@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="CommandContextHint_CommandProcessData">
+        <StackPanel>
+            <TextBlock>
+                <Run Text="Press"/>
+                <Run Text="Alt" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="+"/><Run Text="Up" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="/"/><Run Text="Down" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
+                <Run Text="to scroll the process output."/>
+            </TextBlock>
+            <TextBlock>
+                <Run Text="Press"/>
+                <Run Text="Alt" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="+"/><Run Text="Left" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="/"/><Run Text="Right" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
+                <Run Text="to cycle through the process history."/>
+            </TextBlock>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

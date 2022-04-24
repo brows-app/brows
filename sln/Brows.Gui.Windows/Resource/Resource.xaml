@@ -1,0 +1,14 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+    <SolidColorBrush x:Key="LogSeverity_Debug_Foreground" Color="{DynamicResource Global_Default_Foreground}"></SolidColorBrush>
+    <SolidColorBrush x:Key="LogSeverity_Info_Foreground" Color="{DynamicResource Global_Info_Foreground}"></SolidColorBrush>
+    <SolidColorBrush x:Key="LogSeverity_None_Foreground" Color="{DynamicResource Global_Default_Foreground}"></SolidColorBrush>
+    <SolidColorBrush x:Key="LogSeverity_Warn_Foreground" Color="{DynamicResource Global_Danger_Foreground}"></SolidColorBrush>
+    <SolidColorBrush x:Key="LogSeverity_Error_Foreground" Color="{DynamicResource Global_Danger_Foreground}"></SolidColorBrush>
+    <SolidColorBrush x:Key="LogSeverity_Critical_Foreground" Color="{DynamicResource Global_Danger_Foreground}"></SolidColorBrush>
+
+    <FontFamily x:Key="LogMessage_Default_FontFamily">Consolas</FontFamily>
+    <s:Double x:Key="LogMessage_Default_FontSize">12</s:Double>
+    <FontWeight x:Key="LogMessage_Default_FontWeight">Normal</FontWeight>
+</ResourceDictionary>

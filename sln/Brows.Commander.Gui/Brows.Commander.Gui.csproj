@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Brows.Commander\Brows.Commander.csproj" />
+      <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
+      <ProjectReference Include="..\Brows.Operation.Gui\Brows.Operation.Gui.csproj" />
+      <ProjectReference Include="..\Brows.Panel.Gui\Brows.Panel.Gui.csproj" />
+      <ProjectReference Include="..\Brows.Triggers\Brows.Triggers.csproj" />
+      <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
+    </ItemGroup>
+</Project>

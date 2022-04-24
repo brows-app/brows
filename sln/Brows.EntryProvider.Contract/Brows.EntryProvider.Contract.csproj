@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Panel.Contract\Brows.Panel.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Operation.Contract\Brows.Operation.Contract.csproj" />
+    </ItemGroup>
+</Project>

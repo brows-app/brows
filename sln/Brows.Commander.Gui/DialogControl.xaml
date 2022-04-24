@@ -1,0 +1,29 @@
+<UserControl x:Class="Brows.DialogControl"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Brows">
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Setter Property="Background" Value="{DynamicResource DialogControl_Default_Background}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Current}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <local:DialogContentControl Grid.Row="1" Grid.Column="1" Content="{Binding Current}"/>
+    </Grid>
+</UserControl>

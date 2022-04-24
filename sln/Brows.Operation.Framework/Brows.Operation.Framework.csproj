@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj" />
+        <ProjectReference Include="..\Brows.ComponentModel.NotifyPropertyChanged\Brows.ComponentModel.NotifyPropertyChanged.csproj" />
+        <ProjectReference Include="..\Brows.Logger\Brows.Logger.csproj" />
+        <ProjectReference Include="..\Brows.Operation.Contract\Brows.Operation.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Request\Brows.Request.csproj" />
+    </ItemGroup>
+</Project>

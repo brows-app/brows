@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Domore.Notification" Version="1.1.0.9" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Globalization\Brows.Globalization.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.ComponentModel.NotifyPropertyChanged\Brows.ComponentModel.NotifyPropertyChanged.csproj" />
+        <ProjectReference Include="..\Brows.Dialog.Contract\Brows.Dialog.Contract.csproj" />
+    </ItemGroup>
+</Project>

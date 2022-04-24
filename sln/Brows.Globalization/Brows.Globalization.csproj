@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Translation\en-US" />
+        <EmbeddedResource Include="Translation\en-US.alias" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Domore.Indexing" Version="0.2.0.2" />
+        <PackageReference Include="Domore.Notification" Version="1.1.0.9" />
+    </ItemGroup>
+</Project>

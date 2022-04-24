@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Brows.Data.Contract\Brows.Data.Contract.csproj" />
+      <ProjectReference Include="..\Brows.Logger\Brows.Logger.csproj" />
+      <ProjectReference Include="..\Brows.Threading.Tasks.Async\Brows.Threading.Tasks.Async.csproj" />
+      <ProjectReference Include="..\Brows.Threading.Tasks.TaskHandler\Brows.Threading.Tasks.TaskHandler.csproj" />
+    </ItemGroup>
+</Project>

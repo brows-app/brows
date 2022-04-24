@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
+        <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
+        <ProjectReference Include="..\Brows.Logger\Brows.Logger.csproj" />
+        <ProjectReference Include="..\Brows.Threading.Tasks.Async\Brows.Threading.Tasks.Async.csproj" />
+        <ProjectReference Include="..\Brows.Triggers\Brows.Triggers.csproj" />
+        <ProjectReference Include="..\Brows.Command.Contract\Brows.Command.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
+        <ProjectReference Include="..\Brows.EntryProvider.Contract\Brows.EntryProvider.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Panel.Contract\Brows.Panel.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Dialog.Contract\Brows.Dialog.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Operation.Contract\Brows.Operation.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Threading.Tasks.TaskHandler\Brows.Threading.Tasks.TaskHandler.csproj" />
+        <ProjectReference Include="..\Brows.Request\Brows.Request.csproj" />
+    </ItemGroup>
+</Project>

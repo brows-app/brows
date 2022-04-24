@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj" />
+        <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
+        <ProjectReference Include="..\Brows.IO.PreviewTextReader\Brows.IO.PreviewTextReader.csproj" />
+        <ProjectReference Include="..\Brows.Logger\Brows.Logger.csproj" />
+    </ItemGroup>
+</Project>

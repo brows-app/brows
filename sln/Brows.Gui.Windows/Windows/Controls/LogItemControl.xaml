@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="Brows.Windows.Controls.LogItemControl"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:gui="clr-namespace:Brows.Gui;assembly=Brows.Gui.Framework"
+             xmlns:log="clr-namespace:Brows.Logger;assembly=Brows.Logger"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type={x:Type gui:LogItem}, IsDesignTimeCreatable=False}">
+    <TextBlock Text="{Binding Message}">
+        <TextBlock.Style>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{DynamicResource LogMessage_Default_FontFamily}"/>
+                <Setter Property="FontSize" Value="{DynamicResource LogMessage_Default_FontSize}"/>
+                <Setter Property="FontWeight" Value="{DynamicResource LogMessage_Default_FontWeight}"/>
+                <Setter Property="Foreground" Value="{DynamicResource LogSeverity_None_Foreground}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static log:LogSeverity.Critical}">
+                        <Setter Property="Foreground" Value="{DynamicResource LogSeverity_Critical_Foreground}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static log:LogSeverity.Debug}">
+                        <Setter Property="Foreground" Value="{DynamicResource LogSeverity_Debug_Foreground}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static log:LogSeverity.Error}">
+                        <Setter Property="Foreground" Value="{DynamicResource LogSeverity_Error_Foreground}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static log:LogSeverity.Info}">
+                        <Setter Property="Foreground" Value="{DynamicResource LogSeverity_Info_Foreground}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static log:LogSeverity.Warn}">
+                        <Setter Property="Foreground" Value="{DynamicResource LogSeverity_Warn_Foreground}"/>
+                    </DataTrigger>                    
+                </Style.Triggers>
+            </Style>
+        </TextBlock.Style>
+    </TextBlock>
+</UserControl>

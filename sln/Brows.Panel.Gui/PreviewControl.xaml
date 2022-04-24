@@ -1,0 +1,34 @@
+<UserControl x:Class="Brows.PreviewControl"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Brows"
+             xmlns:brows="http://schemas.brows.app/xaml">
+    <Grid DataContext="{Binding Entry}" 
+          Visibility="{Binding Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}">
+        <local:PreviewTextControl DataContext="{Binding PreviewText}">
+            <local:PreviewTextControl.Style>
+                <Style TargetType="local:PreviewTextControl">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Contents}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </local:PreviewTextControl.Style>
+        </local:PreviewTextControl>
+        <Image Source="{Binding PreviewImage.Source}">
+            <Image.Style>
+                <Style TargetType="Image">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding PreviewText.Contents}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Style>
+        </Image>
+    </Grid>
+</UserControl>

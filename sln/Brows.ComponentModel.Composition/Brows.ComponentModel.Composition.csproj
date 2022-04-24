@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Brows.Command.Contract\Brows.Command.Contract.csproj" />
+      <ProjectReference Include="..\Brows.Data.Contract\Brows.Data.Contract.csproj" />
+      <ProjectReference Include="..\Brows.EntryProvider.Contract\Brows.EntryProvider.Contract.csproj" />
+      <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
+    </ItemGroup>
+</Project>

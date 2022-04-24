@@ -1,0 +1,24 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+    <SolidColorBrush x:Key="Global_Default_Background_Brush"                        Color="{DynamicResource Global_Default_Background}"/>
+    <SolidColorBrush x:Key="Global_Transparent_Background_Brush"                    Color="Transparent"/>
+
+    <SolidColorBrush x:Key="Global_Default_Border_Brush"                            Color="{DynamicResource Global_Default_Foreground}" Opacity=".4"/>
+
+    <SolidColorBrush x:Key="Global_Danger_Foreground_Brush"                         Color="{DynamicResource Global_Danger_Foreground}"/>
+    <SolidColorBrush x:Key="Global_Default_Foreground_Brush"                        Color="{DynamicResource Global_Default_Foreground}" Opacity="0.9"/>
+    <SolidColorBrush x:Key="Global_Highlight_Foreground_Brush"                      Color="{DynamicResource Global_Highlight_Foreground}"/>
+    <SolidColorBrush x:Key="Global_Info_Foreground_Brush"                           Color="{DynamicResource Global_Info_Foreground}"/>
+    <SolidColorBrush x:Key="Global_Success_Foreground_Brush"                        Color="{DynamicResource Global_Success_Foreground}"/>
+    <SolidColorBrush x:Key="Global_Warning_Foreground_Brush"                        Color="{DynamicResource Global_Warning_Foreground}"/>
+
+    <SolidColorBrush x:Key="Global_IsMouseOver_Background_Brush"                    Color="{DynamicResource Global_Default_Foreground}" Opacity=".1"/>
+    <SolidColorBrush x:Key="Global_IsMouseOver_IsSelected_Background_Brush"         Color="{DynamicResource Global_Default_Foreground}" Opacity=".3"/>
+    <SolidColorBrush x:Key="Global_IsSelected_Background_Brush"                     Color="{DynamicResource Global_Default_Foreground}" Opacity=".05"/>
+    <SolidColorBrush x:Key="Global_IsSelected_IsSelectionActive_Background_Brush"   Color="{DynamicResource Global_Default_Foreground}" Opacity=".2"/>
+
+    <FontFamily x:Key="Global_Monospace_FontFamily">Consolas</FontFamily>
+    <s:Double x:Key="Global_Monospace_FontSize">12</s:Double>
+    <FontWeight x:Key="Global_Monospace_FontWeight">Normal</FontWeight>
+</ResourceDictionary>

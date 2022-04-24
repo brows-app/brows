@@ -1,0 +1,15 @@
+<TextBlock x:Class="Brows.CommandSuggestionGroupTextBlock"
+           x:ClassModifier="internal"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <TextBlock.Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Background" Value="{DynamicResource CommandSuggestionGroup_Default_Background}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource CommandSuggestionGroup_Default_FontFamily}"/>
+            <Setter Property="FontSize" Value="{DynamicResource CommandSuggestionGroup_Default_FontSize}"/>
+            <Setter Property="FontWeight" Value="{DynamicResource CommandSuggestionGroup_Default_FontWeight}"/>
+            <Setter Property="Foreground" Value="{DynamicResource CommandSuggestionGroup_Default_Foreground}"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+    </TextBlock.Style>
+</TextBlock>

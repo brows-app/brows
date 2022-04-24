@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows">
+    <DataTemplate x:Key="EntryData_Name">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="4px"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <local:EntryIconImage Grid.Column="0" Source="{Binding Icon.Source}"/>
+            <local:EntryDataTextBlock Grid.Column="2" Text="{Binding Item[Name].Value, Mode=OneWay}" Width="250"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="EntryData_Thumbnail">
+        <local:EntryThumbnailImage Source="{Binding Thumbnail.Source}" Height="{Binding Thumbnail.Size.Height}" Width="{Binding Thumbnail.Size.Width}"/>
+    </DataTemplate>
+</ResourceDictionary>

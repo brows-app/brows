@@ -1,0 +1,7 @@
+theme: jekyll-theme-minimal
+
+title: Brows
+logo: logo.png
+description: Brows is a keyboard-centric file browser
+
+show_downloads: true

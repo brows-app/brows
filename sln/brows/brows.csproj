@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <ApplicationIcon>..\..\icon.ico</ApplicationIcon>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Commander.Gui\Brows.Commander.Gui.csproj" />
+        <ProjectReference Include="..\Brows.CommanderService\Brows.CommanderService.csproj" />
+        <ProjectReference Include="..\Brows.Commands.Bookmark\Brows.Commands.Bookmark.csproj" />
+        <ProjectReference Include="..\Brows.Commands.Manual.Gui\Brows.Commands.Manual.Gui.csproj" />
+        <ProjectReference Include="..\Brows.Commands.Manual\Brows.Commands.Manual.csproj" />
+        <ProjectReference Include="..\Brows.Commands.Operations\Brows.Commands.Operations.csproj" />
+        <ProjectReference Include="..\Brows.Commands.Process.Gui\Brows.Commands.Process.Gui.csproj" />
+        <ProjectReference Include="..\Brows.Commands.Process\Brows.Commands.Process.csproj" />
+        <ProjectReference Include="..\Brows.Entry.Gui\Brows.Entry.Gui.csproj" />
+        <ProjectReference Include="..\Brows.Globalization\Brows.Globalization.csproj" />
+        <ProjectReference Include="..\Brows.Gui.Logger\Brows.Gui.Logger.csproj" />
+        <ProjectReference Include="..\Brows.IO.Commands.Find.Gui\Brows.IO.Commands.Find.Gui.csproj" />
+        <ProjectReference Include="..\Brows.IO.Commands.Find\Brows.IO.Commands.Find.csproj" />
+        <ProjectReference Include="..\Brows.IO.Commands\Brows.IO.Commands.csproj" />
+        <ProjectReference Include="..\Brows.IO.Gui\Brows.IO.Gui.csproj" />
+        <ProjectReference Include="..\Brows.Net.Sockets\Brows.Net.Sockets.csproj" />
+        <ProjectReference Include="..\Brows.Runtime.Win32\Brows.Runtime.Win32.csproj" />
+        <ProjectReference Include="..\Brows.Commands\Brows.Commands.csproj" />
+    </ItemGroup>
+    <Target Name="GetTargetPath" Returns="@(Brows_SetupOutputPath)">
+        <ItemGroup Condition="'$(OutputType)' == 'Library'">
+            <Brows_SetupOutputPath Include="$(MSBuildProjectDirectory)\$(OutputPath)\$(Brows_SetupTargetFramework)\$(AssemblyName).dll" />
+        </ItemGroup>
+        <ItemGroup Condition="'$(OutputType)' == 'Exe'">
+            <Brows_SetupOutputPath Include="$(MSBuildProjectDirectory)\$(OutputPath)\$(Brows_SetupTargetFramework)\$(AssemblyName).exe" />
+        </ItemGroup>
+        <ItemGroup Condition="'$(OutputType)' == 'WinExe'">
+            <Brows_SetupOutputPath Include="$(MSBuildProjectDirectory)\$(OutputPath)\$(Brows_SetupTargetFramework)\$(AssemblyName).exe" />
+        </ItemGroup>
+    </Target>
+</Project>

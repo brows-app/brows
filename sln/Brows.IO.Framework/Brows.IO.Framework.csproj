@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Dialogs\Brows.Dialogs.csproj" />
+        <ProjectReference Include="..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
+        <ProjectReference Include="..\Brows.EntryProvider.Framework\Brows.EntryProvider.Framework.csproj" />
+        <ProjectReference Include="..\Brows.IO.Contract\Brows.IO.Contract.csproj" />
+        <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />
+        <ProjectReference Include="..\Brows.IO.PathBookmark\Brows.IO.PathBookmark.csproj" />
+        <ProjectReference Include="..\Brows.Operation.Framework\Brows.Operation.Framework.csproj" />
+        <ProjectReference Include="..\Brows.Panel.Framework\Brows.Panel.Framework.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Commands.Manual\Brows.Commands.Manual.csproj" />
+        <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
+        <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Resource\Resource.xaml">
+        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+        <SubType>Designer</SubType>
+      </Page>
+    </ItemGroup>
+</Project>

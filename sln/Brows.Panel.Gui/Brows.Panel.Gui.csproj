@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
+      <ProjectReference Include="..\Brows.Entry.Gui\Brows.Entry.Gui.csproj" />
+      <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
+      <ProjectReference Include="..\Brows.Panel\Brows.Panel.csproj" />
+      <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="PanelInputControl.xaml">
+        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      </Page>
+      <Page Update="PanelRowSplitter.xaml">
+        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      </Page>
+      <Page Update="PanelControl.xaml">
+        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      </Page>
+      <Page Update="PanelIDControl.xaml">
+        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      </Page>
+      <Page Update="PreviewControl.xaml">
+        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      </Page>
+      <Page Update="PreviewTextBox.xaml">
+        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      </Page>
+      <Page Update="PreviewTextControl.xaml">
+        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      </Page>
+    </ItemGroup>
+</Project>

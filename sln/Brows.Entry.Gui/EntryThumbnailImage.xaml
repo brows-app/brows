@@ -1,0 +1,10 @@
+<Image x:Class="Brows.EntryThumbnailImage"
+       x:ClassModifier="internal"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Image.Style>
+        <Style TargetType="Image">
+            <Setter Property="Margin" Value="2,0,4,0"/>
+        </Style>
+    </Image.Style>
+</Image>

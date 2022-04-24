@@ -1,0 +1,195 @@
+﻿<GridView x:Class="Brows.EntryGridView"
+          x:ClassModifier="internal"
+          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:s="clr-namespace:System;assembly=mscorlib">
+    <GridView.ColumnHeaderContainerStyle>
+        <Style TargetType="GridViewColumnHeader">
+            <Style.Triggers>
+                <Trigger Property="GridViewColumnHeader.Role">
+                    <Setter Property="UIElement.Opacity">
+                        <Setter.Value>
+                            <s:Double>0.4082</s:Double>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="GridViewColumnHeader">
+                                <Canvas Name="PART_FloatingHeaderCanvas">
+                                    <Rectangle Fill="#FF000000" Width="{TemplateBinding FrameworkElement.ActualWidth}" Height="{TemplateBinding FrameworkElement.ActualHeight}" Opacity="0.4697" />
+                                </Canvas>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Trigger.Value>
+                        <x:Static Member="GridViewColumnHeaderRole.Floating" />
+                    </Trigger.Value>
+                </Trigger>
+                <Trigger Property="GridViewColumnHeader.Role">
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="GridViewColumnHeader">
+                                <Border BorderThickness="0,0,0,0" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" Name="HeaderBorder" />
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="FrameworkElement.Height">
+                                        <Setter Property="FrameworkElement.MinHeight">
+                                            <Setter.Value>
+                                                <s:Double>20</s:Double>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Trigger.Value>
+                                            <s:Double>NaN</s:Double>
+                                        </Trigger.Value>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Trigger.Value>
+                        <x:Static Member="GridViewColumnHeaderRole.Padding" />
+                    </Trigger.Value>
+                </Trigger>
+            </Style.Triggers>
+            <Style.Resources>
+                <ResourceDictionary />
+            </Style.Resources>
+            <Setter Property="Control.HorizontalContentAlignment">
+                <Setter.Value>
+                    <x:Static Member="HorizontalAlignment.Left" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Control.VerticalContentAlignment">
+                <Setter.Value>
+                    <x:Static Member="VerticalAlignment.Center" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Panel.Background" Value="{DynamicResource Global_Transparent_Background_Brush}"/>
+            <Setter Property="Border.BorderBrush" Value="{DynamicResource Global_Transparent_Background_Brush}"/>
+            <Setter Property="Border.BorderThickness">
+                <Setter.Value>
+                    <Thickness>0,0,0,0</Thickness>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Border.Margin">
+                <Setter.Value>
+                    <Thickness>0,0,0,6</Thickness>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Control.Padding">
+                <Setter.Value>
+                    <Thickness>6,6,3,3</Thickness>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewColumnHeader">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border BorderThickness="0,0,0,0" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" Name="HeaderBorder">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition MaxHeight="7" />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <Border Padding="{TemplateBinding Control.Padding}" Grid.RowSpan="2">
+                                        <ContentPresenter RecognizesAccessKey="True" Content="{TemplateBinding ContentControl.Content}" ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}" ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}" Name="HeaderContent" Margin="0,0,0,1" HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <Border BorderThickness="0,0,0,0" Name="HeaderHoverBorder" Margin="0,0,0,0" />
+                            <Border BorderThickness="0,0,0,0" Name="HeaderPressBorder" Margin="0,0,0,0" />
+                            <Canvas>
+                                <Thumb Name="PART_HeaderGripper">
+                                    <Thumb.Style>
+                                        <Style TargetType="Thumb">
+                                            <Style.Resources>
+                                                <ResourceDictionary />
+                                            </Style.Resources>
+                                            <Setter Property="Canvas.Right">
+                                                <Setter.Value>
+                                                    <s:Double>-9</s:Double>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="FrameworkElement.Width">
+                                                <Setter.Value>
+                                                    <s:Double>18</s:Double>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="FrameworkElement.Height">
+                                                <Setter.Value>
+                                                    <Binding Path="ActualHeight" RelativeSource="{RelativeSource Mode=TemplatedParent}" />
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Control.Padding">
+                                                <Setter.Value>
+                                                    <Thickness>0,0,0,0</Thickness>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Panel.Background" Value="{DynamicResource Global_IsMouseOver_Background_Brush}"/>
+                                            <Setter Property="Control.Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Thumb">
+                                                        <Border Padding="{TemplateBinding Control.Padding}" Background="#00FFFFFF">
+                                                            <Rectangle Fill="{TemplateBinding Panel.Background}" Width="1" HorizontalAlignment="Center" />
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Thumb.Style>
+                                </Thumb>
+                            </Canvas>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="UIElement.IsMouseOver">
+                                <Setter Property="Panel.Background" TargetName="HeaderBorder" Value="{DynamicResource Global_IsSelected_IsSelectionActive_Background_Brush}"/>
+                                <Setter Property="Border.BorderBrush" TargetName="HeaderHoverBorder" Value="{DynamicResource Global_IsSelected_IsSelectionActive_Background_Brush}"/>
+                                <Setter Property="Panel.Background" TargetName="PART_HeaderGripper">
+                                    <Setter.Value>
+                                        <SolidColorBrush>#00FFFFFF</SolidColorBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Trigger.Value>
+                                    <s:Boolean>True</s:Boolean>
+                                </Trigger.Value>
+                            </Trigger>
+                            <Trigger Property="ButtonBase.IsPressed">
+                                <Setter Property="Panel.Background" TargetName="HeaderBorder" Value="{DynamicResource Global_IsMouseOver_IsSelected_Background_Brush}"/>
+                                <Setter Property="Border.BorderBrush" TargetName="HeaderHoverBorder" Value="{DynamicResource Global_IsMouseOver_IsSelected_Background_Brush}"/>
+                                <Setter Property="Border.BorderBrush" TargetName="HeaderPressBorder" Value="{DynamicResource Global_IsMouseOver_IsSelected_Background_Brush}"/>
+                                <Setter Property="UIElement.Visibility" TargetName="PART_HeaderGripper">
+                                    <Setter.Value>
+                                        <x:Static Member="Visibility.Hidden" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Trigger.Value>
+                                    <s:Boolean>True</s:Boolean>
+                                </Trigger.Value>
+                            </Trigger>
+                            <Trigger Property="FrameworkElement.Height">
+                                <Setter Property="FrameworkElement.MinHeight">
+                                    <Setter.Value>
+                                        <s:Double>20</s:Double>
+                                    </Setter.Value>
+                                </Setter>
+                                <Trigger.Value>
+                                    <s:Double>NaN</s:Double>
+                                </Trigger.Value>
+                            </Trigger>
+                            <Trigger Property="UIElement.IsEnabled">
+                                <Setter Property="TextElement.Foreground">
+                                    <Setter.Value>
+                                        <DynamicResource ResourceKey="{x:Static SystemColors.GrayTextBrushKey}" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Trigger.Value>
+                                    <s:Boolean>False</s:Boolean>
+                                </Trigger.Value>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </GridView.ColumnHeaderContainerStyle>
+</GridView>

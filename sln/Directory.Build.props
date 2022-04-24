@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <Authors>Ken Yourek</Authors>
+    <Copyright>Copyright © Ken Yourek 2022</Copyright>
+    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionSuffix>alpha.1</VersionSuffix>
+    <AssemblyVersion>0.2.0.1</AssemblyVersion>
+    <InformationalVersion>0.2.0-alpha.1</InformationalVersion>
+    <FileVersion>0.2.0.1</FileVersion>
+    <PackageVersion>0.2.0-alpha.1</PackageVersion>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/brows-app/brows</RepositoryUrl>
+    <RepositoryBranch>master</RepositoryBranch>
+    <RepositoryCommit>3d3347ae024db3d0135c8c7af8dc33a5fab5c99b</RepositoryCommit>
+    <RootNamespace>Brows</RootNamespace>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+  </PropertyGroup>
+</Project>
