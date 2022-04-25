@@ -10,7 +10,7 @@
             <Setter Property="FontWeight" Value="{DynamicResource Global_Monospace_FontWeight}"/>
             <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
             <Setter Property="IsSelected" Value="{Binding Selected}"/>
-            <Setter Property="Margin" Value="2 0 0 0"/>
+            <Setter Property="Margin" Value="0"/>
             <Setter Property="FocusVisualStyle">
                 <Setter.Value>
                     <Style>
@@ -53,7 +53,7 @@
                                 </MultiTrigger.Setters>
                             </MultiTrigger>
                         </ControlTemplate.Triggers>
-                        <Border Background="{TemplateBinding Background}" Padding="0 2 0 3">
+                        <Border Background="{TemplateBinding Background}" Padding="2 2 0 3">
                             <GridViewRowPresenter/>
                         </Border>
                     </ControlTemplate>

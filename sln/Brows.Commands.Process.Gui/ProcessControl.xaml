@@ -13,21 +13,7 @@
         </Grid>
         <Grid Grid.Row="1">
             <Grid.Resources>
-                <Style TargetType="TextBlock" x:Key="ProcessControl_TextBlock_Default">
-                    <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
-                    <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
-                    <Setter Property="FontSize" Value="{DynamicResource Global_Monospace_FontSize}"/>
-                    <Setter Property="FontWeight" Value="{DynamicResource Global_Monospace_FontWeight}"/>
-                    <Setter Property="HorizontalAlignment" Value="Left"/>
-                    <Setter Property="Padding" Value="5 0 0 0"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Running}" Value="True">
-                            <Setter Property="Foreground" Value="{DynamicResource Global_Warning_Foreground_Brush}"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-                <Style TargetType="TextBlock" BasedOn="{StaticResource ProcessControl_TextBlock_Default}"/>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource Process_Default_Text}"/>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -39,13 +25,13 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto" MinWidth="{x:Static SystemParameters.VerticalScrollBarWidth}"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="{Binding Translate[Process_Label_PID]}"/>
+            <TextBlock Grid.Column="0" Style="{DynamicResource Process_PID_Text}"/>
             <TextBlock Grid.Column="1" Text="{Binding ProcessID}"/>
             <TextBlock Grid.Column="2" Text="|"/>
             <TextBlock Grid.Column="3" Text="{Binding Input}"/>
             <TextBlock Grid.Column="4" Text="{Binding StartTime}"/>
             <TextBlock Grid.Column="5" Text="|"/>
-            <TextBlock Grid.Column="6" Text="{Binding Translate[Process_Label_ExitCode]}"/>
+            <TextBlock Grid.Column="6" Style="{DynamicResource Process_ExitCode_Text}"/>
             <TextBlock Grid.Column="7" Text="{Binding ExitCode}" HorizontalAlignment="Center" Padding="0"/>
         </Grid>
     </Grid>

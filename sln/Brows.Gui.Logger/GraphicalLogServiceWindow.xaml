@@ -6,7 +6,7 @@
         <Style TargetType="Window">
             <Setter Property="Background" Value="Black"/>
             <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
             <Setter Property="Padding" Value="10"/>
         </Style>
     </Window.Style>

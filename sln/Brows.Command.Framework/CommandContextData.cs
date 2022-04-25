@@ -7,9 +7,7 @@ namespace Brows {
         public abstract object Current { get; }
 
         public virtual string Input { get; }
-        public virtual bool CanUpDown => false;
-        public virtual bool CanRemove => false;
-        public virtual bool CanNextPrevious => false;
+        public virtual object KeyTarget { get; }
         public ICommand Command { get; }
 
         public CommandContextData(ICommand command) {
@@ -32,18 +30,6 @@ namespace Brows {
             return null;
         }
 
-        public virtual void Up() {
-        }
-
-        public virtual void Down() {
-        }
-
-        public virtual void PageUp() {
-        }
-
-        public virtual void PageDown() {
-        }
-
         public virtual void Enter() {
         }
     }
@@ -61,9 +47,6 @@ namespace Brows {
 
         protected virtual void Cleared() {
         }
-
-        public override bool CanRemove => true;
-        public override bool CanNextPrevious => true;
 
         public override string Control =>
             typeof(T).Name;

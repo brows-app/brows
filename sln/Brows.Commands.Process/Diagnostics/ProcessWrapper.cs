@@ -71,22 +71,6 @@ namespace Brows.Diagnostics {
             WorkingDirectory = workingDirectory;
         }
 
-        public void ScrollUp() {
-            Logbook.ScrollUp();
-        }
-
-        public void ScrollDown() {
-            Logbook.ScrollDown();
-        }
-
-        public void PageUp() {
-            Logbook.PageUp();
-        }
-
-        public void PageDown() {
-            Logbook.PageDown();
-        }
-
         public async Task Write(string input, CancellationToken cancellationToken) {
             var writer = Writer;
             if (writer != null) {

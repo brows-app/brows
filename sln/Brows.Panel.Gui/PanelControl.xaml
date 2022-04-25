@@ -11,6 +11,7 @@
     <UserControl.Style>
         <Style TargetType="UserControl">
             <Setter Property="Background" Value="{DynamicResource Panel_Default_Background}"/>
+            <Setter Property="Focusable" Value="False"/>
             <Setter Property="KeyboardNavigation.ControlTabNavigation" Value="None"/>
             <Setter Property="KeyboardNavigation.DirectionalNavigation" Value="None"/>
             <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
@@ -58,7 +59,7 @@
                     Grid.Column="1" 
                     DataContext="{Binding ID}"/>
             </Grid>
-            <brows:EntryCollectionControl Grid.Row="1" DataContext="{Binding Entries}" Margin="10 0 0 0"/>
+            <brows:EntryCollectionControl Grid.Row="1" DataContext="{Binding Entries}"/>
             <local:PanelRowSplitter 
                 Grid.Row="2"
                 Visibility="{Binding Preview, Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>

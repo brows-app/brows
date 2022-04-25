@@ -24,5 +24,13 @@ namespace Brows.Gui {
                 ? listBox.MoveToSelected()
                 : false;
         }
+
+        public static bool MoveToOffset(this ListBox listBox, int offset) {
+            if (null == listBox) throw new ArgumentNullException(nameof(listBox));
+            var selected = SelectorExtension.SelectOffset(listBox, offset);
+            return selected
+                ? listBox.MoveToSelected()
+                : false;
+        }
     }
 }

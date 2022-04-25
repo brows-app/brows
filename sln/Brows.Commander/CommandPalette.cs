@@ -48,13 +48,13 @@ namespace Brows {
                 { new KeyboardGesture(KeyboardKey.Enter, KeyboardModifiers.Alt),
                     () => SuggestionData?.Enter() },
                 { new KeyboardGesture(KeyboardKey.Up, KeyboardModifiers.Alt),
-                    () => SuggestionData?.Up() },
+                    () => Controller?.ScrollSuggestionData(KeyboardKey.Up) },
                 { new KeyboardGesture(KeyboardKey.Down, KeyboardModifiers.Alt),
-                    () => SuggestionData?.Down() },
+                    () => Controller?.ScrollSuggestionData(KeyboardKey.Down) },
                 { new KeyboardGesture(KeyboardKey.PageUp, KeyboardModifiers.Alt),
-                    () => SuggestionData?.PageUp() },
+                    () => Controller?.ScrollSuggestionData(KeyboardKey.PageUp) },
                 { new KeyboardGesture(KeyboardKey.PageDown, KeyboardModifiers.Alt),
-                    () => SuggestionData?.PageDown() },
+                    () => Controller?.ScrollSuggestionData(KeyboardKey.PageDown) },
                 { new KeyboardGesture(KeyboardKey.D3, KeyboardModifiers.Shift | KeyboardModifiers.Alt),
                     () => SuggestionData = SuggestionData?.Remove() },
                 { new KeyboardGesture(KeyboardKey.D3, KeyboardModifiers.Shift | KeyboardModifiers.Alt | KeyboardModifiers.Control),
@@ -69,11 +69,11 @@ namespace Brows {
             return new CommandContext(Commander, trigger, info);
         }
 
-        private void Control_Loaded(object sender, EventArgs e) {
+        private void Controller_Loaded(object sender, EventArgs e) {
             OnLoaded(e);
         }
 
-        private void Control_CurrentSuggestionChanged(object sender, EventArgs e) {
+        private void Controller_CurrentSuggestionChanged(object sender, EventArgs e) {
             var suggestion = Controller.CurrentSuggestion;
             if (suggestion != null) {
                 var input = (suggestion.Input ?? "").Trim();
@@ -86,11 +86,11 @@ namespace Brows {
             }
         }
 
-        private void Control_LostFocus(object sender, EventArgs e) {
+        private void Controller_LostFocus(object sender, EventArgs e) {
             Escape();
         }
 
-        private void Window_KeyboardKeyDown(object sender, KeyboardKeyEventArgs e) {
+        private void Controller_KeyboardKeyDown(object sender, KeyboardKeyEventArgs e) {
             if (e != null) {
                 if (KeyMap.TryGetValue(e.Gesture, out var action)) {
                     action();
@@ -291,16 +291,16 @@ namespace Brows {
                 var newValue = value;
                 if (Change(ref _Controller, newValue, nameof(Controller))) {
                     if (oldValue != null) {
-                        oldValue.Loaded -= Control_Loaded;
-                        oldValue.CurrentSuggestionChanged -= Control_CurrentSuggestionChanged;
-                        oldValue.LostFocus -= Control_LostFocus;
-                        oldValue.WindowKeyboardKeyDown -= Window_KeyboardKeyDown;
+                        oldValue.Loaded -= Controller_Loaded;
+                        oldValue.CurrentSuggestionChanged -= Controller_CurrentSuggestionChanged;
+                        oldValue.LostFocus -= Controller_LostFocus;
+                        oldValue.KeyboardKeyDown -= Controller_KeyboardKeyDown;
                     }
                     if (newValue != null) {
-                        newValue.Loaded += Control_Loaded;
-                        newValue.CurrentSuggestionChanged += Control_CurrentSuggestionChanged;
-                        newValue.LostFocus += Control_LostFocus;
-                        newValue.WindowKeyboardKeyDown += Window_KeyboardKeyDown;
+                        newValue.Loaded += Controller_Loaded;
+                        newValue.CurrentSuggestionChanged += Controller_CurrentSuggestionChanged;
+                        newValue.LostFocus += Controller_LostFocus;
+                        newValue.KeyboardKeyDown += Controller_KeyboardKeyDown;
                     }
                 }
             }

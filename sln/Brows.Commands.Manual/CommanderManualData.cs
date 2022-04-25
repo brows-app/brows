@@ -6,24 +6,9 @@
 
         public override string Control => nameof(Manual);
         public override object Current => Agent;
+        public override object KeyTarget => Agent.Controller?.KeyTarget;
 
         public CommanderManualData(ICommand command) : base(command) {
-        }
-
-        public override void Up() {
-            Agent.Controller?.ScrollUp();
-        }
-
-        public override void Down() {
-            Agent.Controller?.ScrollDown();
-        }
-
-        public override void PageUp() {
-            Agent.Controller?.PageUp();
-        }
-
-        public override void PageDown() {
-            Agent.Controller?.PageDown();
         }
     }
 }

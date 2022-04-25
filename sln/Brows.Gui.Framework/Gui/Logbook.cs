@@ -5,8 +5,6 @@ namespace Brows.Gui {
     using Collections.ObjectModel;
 
     public class Logbook : CollectionSource<LogItem>, IControlled<ILogbookController> {
-        private double? Offset;
-
         public ILogbookController Controller {
             get => _Controller;
             set {
@@ -24,22 +22,6 @@ namespace Brows.Gui {
 
         public void Clear() {
             List.Clear();
-        }
-
-        public void ScrollUp() {
-            Offset = Controller?.ScrollUp();
-        }
-
-        public void ScrollDown() {
-            Offset = Controller?.ScrollDown();
-        }
-
-        public void PageUp() {
-            Offset = Controller?.PageUp();
-        }
-
-        public void PageDown() {
-            Offset = Controller?.PageDown();
         }
 
         public override string ToString() {

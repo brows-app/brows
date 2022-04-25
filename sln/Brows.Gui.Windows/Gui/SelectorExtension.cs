@@ -36,5 +36,25 @@ namespace Brows.Gui {
             }
             return false;
         }
+
+        public static bool SelectOffset(this Selector selector, int offset) {
+            if (null == selector) throw new ArgumentNullException(nameof(selector));
+            var i = selector.SelectedIndex;
+            if (i < 0) {
+                i = 0;
+            }
+            var j = i + offset;
+            if (j < 0) {
+                j = 0;
+            }
+            if (j >= selector.Items.Count) {
+                j = selector.Items.Count - 1;
+            }
+            if (j >= 0) {
+                selector.SelectedIndex = j;
+                return true;
+            }
+            return false;
+        }
     }
 }

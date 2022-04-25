@@ -48,13 +48,22 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <local:CommandPaletteInputTextBox Grid.Row="0" Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}" x:Name="InputTextBox"/>
-                        <local:CommandPaletteInputTextBox Grid.Row="0" Text="{Binding InputSuggestion, Mode=OneWay}" IsEnabled="False"/>
-                        <local:CommandSuggestionListView Grid.Row="1" 
-                                             ItemsSource="{Binding SuggestionSource}" 
-                                             IsSynchronizedWithCurrentItem="True" 
-                                             x:Name="CommandSuggestionListView" 
-                                             GotFocus="CommandSuggestionListView_GotFocus"/>
+                        <local:CommandPaletteInputTextBox 
+                            Grid.Row="0" 
+                            x:Name="InputTextBox" 
+                            Focusable="True"
+                            Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}"/>
+                        <local:CommandPaletteInputTextBox 
+                            Grid.Row="0" 
+                            Focusable="False"
+                            IsEnabled="False" 
+                            Text="{Binding InputSuggestion, Mode=OneWay}"/>
+                        <local:CommandSuggestionListView 
+                            Grid.Row="1" 
+                            x:Name="CommandSuggestionListView"
+                            Focusable="False"                                                         
+                            ItemsSource="{Binding SuggestionSource}" 
+                            IsSynchronizedWithCurrentItem="True"/>
                     </Grid>
                     <Grid Grid.Row="1">
                         <Grid.Style>
@@ -77,7 +86,7 @@
                                     <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
                                 </Style>
                             </Grid.Style>
-                            <local:CommandContextDataControl DataContext="{Binding SuggestionData}"/>
+                            <local:CommandContextDataControl DataContext="{Binding SuggestionData}" x:Name="SuggestionDataControl"/>
                         </Grid>
                     </Grid>
                 </Grid>

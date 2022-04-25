@@ -30,14 +30,6 @@ namespace Brows {
         public FindData(ICommand command, ICommandContext context, int index, IList<FindResult> list) : this(command, context, false, index, list) {
         }
 
-        public override void Up() {
-            Item?.Controller?.Up();
-        }
-
-        public override void Down() {
-            Item?.Controller?.Down();
-        }
-
         public override void Enter() {
             var findItem = Item?.CurrentItem;
             if (findItem != null) {

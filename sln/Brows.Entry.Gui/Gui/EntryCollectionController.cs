@@ -24,7 +24,7 @@ namespace Brows.Gui {
 
         public new EntryCollectionControl UserControl { get; }
 
-        public bool Focused => UserControl.IsKeyboardFocusWithin;
+        public bool Focused => ListView.IsKeyboardFocusWithin;
         public IEntry CurrentEntry => CurrentItem as IEntry;
 
         public EntryCollectionController(EntryCollectionControl userControl) : base(userControl, userControl.ListView) {

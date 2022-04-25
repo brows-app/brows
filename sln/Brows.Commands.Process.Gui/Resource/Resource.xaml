@@ -4,4 +4,19 @@
     <ControlTemplate x:Key="CommandContextData_ProcessWrapper">
         <local:ProcessControl/>
     </ControlTemplate>
+
+    <Style TargetType="TextBlock" x:Key="Process_Default_Text">
+        <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
+        <Setter Property="FontSize" Value="{DynamicResource Global_Monospace_FontSize}"/>
+        <Setter Property="FontWeight" Value="{DynamicResource Global_Monospace_FontWeight}"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Padding" Value="5 0 0 0"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Running}" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource Global_Warning_Foreground_Brush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>

@@ -14,4 +14,12 @@
             </TextBlock>
         </StackPanel>
     </DataTemplate>
+
+    <Style TargetType="TextBlock" x:Key="Process_PID_Text" BasedOn="{StaticResource Process_Default_Text}">
+        <Setter Property="Text" Value="PID"/>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="Process_ExitCode_Text" BasedOn="{StaticResource Process_Default_Text}">
+        <Setter Property="Text" Value="Exit code"/>
+    </Style>
 </ResourceDictionary>
