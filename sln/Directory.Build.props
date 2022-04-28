@@ -11,8 +11,8 @@
     <PackageVersion>0.2.0-alpha.1</PackageVersion>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/brows-app/brows</RepositoryUrl>
-    <RepositoryBranch>master</RepositoryBranch>
-    <RepositoryCommit>3d3347ae024db3d0135c8c7af8dc33a5fab5c99b</RepositoryCommit>
+    <RepositoryBranch>main</RepositoryBranch>
+    <RepositoryCommit>f7a9f15536a04864098310b616780731dc6aa007</RepositoryCommit>
     <RootNamespace>Brows</RootNamespace>
     <TargetFrameworks>net6.0</TargetFrameworks>
   </PropertyGroup>
