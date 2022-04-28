@@ -14,8 +14,8 @@ namespace Brows {
         }
 
         public Task<KeyValuePair<string, string>> MakeFrom(string value, IEnumerable<KeyValuePair<string, string>> existing, CancellationToken cancellationToken) {
-            if (null == existing) throw new ArgumentNullException(nameof(existing));
             if (null == value) throw new ArgumentNullException(nameof(value));
+            if (null == existing) throw new ArgumentNullException(nameof(existing));
             var sep = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
             var parts = value
                 .Split(

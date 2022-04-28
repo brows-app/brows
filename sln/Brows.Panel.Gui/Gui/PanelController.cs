@@ -3,13 +3,16 @@ using System.Windows;
 
 namespace Brows.Gui {
     internal class PanelController : Controller<IPanelController>, IPanelController {
+        private void UserControl_Drop(object sender, DragEventArgs e) {
+            Drop?.Invoke(this, new DropEventArgs(new DragPayload(e)));
+        }
 
         private void UserControl_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e) {
             FocusedChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private void UserControl_Drop(object sender, DragEventArgs e) {
-            Drop?.Invoke(this, new DropEventArgs(new DragPayload(e)));
+        private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e) {
+            SizeChanged?.Invoke(this, e);
         }
 
         public event DropEventHandler Drop;
@@ -25,8 +28,9 @@ namespace Brows.Gui {
         public PanelController(PanelControl userControl) : base(userControl) {
             UserControl = userControl ?? throw new ArgumentNullException(nameof(userControl));
             UserControl.AllowDrop = true;
-            UserControl.IsKeyboardFocusWithinChanged += UserControl_IsKeyboardFocusWithinChanged;
             UserControl.Drop += UserControl_Drop;
+            UserControl.IsKeyboardFocusWithinChanged += UserControl_IsKeyboardFocusWithinChanged;
+            UserControl.SizeChanged += UserControl_SizeChanged;
         }
     }
 }

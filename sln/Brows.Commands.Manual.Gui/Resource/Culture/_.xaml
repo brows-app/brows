@@ -36,10 +36,6 @@
     </CompositeCollection>
 
     <DataTemplate x:Key="CommandContextHint_CommanderManualData">
-        <TextBlock>
-                <Run Text="Press"/>
-                <Run Text="Alt" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="+"/><Run Text="Up" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="/"/><Run Text="Down" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="to scroll the content."/>
-        </TextBlock>
+        <Control Template="{DynamicResource CommandContextDataGesture_Hint_Down_Up}"/>
     </DataTemplate>
 </ResourceDictionary>

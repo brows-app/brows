@@ -2,9 +2,11 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="..\Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj" />
         <ProjectReference Include="..\Brows.Command.Framework\Brows.Command.Framework.csproj" />
         <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
         <ProjectReference Include="..\Brows.Data.Framework\Brows.Data.Framework.csproj" />
         <ProjectReference Include="..\Brows.Globalization\Brows.Globalization.csproj" />
+        <ProjectReference Include="..\Brows.Threading.Tasks.TaskHandler\Brows.Threading.Tasks.TaskHandler.csproj" />
     </ItemGroup>
 </Project>

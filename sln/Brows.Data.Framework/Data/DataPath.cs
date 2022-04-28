@@ -14,15 +14,17 @@ namespace Brows.Data {
             return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create);
         }
 
-        internal string For(string name, string id) {
+        internal string For(string name, string id, string extension) {
             var root = Root;
             var model = Path.Combine(root, name);
             Directory.CreateDirectory(model);
             while (Directory.Exists(model) == false) {
                 Thread.Sleep(0);
             }
-            var file = Path.Combine(model, Encode(id));
-            return Path.ChangeExtension(file, "xml");
+            var
+            file = Path.Combine(model, Encode(id));
+            file = Path.ChangeExtension(file, extension);
+            return file;
         }
 
         public static string Root =>

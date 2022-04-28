@@ -58,6 +58,7 @@ namespace Brows.Commands {
                 var find = new FindResult(input, root.FullName);
                 var list = FindCommand.List;
                 var data = new FindData(this, context, 0, list);
+                var work = new FindWork(root, find, parameter);
                 list.Insert(0, find);
                 context.SetData(data);
                 context.SetHint(data);
@@ -65,30 +66,7 @@ namespace Brows.Commands {
                     PersistInput = true,
                     RefreshInput = true
                 });
-                TaskHandler.Begin(async token => {
-                    var findIn = parameter.In;
-                    var findInDir = findIn.HasFlag(FindIn.DirectoryName);
-                    var findInFil = findIn.HasFlag(FindIn.FileName);
-                    var infos = root.RecurseByDepthAsync(cancellationToken);
-                    var algo = MatchAlgorithm.Create(ignoreCase: !parameter.CaseSensitive);
-                    var matcher = algo.Matcher(pattern);
-                    await foreach (var info in infos) {
-                        if (findInFil == false && info is FileInfo) {
-                            continue;
-                        }
-                        if (findInDir == false && info is DirectoryInfo) {
-                            continue;
-                        }
-                        var name = info.Name;
-                        var matched = matcher.Matches(name);
-                        if (matched) {
-                            find.Add(new FindItem(info, root));
-                            find.MatchMatched++;
-                        }
-                        find.MatchTried++;
-                    }
-                    find.Complete = true;
-                });
+                work.Work();
                 return true;
             }
             return false;

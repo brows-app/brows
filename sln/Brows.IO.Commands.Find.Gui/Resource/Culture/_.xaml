@@ -1,5 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:browsCommandFramework="clr-namespace:Brows;assembly=Brows.Command.Framework">
     <Style TargetType="TextBlock" x:Key="FindResult_TextBlock_MatchMatched" BasedOn="{StaticResource FindResult_TextBlock}">
         <Setter Property="Text" Value="{Binding MatchMatched, StringFormat='Matched {0} items'}"/>
     </Style>
@@ -22,25 +24,29 @@
 
     <DataTemplate x:Key="CommandContextHint_FindData">
         <StackPanel>
-            <TextBlock>
-                <Run Text="Press"/>
-                <Run Text="Alt" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="+"/>
-                <Run Text="Up" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="/"/>
-                <Run Text="Down" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="to scroll the results."/>
-            </TextBlock>
-            <TextBlock>
-                <Run Text="Press"/>
-                <Run Text="Alt" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="+"/>
-                <Run Text="Left" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="/"/>
-                <Run Text="Right" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="to change the current search."/>
-            </TextBlock>
+            <Control Template="{DynamicResource CommandContextDataGesture_Hint_Down_Up}"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Enter}"/>
+                <TextBlock Text=" to open the found item's location."/>
+            </StackPanel>                       
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Previous}"/>
+                <TextBlock Text=" or "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Next}"/>
+                <TextBlock Text=" to cycle through the search history."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Remove}"/>
+                <TextBlock Text=" to remove this search."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Clear}"/>
+                <TextBlock Text=" to remove all completed searches."/>
+            </StackPanel>
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>
-    

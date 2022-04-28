@@ -9,6 +9,8 @@ namespace Brows {
             CurrentItem = Controller?.CurrentItem;
         }
 
+        public event EventHandler Died;
+
         public IFindResultController Controller {
             get => _Controller;
             set {
@@ -51,6 +53,18 @@ namespace Brows {
         }
         private bool _Complete;
 
+        public bool Canceled {
+            get => _Canceled;
+            set => Change(ref _Canceled, value, nameof(Canceled));
+        }
+        private bool _Canceled;
+
+        public Exception Exception {
+            get => _Exception;
+            set => Change(ref _Exception, value, nameof(Exception));
+        }
+        private Exception _Exception;
+
         public string Root { get; }
         public string Input { get; }
 
@@ -65,6 +79,10 @@ namespace Brows {
                 return true;
             }
             return false;
+        }
+
+        public void Die() {
+            Died?.Invoke(this, EventArgs.Empty);
         }
     }
 }

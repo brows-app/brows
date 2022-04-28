@@ -18,7 +18,7 @@ namespace Brows {
             get => _Timeout;
             set => Change(ref _Timeout, value, nameof(Timeout));
         }
-        private TimeSpan _Timeout = TimeSpan.FromSeconds(2.5);
+        private TimeSpan _Timeout = TimeSpan.FromSeconds(1);
 
         public string Text {
             get => _Text ?? (_Text = "");

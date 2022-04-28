@@ -9,7 +9,7 @@ namespace Brows.Gui {
             return listBox.Items.MoveCurrentTo(listBox.SelectedItem);
         }
 
-        public static bool MoveToPreviousOne(this ListBox listBox) {
+        public static bool MoveUp(this ListBox listBox) {
             if (null == listBox) throw new ArgumentNullException(nameof(listBox));
             var selected = SelectorExtension.SelectPrevious(listBox);
             return selected
@@ -17,12 +17,30 @@ namespace Brows.Gui {
                 : false;
         }
 
-        public static bool MoveToNextOne(this ListBox listBox) {
+        public static bool MoveDown(this ListBox listBox) {
             if (null == listBox) throw new ArgumentNullException(nameof(listBox));
             var selected = SelectorExtension.SelectNext(listBox);
             return selected
                 ? listBox.MoveToSelected()
                 : false;
+        }
+
+        public static bool MovePageUp(this ListBox listBox) {
+            if (null == listBox) throw new ArgumentNullException(nameof(listBox));
+            var scrollViewer = listBox.FindVisualChild<ScrollViewer>();
+            if (scrollViewer != null) {
+                return MoveToOffset(listBox, -(int)scrollViewer.ViewportHeight);
+            }
+            return false;
+        }
+
+        public static bool MovePageDown(this ListBox listBox) {
+            if (null == listBox) throw new ArgumentNullException(nameof(listBox));
+            var scrollViewer = listBox.FindVisualChild<ScrollViewer>();
+            if (scrollViewer != null) {
+                return MoveToOffset(listBox, (int)scrollViewer.ViewportHeight);
+            }
+            return false;
         }
 
         public static bool MoveToOffset(this ListBox listBox, int offset) {

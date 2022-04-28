@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 namespace Brows.Diagnostics {
     using Gui;
     using Logger;
-    using Threading.Tasks;
 
     internal class ProcessStreamReader {
         private ILog Log =>
@@ -22,8 +21,8 @@ namespace Brows.Diagnostics {
             for (; ; ) {
                 var s = default(string);
                 try {
-                    var e = await Async.Run(cancellationToken, () => reader.EndOfStream);
-                    if (e) {
+                    var c = cancellationToken.IsCancellationRequested;
+                    if (c) {
                         break;
                     }
                     var r = await reader.ReadAsync(buffer, cancellationToken);

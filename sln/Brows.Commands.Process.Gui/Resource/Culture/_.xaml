@@ -1,17 +1,27 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:browsCommandFramework="clr-namespace:Brows;assembly=Brows.Command.Framework">
     <DataTemplate x:Key="CommandContextHint_CommandProcessData">
         <StackPanel>
-            <TextBlock>
-                <Run Text="Press"/>
-                <Run Text="Alt" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="+"/><Run Text="Up" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="/"/><Run Text="Down" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="to scroll the process output."/>
-            </TextBlock>
-            <TextBlock>
-                <Run Text="Press"/>
-                <Run Text="Alt" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="+"/><Run Text="Left" Style="{DynamicResource CommandContextHint_KeyboardKey}"/><Run Text="/"/><Run Text="Right" Style="{DynamicResource CommandContextHint_KeyboardKey}"/>
-                <Run Text="to cycle through the process history."/>
-            </TextBlock>
+            <Control Template="{DynamicResource CommandContextDataGesture_Hint_Down_Up}"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Previous}"/>
+                <TextBlock Text=" or "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Next}"/>
+                <TextBlock Text=" to cycle through the process history."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Remove}"/>
+                <TextBlock Text=" to remove this process item AND KILL THE PROCESS IF IT IS RUNNING."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Clear}"/>
+                <TextBlock Text=" to remove all process items AND KILL ANY PROCESSES THAT ARE STILL RUNNING."/>
+            </StackPanel>
         </StackPanel>
     </DataTemplate>
 

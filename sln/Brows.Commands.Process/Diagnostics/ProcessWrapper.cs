@@ -10,7 +10,9 @@ namespace Brows.Diagnostics {
     using Threading.Tasks;
 
     internal class ProcessWrapper : NotifyPropertyChanged {
+        private Process Process;
         private ProcessStreamWriter Writer;
+        private CancellationTokenSource CancellationTokenSource;
 
         private ILog Log =>
             _Log ?? (
@@ -21,6 +23,82 @@ namespace Brows.Diagnostics {
             _TaskHandler ?? (
             _TaskHandler = new TaskHandler<ProcessWrapper>());
         private TaskHandler _TaskHandler;
+
+        private async Task Run(CancellationToken cancellationToken) {
+            if (Started == false) {
+                Started = true;
+                StartTime = DateTime.Now;
+            }
+            else {
+                throw new InvalidOperationException(message: $"{nameof(Started)} [{Started}]");
+            }
+            if (Log.Info()) {
+                Log.Info(
+                    nameof(Run),
+                    $"{nameof(Input)} > {Input}",
+                    $"{nameof(WorkingDirectory)} > {WorkingDirectory}");
+            }
+            var trim = Input?.Trim() ?? "";
+            var parts = trim.Split(new char[] { }, 2, StringSplitOptions.None);
+            var fileName = parts[0];
+            var arguments = parts.Length > 1 ? parts[1] : "";
+            var startInfo = new ProcessStartInfo {
+                Arguments = arguments,
+                CreateNoWindow = true,
+                ErrorDialog = false,
+                FileName = fileName,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                WorkingDirectory = WorkingDirectory
+            };
+            using (var process = Process = new Process()) {
+                process.StartInfo = startInfo;
+                try {
+                    process.Start();
+                    Running = true;
+                    ProcessID = process.Id;
+
+                    var state = new ProcessLogState(Logbook);
+                    var writer = new ProcessStreamWriter(process.StandardInput, state);
+                    var stdErr = new ProcessStreamReader(process.StandardError, state, LogSeverity.Error);
+                    var stdOut = new ProcessStreamReader(process.StandardOutput, state, LogSeverity.Info);
+                    TaskHandler.Begin(stdErr.Read(cancellationToken));
+                    TaskHandler.Begin(stdOut.Read(cancellationToken));
+
+                    Writer = writer;
+                    await process.WaitForExitAsync(cancellationToken);
+                    try {
+                        ExitCode = process.ExitCode;
+                        ExitTime = process.ExitTime;
+                    }
+                    catch (Exception ex) {
+                        if (Log.Warn()) {
+                            Log.Warn(ex);
+                        }
+                    }
+                    if (Log.Info()) {
+                        Log.Info(
+                            nameof(process.Exited),
+                            $"{nameof(Input)} > {Input}",
+                            $"{nameof(WorkingDirectory)} > {WorkingDirectory}",
+                            $"{nameof(ExitTime)} > {ExitTime}",
+                            $"{nameof(ExitCode)} > {ExitCode}");
+                    }
+                }
+                catch (Exception ex) {
+                    if (Log.Error()) {
+                        Log.Error(ex);
+                    }
+                }
+                finally {
+                    Writer = null;
+                    Process = null;
+                    Running = false;
+                }
+            }
+        }
 
         public Logbook Logbook =>
             _Logbook ?? (
@@ -78,81 +156,38 @@ namespace Brows.Diagnostics {
             }
         }
 
-        public async Task Run(CancellationToken cancellationToken) {
-            if (Started == false) {
-                Started = true;
-                StartTime = DateTime.Now;
-            }
-            else {
-                throw new InvalidOperationException(message: $"{nameof(Started)} [{Started}]");
-            }
-            if (Log.Info()) {
-                Log.Info(
-                    nameof(Run),
-                    $"{nameof(Input)} > {Input}",
-                    $"{nameof(WorkingDirectory)} > {WorkingDirectory}");
-            }
-            var trim = Input?.Trim() ?? "";
-            var parts = trim.Split(new char[] { }, 2, StringSplitOptions.None);
-            var fileName = parts[0];
-            var arguments = parts.Length > 1 ? parts[1] : "";
-            var startInfo = new ProcessStartInfo {
-                Arguments = arguments,
-                CreateNoWindow = true,
-                ErrorDialog = false,
-                FileName = fileName,
-                RedirectStandardError = true,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                WorkingDirectory = WorkingDirectory
-            };
-            using (var process = new Process()) {
-                process.StartInfo = startInfo;
+        public void Kill() {
+            var process = Process;
+            if (process != null) {
+                if (Log.Info()) {
+                    Log.Info(
+                        nameof(Kill),
+                        nameof(ProcessID) + " > " + ProcessID);
+                }
                 try {
-                    await Async.Run(cancellationToken, process.Start);
-                    Running = true;
-                    ProcessID = process.Id;
-
-                    var state = new ProcessLogState(Logbook);
-                    var writer = new ProcessStreamWriter(process.StandardInput, state);
-                    var stdErr = new ProcessStreamReader(process.StandardError, state, LogSeverity.Error);
-                    var stdOut = new ProcessStreamReader(process.StandardOutput, state, LogSeverity.Info);
-                    var stdErrTask = stdErr.Read(cancellationToken);
-                    var stdOutTask = stdOut.Read(cancellationToken);
-
-                    Writer = writer;
-                    await process.WaitForExitAsync(cancellationToken);
-                    await stdErrTask;
-                    await stdOutTask;
-                    try {
-                        ExitCode = process.ExitCode;
-                        ExitTime = process.ExitTime;
-                    }
-                    catch (Exception ex) {
-                        if (Log.Warn()) {
-                            Log.Warn(ex);
-                        }
-                    }
-                    if (Log.Info()) {
-                        Log.Info(
-                            nameof(process.Exited),
-                            $"{nameof(Input)} > {Input}",
-                            $"{nameof(WorkingDirectory)} > {WorkingDirectory}",
-                            $"{nameof(ExitTime)} > {ExitTime}",
-                            $"{nameof(ExitCode)} > {ExitCode}");
-                    }
+                    process.Kill();
                 }
                 catch (Exception ex) {
                     if (Log.Error()) {
                         Log.Error(ex);
                     }
                 }
-                finally {
-                    Writer = null;
-                    Running = false;
-                }
             }
+            CancellationTokenSource?.Cancel();
+        }
+
+        public void Start() {
+            TaskHandler.Begin(async () => {
+                using (CancellationTokenSource = new CancellationTokenSource()) {
+                    try {
+                        await Run(CancellationTokenSource.Token);
+                    }
+                    finally {
+                        CancellationTokenSource.Cancel();
+                        CancellationTokenSource = null;
+                    }
+                }
+            });
         }
     }
 }

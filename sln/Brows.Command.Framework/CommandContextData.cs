@@ -3,11 +3,10 @@ using System.Collections.Generic;
 
 namespace Brows {
     public abstract class CommandContextData : ICommandContextData {
-        public abstract string Control { get; }
         public abstract object Current { get; }
 
         public virtual string Input { get; }
-        public virtual object KeyTarget { get; }
+        public virtual ICommandContextFlag Flag { get; protected set; }
         public ICommand Command { get; }
 
         public CommandContextData(ICommand command) {
@@ -15,22 +14,23 @@ namespace Brows {
         }
 
         public virtual ICommandContextData Remove() {
-            return null;
+            return this;
         }
 
-        public virtual ICommandContextData RemoveAll() {
-            return null;
+        public virtual ICommandContextData Clear() {
+            return this;
         }
 
         public virtual ICommandContextData Next() {
-            return null;
+            return this;
         }
 
         public virtual ICommandContextData Previous() {
-            return null;
+            return this;
         }
 
-        public virtual void Enter() {
+        public virtual ICommandContextData Enter() {
+            return this;
         }
     }
 
@@ -45,11 +45,8 @@ namespace Brows {
         protected virtual void Removed(T item) {
         }
 
-        protected virtual void Cleared() {
+        protected virtual void Cleared(IEnumerable<T> items) {
         }
-
-        public override string Control =>
-            typeof(T).Name;
 
         public override object Current =>
             Item;
@@ -78,9 +75,10 @@ namespace Brows {
             return null;
         }
 
-        public override ICommandContextData RemoveAll() {
+        public override ICommandContextData Clear() {
+            var items = new List<T>(List);
             List.Clear();
-            Cleared();
+            Cleared(items);
             return null;
         }
 

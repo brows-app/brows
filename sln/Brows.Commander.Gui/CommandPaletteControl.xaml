@@ -86,6 +86,19 @@
                                     <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
                                 </Style>
                             </Grid.Style>
+                            <Grid.Resources>
+                                <Style x:Key="H1">
+                                    <Setter Property="TextBlock.FontSize" Value="14"/>
+                                    <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+                                    <Setter Property="TextBlock.Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+                                    <Setter Property="TextBlock.Padding" Value="5"/>
+                                </Style>
+                                <Style x:Key="H2">
+                                    <Setter Property="TextBlock.FontSize" Value="12"/>
+                                    <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+                                    <Setter Property="TextBlock.Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+                                </Style>                                
+                            </Grid.Resources>
                             <local:CommandContextDataControl DataContext="{Binding SuggestionData}" x:Name="SuggestionDataControl"/>
                         </Grid>
                     </Grid>

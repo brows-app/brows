@@ -1,10 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Brows">
-    <ControlTemplate x:Key="CommandContextData_ProcessWrapper">
-        <local:ProcessControl/>
-    </ControlTemplate>
-
     <Style TargetType="TextBlock" x:Key="Process_Default_Text">
         <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
         <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
@@ -19,4 +15,8 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+
+    <DataTemplate x:Key="CommandContextData_ProcessWrapper">
+        <local:ProcessWrapperControl/>
+    </DataTemplate>
 </ResourceDictionary>

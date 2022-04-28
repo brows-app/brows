@@ -11,7 +11,6 @@
         <ProjectReference Include="..\Brows.Threading.Tasks.Async\Brows.Threading.Tasks.Async.csproj" />
         <ProjectReference Include="..\Brows.Triggers\Brows.Triggers.csproj" />
         <ProjectReference Include="..\Brows.Command.Contract\Brows.Command.Contract.csproj" />
-        <ProjectReference Include="..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
         <ProjectReference Include="..\Brows.EntryProvider.Contract\Brows.EntryProvider.Contract.csproj" />
         <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
         <ProjectReference Include="..\Brows.Panel.Contract\Brows.Panel.Contract.csproj" />

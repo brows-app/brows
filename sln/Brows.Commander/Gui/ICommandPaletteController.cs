@@ -6,7 +6,6 @@ namespace Brows.Gui {
     public interface ICommandPaletteController : IController {
         event EventHandler CurrentSuggestionChanged;
         event EventHandler LostFocus;
-        event InputEventHandler Input;
         event KeyboardKeyEventHandler KeyboardKeyDown;
 
         ICommandSuggestion CurrentSuggestion { get; }

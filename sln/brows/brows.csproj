@@ -9,6 +9,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Brows.Commander.Gui\Brows.Commander.Gui.csproj" />
         <ProjectReference Include="..\Brows.CommanderService\Brows.CommanderService.csproj" />
+        <ProjectReference Include="..\Brows.Commands.Bookmark.Gui\Brows.Commands.Bookmark.Gui.csproj" />
         <ProjectReference Include="..\Brows.Commands.Bookmark\Brows.Commands.Bookmark.csproj" />
         <ProjectReference Include="..\Brows.Commands.Manual.Gui\Brows.Commands.Manual.Gui.csproj" />
         <ProjectReference Include="..\Brows.Commands.Manual\Brows.Commands.Manual.csproj" />

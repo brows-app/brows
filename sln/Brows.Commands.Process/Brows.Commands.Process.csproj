@@ -5,10 +5,8 @@
         <ProjectReference Include="..\Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj" />
         <ProjectReference Include="..\Brows.Command.Framework\Brows.Command.Framework.csproj" />
         <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
-        <ProjectReference Include="..\Brows.Dialogs\Brows.Dialogs.csproj" />
         <ProjectReference Include="..\Brows.Globalization\Brows.Globalization.csproj" />
         <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
         <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />
-        <ProjectReference Include="..\Brows.Match\Brows.Match.csproj" />
     </ItemGroup>
 </Project>

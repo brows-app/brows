@@ -41,26 +41,42 @@ namespace Brows {
                     Escape },
                 { new KeyboardGesture(KeyboardKey.Tab, KeyboardModifiers.None),
                     Tab },
-                { new KeyboardGesture(KeyboardKey.Right, KeyboardModifiers.Alt),
-                    () => SuggestionData = SuggestionData?.Next() },
-                { new KeyboardGesture(KeyboardKey.Left, KeyboardModifiers.Alt),
-                    () => SuggestionData = SuggestionData?.Previous() },
-                { new KeyboardGesture(KeyboardKey.Enter, KeyboardModifiers.Alt),
-                    () => SuggestionData?.Enter() },
-                { new KeyboardGesture(KeyboardKey.Up, KeyboardModifiers.Alt),
+                { CommandContextDataGesture.Next,
+                    () => Change(SuggestionData?.Next()) },
+                { CommandContextDataGesture.Previous,
+                    () => Change(SuggestionData?.Previous()) },
+                { CommandContextDataGesture.Enter,
+                    () => Change(SuggestionData?.Enter()) },
+                { CommandContextDataGesture.Up,
                     () => Controller?.ScrollSuggestionData(KeyboardKey.Up) },
-                { new KeyboardGesture(KeyboardKey.Down, KeyboardModifiers.Alt),
+                { CommandContextDataGesture.Down,
                     () => Controller?.ScrollSuggestionData(KeyboardKey.Down) },
-                { new KeyboardGesture(KeyboardKey.PageUp, KeyboardModifiers.Alt),
+                { CommandContextDataGesture.PageUp,
                     () => Controller?.ScrollSuggestionData(KeyboardKey.PageUp) },
-                { new KeyboardGesture(KeyboardKey.PageDown, KeyboardModifiers.Alt),
+                { CommandContextDataGesture.PageDown,
                     () => Controller?.ScrollSuggestionData(KeyboardKey.PageDown) },
-                { new KeyboardGesture(KeyboardKey.D3, KeyboardModifiers.Shift | KeyboardModifiers.Alt),
-                    () => SuggestionData = SuggestionData?.Remove() },
-                { new KeyboardGesture(KeyboardKey.D3, KeyboardModifiers.Shift | KeyboardModifiers.Alt | KeyboardModifiers.Control),
-                    () => SuggestionData = SuggestionData?.RemoveAll() }
+                { CommandContextDataGesture.Remove,
+                    () => Change(SuggestionData?.Remove()) },
+                { CommandContextDataGesture.Clear,
+                    () => Change(SuggestionData?.Clear()) }
             });
         private Dictionary<KeyboardGesture, Action> _KeyMap;
+
+        private void Change(ICommandContextData data) {
+            var escape = false;
+            if (data != null) {
+                var flag = data.Flag;
+                if (flag != null) {
+                    if (flag.PersistInput == false) {
+                        Escape();
+                        escape = true;
+                    }
+                }
+            }
+            SuggestionData = escape
+                ? null
+                : data;
+        }
 
         private CommandContext CreateContext(string input) {
             var inp = input?.Trim() ?? "";

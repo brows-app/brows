@@ -11,6 +11,8 @@ namespace Brows.Data.Files {
             _Log = Logging.For(typeof(XmlDataFile)));
         private ILog _Log;
 
+        public override string Extension => "xml";
+
         public override void Save(object data, Type type, string path) {
             if (Log.Info()) {
                 Log.Info(

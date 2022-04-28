@@ -2,7 +2,7 @@
              x:ClassModifier="internal"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Brows">
+             xmlns:brows="http://schemas.brows.app/xaml">
     <UserControl.Style>
         <Style TargetType="UserControl">
             <Setter Property="Background" Value="#F8D775"/>
@@ -12,5 +12,7 @@
             <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
     </UserControl.Style>
-    <ContentControl Content="{Binding}" ContentTemplateSelector="{x:Static local:CommandContextHintControl.ItemTemplateSelector}"/>
+    <ContentControl
+        Content="{Binding}"
+        ContentTemplateSelector="{Binding Item[CommandContextHint], Source={x:Static brows:AppComponent.DataTemplateSelector}}"/>
 </UserControl>

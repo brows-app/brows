@@ -11,12 +11,9 @@ namespace Brows {
             Collection.Remove(item);
         }
 
-        protected override void Cleared() {
+        protected override void Cleared(IEnumerable<IOperation> items) {
             Collection.Clear();
         }
-
-        public override string Control =>
-            nameof(OperationData);
 
         public IOperationCollection Collection { get; }
 

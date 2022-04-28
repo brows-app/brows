@@ -32,7 +32,7 @@ namespace Brows {
             _PanelCollection = new PanelCollection());
         private PanelCollection _PanelCollection;
 
-        private void Control_Loaded(object sender, EventArgs e) {
+        private void Controller_Loaded(object sender, EventArgs e) {
             TaskHandler.Begin(async token => {
                 await AddPanel("", token);
                 if (First) {
@@ -46,17 +46,17 @@ namespace Brows {
             OnLoaded(e);
         }
 
-        private void Window_Closed(object sender, EventArgs e) {
+        private void Controller_WindowClosed(object sender, EventArgs e) {
             OnClosed(e);
         }
 
-        private void Window_Input(object sender, InputEventArgs e) {
+        private void Controller_WindowInput(object sender, InputEventArgs e) {
             if (e != null) {
                 e.Triggered = Input(e.Text);
             }
         }
 
-        private void Window_KeyboardKeyDown(object sender, KeyboardKeyEventArgs e) {
+        private void Controller_WindowKeyboardKeyDown(object sender, KeyboardKeyEventArgs e) {
             if (e != null) {
                 e.Triggered = Input(e.Key, e.Modifiers);
             }
@@ -138,16 +138,16 @@ namespace Brows {
                 var newValue = value;
                 if (Change(ref _Controller, newValue, nameof(Controller))) {
                     if (oldValue != null) {
-                        oldValue.Loaded -= Control_Loaded;
-                        oldValue.WindowClosed -= Window_Closed;
-                        oldValue.WindowInput -= Window_Input;
-                        oldValue.WindowKeyboardKeyDown -= Window_KeyboardKeyDown;
+                        oldValue.Loaded -= Controller_Loaded;
+                        oldValue.WindowClosed -= Controller_WindowClosed;
+                        oldValue.WindowInput -= Controller_WindowInput;
+                        oldValue.WindowKeyboardKeyDown -= Controller_WindowKeyboardKeyDown;
                     }
                     if (newValue != null) {
-                        newValue.Loaded += Control_Loaded;
-                        newValue.WindowClosed += Window_Closed;
-                        newValue.WindowInput += Window_Input;
-                        newValue.WindowKeyboardKeyDown += Window_KeyboardKeyDown;
+                        newValue.Loaded += Controller_Loaded;
+                        newValue.WindowClosed += Controller_WindowClosed;
+                        newValue.WindowInput += Controller_WindowInput;
+                        newValue.WindowKeyboardKeyDown += Controller_WindowKeyboardKeyDown;
                     }
                     var dialog = Dialog;
                     if (dialog != null) {
@@ -214,7 +214,8 @@ namespace Brows {
                     nameof(AddPanel),
                     $"{nameof(id)} > {id}");
             }
-            await PanelCollection.Add(id, Dialog, Operations, EntryProviderFactory, cancellationToken);
+            var panel = await PanelCollection.Add(id, Dialog, Operations, EntryProviderFactory, cancellationToken);
+            Controller?.AddPanel(panel);
         }
 
         public async Task RemovePanel(IPanel panel, CancellationToken cancellationToken) {
@@ -224,6 +225,7 @@ namespace Brows {
                     $"{nameof(panel)} > {panel}");
             }
             await PanelCollection.Remove(panel, cancellationToken);
+            Controller?.RemovePanel(panel);
         }
 
         public Task ShowPalette(string input, CancellationToken cancellationToken) {

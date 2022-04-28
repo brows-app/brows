@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 
@@ -34,55 +33,12 @@ namespace Brows.Windows {
             yield return LocalResource("Extend");
         }
 
-        private static ResourceDictionary SourceResource(string source) {
-            try {
-                return new ResourceDictionary { Source = new Uri(source) };
-            }
-            catch {
-                return null;
-            }
-        }
-
-        private static IEnumerable<string> CultureChecks() {
-            var culture = Thread.CurrentThread.CurrentUICulture;
-            var cultureName = culture.Name;
-            yield return cultureName;
-
-            var parentName = culture.Parent?.Name;
-            if (parentName != null && parentName != cultureName) {
-                yield return parentName;
-            }
-
-            var defaultName = "_";
-            yield return defaultName;
-        }
-
-        private IEnumerable<ResourceDictionary> ComponentResourceDictionaries() {
-            foreach (var componentResource in ComponentResources) {
-                var type = componentResource.GetType();
-                var assembly = type.Assembly;
-                var assemblyName = assembly.GetName();
-                var resource = SourceResource($"pack://application:,,,/{assemblyName.Name};component/Resource/Resource.xaml");
-                if (resource != null) {
-                    yield return resource;
-                }
-                var cultureChecks = CultureChecks();
-                foreach (var culture in cultureChecks) {
-                    var cultureResource = SourceResource($"pack://application:,,,/{assemblyName.Name};component/Resource/Culture/{culture}.xaml");
-                    if (cultureResource != null) {
-                        yield return cultureResource;
-                        break;
-                    }
-                }
-            }
-        }
-
         public Application Application { get; }
-        public IEnumerable<IComponentResource> ComponentResources { get; }
+        public AppComponentCollection Components { get; }
 
-        public AppTheme(Application application, IEnumerable<IComponentResource> componentResources, CommanderTheme theme = null) {
+        public AppTheme(Application application, AppComponentCollection components, CommanderTheme theme = null) {
             Application = application ?? throw new ArgumentNullException(nameof(application));
-            ComponentResources = componentResources ?? throw new ArgumentNullException(nameof(componentResources));
+            Components = components ?? throw new ArgumentNullException(nameof(components));
 
             theme = theme ?? new CommanderTheme("dark", null, null);
             var key = theme.Base?.Trim() ?? "";
@@ -117,7 +73,7 @@ namespace Brows.Windows {
                 foreach (var dictionary in LocalResourceDictionaries()) {
                     Application.Resources.MergedDictionaries.Add(dictionary);
                 }
-                foreach (var dictionary in ComponentResourceDictionaries()) {
+                foreach (var dictionary in Components.ResourceDictionaries) {
                     Application.Resources.MergedDictionaries.Add(dictionary);
                 }
             }

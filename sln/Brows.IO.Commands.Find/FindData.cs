@@ -20,6 +20,22 @@ namespace Brows {
             return new FindData(Command, Context, true, index, list);
         }
 
+        protected override void Cleared(IEnumerable<FindResult> items) {
+            if (items != null) {
+                foreach (var item in items) {
+                    item.Die();
+                }
+            }
+            base.Cleared(items);
+        }
+
+        protected override void Removed(FindResult item) {
+            if (item != null) {
+                item.Die();
+            }
+            base.Removed(item);
+        }
+
         public override string Input => Inputs
             ? Item?.Input
             : null;
@@ -30,7 +46,7 @@ namespace Brows {
         public FindData(ICommand command, ICommandContext context, int index, IList<FindResult> list) : this(command, context, false, index, list) {
         }
 
-        public override void Enter() {
+        public override ICommandContextData Enter() {
             var findItem = Item?.CurrentItem;
             if (findItem != null) {
                 var path = findItem.Info.FullName;
@@ -39,6 +55,8 @@ namespace Brows {
                     await Context.OpenOrAddPanel(directory, token);
                 });
             }
+            Flag = new CommandContextFlag { PersistInput = false };
+            return this;
         }
     }
 }

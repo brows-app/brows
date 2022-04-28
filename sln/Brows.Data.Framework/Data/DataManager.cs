@@ -47,6 +47,10 @@ namespace Brows.Data {
             });
         }
 
+        public TData Get() {
+            return Data;
+        }
+
         public async Task<TData> Load(CancellationToken cancellationToken) {
             if (Data == null) {
                 await Async.Run(cancellationToken, () => {

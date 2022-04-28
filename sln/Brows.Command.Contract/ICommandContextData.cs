@@ -1,14 +1,13 @@
 ﻿namespace Brows {
     public interface ICommandContextData {
         string Input { get; }
-        string Control { get; }
         object Current { get; }
-        object KeyTarget { get; }
         ICommand Command { get; }
+        ICommandContextFlag Flag { get; }
         ICommandContextData Remove();
-        ICommandContextData RemoveAll();
+        ICommandContextData Clear();
         ICommandContextData Next();
         ICommandContextData Previous();
-        void Enter();
+        ICommandContextData Enter();
     }
 }

@@ -37,7 +37,7 @@
     
     <Style x:Key="CommandContextHint_KeyboardKey" BasedOn="{StaticResource CommandContextData_KeyboardKey}">
     </Style>
-    
+        
     <Style x:Key="CommandPalette_ListView" TargetType="ListView">
         <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
         <Setter Property="BorderThickness" Value="0"/>

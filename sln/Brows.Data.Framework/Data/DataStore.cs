@@ -11,7 +11,7 @@ namespace Brows.Data {
 
         private string Path =>
             _Path ?? (
-            _Path = DataPath.For(Name, Name));
+            _Path = DataPath.For(Name, Name, DataFile.Extension));
         private string _Path;
 
         private DataPath DataPath =>

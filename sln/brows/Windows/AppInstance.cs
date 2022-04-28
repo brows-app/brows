@@ -9,6 +9,11 @@ namespace Brows.Windows {
         private readonly bool ShutDown;
         private readonly CommanderService Service = new CommanderService();
 
+        private AppComponentCollection Components =>
+            _Components ?? (
+            _Components = AppComponentCollection.From(Service.ComponentResources));
+        private AppComponentCollection _Components;
+
         private void Service_Exited(object sender, CommanderExitedEventArgs e) {
             var app = Application;
             var windows = app.Windows;
@@ -25,7 +30,7 @@ namespace Brows.Windows {
         private void Service_Loaded(object sender, CommanderLoadedEventArgs e) {
             if (e != null) {
                 if (e.First) {
-                    new AppTheme(Application, Service.ComponentResources);
+                    new AppTheme(Application, Components);
                 }
                 var
                 window = new CommanderWindow { DataContext = e.Commander };
@@ -34,7 +39,7 @@ namespace Brows.Windows {
         }
 
         private void Service_Themed(object sender, CommanderThemedEventArgs e) {
-            new AppTheme(Application, Service.ComponentResources, e?.Theme);
+            new AppTheme(Application, Components, e?.Theme);
         }
 
         private void Service_Logger(object sender, CommanderLoggerEventArgs e) {

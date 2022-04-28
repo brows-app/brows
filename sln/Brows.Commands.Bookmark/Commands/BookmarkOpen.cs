@@ -8,10 +8,10 @@ namespace Brows.Commands {
     using Data;
 
     internal class BookmarkOpen : Command, ICommandExport {
-        private DataManager<BookmarkCollectionModel> Data =>
+        private DataManager<BookmarkCollection> Data =>
             _Data ?? (
-            _Data = new DataManager<BookmarkCollectionModel>());
-        private DataManager<BookmarkCollectionModel> _Data;
+            _Data = new DataManager<BookmarkCollection>());
+        private DataManager<BookmarkCollection> _Data;
 
         protected override async IAsyncEnumerable<ICommandSuggestion> ProtectedSuggestAsync(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             var model = await Data.Load(cancellationToken);
@@ -51,14 +51,7 @@ namespace Brows.Commands {
                 var items = model.Items;
                 foreach (var item in items) {
                     if (input.Equals(item.Key, StringComparison.CurrentCultureIgnoreCase)) {
-                        if (context.HasPanel(out var panel)) {
-                            await panel.Open(item.Value, cancellationToken);
-                            return true;
-                        }
-                        if (context.HasCommander(out var commander)) {
-                            await commander.AddPanel(item.Value, cancellationToken);
-                            return true;
-                        }
+                        return await context.OpenOrAddPanel(item.Value, cancellationToken);
                     }
                 }
             }

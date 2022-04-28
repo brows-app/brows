@@ -9,10 +9,16 @@ namespace Brows.Gui {
     using Triggers;
     using Windows.Input;
 
-
     internal class CommandPaletteController : Controller<ICommandPaletteController>, ICommandPaletteController {
         private void Items_CurrentChanged(object sender, EventArgs e) {
             CurrentSuggestionChanged?.Invoke(this, e);
+        }
+
+        private void InputTextBox_Loaded(object sender, RoutedEventArgs e) {
+            if (InputTextBox.SelectionLength == 0) {
+                InputTextBox.CaretIndex = InputTextBox.Text.Length;
+            }
+            InputTextBox.Focus();
         }
 
         private void InputTextBox_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e) {
@@ -40,50 +46,32 @@ namespace Brows.Gui {
             var handled = e.Handled = eventArgs.Triggered;
             if (handled == false) {
                 switch (e.Key) {
-                    case Key.Down: {
-                            var items = UserControl.CommandSuggestionListView.Items;
-                            if (items.CurrentPosition < 0) {
-                                items.MoveCurrentToFirst();
-                            }
-                            else {
-                                if (items.CurrentPosition < items.Count - 1) {
-                                    items.MoveCurrentToNext();
-                                }
-                            }
-                            InputTextBox.CaretIndex = InputTextBox.Text.Length;
-                            e.Handled = true;
-                            break;
-                        }
-                    case Key.Up: {
-                            var items = UserControl.CommandSuggestionListView.Items;
-                            if (items.CurrentPosition < 0) {
-                                items.MoveCurrentToFirst();
-                            }
-                            else {
-                                if (items.CurrentPosition > 0) {
-                                    items.MoveCurrentToPrevious();
-                                }
-                            }
-                            InputTextBox.CaretIndex = InputTextBox.Text.Length;
-                            e.Handled = true;
-                            break;
-                        }
-                    case Key.PageDown:
-                    case Key.PageUp:
-                        var args = new KeyEventArgs(e.KeyboardDevice, e.InputSource, e.Timestamp, e.Key) {
-                            RoutedEvent = UIElement.KeyDownEvent
-                        };
-                        UserControl.CommandSuggestionListView.RaiseEvent(args);
-                        InputTextBox.CaretIndex = InputTextBox.Text.Length;
-                        e.Handled = true;
+                    case Key.Up:
+                        UserControl.CommandSuggestionListView.MoveUp();
+                        handled = true;
                         break;
+                    case Key.Down:
+                        UserControl.CommandSuggestionListView.MoveDown();
+                        handled = true;
+                        break;
+                    case Key.PageUp:
+                        UserControl.CommandSuggestionListView.MovePageUp();
+                        handled = true;
+                        break;
+                    case Key.PageDown:
+                        UserControl.CommandSuggestionListView.MovePageDown();
+                        handled = true;
+                        break;
+                }
+                if (handled) {
+                    e.Handled = true;
+                    InputTextBox.CaretIndex = InputTextBox.Text.Length;
                 }
             }
         }
 
         public event EventHandler CurrentSuggestionChanged;
         public event EventHandler LostFocus;
-        public event InputEventHandler Input;
         public event KeyboardKeyEventHandler KeyboardKeyDown;
 
         public CommandPaletteInputTextBox InputTextBox => UserControl.InputTextBox;
@@ -92,6 +80,7 @@ namespace Brows.Gui {
         public CommandPaletteController(CommandPaletteControl userControl) : base(userControl) {
             UserControl = userControl ?? throw new ArgumentNullException(nameof(userControl));
             UserControl.InputTextBox.IsKeyboardFocusWithinChanged += InputTextBox_IsKeyboardFocusWithinChanged;
+            UserControl.InputTextBox.Loaded += InputTextBox_Loaded;
             UserControl.InputTextBox.PreviewKeyDown += InputTextBox_PreviewKeyDown;
             UserControl.CommandSuggestionListView.Items.CurrentChanged += Items_CurrentChanged;
             UserControl.CommandSuggestionListView.Items.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ICommandSuggestion.Header)));
@@ -119,38 +108,34 @@ namespace Brows.Gui {
             switch (key) {
                 case KeyboardKey.Down:
                     if (listBox != null) {
-                        listBox.MoveToNextOne();
+                        listBox.MoveDown();
                     }
                     else {
-                        scrollViewer?.ScrollToVerticalOffset(scrollViewer.VerticalOffset + 1);
+                        scrollViewer?.LineDown();
                     }
                     break;
                 case KeyboardKey.Up:
                     if (listBox != null) {
-                        listBox.MoveToPreviousOne();
+                        listBox.MoveUp();
                     }
                     else {
-                        scrollViewer?.ScrollToVerticalOffset(scrollViewer.VerticalOffset - 1);
+                        scrollViewer?.LineUp();
                     }
                     break;
                 case KeyboardKey.PageDown:
                     if (listBox != null) {
-                        if (scrollViewer != null) {
-                            listBox.MoveToOffset((int)scrollViewer.ViewportHeight);
-                        }
+                        listBox.MovePageDown();
                     }
                     else {
-                        scrollViewer?.ScrollToVerticalOffset(scrollViewer.VerticalOffset + scrollViewer.ViewportHeight);
+                        scrollViewer?.PageDown();
                     }
                     break;
                 case KeyboardKey.PageUp:
                     if (listBox != null) {
-                        if (scrollViewer != null) {
-                            listBox.MoveToOffset(-(int)scrollViewer.ViewportHeight);
-                        }
+                        listBox.MovePageUp();
                     }
                     else {
-                        scrollViewer?.ScrollToVerticalOffset(scrollViewer.VerticalOffset - scrollViewer.ViewportHeight);
+                        scrollViewer?.PageUp();
                     }
                     break;
             }
