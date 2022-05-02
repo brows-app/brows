@@ -280,21 +280,20 @@ namespace Brows {
 
         public EntryProviderFactoryCollection ProviderFactory { get; }
 
-        public async Task Up(CancellationToken cancellationToken) {
-            if (Log.Info()) {
-                Log.Info(nameof(Up));
-            }
-            var provider = Provider;
-            if (provider != null) {
-                var parent = provider.ParentID;
-                if (parent != null) {
-                    await Open(parent, cancellationToken);
-                }
-                else {
-                    await Open("", cancellationToken);
-                }
-            }
-        }
+        public object HistoryBackRequest => Request.CreateAsync(
+            owner: this,
+            execute: async (_, token) => await HistoryBack(token),
+            canExecute: _ => true);
+
+        public object HistoryForwardRequest => Request.CreateAsync(
+            owner: this,
+            execute: async (_, token) => await HistoryForward(token),
+            canExecute: _ => true);
+
+        public object OpenParentRequest => Request.CreateAsync(
+            owner: this,
+            execute: async (_, token) => await OpenParent(token),
+            canExecute: _ => true);
 
         public async Task Open(string id, CancellationToken cancellationToken) {
             if (Log.Info()) {
@@ -305,6 +304,22 @@ namespace Brows {
             var started = await StartID(id, cancellationToken);
             if (started == false) {
                 started = await StartDefault(cancellationToken);
+            }
+        }
+
+        public async Task OpenParent(CancellationToken cancellationToken) {
+            if (Log.Info()) {
+                Log.Info(nameof(OpenParent));
+            }
+            var provider = Provider;
+            if (provider != null) {
+                var parent = provider.ParentID;
+                if (parent != null) {
+                    await Open(parent, cancellationToken);
+                }
+                else {
+                    await Open("", cancellationToken);
+                }
             }
         }
 

@@ -5,6 +5,9 @@
     <Window.Style>
         <Style TargetType="Window">
             <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="{DynamicResource Global_Default_TextFormattingMode}"/>
+            <Setter Property="TextOptions.TextHintingMode" Value="{DynamicResource Global_Default_TextHintingMode}"/>
+            <Setter Property="TextOptions.TextRenderingMode" Value="{DynamicResource Global_Default_TextRenderingMode}"/>
             <Setter Property="Title" Value="{Binding Panels.Active.ID.Value}"/>
             <Setter Property="Content">
                 <Setter.Value>

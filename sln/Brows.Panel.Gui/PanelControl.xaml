@@ -47,6 +47,8 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="{x:Static SystemParameters.VerticalScrollBarWidth}"/>
                 </Grid.ColumnDefinitions>
                 <local:PanelIconControl
                     Grid.Column="0" 
@@ -58,6 +60,53 @@
                 <local:PanelIDControl
                     Grid.Column="1" 
                     DataContext="{Binding ID}"/>
+                <Grid Grid.Column="2">
+                    <Grid.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="{DynamicResource Global_Transparent_Background_Brush}"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Margin" Value="0"/>
+                            <Setter Property="Padding" Value="5 0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter Property="Background" TargetName="border" Value="{DynamicResource Global_IsMouseOver_Background_Brush}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="true">
+                                                <Setter Property="Background" TargetName="border" Value="{DynamicResource Global_IsMouseOver_IsSelected_Background_Brush}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <Style TargetType="Path">
+                            <Setter Property="Fill" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+                            <Setter Property="Height" Value="10"/>
+                            <Setter Property="Stretch" Value="Fill"/>
+                            <Setter Property="Width" Value="10"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Command="{Binding HistoryBackRequest}">
+                        <Path Data="M 410.312 454.729 151.767 244.996 410.312 35.271 381.693 0 79.688 244.996 381.693 490 Z"/>
+                    </Button>
+                    <Button Grid.Column="1" Command="{Binding HistoryForwardRequest}">
+                        <Path Data="M 106.601 490 412.15 245.004 106.601 0 77.85 35.856 338.702 245.004 77.85 454.159 Z"/>
+                    </Button>
+                    <Button Grid.Column="2" Command="{Binding OpenParentRequest}">
+                        <Path Data="M 0 6 L 12 6 L 6 0 Z"/>
+                    </Button>
+                </Grid>
             </Grid>
             <brows:EntryCollectionControl Grid.Row="1" DataContext="{Binding Entries}"/>
             <local:PanelRowSplitter 

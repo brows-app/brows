@@ -1,6 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+                    xmlns:s="clr-namespace:System;assembly=mscorlib"
+                    xmlns:m1="clr-namespace:System.Windows.Media;assembly=WindowsBase"
+                    xmlns:m2="clr-namespace:System.Windows.Media;assembly=PresentationCore">
     <SolidColorBrush x:Key="Global_Default_Background_Brush"                        Color="{DynamicResource Global_Default_Background}"/>
     <SolidColorBrush x:Key="Global_Transparent_Background_Brush"                    Color="Transparent"/>
 
@@ -21,4 +23,8 @@
     <FontFamily x:Key="Global_Monospace_FontFamily">Consolas</FontFamily>
     <s:Double x:Key="Global_Monospace_FontSize">12</s:Double>
     <FontWeight x:Key="Global_Monospace_FontWeight">Normal</FontWeight>
+
+    <m1:TextFormattingMode x:Key="Global_Default_TextFormattingMode">Display</m1:TextFormattingMode>
+    <m2:TextHintingMode x:Key="Global_Default_TextHintingMode">Fixed</m2:TextHintingMode>
+    <m2:TextRenderingMode x:Key="Global_Default_TextRenderingMode">Auto</m2:TextRenderingMode>
 </ResourceDictionary>

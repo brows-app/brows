@@ -17,9 +17,9 @@ namespace Brows {
         void Activate();
         bool Input(string text);
         Task Refresh(CancellationToken cancellationToken);
-        Task Up(CancellationToken cancellationToken);
         Task Save(CancellationToken cancellationToken);
         Task Open(string id, CancellationToken cancellationToken);
+        Task OpenParent(CancellationToken cancellationToken);
         Task<bool> OpenCreated(string createdName, CancellationToken cancellationToken);
         Task<bool> HistoryBack(CancellationToken cancellationToken);
         Task<bool> HistoryForward(CancellationToken cancellationToken);
