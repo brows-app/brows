@@ -4,20 +4,12 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
+      <EmbeddedResource Include="Resource\Culture\_" />
+    </ItemGroup>
+    <ItemGroup>
       <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
       <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
       <ProjectReference Include="..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
       <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-      <Page Update="EntryIconImage.xaml">
-        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      </Page>
-      <Page Update="EntryListViewItem.xaml">
-        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      </Page>
-      <Page Update="EntryThumbnailImage.xaml">
-        <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      </Page>
     </ItemGroup>
 </Project>

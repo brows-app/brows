@@ -3,8 +3,8 @@ using System.IO;
 
 namespace Brows {
     internal class DriveEntryData {
-        public static IReadOnlyDictionary<string, IEntryDataConverter> Converters =>
-            DriveInfoWrapper.Converters;
+        public static IReadOnlyDictionary<string, IEntryColumn> Columns =>
+            DriveInfoWrapper.Columns;
 
         public static IReadOnlySet<string> Options =>
             DriveInfoWrapper.Keys;

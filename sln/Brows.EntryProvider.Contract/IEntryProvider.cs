@@ -5,8 +5,7 @@ namespace Brows {
         string ParentID { get; }
         IReadOnlySet<string> DataKeyDefaults { get; }
         IReadOnlySet<string> DataKeyOptions { get; }
-        IReadOnlyDictionary<string, IEntryDataConverter> DataKeyConverters { get; }
-        IComponentResourceKey DataKeyResolver { get; }
+        IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns { get; }
         IOperator Operator(IOperatorDeployment deployment);
         string CreatedID(string createdName);
         void Begin(IEntryProviderTarget target);

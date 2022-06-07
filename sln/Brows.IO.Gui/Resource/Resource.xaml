@@ -1,39 +1,4 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:brows="http://schemas.brows.app/xaml"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="DriveEntryData_AvailableFreeSpace">
-        <brows:EntryDataTextBlock Text="{Binding Item[AvailableFreeSpace].Value, Mode=OneWay, Converter={x:Static brows:EntryValueConverter.FileSystemSize}, ConverterParameter='0.0'}" TextAlignment="Right" Width="75"/>
-    </DataTemplate>
-
-    <DataTemplate x:Key="DriveEntryData_TotalFreeSpace">
-        <brows:EntryDataTextBlock Text="{Binding Item[TotalFreeSpace].Value, Mode=OneWay, Converter={x:Static brows:EntryValueConverter.FileSystemSize}, ConverterParameter='0.0'}" TextAlignment="Right" Width="75"/>
-    </DataTemplate>
-
-    <DataTemplate x:Key="DriveEntryData_TotalSize">
-        <brows:EntryDataTextBlock Text="{Binding Item[TotalSize].Value, Mode=OneWay, Converter={x:Static brows:EntryValueConverter.FileSystemSize}, ConverterParameter='0.0'}" TextAlignment="Right" Width="75"/>
-    </DataTemplate>
-
-    <DataTemplate x:Key="DriveEntryData_VolumeLabel">
-        <brows:EntryDataTextBlock Text="{Binding Item[VolumeLabel].Value, Mode=OneWay}" Width="100"/>
-    </DataTemplate>
-
-    <DataTemplate x:Key="FileSystemEntryData_Attributes">
-        <brows:EntryDataTextBlock Text="{Binding Item[Attributes].Value, Mode=OneWay}" Width="75"/>
-    </DataTemplate>
-
-    <DataTemplate x:Key="FileSystemEntryData_Extension">
-        <brows:EntryDataTextBlock Text="{Binding Item[Extension].Value, Mode=OneWay}" Width="50"/>
-    </DataTemplate>
-
-    <DataTemplate x:Key="FileSystemEntryData_LastWriteTime">
-        <brows:EntryDataTextBlock Text="{Binding Item[LastWriteTime].Value, Mode=OneWay, StringFormat='yyyy-MM-dd hh:mm:ss tt'}" Width="175"/>
-    </DataTemplate>
-
-    <DataTemplate x:Key="FileSystemEntryData_Length">
-        <brows:EntryDataTextBlock Text="{Binding Item[Length].Value, Mode=OneWay, Converter={x:Static brows:EntryValueConverter.FileSystemSize}, ConverterParameter='0.0'}" TextAlignment="Right" Width="75"/>
-    </DataTemplate>
-
-    <DataTemplate x:Key="FileSystemEntryData_DirectorySize">
-        <brows:EntryDataTextBlock Text="{Binding Item[DirectorySize].Value, Mode=OneWay, Converter={x:Static brows:EntryValueConverter.FileSystemSize}, ConverterParameter='0.0'}" TextAlignment="Right" Width="75"/>
-    </DataTemplate>
 </ResourceDictionary>

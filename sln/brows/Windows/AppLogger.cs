@@ -62,13 +62,13 @@ namespace Brows.Windows {
             }
         }
 
-        public Application Application { get; }
+        public App App { get; }
 
-        public AppLogger(Application application) {
-            Application = application ?? throw new ArgumentNullException(nameof(application));
-            Application.DispatcherUnhandledException += Application_DispatcherUnhandledException;
-            Application.Exit += Application_Exit;
-            Application.Startup += Application_Startup;
+        public AppLogger(App app) {
+            App = app ?? throw new ArgumentNullException(nameof(app));
+            App.DispatcherUnhandledException += Application_DispatcherUnhandledException;
+            App.Exit += Application_Exit;
+            App.Startup += Application_Startup;
 
             Domain = AppDomain.CurrentDomain;
             Domain.DomainUnload += Domain_DomainUnload;

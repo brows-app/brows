@@ -5,7 +5,7 @@ using System.Linq;
 namespace Brows {
     using ComponentModel;
 
-    public class CommandSuggestion : NotifyPropertyChanged, ICommandSuggestion {
+    internal class CommandSuggestion : NotifyPropertyChanged, ICommandSuggestion {
         private IEnumerable<string> InputAliases =>
             Command.InputTriggers.SelectMany(trigger => trigger.Alias).Distinct();
 
@@ -32,18 +32,15 @@ namespace Brows {
 
         public string Group {
             get => _Group;
-            set => Change(ref _Group, value, nameof(Group), nameof(Header));
+            set => Change(ref _Group, value, nameof(Group));
         }
         private string _Group;
 
         public string Description {
-            get => _Description ?? Translate.Value($"Command_Description_{Command.GetType().Name}");
-            set => Change(ref _Description, value, nameof(Description));
+            get => _Description;
+            set => Change(ref _Description, value, nameof(Description), nameof(DescriptionExists));
         }
         private string _Description;
-
-        public string Header =>
-            Translate.Value($"Command_Header_Group_{Group}");
 
         public string InputAlias =>
             string.Join(",", InputAliases);

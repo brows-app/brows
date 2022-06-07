@@ -9,8 +9,10 @@ namespace Brows {
                 switch (e.ChangedButton) {
                     case MouseButton.Left:
                     case MouseButton.Right:
-                        var source = (e.OriginalSource as FrameworkElement)?.DataContext as IEntry;
-                        if (source == null) {
+                        var source = (e.OriginalSource as FrameworkElement)?.DataContext;
+                        var isEntry = source is IEntry || source is IEntryData;
+                        var notEntry = !isEntry;
+                        if (notEntry) {
                             foreach (var item in Items) {
                                 var entry = item as IEntry;
                                 if (entry != null) {

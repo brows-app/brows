@@ -9,11 +9,6 @@ namespace Brows.Windows {
         private readonly bool ShutDown;
         private readonly CommanderService Service = new CommanderService();
 
-        private AppComponentCollection Components =>
-            _Components ?? (
-            _Components = AppComponentCollection.From(Service.ComponentResources));
-        private AppComponentCollection _Components;
-
         private void Service_Exited(object sender, CommanderExitedEventArgs e) {
             var app = Application;
             var windows = app.Windows;
@@ -68,6 +63,11 @@ namespace Brows.Windows {
                 Service.Begin();
             }
         }
+
+        public AppComponentCollection Components =>
+            _Components ?? (
+            _Components = AppComponentCollection.From(Service.ComponentResources));
+        private AppComponentCollection _Components;
 
         public Application Application { get; }
         public bool ShuttingDown => ShutDown;

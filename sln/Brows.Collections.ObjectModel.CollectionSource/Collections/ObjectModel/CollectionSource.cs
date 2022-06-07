@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Brows.Collections.ObjectModel {
     using ComponentModel;
@@ -26,8 +27,13 @@ namespace Brows.Collections.ObjectModel {
         public class Of<T> : CollectionSource, IReadOnlyList<T> {
             private readonly new ObservableCollection<T> Collection;
 
+            private void Collection_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+                OnPropertyChanged(e);
+            }
+
             private Of(ObservableCollection<T> collection) : base(collection) {
-                Collection = collection;
+                Collection = collection ?? throw new ArgumentNullException(nameof(collection));
+                ((INotifyPropertyChanged)Collection).PropertyChanged += Collection_PropertyChanged;
             }
 
             protected IList<T> List =>

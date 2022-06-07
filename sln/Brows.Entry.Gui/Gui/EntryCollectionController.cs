@@ -15,6 +15,19 @@ namespace Brows.Gui {
         private ListView ListView => UserControl.ListView;
         private GridView GridView => UserControl.ListView.GridView;
 
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            var selectedEntries = ListView.SelectedItems.OfType<IEntry>().ToList();
+            var deselectedEntries = SelectedEntries.Except(selectedEntries);
+            foreach (var entry in deselectedEntries) {
+                entry.Selected = false;
+            }
+            foreach (var entry in selectedEntries) {
+                entry.Selected = true;
+            }
+            SelectedEntries = selectedEntries;
+            SelectionChanged?.Invoke(this, e);
+        }
+
         private List<EntryGridViewColumnProxy> List(string key) {
             if (Columns.TryGetValue(key, out var list) == false) {
                 Columns[key] = list = new List<EntryGridViewColumnProxy>();
@@ -22,13 +35,17 @@ namespace Brows.Gui {
             return list;
         }
 
+        public event EventHandler SelectionChanged;
+
         public new EntryCollectionControl UserControl { get; }
 
         public bool Focused => ListView.IsKeyboardFocusWithin;
         public IEntry CurrentEntry => CurrentItem as IEntry;
+        public IReadOnlyList<IEntry> SelectedEntries { get; private set; } = new List<IEntry>();
 
         public EntryCollectionController(EntryCollectionControl userControl) : base(userControl, userControl.ListView) {
             UserControl = userControl ?? throw new ArgumentNullException(nameof(userControl));
+            UserControl.ListView.SelectionChanged += ListView_SelectionChanged;
         }
 
         public bool MoveCurrentTo(IEntry item) {
@@ -120,11 +137,10 @@ namespace Brows.Gui {
             }
         }
 
-        public void AddColumn(string key, IComponentResourceKey resolver, IEntryDataConverter converter) {
+        public void AddColumn(string key, IEntryColumn info) {
             var
-            col = new EntryGridViewColumnProxy(key, resolver, converter);
+            col = new EntryGridViewColumnProxy(key, info);
             col.AddTo(GridView);
-
             var
             list = List(key);
             list.Add(col);

@@ -20,23 +20,23 @@ namespace Brows.Commands {
                     var key = item.Key;
                     var keyRelevance = SuggestionRelevance.From(key, input);
                     if (keyRelevance.HasValue) {
-                        yield return new CommandSuggestion(this, context) {
-                            Description = item.Value,
-                            Group = nameof(BookmarkOpen),
-                            Input = key,
-                            Relevance = keyRelevance.Value
-                        };
+                        yield return Suggestion(
+                            context: context,
+                            description: item.Value,
+                            group: nameof(BookmarkOpen),
+                            input: key,
+                            relevance: keyRelevance.Value);
                     }
                     else {
                         var value = item.Value;
                         var valueRelevance = SuggestionRelevance.From(value, input);
                         if (valueRelevance.HasValue) {
-                            yield return new CommandSuggestion(this, context) {
-                                Description = key,
-                                Group = nameof(BookmarkOpen),
-                                Input = value,
-                                Relevance = valueRelevance.Value
-                            };
+                            yield return Suggestion(
+                                context: context,
+                                description: key,
+                                group: nameof(BookmarkOpen),
+                                input: value,
+                                relevance: valueRelevance.Value);
                         }
                     }
                     await Task.Yield();

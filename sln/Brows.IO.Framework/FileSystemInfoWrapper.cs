@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,16 +34,39 @@ namespace Brows {
 
         private static FileSystemInfoWrapper Default { get; } = new FileSystemInfoWrapper(null, default);
 
-        private static IDictionary<string, IEntryData> DefaultData =>
+        private static IReadOnlyDictionary<string, IEntryData> DefaultData =>
             _DefaultData ?? (
             _DefaultData = Default.Data());
-        private static IDictionary<string, IEntryData> _DefaultData;
+        private static IReadOnlyDictionary<string, IEntryData> _DefaultData;
 
         private FileSystemInfoWrapper(FileSystemInfo info, CancellationToken cancellationToken) {
             Info = info;
             File = Info as FileInfo;
             Directory = Info as DirectoryInfo;
             CancellationToken = cancellationToken;
+        }
+
+        private static IEnumerable<(IEntryData Data, double Width)> ColumnTable(FileSystemInfoWrapper item) {
+            if (null == item) throw new ArgumentNullException(nameof(item));
+            return new List<(IEntryData, double)> {
+                (Entry.ThumbnailData, 100),
+                (new DataItem(nameof(Attributes), item, i => i.Attributes), 75),
+                (new DataItem(nameof(CreationTime), item, i => i.CreationTime) { Converter = EntryDataConverter.DateTime }, 175),
+                (new DataItem(nameof(CreationTimeUtc), item, i => i.CreationTimeUtc) { Converter = EntryDataConverter.DateTime }, 175),
+                (new DataItem(nameof(Extension), item, i => i.Extension), 50),
+                (new DataItem(nameof(LastAccessTime), item, i => i.LastAccessTime) { Converter = EntryDataConverter.DateTime }, 175),
+                (new DataItem(nameof(LastAccessTimeUtc), item, i => i.LastAccessTimeUtc) { Converter = EntryDataConverter.DateTime }, 175),
+                (new DataItem(nameof(LastWriteTime), item, i => i.LastWriteTime) { Converter = EntryDataConverter.DateTime }, 175),
+                (new DataItem(nameof(LastWriteTimeUtc), item, i => i.LastWriteTimeUtc) { Converter = EntryDataConverter.DateTime }, 175),
+                (new DataItem(nameof(Length), item, i => i.Length) { Alignment = EntryDataAlignment.Right, Converter = EntryDataConverter.FileSystemSize }, 75),
+                (new DataItem(nameof(LinkTarget), item, i => i.LinkTarget), 100),
+                (new DataItem(nameof(Name), item, i => i.Name), 250),
+                (new FileChecksum(nameof(FileInfoExtension.ChecksumMD5), item.File, item.CancellationToken), 250),
+                (new FileChecksum(nameof(FileInfoExtension.ChecksumSHA1), item.File, item.CancellationToken), 250),
+                (new FileChecksum(nameof(FileInfoExtension.ChecksumSHA256), item.File, item.CancellationToken), 250),
+                (new FileChecksum(nameof(FileInfoExtension.ChecksumSHA512), item.File, item.CancellationToken), 250),
+                (new DirectorySize(item.Directory, item.CancellationToken) { Alignment = EntryDataAlignment.Right, Converter = EntryDataConverter.FileSystemSize }, 75)
+            };
         }
 
         private async Task<object> Get(Func<FileSystemInfoWrapper, object> func) {
@@ -91,34 +115,20 @@ namespace Brows {
             _Keys = new HashSet<string>(DefaultData.Keys));
         private static IReadOnlySet<string> _Keys;
 
-        public static IReadOnlyDictionary<string, IEntryDataConverter> Converters =>
-            _Converters ?? (
-            _Converters = new Dictionary<string, IEntryDataConverter> {
-                { nameof(Length), EntryDataConverter.FileSystemSize },
-                { nameof(DirectorySize), EntryDataConverter.FileSystemSize }
-            });
-        private static IReadOnlyDictionary<string, IEntryDataConverter> _Converters;
+        public static IReadOnlyDictionary<string, IEntryColumn> Columns =>
+            _Columns ?? (
+            _Columns = ColumnTable(Default).ToDictionary(
+                c => c.Data.Key,
+                c => (IEntryColumn)new EntryColumn {
+                    Resolver = FileSystemEntryData.Resolver,
+                    Width = c.Width
+                }));
+        private static IReadOnlyDictionary<string, IEntryColumn> _Columns;
 
-        public IDictionary<string, IEntryData> Data() {
-            return new Dictionary<string, IEntryData> {
-                { Entry.ThumbnailKey, Entry.ThumbnailData },
-                { nameof(Attributes), new DataItem(nameof(Attributes), this, i => i.Attributes) },
-                { nameof(CreationTime), new DataItem(nameof(CreationTime), this, i => i.CreationTime) },
-                { nameof(CreationTimeUtc), new DataItem(nameof(CreationTimeUtc), this, i => i.CreationTimeUtc) },
-                { nameof(Extension), new DataItem(nameof(Extension), this, i => i.Extension) },
-                { nameof(LastAccessTime), new DataItem(nameof(LastAccessTime), this, i => i.LastAccessTime) },
-                { nameof(LastAccessTimeUtc), new DataItem(nameof(LastAccessTimeUtc), this, i => i.LastAccessTimeUtc) },
-                { nameof(LastWriteTime), new DataItem(nameof(LastWriteTime), this, i => i.LastWriteTime) },
-                { nameof(LastWriteTimeUtc), new DataItem(nameof(LastWriteTimeUtc), this, i => i.LastWriteTimeUtc) },
-                { nameof(Length), new DataItem(nameof(Length), this, i => i.Length) },
-                { nameof(LinkTarget), new DataItem(nameof(LinkTarget), this, i => i.LinkTarget) },
-                { nameof(Name), new DataItem(nameof(Name), this, i => i.Name) },
-                { nameof(FileInfoExtension.ChecksumMD5), new FileChecksum(nameof(FileInfoExtension.ChecksumMD5), File, CancellationToken) },
-                { nameof(FileInfoExtension.ChecksumSHA1), new FileChecksum(nameof(FileInfoExtension.ChecksumSHA1), File, CancellationToken) },
-                { nameof(FileInfoExtension.ChecksumSHA256), new FileChecksum(nameof(FileInfoExtension.ChecksumSHA256), File, CancellationToken) },
-                { nameof(FileInfoExtension.ChecksumSHA512), new FileChecksum(nameof(FileInfoExtension.ChecksumSHA512), File, CancellationToken) },
-                { nameof(DirectorySize), new DirectorySize(Directory, CancellationToken) }
-            };
+        public IReadOnlyDictionary<string, IEntryData> Data() {
+            return ColumnTable(this).ToDictionary(
+                c => c.Data.Key,
+                c => c.Data);
         }
 
         public static FileSystemInfoWrapper For(FileSystemInfo info, CancellationToken cancellationToken) {

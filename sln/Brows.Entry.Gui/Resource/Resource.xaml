@@ -9,11 +9,26 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <local:EntryIconImage Grid.Column="0" Source="{Binding Icon.Source}"/>
-            <local:EntryDataTextBlock Grid.Column="2" Text="{Binding Item[Name].Value, Mode=OneWay}" Width="250"/>
+            <local:EntryDataControl Grid.Column="2" DataContext="{Binding Item[Name]}"/>
         </Grid>
     </DataTemplate>
 
     <DataTemplate x:Key="EntryData_Thumbnail">
-        <local:EntryThumbnailImage Source="{Binding Thumbnail.Source}" Height="{Binding Thumbnail.Size.Height}" Width="{Binding Thumbnail.Size.Width}"/>
+        <local:EntryThumbnailImage 
+            Source="{Binding Thumbnail.Source}" 
+            Height="{Binding Thumbnail.Size.Height}" 
+            Width="{Binding Thumbnail.Size.Width}"/>
     </DataTemplate>
+    
+    <Style TargetType="{x:Type TextBlock}" x:Key="EntryDataTextBlockStyle">
+        <Setter Property="Background" Value="{DynamicResource Global_Transparent_Background_Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
+        <Setter Property="FontSize" Value="{DynamicResource Global_Monospace_FontSize}"/>
+        <Setter Property="FontWeight" Value="{DynamicResource Global_Monospace_FontWeight}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style TargetType="{x:Type local:EntryDataTextBlock}" BasedOn="{StaticResource EntryDataTextBlockStyle}">
+    </Style>
 </ResourceDictionary>

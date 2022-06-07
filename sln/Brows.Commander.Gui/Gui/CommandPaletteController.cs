@@ -83,7 +83,7 @@ namespace Brows.Gui {
             UserControl.InputTextBox.Loaded += InputTextBox_Loaded;
             UserControl.InputTextBox.PreviewKeyDown += InputTextBox_PreviewKeyDown;
             UserControl.CommandSuggestionListView.Items.CurrentChanged += Items_CurrentChanged;
-            UserControl.CommandSuggestionListView.Items.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ICommandSuggestion.Header)));
+            UserControl.CommandSuggestionListView.Items.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ICommandSuggestion.Group)));
             UserControl.CommandSuggestionListView.Items.IsLiveSorting = true;
             UserControl.CommandSuggestionListView.Items.LiveSortingProperties.Add(nameof(ICommandSuggestion.Relevance));
             UserControl.CommandSuggestionListView.Items.LiveSortingProperties.Add(nameof(ICommandSuggestion.Input));

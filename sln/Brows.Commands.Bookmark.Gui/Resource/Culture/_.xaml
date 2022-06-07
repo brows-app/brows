@@ -22,7 +22,7 @@
                 <TextBlock Text="Press "/>
                 <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Clear}"/>
                 <TextBlock Text=" to delete all bookmarks."/>
-            </StackPanel>            
+            </StackPanel>
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>

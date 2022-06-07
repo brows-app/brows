@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace Brows.Gui {
-    using Windows.Data;
-
     internal class EntryGridViewColumnProxy {
         private static Application Application =>
             _Application ?? (
@@ -20,7 +17,7 @@ namespace Brows.Gui {
 
         private IEnumerable<object> ResourceKeys() {
             var key = Key;
-            var resolver = Resolver;
+            var resolver = Info?.Resolver;
             if (resolver != null) {
                 yield return resolver.For(key);
             }
@@ -28,33 +25,24 @@ namespace Brows.Gui {
         }
 
         private GridViewColumn GetColumn() {
-            var column = default(GridViewColumn);
+            var dataTemplate = default(DataTemplate);
             var resourceKeys = ResourceKeys();
             foreach (var resourceKey in resourceKeys) {
                 var resource = Application.TryFindResource(resourceKey);
-                if (resource != null) {
-                    if (resource is DataTemplate dataTemplate) {
-                        column = new EntryGridViewColumn {
-                            CellTemplate = dataTemplate
-                        };
-                    }
-                }
-                if (column != null) {
+                var template = dataTemplate = resource as DataTemplate;
+                if (template != null) {
                     break;
                 }
             }
-            if (column == null) {
-                column = new EntryGridViewColumn {
-                    DisplayMemberBinding = new Binding(BindingValuePath) {
-                        Converter = Converter == null
-                            ? null
-                            : EntryValueConverter.From(Converter)
-                    },
-                    Width = Width
-                };
+            if (dataTemplate == null) {
+                dataTemplate = EntryGridViewColumnCellTemplate.Build(Key, Info);
             }
+            var column = new EntryGridViewColumn {
+                CellTemplate = dataTemplate,
+                Width = Info?.Width ?? double.NaN
+            };
             if (column.Header == null) {
-                column.Header = new EntryGridViewColumnHeader { Key = Key };
+                column.Header = new EntryGridViewColumnHeader(Info?.Resolver) { Key = Key };
             }
             return column;
         }
@@ -65,14 +53,11 @@ namespace Brows.Gui {
         private string _BindingValuePath;
 
         public string Key { get; }
-        public double Width { get; set; } = double.NaN;
-        public IEntryDataConverter Converter { get; }
-        public IComponentResourceKey Resolver { get; }
+        public IEntryColumn Info { get; }
 
-        public EntryGridViewColumnProxy(string key, IComponentResourceKey resolver, IEntryDataConverter converter) {
+        public EntryGridViewColumnProxy(string key, IEntryColumn info) {
             Key = key;
-            Resolver = resolver;
-            Converter = converter;
+            Info = info;
         }
 
         public void Sorting(EntrySortDirection? direction) {

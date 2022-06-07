@@ -1,9 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>net6.0-windows</TargetFrameworks>
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
-      <ProjectReference Include="..\Brows.Entry.Gui\Brows.Entry.Gui.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Resource\Culture\_" />
+        <EmbeddedResource Include="Resource\Culture\_.alias" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Entry.Gui\Brows.Entry.Gui.csproj" />
     </ItemGroup>
 </Project>

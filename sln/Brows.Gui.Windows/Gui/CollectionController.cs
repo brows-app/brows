@@ -23,7 +23,7 @@ namespace Brows.Gui {
                     nameof(Items.CurrentItem) + " > " + Items.CurrentItem,
                     nameof(Items.CurrentPosition) + " > " + Items.CurrentPosition);
             }
-            OnCurrentChanged(e);
+            CurrentChanged?.Invoke(this, e);
         }
 
         protected object CurrentItem => Items.CurrentItem;
@@ -34,10 +34,6 @@ namespace Brows.Gui {
             _ScrollViewer ?? (
             _ScrollViewer = ItemsControl.FindVisualChild<ScrollViewer>());
         private ScrollViewer _ScrollViewer;
-
-        protected virtual void OnCurrentChanged(EventArgs e) {
-            CurrentChanged?.Invoke(this, e);
-        }
 
         public event EventHandler CurrentChanged;
 

@@ -1,19 +1,13 @@
-using System;
-
 namespace Brows {
     using Gui;
 
     public interface IEntry {
-        event EventHandler SelectedChanged;
-
         IEntryData this[string key] { get; }
 
         string ID { get; }
         string Name { get; }
         string File { get; }
         bool Selected { get; set; }
-        bool Highlighted { get; set; }
-        bool Hovering { get; set; }
 
         Image Icon { get; }
         Image Thumbnail { get; }

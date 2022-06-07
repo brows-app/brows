@@ -31,12 +31,12 @@ namespace Brows.Commands {
                         await foreach (var item in history) {
                             var relevance = SuggestionRelevance.From(item, process);
                             if (relevance.HasValue) {
-                                yield return new CommandSuggestion(this, context) {
-                                    Group = nameof(Process),
-                                    Input = $"{inputTrigger} {item}",
-                                    Relevance = relevance.Value,
-                                    Description = ""
-                                };
+                                yield return Suggestion(
+                                    context: context,
+                                    description: "",
+                                    group: nameof(Process),
+                                    input: $"{inputTrigger} {item}",
+                                    relevance: relevance.Value);
                             }
                         }
                     }

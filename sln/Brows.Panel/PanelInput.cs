@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace Brows {
     using ComponentModel;
 
-    public class PanelInput : NotifyPropertyChanged {
+    internal class PanelInput : NotifyPropertyChanged {
         private readonly Stopwatch Stopwatch = new Stopwatch();
 
         public IEnumerable<IEntry> Entries {

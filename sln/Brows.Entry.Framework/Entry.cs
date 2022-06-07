@@ -44,10 +44,6 @@ namespace Brows {
             CancellationToken = cancellationToken;
         }
 
-        protected virtual void OnSelectedChanged(EventArgs e) {
-            SelectedChanged?.Invoke(this, e);
-        }
-
         protected async Task<bool> Browse(string id, CancellationToken cancellationToken) {
             var browser = Browser;
             if (browser != null) {
@@ -61,8 +57,6 @@ namespace Brows {
         }
 
         protected abstract IEntryData Get(string key);
-
-        public event EventHandler SelectedChanged;
 
         public static string ThumbnailKey => ThumbnailData.Key;
         public static IEntryData ThumbnailData { get; } = new EntryThumbnailData();
@@ -107,27 +101,11 @@ namespace Brows {
         }
         private IPreviewText _PreviewText;
 
-        public bool Hovering {
-            get => _Hovering;
-            set => Change(ref _Hovering, value, nameof(Hovering));
-        }
-        private bool _Hovering;
-
         public bool Selected {
             get => _Selected;
-            set {
-                if (Change(ref _Selected, value, nameof(Selected))) {
-                    OnSelectedChanged(EventArgs.Empty);
-                }
-            }
+            set => Change(ref _Selected, value, nameof(Selected));
         }
         private bool _Selected;
-
-        public bool Highlighted {
-            get => _Highlighted;
-            set => Change(ref _Highlighted, value, nameof(Highlighted));
-        }
-        private bool _Highlighted;
 
         public object OpenCommand => Request.Create(
             owner: this,

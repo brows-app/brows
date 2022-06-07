@@ -15,9 +15,16 @@
     <SolidColorBrush x:Key="PanelInputText_Default_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity=".2"/>
     <SolidColorBrush x:Key="PanelInputText_Default_Foreground" Color="{DynamicResource Global_Highlight_Foreground}"/>
 
+    <SolidColorBrush x:Key="PanelState_Default_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity=".1"/>
+    
     <SolidColorBrush x:Key="PreviewText_Default_Background" Color="Transparent"/>
     <FontFamily x:Key="PreviewText_Default_FontFamily">Consolas</FontFamily>
     <s:Double x:Key="PreviewText_Default_FontSize">14</s:Double>
     <FontWeight x:Key="PreviewText_Default_FontWeight">Normal</FontWeight>
     <SolidColorBrush x:Key="PreviewText_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity="0.9"/>
+
+    <Style TargetType="TextBlock" x:Key="PanelStateTextBlockStyle">
+        <Setter Property="Background" Value="{DynamicResource Global_Default_Transparent_Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+    </Style>
 </ResourceDictionary>

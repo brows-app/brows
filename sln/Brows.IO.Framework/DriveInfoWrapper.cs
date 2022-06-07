@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
     using Logger;
     using Threading.Tasks;
+    using Align = EntryDataAlignment;
 
     internal class DriveInfoWrapper {
         private readonly ILog Log = Logging.For(typeof(DriveInfoWrapper));
@@ -29,14 +31,37 @@ namespace Brows {
 
         private static DriveInfoWrapper Default { get; } = new DriveInfoWrapper(null, default);
 
-        private static IDictionary<string, IEntryData> DefaultData =>
+        private static IReadOnlyDictionary<string, IEntryData> DefaultData =>
             _DefaultData ?? (
             _DefaultData = Default.Data());
-        private static IDictionary<string, IEntryData> _DefaultData;
+        private static IReadOnlyDictionary<string, IEntryData> _DefaultData;
 
         private DriveInfoWrapper(DriveInfo info, CancellationToken cancellationToken) {
             Info = info;
             CancellationToken = cancellationToken;
+        }
+
+        private static IEnumerable<(IEntryData Data, double Width)> ColumnTable(DriveInfoWrapper item) {
+            return new List<(IEntryData, double)> {
+                (new DataItem(nameof(AvailableFreeSpace), item, i => i.AvailableFreeSpace) { Alignment = Align.Right, Converter = EntryDataConverter.FileSystemSize },
+                    75),
+                (new DataItem(nameof(DriveFormat), item, i => i.DriveFormat),
+                    75),
+                (new DataItem(nameof(DriveType), item, i => i.DriveType),
+                    75),
+                (new DataItem(nameof(IsReady), item, i => i.IsReady) { Converter = EntryDataConverter.BooleanYesNo },
+                    75),
+                (new DataItem(nameof(Name), item, i => i.Name),
+                    250),
+                (new DataItem(nameof(RootDirectory), item, i => i.RootDirectory),
+                    75),
+                (new DataItem(nameof(TotalFreeSpace), item, i => i.TotalFreeSpace) { Alignment = Align.Right, Converter = EntryDataConverter.FileSystemSize },
+                    75),
+                (new DataItem(nameof(TotalSize), item, i => i.TotalSize) { Alignment = Align.Right, Converter = EntryDataConverter.FileSystemSize },
+                    75),
+                (new DataItem(nameof(VolumeLabel), item, i => i.VolumeLabel),
+                    100)
+            };
         }
 
         private async Task<object> Get(Func<DriveInfoWrapper, object> func) {
@@ -82,28 +107,20 @@ namespace Brows {
             _Keys = new HashSet<string>(DefaultData.Keys));
         private static IReadOnlySet<string> _Keys;
 
-        public static IReadOnlyDictionary<string, IEntryDataConverter> Converters =>
-            _Converters ?? (
-            _Converters = new Dictionary<string, IEntryDataConverter> {
-                { nameof(AvailableFreeSpace), EntryDataConverter.FileSystemSize },
-                { nameof(TotalFreeSpace), EntryDataConverter.FileSystemSize },
-                { nameof(TotalSize), EntryDataConverter.FileSystemSize },
-            });
-        private static IReadOnlyDictionary<string, IEntryDataConverter> _Converters;
+        public static IReadOnlyDictionary<string, IEntryColumn> Columns =>
+            _Columns ?? (
+            _Columns = ColumnTable(Default).ToDictionary(
+                c => c.Data.Key,
+                c => (IEntryColumn)new EntryColumn {
+                    Resolver = DriveEntryData.Resolver,
+                    Width = c.Width
+                }));
+        private static IReadOnlyDictionary<string, IEntryColumn> _Columns;
 
-
-        public IDictionary<string, IEntryData> Data() {
-            return new Dictionary<string, IEntryData> {
-                { nameof(AvailableFreeSpace), new DataItem(nameof(AvailableFreeSpace), this, i => i.AvailableFreeSpace) },
-                { nameof(DriveFormat), new DataItem(nameof(DriveFormat), this, i => i.DriveFormat) },
-                { nameof(DriveType), new DataItem(nameof(DriveType), this, i => i.DriveType) },
-                { nameof(IsReady), new DataItem(nameof(IsReady), this, i => i.IsReady) },
-                { nameof(Name), new DataItem(nameof(Name), this, i => i.Name) },
-                { nameof(RootDirectory), new DataItem(nameof(RootDirectory), this, i => i.RootDirectory) },
-                { nameof(TotalFreeSpace), new DataItem(nameof(TotalFreeSpace), this, i => i.TotalFreeSpace) },
-                { nameof(TotalSize), new DataItem(nameof(TotalSize), this, i => i.TotalSize) },
-                { nameof(VolumeLabel), new DataItem(nameof(VolumeLabel), this, i => i.VolumeLabel) }
-            };
+        public IReadOnlyDictionary<string, IEntryData> Data() {
+            return ColumnTable(this).ToDictionary(
+                c => c.Data.Key,
+                c => c.Data);
         }
 
         public static DriveInfoWrapper For(DriveInfo info, CancellationToken cancellationToken) {
@@ -120,9 +137,9 @@ namespace Brows {
             public Func<DriveInfoWrapper, object> Func { get; }
 
             public DataItem(string name, DriveInfoWrapper wrap, Func<DriveInfoWrapper, object> func) : base(name) {
+                Wrap = wrap ?? throw new ArgumentNullException(nameof(wrap));
                 Name = name;
                 Func = func;
-                Wrap = wrap ?? throw new ArgumentNullException(nameof(wrap));
             }
 
             public sealed override void Refresh() {

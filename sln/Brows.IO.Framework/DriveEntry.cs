@@ -7,10 +7,10 @@ namespace Brows {
     using Gui;
 
     public abstract class DriveEntry : Entry {
-        private IDictionary<string, IEntryData> Data =>
+        private IReadOnlyDictionary<string, IEntryData> Data =>
             _Data ?? (
             _Data = Wrap.Data());
-        private IDictionary<string, IEntryData> _Data;
+        private IReadOnlyDictionary<string, IEntryData> _Data;
 
         private DriveInfoWrapper Wrap =>
             _Wrap ?? (

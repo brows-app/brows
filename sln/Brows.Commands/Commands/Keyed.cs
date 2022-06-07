@@ -55,12 +55,11 @@ namespace Brows.Commands {
                                     help += $" ({string.Join(',', others)})";
                                 }
                             }
-                            yield return new CommandSuggestion(this, context) {
-                                Group = nameof(Command),
-                                Help = help,
-                                Input = input,
-                                Relevance = suggestion.Relevance
-                            };
+                            yield return Suggestion(
+                                context: context,
+                                help: help,
+                                input: input,
+                                relevance: suggestion.Relevance);
                         }
                     }
                 }

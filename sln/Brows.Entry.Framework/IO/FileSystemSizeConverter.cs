@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using CONVERT = System.Convert;
 
@@ -7,11 +8,11 @@ namespace Brows.IO {
             if (value == null) return null;
             var format = parameter?.ToString() ?? "0.#";
             var length = CONVERT.ToInt64(value);
-            var readable = ToReadable(length, format);
+            var readable = ToReadable(length, format, culture);
             return readable;
         }
 
-        public static string ToReadable(long length, string format) {
+        public static string ToReadable(long length, string format, IFormatProvider provider) {
             string unit;
             double read;
 
@@ -44,7 +45,7 @@ namespace Brows.IO {
                 return length.ToString("0 B");
             }
             read = (read / 1024);
-            return read.ToString($"{format} ") + unit;
+            return read.ToString(format, provider) + " " + unit;
         }
     }
 }

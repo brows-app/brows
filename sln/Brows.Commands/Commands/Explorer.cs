@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using PROCESS = System.Diagnostics.Process;
 
 namespace Brows.Commands {
     using Triggers;
@@ -19,7 +19,7 @@ namespace Brows.Commands {
             if (context.HasPanel(out var active)) {
                 var location = active.ID?.Value?.Trim() ?? "";
                 if (location != "") {
-                    using (PROCESS.Start("explorer.exe", location)) {
+                    using (Process.Start("explorer.exe", location)) {
                     }
                     return true;
                 }

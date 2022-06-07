@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style TargetType="TextBlock" BasedOn="{StaticResource PanelStateTextBlockStyle}" x:Key="PanelStateItemsCountTextBlockStyle">
+        <Setter Property="Text" Value="{Binding ItemsCount, StringFormat='{}{0} items  |  '}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ItemsCount}" Value="1">
+                <Setter Property="Text" Value="1 item  |  "/>
+            </DataTrigger>            
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="TextBlock" BasedOn="{StaticResource PanelStateTextBlockStyle}" x:Key="PanelStateItemsSelectedCountTextBlockStyle">
+        <Setter Property="Text" Value="{Binding ItemsSelectedCount, StringFormat='{}{0} items selected  |  '}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ItemsSelectedCount}" Value="0">
+                <Setter Property="Text" Value=""/>
+            </DataTrigger>            
+            <DataTrigger Binding="{Binding ItemsSelectedCount}" Value="1">
+                <Setter Property="Text" Value="1 item selected  |  "/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

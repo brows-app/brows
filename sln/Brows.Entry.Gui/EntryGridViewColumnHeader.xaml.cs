@@ -1,17 +1,33 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
 
 namespace Brows {
-    using Globalization;
+    using Translation;
 
     partial class EntryGridViewColumnHeader {
-        private ITranslation Translate =>
+        private static ITranslation Translate =>
             _Translate ?? (
             _Translate = Global.Translation);
-        private ITranslation _Translate;
+        private static ITranslation _Translate;
+
+        private IEnumerable<string> ResourceKeys() {
+            var key = Key;
+            var resolver = Resolver;
+            if (resolver != null) {
+                yield return resolver.For($"{key}");
+            }
+            yield return $"EntryData_{key}";
+        }
 
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e) {
             if (e.Property == KeyProperty) {
-                Content = Translate.Value($"Entry_Header_{e.NewValue}");
+                foreach (var key in ResourceKeys()) {
+                    var content = Translate.Value(key);
+                    if (content != null) {
+                        Content = content;
+                        break;
+                    }
+                }
             }
             base.OnPropertyChanged(e);
         }
@@ -26,8 +42,14 @@ namespace Brows {
             set => SetValue(KeyProperty, value);
         }
 
-        public EntryGridViewColumnHeader() {
+        public IComponentResourceKey Resolver { get; }
+
+        public EntryGridViewColumnHeader(IComponentResourceKey resolver) {
+            Resolver = resolver;
             InitializeComponent();
+        }
+
+        public EntryGridViewColumnHeader() : this(null) {
         }
 
         public void Sorting(EntrySortDirection? direction) {

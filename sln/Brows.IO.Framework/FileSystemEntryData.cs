@@ -3,8 +3,8 @@ using System.IO;
 
 namespace Brows {
     public static class FileSystemEntryData {
-        public static IReadOnlyDictionary<string, IEntryDataConverter> Converters =>
-            FileSystemInfoWrapper.Converters;
+        public static IReadOnlyDictionary<string, IEntryColumn> Columns =>
+            FileSystemInfoWrapper.Columns;
 
         public static IReadOnlySet<string> Options =>
             FileSystemInfoWrapper.Keys;

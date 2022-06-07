@@ -9,22 +9,23 @@ namespace Brows {
     internal class EntryCollection : CollectionSource<IEntry>, IEntryCollection, IControlled<IEntryCollectionController> {
         private readonly List<string> Columns = new List<string>();
 
-        private IEntryDataConverter ColumnConverter(string key) {
-            if (ColumnConverters.TryGetValue(key, out var value)) {
+        private IEntryColumn Column(string key) {
+            if (ColumnInfo.TryGetValue(key, out var value)) {
                 return value;
             }
             return null;
         }
 
         private void Controller_CurrentChanged(object sender, EventArgs e) {
-            OnCurrentChanged(e);
-        }
-
-        protected virtual void OnCurrentChanged(EventArgs e) {
             CurrentChanged?.Invoke(this, e);
         }
 
+        private void Controller_SelectionChanged(object sender, EventArgs e) {
+            SelectionChanged?.Invoke(this, e);
+        }
+
         public event EventHandler CurrentChanged;
+        public event EventHandler SelectionChanged;
 
         public IEnumerable<string> ColumnDefaults {
             get => _ColumnDefaults ?? (_ColumnDefaults = Array.Empty<string>());
@@ -32,11 +33,11 @@ namespace Brows {
         }
         private IEnumerable<string> _ColumnDefaults;
 
-        public IReadOnlyDictionary<string, IEntryDataConverter> ColumnConverters {
-            get => _ColumnConverters ?? (_ColumnConverters = new Dictionary<string, IEntryDataConverter>());
-            set => Change(ref _ColumnConverters, value, nameof(ColumnConverters));
+        public IReadOnlyDictionary<string, IEntryColumn> ColumnInfo {
+            get => _ColumnInfo ?? (_ColumnInfo = new Dictionary<string, IEntryColumn>());
+            set => Change(ref _ColumnInfo, value, nameof(ColumnInfo));
         }
-        private IReadOnlyDictionary<string, IEntryDataConverter> _ColumnConverters;
+        private IReadOnlyDictionary<string, IEntryColumn> _ColumnInfo;
 
         public Func<string, string> ColumnLookup {
             get => _ColumnLookup ?? (_ColumnLookup = s => s);
@@ -44,14 +45,9 @@ namespace Brows {
         }
         private Func<string, string> _ColumnLookup;
 
-        public IComponentResourceKey ColumnResolver {
-            get => _ColumnResolver;
-            set => Change(ref _ColumnResolver, value, nameof(ColumnResolver));
-        }
-        private IComponentResourceKey _ColumnResolver;
-
         public IEntry CurrentItem => Controller?.CurrentEntry;
         public int? CurrentPosition => Controller?.CurrentPosition;
+        public IReadOnlyList<IEntry> Selection => Controller?.SelectedEntries;
 
         public IEntryCollectionController Controller {
             get => _Controller;
@@ -61,15 +57,18 @@ namespace Brows {
                 if (oldValue != newValue) {
                     if (oldValue != null) {
                         oldValue.CurrentChanged -= Controller_CurrentChanged;
+                        oldValue.SelectionChanged -= Controller_SelectionChanged;
                     }
                     if (newValue != null) {
                         newValue.CurrentChanged += Controller_CurrentChanged;
+                        newValue.SelectionChanged += Controller_SelectionChanged;
                     }
                     _Controller = newValue;
                     RefreshColumns();
                 }
             }
         }
+
         private IEntryCollectionController _Controller;
 
         public IReadOnlyDictionary<string, EntrySortDirection?> Sorting {
@@ -98,8 +97,17 @@ namespace Brows {
             },
             canExecute: _ => true);
 
-        public void Add(IEntry item) => List.Add(item);
-        public void Clear() => List.Clear();
+        public bool Add(IEntry item) {
+            if (item != null) {
+                List.Add(item);
+                return true;
+            }
+            return false;
+        }
+
+        public void Clear() {
+            List.Clear();
+        }
 
         public bool Remove(IEntry item) {
             var removed = List.Remove(item);
@@ -124,7 +132,7 @@ namespace Brows {
                 var k = ColumnLookup(n);
                 if (k != null) {
                     Columns.Add(k);
-                    Controller?.AddColumn(k, ColumnResolver, ColumnConverter(k));
+                    Controller?.AddColumn(k, Column(k));
                 }
                 names[i] = k;
             }
@@ -157,7 +165,7 @@ namespace Brows {
 
                 var keys = Columns.Count == 0 ? ColumnDefaults : Columns;
                 foreach (var key in keys) {
-                    controller.AddColumn(key, ColumnResolver, ColumnConverter(key));
+                    controller.AddColumn(key, Column(key));
                 }
             }
         }

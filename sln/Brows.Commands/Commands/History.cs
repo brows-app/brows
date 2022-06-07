@@ -15,11 +15,11 @@ namespace Brows.Commands {
                         foreach (var item in history) {
                             var relevance = SuggestionRelevance.From(item, input);
                             if (relevance.HasValue) {
-                                yield return new CommandSuggestion(this, context) {
-                                    Group = nameof(History),
-                                    Input = item,
-                                    Relevance = relevance.Value
-                                };
+                                yield return Suggestion(
+                                    context: context,
+                                    group: nameof(History),
+                                    input: item,
+                                    relevance: relevance.Value);
                             }
                             await Task.Yield();
                         }

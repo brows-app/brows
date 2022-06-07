@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Brows {
     using Logger;
     using Threading.Tasks;
 
-    public class Panel : NotifyPropertyChanged, IPanel, IEntryProviderTarget, IPayloadTarget, IControlled<IPanelController> {
+    internal class Panel : NotifyPropertyChanged, IPanel, IEntryProviderTarget, IPayloadTarget, IControlled<IPanelController> {
         private ILog Log =>
             _Log ?? (
             _Log = Logging.For(typeof(Panel)));
@@ -39,6 +40,14 @@ namespace Brows {
             if (preview != null) {
                 preview.Set(entry);
             }
+        }
+
+        private void EntryCollection_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            State = PanelState.For(this);
+        }
+
+        private void EntryCollection_SelectionChanged(object sender, EventArgs e) {
+            State = PanelState.For(this);
         }
 
         private void Control_Drop(object sender, DropEventArgs e) {
@@ -86,16 +95,19 @@ namespace Brows {
             if (preview != null) {
                 preview.Set(null);
             }
+            State = null;
             Activated = false;
             CurrentEntry = null;
             Input.Clear();
 
             EntryCollection.CurrentChanged -= EntryCollection_CurrentChanged;
+            EntryCollection.PropertyChanged -= EntryCollection_PropertyChanged;
+            EntryCollection.SelectionChanged -= EntryCollection_SelectionChanged;
             EntryCollection.Clear();
             EntryCollection.ClearSort();
+            EntryCollection.ColumnInfo = null;
             EntryCollection.ColumnLookup = null;
             EntryCollection.ColumnDefaults = null;
-            EntryCollection.ColumnResolver = null;
         }
 
         private void Restart(IEntryProvider provider) {
@@ -109,10 +121,11 @@ namespace Brows {
             Provider = provider;
 
             EntryCollection.CurrentChanged += EntryCollection_CurrentChanged;
+            EntryCollection.PropertyChanged += EntryCollection_PropertyChanged;
+            EntryCollection.SelectionChanged += EntryCollection_SelectionChanged;
+            EntryCollection.ColumnInfo = provider.DataKeyColumns;
             EntryCollection.ColumnLookup = provider.DataKeyLookup;
             EntryCollection.ColumnDefaults = provider.DataKeyDefaults;
-            EntryCollection.ColumnResolver = provider.DataKeyResolver;
-            EntryCollection.ColumnConverters = provider.DataKeyConverters;
 
             if (DataKeyOptions != provider.DataKeyOptions) {
                 DataKeyOptions = provider.DataKeyOptions;
@@ -155,7 +168,7 @@ namespace Brows {
             return true;
         }
 
-        internal Panel(EntryProviderFactoryCollection providerFactory) {
+        public Panel(EntryProviderFactoryCollection providerFactory) {
             ProviderFactory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
         }
 
@@ -177,8 +190,8 @@ namespace Brows {
         }
         private double _ControlHeight;
 
-        public IEntryCollection Entries =>
-            EntryCollection;
+        public IEntryCollection Entries => EntryCollection;
+        public IReadOnlyList<IEntry> EntriesSelected => EntryCollection.Selection ?? new List<IEntry>(capacity: 0);
 
         public Preview Preview {
             get => _Preview;
@@ -223,6 +236,12 @@ namespace Brows {
             _Input ?? (
             _Input = new PanelInput { Entries = EntryCollection });
         private PanelInput _Input;
+
+        public PanelState State {
+            get => _State ?? (_State = new PanelState());
+            private set => Change(ref _State, value, nameof(State));
+        }
+        private PanelState _State;
 
         public IPanelID ID {
             get => _ID;

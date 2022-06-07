@@ -2,8 +2,6 @@ using Domore.Notification;
 using System.ComponentModel;
 
 namespace Brows.ComponentModel {
-    using Globalization;
-
     public class NotifyPropertyChanged : Notifier {
         protected bool NotifyState { get; set; } = true;
 
@@ -12,8 +10,5 @@ namespace Brows.ComponentModel {
                 base.OnPropertyChanged(e);
             }
         }
-
-        public ITranslation Translate =>
-            Global.Translation;
     }
 }

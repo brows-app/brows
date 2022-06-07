@@ -11,19 +11,36 @@
     <ListView.ItemTemplate>
         <DataTemplate>
             <StackPanel>
+                <StackPanel.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Background" Value="{DynamicResource CommandSuggestionDescription_Default_Background}"/>
+                        <Setter Property="FontFamily" Value="{DynamicResource CommandSuggestionDescription_Default_FontFamily}"/>
+                        <Setter Property="FontSize" Value="{DynamicResource CommandSuggestionDescription_Default_FontSize}"/>
+                        <Setter Property="FontStyle" Value="{DynamicResource CommandSuggestionDescription_Default_FontStyle}"/>
+                        <Setter Property="FontWeight" Value="{DynamicResource CommandSuggestionDescription_Default_FontWeight}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource CommandSuggestionDescription_Default_Foreground}"/>
+                    </Style>
+                </StackPanel.Resources>
                 <StackPanel.Style>
                     <Style TargetType="StackPanel">
                         <Setter Property="Margin" Value="5 0 0 0"/>
                     </Style>
                 </StackPanel.Style>
                 <local:CommandSuggestionInputTextBlock Text="{Binding Help, Mode=OneWay}"/>
-                <local:CommandSuggestionDescriptionTextBlock Text="{Binding InputAlias, Mode=OneWay}" 
-                                                             Visibility="{Binding InputAliasExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
-                <local:CommandSuggestionDescriptionTextBlock Text="{Binding KeyboardTrigger, Mode=OneWay}" 
-                                                             FontStyle="Italic"
-                                                             Visibility="{Binding KeyboardTriggerExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
-                <local:CommandSuggestionDescriptionTextBlock Text="{Binding Description, Mode=OneWay}" 
-                                                             Visibility="{Binding DescriptionExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
+                <TextBlock
+                    Text="{Binding InputAlias, Mode=OneWay}" 
+                    Visibility="{Binding InputAliasExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
+                <TextBlock
+                    Text="{Binding KeyboardTrigger, Mode=OneWay}" 
+                    FontStyle="Italic"
+                    Visibility="{Binding KeyboardTriggerExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
+                <TextBlock
+                    Text="{Binding Description, Mode=OneWay}" 
+                    Visibility="{Binding DescriptionExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
+                <local:CommandSuggestionContentControl
+                    Content="{Binding Command}"
+                    ContentTemplateSelector="{Binding Item[Command_Description], Source={x:Static brows:AppComponent.DataTemplateSelector}}"
+                    Visibility="{Binding DescriptionExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Collapsed, FallbackValue=Visible}"/>
             </StackPanel>
         </DataTemplate>
     </ListView.ItemTemplate>
@@ -36,11 +53,22 @@
                             <ControlTemplate TargetType="GroupItem">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition/>
+                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
                                     <Grid Grid.Row="0">
-                                        <local:CommandSuggestionGroupTextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Name}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Background" Value="{DynamicResource CommandSuggestionGroup_Default_Background}"/>
+                                                    <Setter Property="FontFamily" Value="{DynamicResource CommandSuggestionGroup_Default_FontFamily}"/>
+                                                    <Setter Property="FontSize" Value="{DynamicResource CommandSuggestionGroup_Default_FontSize}"/>
+                                                    <Setter Property="FontWeight" Value="{DynamicResource CommandSuggestionGroup_Default_FontWeight}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource CommandSuggestionGroup_Default_Foreground}"/>
+                                                    <Setter Property="Padding" Value="5"/>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </Grid>
                                     <Grid Grid.Row="1">
                                         <ItemsPresenter/>

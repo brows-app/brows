@@ -30,11 +30,11 @@ namespace Brows {
             _PanelID = new DrivePanelID());
         private IPanelID _PanelID;
 
-        public override IComponentResourceKey DataKeyResolver => DriveEntryData.Resolver;
         public override IReadOnlySet<string> DataKeyOptions => DriveEntryData.Options;
         public override IReadOnlySet<string> DataKeyDefaults => DriveEntryData.Defaults;
-        public override IReadOnlyDictionary<string, IEntryDataConverter> DataKeyConverters =>
-            DriveEntryData.Converters;
+
+        public override IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns =>
+            DriveEntryData.Columns;
 
         public override IOperator Operator(IOperatorDeployment deployment) {
             return new DriveOperator(deployment);

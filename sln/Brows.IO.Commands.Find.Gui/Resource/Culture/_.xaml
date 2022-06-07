@@ -29,7 +29,7 @@
                 <TextBlock Text="Press "/>
                 <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Enter}"/>
                 <TextBlock Text=" to open the found item's location."/>
-            </StackPanel>                       
+            </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Press "/>
                 <brows:KeyboardTriggerControl DataContext="{x:Static browsCommandFramework:CommandContextDataGesture.Previous}"/>

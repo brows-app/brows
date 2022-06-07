@@ -5,7 +5,7 @@ namespace Brows {
 
     partial class PanelControl {
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e) {
-            var panel = DataContext as Panel;
+            var panel = DataContext as IPanel;
             if (panel != null) {
                 panel.Activate();
             }

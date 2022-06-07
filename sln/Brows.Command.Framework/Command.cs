@@ -7,9 +7,23 @@ using System.Threading.Tasks;
 
 namespace Brows {
     using Cli;
+    using Translation;
     using Triggers;
 
     public abstract class Command : ICommand {
+        private ITranslation Translate =>
+            Global.Translation;
+
+        private string SuggestionDescriptionKey =>
+            _SuggestionDescriptionKey ?? (
+            _SuggestionDescriptionKey = $"Command_Description_{GetType()?.Name}");
+        private string _SuggestionDescriptionKey;
+
+        private string SuggestionGroupKey =>
+            _SuggestionGroupKey ?? (
+            _SuggestionGroupKey = $"Command_Group_{nameof(Command)}");
+        private string _SuggestionGroupKey;
+
         protected CommandSuggestionRelevance SuggestionRelevance =>
             _SuggestionRelevance ?? (
             _SuggestionRelevance = new CommandSuggestionRelevance());
@@ -40,6 +54,22 @@ namespace Brows {
             return false;
         }
 
+        protected ICommandSuggestion Suggestion(ICommandContext context, string input, int? relevance = null, string description = null, string group = null, string help = null) {
+            return new CommandSuggestion(this, context) {
+                Description = description == null
+                    ? Translate.Value(SuggestionDescriptionKey)
+                    : description,
+                Group = group == null
+                    ? Translate.Value(SuggestionGroupKey)
+                    : Translate.Value($"Command_Group_{group}"),
+                Help = help,
+                Input = input,
+                Relevance = relevance.HasValue
+                    ? relevance.Value
+                    : default(int)
+            };
+        }
+
         protected virtual bool ProtectedWorkable(ICommandContext context) {
             return true;
         }
@@ -55,12 +85,11 @@ namespace Brows {
                 foreach (var trigger in InputTriggers) {
                     var relevance = SuggestionRelevance.From(trigger.Aggregate, command);
                     if (relevance.HasValue) {
-                        yield return new CommandSuggestion(this, context) {
-                            Group = nameof(Command),
-                            Input = trigger.Value,
-                            Help = string.Join(" ", trigger.Value, HelpLine),
-                            Relevance = relevance.Value
-                        };
+                        yield return Suggestion(
+                            context: context,
+                            help: string.Join(" ", trigger.Value, HelpLine),
+                            input: trigger.Value,
+                            relevance: relevance.Value);
                     }
                     await Task.Yield();
                 }

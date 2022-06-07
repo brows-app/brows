@@ -11,10 +11,14 @@ namespace Brows {
     using Gui;
     using Logger;
     using Threading.Tasks;
+    using Translation;
 
     public abstract class EntryProvider : NotifyPropertyChanged, IEntryProvider {
         private IEntryProviderTarget Target;
         private CancellationTokenSource CancellationTokenSource;
+
+        private ITranslation Translate =>
+            Global.Translation;
 
         private ILog Log =>
             _Log ?? (
@@ -36,8 +40,7 @@ namespace Brows {
         public abstract IPanelID PanelID { get; }
         public abstract IReadOnlySet<string> DataKeyDefaults { get; }
         public virtual IReadOnlySet<string> DataKeyOptions => DataKeyDefaults;
-        public virtual IReadOnlyDictionary<string, IEntryDataConverter> DataKeyConverters { get; }
-        public virtual IComponentResourceKey DataKeyResolver { get; }
+        public virtual IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns { get; }
         public virtual IBookmark Bookmark { get; }
         public virtual Image Icon { get; }
 

@@ -17,17 +17,16 @@ namespace Brows {
             if (directory == null) {
                 return null;
             }
-            var
-            value = 0L;
-            Value = value;
+            var value = 0L;
+            Set(value);
             await Log.Performance(directory.Name, async () => {
                 try {
                     await foreach (var file in directory.RecurseFilesAsync(CancellationToken)) {
-                        Value = value = value + file.Length;
+                        Set(value += file.Length);
                     }
                 }
                 catch {
-                    Value = null;
+                    Set(null);
                     throw;
                 }
             });
@@ -43,7 +42,7 @@ namespace Brows {
         }
 
         public sealed override void Refresh() {
-            Value = null;
+            Set(null);
             base.Refresh();
         }
     }

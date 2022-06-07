@@ -9,6 +9,7 @@
             <Setter Property="FontSize" Value="{DynamicResource Global_Monospace_FontSize}"/>
             <Setter Property="FontWeight" Value="{DynamicResource Global_Monospace_FontWeight}"/>
             <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="IsSelected" Value="{Binding Selected}"/>
             <Setter Property="Margin" Value="0"/>
             <Setter Property="FocusVisualStyle">

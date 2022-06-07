@@ -51,10 +51,10 @@ namespace Brows.Commands {
                 var options = SuggestionEnumerationOptions;
                 var directories = dirInfo.EnumerateDirectoriesAsync(searchPattern, options, null, cancellationToken);
                 await foreach (var directory in directories) {
-                    yield return new CommandSuggestion(this, context) {
-                        Group = nameof(OpenDirectory),
-                        Input = await Canon.GetCanonicalFullName(directory, cancellationToken)
-                    };
+                    yield return Suggestion(
+                        context: context,
+                        group: nameof(OpenDirectory),
+                        input: await Canon.GetCanonicalFullName(directory, cancellationToken));
                 }
             }
         }
