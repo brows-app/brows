@@ -20,6 +20,7 @@ namespace Brows {
 
         private bool Refreshed;
         private bool Refreshing;
+        private bool RefreshInfo;
         private FileAttributes? Attributes;
         private DateTime? CreationTime;
         private DateTime? CreationTimeUtc;
@@ -83,10 +84,16 @@ namespace Brows {
                                     $"{nameof(Info)} > {Info}");
                             }
                             try {
-                                var
-                                info = Info;
-                                info?.Refresh();
-                                info = info?.Exists == true ? info : null;
+                                var info = Info;
+
+                                if (RefreshInfo) {
+                                    RefreshInfo = false;
+                                    info?.Refresh();
+                                }
+                                var infoExists = info?.Exists;
+                                if (infoExists != true) {
+                                    info = null;
+                                }
                                 var file = info as FileInfo;
                                 Attributes = info?.Attributes;
                                 CreationTime = info?.CreationTime;
@@ -152,6 +159,7 @@ namespace Brows {
 
             public sealed override void Refresh() {
                 Wrap.Refreshed = false;
+                Wrap.RefreshInfo = true;
                 base.Refresh();
             }
         }

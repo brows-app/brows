@@ -4,10 +4,15 @@ using CONVERT = System.Convert;
 
 namespace Brows.IO {
     internal class FileSystemSizeConverter : EntryDataConverter {
+        public string Format { get; set; } = "0.#";
+
         public override string Convert(object value, object parameter, CultureInfo culture) {
             if (value == null) return null;
-            var format = parameter?.ToString() ?? "0.#";
-            var length = CONVERT.ToInt64(value);
+
+            var converted = Try(CONVERT.ToInt64, value, out var length);
+            if (converted == false) return null;
+
+            var format = parameter?.ToString() ?? Format;
             var readable = ToReadable(length, format, culture);
             return readable;
         }

@@ -131,6 +131,7 @@ namespace Brows {
         public virtual void Refresh() {
             Accessed = false;
             NotifyPropertyChanged(nameof(Value));
+            NotifyPropertyChanged(nameof(ConvertedValue));
         }
     }
 }
