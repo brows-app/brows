@@ -1,9 +1,8 @@
 ---
 layout: default
 title: The FIND command
-permalink: /commands/find
 --- 
 
 Find files and folders by pressing ***CONTROL+F*** and entering a pattern. Navigate through the results with ***ALT*** and the arrow keys.
 
-![Find files and folders](assets/img/Find.gif)
+![Find files and folders](/assets/img/Find.gif)
