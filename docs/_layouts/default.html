@@ -36,9 +36,11 @@
         {% endif %}
         
         {% for page in site.pages %}
-            <ul>
-                <li><a href="{{ page.url }}">{{ page.title }}</a></li>
-            </ul>
+            <p>
+                <ul>
+                    <li><a href="{{ page.permalink }}">{{ page.title }}</a></li>
+                </ul>
+            </p>
         {% endfor %}
       </header>
       
