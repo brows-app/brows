@@ -9,3 +9,4 @@ show_downloads: true
 collections:
   docs:
     output: true
+    permalink: /:collection/:path
