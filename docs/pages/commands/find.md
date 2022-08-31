@@ -1,8 +1,7 @@
 ---
 layout: default
 title: The FIND command
-filename: find.md
-permalink: /commands/
+permalink: /commands/find
 --- 
 
 Find files and folders by pressing ***CONTROL+F*** and entering a pattern. Navigate through the results with ***ALT*** and the arrow keys.
