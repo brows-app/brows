@@ -35,13 +35,13 @@
         </ul>
         {% endif %}
         
-        {% for page in site.pages %}
-            <p>
-                <ul>
-                    <li><a href="{{ page.permalink }}">{{ page.title }}</a></li>
-                </ul>
-            </p>
-        {% endfor %}
+        <p>
+            <ul>
+                {% for doc in site.docs %}
+                    <li><a href="{{ doc.url }}">{{ doc.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </p>
       </header>
       
       <section>
