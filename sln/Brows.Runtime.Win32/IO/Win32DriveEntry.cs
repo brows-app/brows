@@ -6,6 +6,7 @@ namespace Brows.IO {
 
     internal class Win32DriveEntry : DriveEntry {
         protected override IIconProvider IconProvider => Win32Gui.IconProvider;
+        protected override IOverlayProvider OverlayProvider => Win32Gui.OverlayProvider;
         protected override IPreviewProvider PreviewProvider => Win32Gui.PreviewProvider;
         protected override IThumbnailProvider ThumbnailProvider => Win32Gui.ThumbnailProvider;
 

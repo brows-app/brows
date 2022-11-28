@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -42,37 +41,17 @@ namespace Brows.Commands {
                             }
                         }
                         var trigger = InputTrigger();
-                        var input = $"{trigger} {rename}";
-                        var inputStart = trigger.Length + 1;
+                        var input = $"{trigger} \"{rename}\"";
+                        var inputStart = trigger.Length + 2;
                         var inputLength = rename.Length - renameExt.Length;
                         await commander.ShowPalette(input, inputStart, inputLength, cancellationToken);
                         return true;
                     }
                 }
                 if (context.HasParameter(out var parameter)) {
-                    var entries = active.Selection().ToList();
-                    if (entries.Count == 1) {
-                        var
-                        entry = entries[0];
-                        entry.Rename(parameter.Name);
-                    }
-                    else {
-                        var rename = parameter.Name?.Trim() ?? "";
-                        if (rename.Contains('%') || rename.Contains('*')) {
-                            var orderedEntries = entries.OrderBy(entry => entry.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
-                            for (var i = 0; i < orderedEntries.Count; i++) {
-                                var entry = orderedEntries[i];
-                                var entryRename = rename
-                                    .Replace("*", Path.GetFileNameWithoutExtension(entry.Name))
-                                    .Replace("%", $"{i + 1}");
-                                entry.Rename(entryRename);
-                            }
-                        }
-                        else {
-                            return false;
-                        }
-                    }
-                    await active.Deploy(renameEntries: entries, cancellationToken: cancellationToken);
+                    var pattern = parameter.Name?.Trim() ?? "";
+                    var list = await Renamer.Rename(context, pattern, cancellationToken);
+                    await active.Deploy(renameEntries: list, cancellationToken: cancellationToken);
                     return true;
                 }
             }

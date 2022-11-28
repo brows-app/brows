@@ -68,23 +68,11 @@ namespace Brows.Threading {
             }
         }
 
-        public TimeSpan IdleTime { get; set; } = TimeSpan.FromMinutes(5);
-
-        public string Name { get; }
-
-        public StaThreadPool(string name) {
-            Name = name;
-        }
-
-        public async Task<TResult> Work<TResult>(Func<TResult> work, CancellationToken cancellationToken) {
-            if (Log.Info()) {
-                Log.Info(nameof(Work));
-            }
-            var item = new StaThreadWorkItem<TResult>(work);
+        private async Task<(bool worked, TResult result)> TryWork<TResult>(StaThreadWorkItem<TResult> item, CancellationToken cancellationToken) {
             var worker = default(StaThreadWorker);
             lock (Workers) {
                 var idle = Workers.FirstOrDefault(w => w.Working == false);
-                if (idle == null) {
+                if (idle == null && WorkerCountMax > Workers.Count) {
                     idle = new StaThreadWorker(Name, ++WorkerID);
                     Workers.Add(idle);
                     if (Log.Info()) {
@@ -94,11 +82,14 @@ namespace Brows.Threading {
                             $"{nameof(idle.ID)} > {idle.ID}");
                     }
                 }
+                if (idle == null) {
+                    return (worked: false, result: default);
+                }
                 idle.Working = true;
                 worker = idle;
             }
             try {
-                return await worker.Work(item, cancellationToken);
+                return (worked: true, result: await worker.Work(item, cancellationToken));
             }
             finally {
                 lock (Workers) {
@@ -110,9 +101,55 @@ namespace Brows.Threading {
             }
         }
 
-        public async Task Work(Action work, CancellationToken cancellationToken) {
-            await Work<object>(() => {
-                work?.Invoke();
+        private async Task<TResult> DoWork<TResult>(StaThreadWorkItem<TResult> item, CancellationToken cancellationToken) {
+            for (; ; ) {
+                var tryWork = await TryWork(item, cancellationToken);
+                if (tryWork.worked) {
+                    return tryWork.result;
+                }
+                await Task.Delay(TryWorkDelay, cancellationToken);
+            }
+        }
+
+        private async Task<TResult> Work<TResult>(string name, StaThreadWorkItem<TResult> item, CancellationToken cancellationToken) {
+            if (Log.Info()) {
+                Log.Info($"{nameof(Work)} [{name}]");
+            }
+            return await DoWork(item, cancellationToken);
+        }
+
+        public TimeSpan IdleTime { get; set; } = TimeSpan.FromMinutes(2.5);
+        public int TryWorkDelay { get; set; } = 10;
+        public int WorkerCountMax { get; set; } = 8;
+
+        public string Name { get; }
+
+        public StaThreadPool(string name) {
+            Name = name;
+        }
+
+        public Task<TResult> Work<TResult>(string name, Func<TResult> work, CancellationToken cancellationToken) {
+            return Work(name, new StaThreadWorkItem<TResult>(work), cancellationToken);
+        }
+
+        public Task<TResult> Work<TResult>(string name, Func<CancellationToken, Task<TResult>> work, CancellationToken cancellationToken) {
+            return Work(name, new StaThreadWorkItem<TResult>(work), cancellationToken);
+        }
+
+        public async Task Work(string name, Action work, CancellationToken cancellationToken) {
+            await Work<object>(name, () => {
+                if (work != null) {
+                    work();
+                }
+                return default;
+            }, cancellationToken);
+        }
+
+        public async Task Work(string name, Func<CancellationToken, Task> work, CancellationToken cancellationToken) {
+            await Work<object>(name, async token => {
+                if (work != null) {
+                    await work(token);
+                }
                 return default;
             }, cancellationToken);
         }

@@ -9,6 +9,7 @@ namespace Brows.IO {
     using Logger;
     using Runtime.InteropServices;
     using Runtime.InteropServices.ComTypes;
+    using Runtime.Win32;
     using Threading;
 
     internal class Win32FileOperator : Operator {
@@ -17,15 +18,14 @@ namespace Brows.IO {
             _Log = Logging.For(typeof(Win32FileOperator)));
         private ILog _Log;
 
-        private bool Delete(IFileOperation fop) {
-            if (null == fop) throw new ArgumentNullException(nameof(fop));
+        private async Task<bool> Delete(FileOperationState state, CancellationToken cancellationToken) {
+            var fop = state.FileOperation;
             var delete = Payload?.DeleteEntries?.ToList();
             if (delete == null || delete.Count == 0) {
                 return false;
             }
             foreach (var item in delete) {
                 var file = item.File;
-                var name = Path.GetFileName(file);
                 using (var shItemW = new ShellItemWrapper(file)) {
                     var shItem = shItemW.ShellItem;
                     var
@@ -33,18 +33,17 @@ namespace Brows.IO {
                     hr.ThrowOnError();
                 }
             }
-            return true;
+            return await Task.FromResult(true);
         }
 
-        private bool Rename(IFileOperation fop) {
-            if (null == fop) throw new ArgumentNullException(nameof(fop));
+        private async Task<bool> Rename(FileOperationState state, CancellationToken cancellationToken) {
+            var fop = state.FileOperation;
             var rename = Payload?.RenameEntries?.ToList();
             if (rename == null || rename.Count == 0) {
                 return false;
             }
             foreach (var item in rename) {
                 var oldPath = item.File;
-                var oldName = Path.GetFileName(oldPath);
                 var newName = item.Rename();
                 using (var shItemW = new ShellItemWrapper(oldPath)) {
                     var shItem = shItemW.ShellItem;
@@ -53,26 +52,31 @@ namespace Brows.IO {
                     hr.ThrowOnError();
                 }
             }
-            return true;
+            return await Task.FromResult(true);
         }
 
-        private bool Copy(IFileOperation fop) {
-            if (null == fop) throw new ArgumentNullException(nameof(fop));
-            var copyFiles = Payload?.CopyFiles ?? Array.Empty<string>();
-            var copyEntries = Payload?.CopyEntries?.Select(e => e.ID) ?? Array.Empty<string>();
+        private async Task<bool> Copy(FileOperationState state, CancellationToken cancellationToken) {
+            var fop = state.FileOperation;
+            var copyFiles = (Payload?.CopyFiles ?? Array.Empty<string>()).Select(f => new { File = f, Name = (string)null });
+            var copyEntries = (Payload?.CopyEntries ?? Array.Empty<IEntry>()).Select(e => new { File = e.File, Name = e.Rename() });
             var copy = copyFiles.Concat(copyEntries).ToList();
             if (copy.Count == 0) {
                 return false;
             }
             using (var shDrItemW = new ShellItemWrapper(Directory)) {
-                foreach (var file in copy) {
-                    var name = Path.GetFileName(file);
-                    var path = Path.Combine(Directory, name);
-                    using (var shItemW = new ShellItemWrapper(file)) {
+                foreach (var item in copy) {
+                    var fileDir = Path.GetDirectoryName(item.File);
+                    var thisDir = Directory;
+                    var sameDir = await Win32Path.AreSame(thisDir, fileDir, cancellationToken);
+                    if (sameDir) {
+                        state.Flags |= (uint)FOF.RENAMEONCOLLISION;
+                        state.Flags |= (uint)FOFX.PRESERVEFILEEXTENSIONS;
+                    }
+                    using (var shItemW = new ShellItemWrapper(item.File)) {
                         var shItem = shItemW.ShellItem;
                         var drItem = shDrItemW.ShellItem;
                         var
-                        hr = fop.CopyItem(shItem, drItem, null, null);
+                        hr = fop.CopyItem(shItem, drItem, item.Name, null);
                         hr.ThrowOnError();
                     }
                 }
@@ -80,28 +84,26 @@ namespace Brows.IO {
             return true;
         }
 
-        private bool Move(IFileOperation fop) {
-            if (null == fop) throw new ArgumentNullException(nameof(fop));
-            var moveFiles = Payload?.MoveFiles ?? Array.Empty<string>();
-            var moveEntries = Payload?.MoveEntries?.Select(e => e.ID) ?? Array.Empty<string>();
+        private async Task<bool> Move(FileOperationState state, CancellationToken cancellationToken) {
+            var fop = state.FileOperation;
+            var moveFiles = (Payload?.MoveFiles ?? Array.Empty<string>()).Select(f => new { File = f, Name = (string)null });
+            var moveEntries = (Payload?.MoveEntries ?? Array.Empty<IEntry>()).Select(e => new { File = e.File, Name = e.Rename() });
             var move = moveFiles.Concat(moveEntries).ToList();
             if (move.Count == 0) {
                 return false;
             }
             using (var shDrItemW = new ShellItemWrapper(Directory)) {
-                foreach (var file in move) {
-                    var name = Path.GetFileName(file);
-                    var path = Path.Combine(Directory, name);
-                    using (var shItemW = new ShellItemWrapper(file)) {
+                foreach (var item in move) {
+                    using (var shItemW = new ShellItemWrapper(item.File)) {
                         var shItem = shItemW.ShellItem;
                         var drItem = shDrItemW.ShellItem;
                         var
-                        hr = fop.MoveItem(shItem, drItem, null, null);
+                        hr = fop.MoveItem(shItem, drItem, item.Name, null);
                         hr.ThrowOnError();
                     }
                 }
             }
-            return true;
+            return await Task.FromResult(true);
         }
 
         private void Create(string file, bool directory, IShellItem drItem, IFileOperation fop) {
@@ -113,7 +115,8 @@ namespace Brows.IO {
             hr.ThrowOnError();
         }
 
-        private bool Create(IFileOperation fop) {
+        private async Task<bool> Create(FileOperationState state, CancellationToken cancellationToken) {
+            var fop = state.FileOperation;
             var files = Payload?.CreateFiles ?? Array.Empty<string>();
             var directories = Payload?.CreateDirectories ?? Array.Empty<string>();
             var items = files.Select(f => new {
@@ -132,25 +135,26 @@ namespace Brows.IO {
                     Create(item.File, item.Directory, drItem, fop);
                 }
             }
-            return true;
+            return await Task.FromResult(true);
         }
 
-        private void Operate(IOperationProgress progress) {
+        private async Task Operate(IOperationProgress progress, CancellationToken cancellationToken) {
             using (var fopw = new FileOperationWrapper()) {
                 var fop = fopw.FileOperation;
                 var flags = Payload.Win32Flags();
-                var
-                hr = fop.SetOperationFlags(flags);
-                hr.ThrowOnError();
-
+                var state = new FileOperationState(fop) { Flags = flags };
                 var performOperations =
-                    Copy(fop) |
-                    Move(fop) |
-                    Create(fop) |
-                    Delete(fop) |
-                    Rename(fop);
+                    await Copy(state, cancellationToken) |
+                    await Move(state, cancellationToken) |
+                    await Create(state, cancellationToken) |
+                    await Delete(state, cancellationToken) |
+                    await Rename(state, cancellationToken);
 
                 if (performOperations) {
+                    var
+                    hr = fop.SetOperationFlags(state.Flags);
+                    hr.ThrowOnError();
+
                     var window = Dialog?.Window;
                     if (window is IntPtr hwnd) {
                         hr = fop.SetOwnerWindow(hwnd);
@@ -188,7 +192,7 @@ namespace Brows.IO {
             var progress = Payload.NativeProgress
                 ? null
                 : Operation(cancellationToken, "Operation", "{0}", "Operation");
-            await ThreadPool.Work(() => Operate(progress), cancellationToken);
+            await ThreadPool.Work(nameof(Operate), async token => await Operate(progress, token), cancellationToken);
         }
 
         public string Directory =>
@@ -200,6 +204,15 @@ namespace Brows.IO {
         public Win32FileOperator(DirectoryInfo directoryInfo, IOperatorDeployment deployment, StaThreadPool threadPool) : base(deployment) {
             DirectoryInfo = directoryInfo ?? throw new ArgumentNullException(nameof(directoryInfo));
             ThreadPool = threadPool ?? throw new ArgumentNullException(nameof(threadPool));
+        }
+
+        private class FileOperationState {
+            public uint Flags { get; set; }
+            public IFileOperation FileOperation { get; }
+
+            public FileOperationState(IFileOperation fileOperation) {
+                FileOperation = fileOperation;
+            }
         }
     }
 }

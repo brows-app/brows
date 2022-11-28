@@ -51,6 +51,7 @@ namespace Brows {
         private string _ParentID;
 
         public abstract IOperator Operator(IOperatorDeployment deployment);
+        public abstract Task<bool> CaseSensitive(CancellationToken cancellationToken);
 
         public virtual string CreatedID(string createdName) {
             return null;

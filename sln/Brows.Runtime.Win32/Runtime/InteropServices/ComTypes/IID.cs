@@ -12,5 +12,6 @@ namespace Brows.Runtime.InteropServices.ComTypes {
         public const string IShellItem = "43826D1E-E718-42EE-BC55-A1E261C37BFE";
         public const string IShellItemImageFactory = "bcc18b79-ba16-442f-80c4-8a59c30c463b";
         public const string IThumbnailCache = "F676C15D-596A-4ce2-8234-33996F445DB1";
+        public const string IShellIconOverlayIdentifier = "0c6c4200-c589-11d0-999a-00c04fd655e1";
     }
 }

@@ -8,12 +8,18 @@ using System.Windows.Media.Imaging;
 
 namespace Brows.Runtime.InteropServices {
     using ComTypes;
+    using Logger;
     using Threading;
     using Win32;
 
 
     internal sealed class ShellItemImageFactoryWrapper : ComObjectWrapper<IShellItemImageFactory> {
         private static readonly Guid IID_IShellItem = new Guid(IID.IShellItem);
+
+        private ILog Log =>
+            _Log ?? (
+            _Log = Logging.For(typeof(ShellItemImageFactoryWrapper)));
+        private ILog _Log;
 
         protected sealed override IShellItemImageFactory Factory() {
             var
@@ -37,10 +43,10 @@ namespace Brows.Runtime.InteropServices {
 
         public async Task<BitmapSource> GetBitmapSource(SIZE size, SIIGBF flags, CancellationToken cancellationToken) {
             var bm = default(IntPtr);
-            var co = await ThreadPool.Work(ComObject, cancellationToken);
+            var co = await ThreadPool.Work(nameof(ComObject), ComObject, cancellationToken);
             try {
                 var
-                hr = await ThreadPool.Work(() => co.GetImage(size, flags, out bm), cancellationToken);
+                hr = await ThreadPool.Work(nameof(co.GetImage), () => co.GetImage(size, flags, out bm), cancellationToken);
                 hr.ThrowOnError();
 
                 var source = Imaging.CreateBitmapSourceFromHBitmap(bm, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
@@ -51,7 +57,12 @@ namespace Brows.Runtime.InteropServices {
             }
             finally {
                 if (bm != default(IntPtr)) {
-                    gdi32.DeleteObject(bm);
+                    var success = gdi32.DeleteObject(bm);
+                    if (success == false) {
+                        if (Log.Error()) {
+                            Log.Error(nameof(gdi32.DeleteObject));
+                        }
+                    }
                 }
             }
         }

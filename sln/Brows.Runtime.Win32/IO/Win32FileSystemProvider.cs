@@ -33,6 +33,10 @@ namespace Brows.IO {
             return new Win32FileOperator(Info, deployment, ThreadPool);
         }
 
+        public override Task<bool> CaseSensitive(CancellationToken cancellationToken) {
+            return Win32Path.IsCaseSensitive(Path, cancellationToken);
+        }
+
         private class IconProvider : IIconProvider {
             private IIconProvider Provider { get; } = Win32Gui.IconProvider;
 

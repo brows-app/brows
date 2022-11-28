@@ -61,7 +61,7 @@ namespace Brows.Gui {
             var psfi = new SHFILEINFOW();
             var cbFileInfo = SHFILEINFOW.Size;
             try {
-                var returnValue = await ThreadPool.Work(() => shell32.SHGetFileInfoW(pszPath, dwFileAttributes, ref psfi, cbFileInfo, uFlags), cancellationToken);
+                var returnValue = await ThreadPool.Work(nameof(shell32.SHGetFileInfoW), () => shell32.SHGetFileInfoW(pszPath, dwFileAttributes, ref psfi, cbFileInfo, uFlags), cancellationToken);
                 if (returnValue == IntPtr.Zero) throw new Win32Exception($"{nameof(shell32.SHGetFileInfoW)} error");
 
                 var source = Imaging.CreateBitmapSourceFromHIcon(psfi.hIcon, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
@@ -111,7 +111,7 @@ namespace Brows.Gui {
             try {
                 var siid = GetStockIconID(id);
                 var
-                hr = await ThreadPool.Work(() => shell32.SHGetStockIconInfo(siid, uFlags, ref psii), cancellationToken);
+                hr = await ThreadPool.Work(nameof(shell32.SHGetStockIconInfo), () => shell32.SHGetStockIconInfo(siid, uFlags, ref psii), cancellationToken);
                 hr.ThrowOnError();
 
                 var source = Imaging.CreateBitmapSourceFromHIcon(psii.hIcon, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());

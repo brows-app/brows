@@ -2,6 +2,7 @@
 Command_Description_ClipboardCopy   = Copy selection to clipboard
 Command_Description_ClipboardPaste  = Paste content from clipboard
 Command_Description_Close           = Close this window
+Command_Description_CopyHere        = Copy selection to the same panel
 Command_Description_CopyNext        = Copy selection to the next panel
 Command_Description_CopyPrev        = Copy selection to the previous panel
 Command_Description_Cycle           = Activate the next panel

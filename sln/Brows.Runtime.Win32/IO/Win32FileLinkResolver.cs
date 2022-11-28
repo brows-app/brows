@@ -32,6 +32,7 @@ namespace Brows.IO {
             }
             try {
                 return await ThreadPool.Work(
+                    name: nameof(Resolve),
                     cancellationToken: cancellationToken,
                     work: () => {
                         using (var wrapper = new ShellWrapper()) {

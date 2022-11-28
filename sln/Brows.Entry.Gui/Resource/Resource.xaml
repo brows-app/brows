@@ -9,6 +9,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <local:EntryIconImage Grid.Column="0" Source="{Binding Icon.Source}"/>
+            <local:EntryIconImage Grid.Column="0" Source="{Binding Overlay.Source}"/>
             <local:EntryDataControl Grid.Column="2" DataContext="{Binding Item[Name]}"/>
         </Grid>
     </DataTemplate>

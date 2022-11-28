@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     using Gui;
@@ -11,5 +13,6 @@ namespace Brows {
         string DataKeyLookup(string alias);
         IEnumerable DataKeyLookup(params string[] alias);
         NameValueCollection DataKeyAlias();
+        Task<bool> CaseSensitive(CancellationToken cancellationToken);
     }
 }

@@ -22,5 +22,11 @@ namespace Brows.Runtime.Win32 {
             IntPtr pbc,
             [MarshalAs(UnmanagedType.LPStruct)] Guid riid,
             [Out][MarshalAs(UnmanagedType.Interface, IidParameterIndex = 2)] out IShellItem ppv);
+
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        public static extern IntPtr ExtractIconW(
+            [In] IntPtr hInst,
+            [In][MarshalAs(UnmanagedType.LPWStr)] string pszExeFileName,
+            int nIconIndex);
     }
 }

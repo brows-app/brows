@@ -20,6 +20,7 @@ namespace Brows {
         protected abstract IReadOnlySet<string> Keys { get; }
 
         protected abstract IIconProvider IconProvider { get; }
+        protected abstract IOverlayProvider OverlayProvider { get; }
         protected abstract IPreviewProvider PreviewProvider { get; }
         protected abstract IThumbnailProvider ThumbnailProvider { get; }
 
@@ -27,6 +28,11 @@ namespace Brows {
             _IconInput ?? (
             _IconInput = new IconInput(IconStock.Unknown, ID));
         private IconInput _IconInput;
+
+        protected virtual OverlayInput OverlayInput =>
+            _OverlayInput ?? (
+            _OverlayInput = new OverlayInput(ID));
+        private OverlayInput _OverlayInput;
 
         protected virtual PreviewInput PreviewInput =>
             _PreviewInput ?? (
@@ -82,6 +88,12 @@ namespace Brows {
             private set => Change(ref _Icon, value, nameof(Icon));
         }
         private Image _Icon;
+
+        public Image Overlay {
+            get => _Overlay ?? (_Overlay = new ImageSourceProvided<IOverlayInput>(OverlayInput, OverlayProvider, CancellationToken));
+            private set => Change(ref _Overlay, value, nameof(Overlay));
+        }
+        private Image _Overlay;
 
         public Image Thumbnail {
             get => _Thumbnail ?? (_Thumbnail = new ImageSourceProvided<IThumbnailInput>(ThumbnailInput, ThumbnailProvider, CancellationToken) { Size = new ImageSize(100, 100) });
@@ -143,6 +155,9 @@ namespace Brows {
             }
             if (flags.HasFlag(EntryRefresh.Thumbnail)) {
                 Thumbnail = null;
+            }
+            if (flags.HasFlag(EntryRefresh.Overlay)) {
+                Overlay = null;
             }
         }
 

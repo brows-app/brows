@@ -4,26 +4,20 @@ using System.Threading.Tasks;
 
 namespace Brows.Threading.Tasks {
     public static class Async {
-        public static async Task Run(CancellationToken cancellationToken, Action action) {
+        public static Task Run(CancellationToken cancellationToken, Action action) {
             if (null == action) throw new ArgumentNullException(nameof(action));
-            await Task.Run(() => {
-                if (cancellationToken.IsCancellationRequested) {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    // TODO: Log debug before throwing.
-                }
-                action();
-            }, cancellationToken);
+            if (cancellationToken.IsCancellationRequested) {
+                return Task.FromCanceled(cancellationToken);
+            }
+            return Task.Run(() => action(), cancellationToken);
         }
 
-        public static async Task<T> Run<T>(CancellationToken cancellationToken, Func<T> function) {
+        public static Task<T> Run<T>(CancellationToken cancellationToken, Func<T> function) {
             if (null == function) throw new ArgumentNullException(nameof(function));
-            return await Task.Run(() => {
-                if (cancellationToken.IsCancellationRequested) {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    // TODO: Log debug before throwing.
-                }
-                return function();
-            }, cancellationToken);
+            if (cancellationToken.IsCancellationRequested) {
+                return Task.FromCanceled<T>(cancellationToken);
+            }
+            return Task.Run(() => function(), cancellationToken);
         }
     }
 }

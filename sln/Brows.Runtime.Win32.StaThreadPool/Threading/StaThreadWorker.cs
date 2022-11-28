@@ -111,12 +111,12 @@ namespace Brows.Threading {
                 taskSource.SetCanceled(cancellationToken);
                 return await taskSource.Task;
             }
-            Context.Post(state: null, d: _ => {
+            Context.Post(state: null, d: async _ => {
                 try {
                     cancellationToken.ThrowIfCancellationRequested();
                     taskSource.SetResult(item == null
                         ? default
-                        : item.Invoke());
+                        : await item.InvokeAsync(cancellationToken));
                 }
                 catch (Exception ex) {
                     if (ex is OperationCanceledException canceled && canceled.CancellationToken.Equals(cancellationToken)) {
