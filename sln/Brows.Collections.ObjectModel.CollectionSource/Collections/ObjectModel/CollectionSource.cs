@@ -21,14 +21,14 @@ namespace Brows.Collections.ObjectModel {
             Collection;
 
         IEnumerator IEnumerable.GetEnumerator() {
-            return Collection.GetEnumerator();
+            return ((IEnumerable)Collection).GetEnumerator();
         }
 
         public class Of<T> : CollectionSource, IReadOnlyList<T> {
             private readonly new ObservableCollection<T> Collection;
 
             private void Collection_PropertyChanged(object sender, PropertyChangedEventArgs e) {
-                OnPropertyChanged(e);
+                NotifyPropertyChanged(e);
             }
 
             private Of(ObservableCollection<T> collection) : base(collection) {

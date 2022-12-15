@@ -13,7 +13,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) {
+        protected override Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
             if (context.HasPanel(out var active)) {
                 active.PreviewMode = active.PreviewMode == PanelPreviewMode.None
                     ? PanelPreviewMode.Default

@@ -59,7 +59,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasInput(out var input)) {
                 if (await DirectoryAsync.Exists(input, cancellationToken)) {
@@ -69,7 +69,7 @@ namespace Brows.Commands {
             return false;
         }
 
-        protected override async IAsyncEnumerable<ICommandSuggestion> ProtectedSuggestAsync(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
+        protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             if (context == null) yield break;
             if (context.HasInput(out var input)) {
                 if (input.Contains(Path.DirectorySeparatorChar) || input.Contains(Path.AltDirectorySeparatorChar)) {

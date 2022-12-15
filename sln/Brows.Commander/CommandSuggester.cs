@@ -18,7 +18,7 @@ namespace Brows {
         public async IAsyncEnumerable<ICommandSuggestion> Suggest([EnumeratorCancellation] CancellationToken cancellationToken) {
             var dispose = new List<Task>();
             var commands = Commands;
-            var suggestions = commands.Select(c => c.SuggestAsync(Context, cancellationToken));
+            var suggestions = commands.Select(c => c.Suggest(Context, cancellationToken));
             var enumerators = suggestions.Select(s => s.GetAsyncEnumerator()).ToList();
             var tasks = enumerators.Select(e => e.MoveNextAsync().AsTask()).ToList();
             try {

@@ -13,7 +13,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
             if (context?.HasPanel(out var active) == true) {
                 await active.HistoryBack(cancellationToken);
                 return true;

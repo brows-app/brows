@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Brows.IO.Compression.Contract\Brows.IO.Compression.Contract.csproj" />
+      <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />
+    </ItemGroup>
+</Project>

@@ -9,8 +9,8 @@ namespace Brows {
         IEnumerable<InputTrigger> InputTriggers { get; }
         IEnumerable<KeyboardTrigger> KeyboardTriggers { get; }
         bool Arbitrary { get; }
-        IAsyncEnumerable<ICommandSuggestion> SuggestAsync(ICommandContext context, CancellationToken cancellationToken);
+        IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, CancellationToken cancellationToken);
         bool Workable(ICommandContext context);
-        Task<bool> WorkAsync(ICommandContext context, CancellationToken cancellationToken);
+        Task<bool> Work(ICommandContext context, CancellationToken cancellationToken);
     }
 }

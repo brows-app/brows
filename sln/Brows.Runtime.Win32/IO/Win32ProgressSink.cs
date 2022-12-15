@@ -17,8 +17,8 @@ namespace Brows.IO {
             if (CancellationToken.IsCancellationRequested) {
                 return (HRESULT)winerror.ERROR_CANCELLED;
             }
-            Progress.Target(iWorkTotal);
-            Progress.Progress(iWorkSoFar);
+            Progress.Target.Set(iWorkTotal);
+            Progress.Set(iWorkSoFar);
             return base.UpdateProgress(iWorkTotal, iWorkSoFar);
         }
     }

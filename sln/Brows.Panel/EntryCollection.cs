@@ -1,19 +1,45 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     using Collections.ObjectModel;
     using Gui;
+    using Threading.Tasks;
 
     internal class EntryCollection : CollectionSource<IEntry>, IEntryCollection, IControlled<IEntryCollectionController> {
         private readonly List<string> Columns = new List<string>();
+
+        private TaskHandler TaskHandler =>
+            _TaskHandler ?? (
+            _TaskHandler = new TaskHandler<EntryCollection>());
+        private TaskHandler _TaskHandler;
 
         private IEntryColumn Column(string key) {
             if (ColumnInfo.TryGetValue(key, out var value)) {
                 return value;
             }
             return null;
+        }
+
+        private async Task Sort(IReadOnlyDictionary<string, EntrySortDirection?> sorting) {
+            if (sorting == null) {
+                Sorting = null;
+                Controller?.Sort(null);
+            }
+            else {
+                if (sorting.Count > 0) {
+                    var entries = List;
+                    var ready = sorting
+                        .Where(s => s.Value.HasValue)
+                        .SelectMany(s => entries.Select(e => e[s.Key].Ready));
+                    await Task.WhenAll(ready);
+                }
+                Sorting = sorting;
+                Controller?.Sort(Sorting);
+            }
         }
 
         private void Controller_CurrentChanged(object sender, EventArgs e) {
@@ -91,14 +117,20 @@ namespace Brows {
                     var
                     dict = Sorting.ToDictionary(pair => pair.Key, pair => pair.Value);
                     dict[key] = cycle;
-                    Sorting = dict;
-                    Controller?.Sort(Sorting);
+                    TaskHandler.Begin(() => Sort(dict));
                 }
             },
             canExecute: _ => true);
 
-        public bool Add(IEntry item) {
+        public async Task<bool> Add(IEntry item, CancellationToken cancellationToken) {
             if (item != null) {
+                var sorting = Sorting;
+                if (sorting.Count > 0) {
+                    var ready = sorting
+                        .Where(s => s.Value.HasValue)
+                        .Select(s => item[s.Key].Ready);
+                    await Task.WhenAll(ready);
+                }
                 List.Add(item);
                 return true;
             }
@@ -186,10 +218,7 @@ namespace Brows {
                 }
                 names[i] = k;
             }
-            if (kDict.Count > 0) {
-                Sorting = kDict;
-                Controller?.Sort(kDict);
-            }
+            TaskHandler.Begin(() => Sort(kDict));
             return names;
         }
 

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows.Controls;
 
 namespace Brows.Gui {
-    using Extensions;
     using Logger;
+    using System.Windows.Data;
 
     internal class EntryCollectionController : CollectionController<IEntryCollectionController>, IEntryCollectionController {
         private static readonly ILog Log = Logging.For(typeof(EntryCollectionController));
@@ -14,6 +13,11 @@ namespace Brows.Gui {
         private Dictionary<string, List<EntryGridViewColumnProxy>> Columns = new Dictionary<string, List<EntryGridViewColumnProxy>>();
         private ListView ListView => UserControl.ListView;
         private GridView GridView => UserControl.ListView.GridView;
+
+        private ListCollectionView ListCollectionView =>
+            _ListCollectionView ?? (
+            _ListCollectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(ListView.ItemsSource));
+        private ListCollectionView _ListCollectionView;
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             var selectedEntries = ListView.SelectedItems.OfType<IEntry>().ToList();
@@ -100,41 +104,24 @@ namespace Brows.Gui {
         }
 
         public void Sort(IReadOnlyDictionary<string, EntrySortDirection?> sorting) {
-            var listViewItems = ListView.Items;
-            var liveSorting = listViewItems.LiveSortingProperties;
-            var sortDescriptions = listViewItems.SortDescriptions;
-            using (listViewItems.DeferRefresh()) {
-                listViewItems.IsLiveSorting = true;
-                liveSorting.Clear();
-                sortDescriptions.Clear();
-                if (sorting == null) {
-                    foreach (var list in Columns.Values) {
-                        foreach (var column in list) {
+            foreach (var list in Columns.Values) {
+                foreach (var column in list) {
+                    if (sorting == null) {
+                        column.Sorting(null);
+                    }
+                    else {
+                        if (sorting.TryGetValue(column.Key, out var value)) {
+                            column.Sorting(value);
+                        }
+                        else {
                             column.Sorting(null);
                         }
                     }
                 }
-                else {
-                    foreach (var pair in sorting) {
-                        var key = pair.Key;
-                        var dir = pair.Value;
-                        var list = List(key);
-                        var path = default(string);
-                        foreach (var column in list) {
-                            column.Sorting(dir);
-                            path = column.BindingValuePath;
-                        }
-                        if (path != null) {
-                            if (dir.HasValue) {
-                                liveSorting.Add(path);
-                                sortDescriptions.Add(new SortDescription(
-                                    propertyName: path,
-                                    direction: dir.Value.ToListSortDirection()));
-                            }
-                        }
-                    }
-                }
             }
+            ListCollectionView.CustomSort = sorting == null
+                ? null
+                : new EntryComparer(sorting);
         }
 
         public void AddColumn(string key, IEntryColumn info) {
@@ -144,6 +131,16 @@ namespace Brows.Gui {
             var
             list = List(key);
             list.Add(col);
+
+            var sort = ListCollectionView.CustomSort as EntryComparer;
+            if (sort != null) {
+                var sorting = sort.Sort;
+                if (sorting != null) {
+                    if (sorting.TryGetValue(key, out var value)) {
+                        col.Sorting(value);
+                    }
+                }
+            }
         }
 
         public bool RemoveColumn(string key) {

@@ -51,16 +51,16 @@ namespace Brows.Commands {
             }
         }
 
-        protected sealed override async IAsyncEnumerable<ICommandSuggestion> ProtectedSuggestAsync(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
+        protected sealed override async IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             await foreach (var suggestion in SuggestHistory(context, cancellationToken)) {
                 yield return suggestion;
             }
-            await foreach (var suggestion in base.ProtectedSuggestAsync(context, cancellationToken)) {
+            await foreach (var suggestion in base.Suggest(context, cancellationToken)) {
                 yield return suggestion;
             }
         }
 
-        protected sealed override async Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) {
+        protected sealed override async Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasKey(out _)) {
                 if (context.HasCommander(out var commander)) {

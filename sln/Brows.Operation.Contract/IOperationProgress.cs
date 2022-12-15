@@ -3,7 +3,11 @@ using System.Threading;
 namespace Brows {
     public interface IOperationProgress {
         CancellationToken CancellationToken { get; }
-        void Target(long value);
-        void Progress(long value);
+        IOperationProgressInfo Info { get; }
+        IOperationProgressTarget Target { get; }
+        long Get();
+        void Add(long value);
+        void Set(long value);
+        IOperable Child(string name);
     }
 }

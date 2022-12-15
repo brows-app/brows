@@ -13,7 +13,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             //if (context.HasKey(out var gesture)) {
             //    if (gesture.Equals(TriggerSelectAll.Gesture)) {

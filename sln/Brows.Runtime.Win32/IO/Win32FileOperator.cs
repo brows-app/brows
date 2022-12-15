@@ -181,7 +181,7 @@ namespace Brows.IO {
 
                     if (aborted) {
                         if (Log.Warn()) {
-                            Log.Warn($"{nameof(Deploy)} aborted");
+                            Log.Warn($"{nameof(Operate)} aborted");
                         }
                     }
                 }
@@ -191,8 +191,13 @@ namespace Brows.IO {
         protected override async Task ProtectedDeploy(CancellationToken cancellationToken) {
             var progress = Payload.NativeProgress
                 ? null
-                : Operation(cancellationToken, "Operation", "{0}", "Operation");
-            await ThreadPool.Work(nameof(Operate), async token => await Operate(progress, token), cancellationToken);
+                : Operation(cancellationToken, "Operation");
+            await ThreadPool.Work(
+                name: nameof(Operate),
+                work: async cancellationToken => {
+                    await Operate(progress, cancellationToken);
+                },
+                cancellationToken: cancellationToken);
         }
 
         public string Directory =>

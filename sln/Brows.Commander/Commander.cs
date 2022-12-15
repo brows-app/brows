@@ -80,7 +80,7 @@ namespace Brows {
                 var context = new CommandContext(this, trigger);
                 foreach (var command in commands) {
                     if (command.Workable(context)) {
-                        command.WorkAsync(context, default).ContinueWith(task => {
+                        command.Work(context, default).ContinueWith(task => {
                             var exception = task.Exception;
                             if (exception != null) {
                                 if (Log.Warn()) {
@@ -224,8 +224,9 @@ namespace Brows {
                     nameof(RemovePanel),
                     $"{nameof(panel)} > {panel}");
             }
-            await PanelCollection.Remove(panel, cancellationToken);
+            PanelCollection.Remove(panel);
             Controller?.RemovePanel(panel);
+            await Task.CompletedTask;
         }
 
         public Task ShowPalette(string input, CancellationToken cancellationToken) {

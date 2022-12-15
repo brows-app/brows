@@ -15,7 +15,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasPanel(out var active)) {
                 if (context.HasKey(out _)) {
@@ -51,7 +51,7 @@ namespace Brows.Commands {
                 if (context.HasParameter(out var parameter)) {
                     var pattern = parameter.Name?.Trim() ?? "";
                     var list = await Renamer.Rename(context, pattern, cancellationToken);
-                    await active.Deploy(renameEntries: list, cancellationToken: cancellationToken);
+                    active.Deploy(renameEntries: list);
                     return true;
                 }
             }

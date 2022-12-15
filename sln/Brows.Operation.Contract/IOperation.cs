@@ -5,7 +5,6 @@ namespace Brows {
         event EventHandler RelevantChanged;
 
         string Name { get; }
-        string Description { get; }
         int Depth { get; }
         long Target { get; }
         long Progress { get; }

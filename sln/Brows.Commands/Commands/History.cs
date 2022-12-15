@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands {
     internal class History : Command, ICommandExport {
-        protected override async IAsyncEnumerable<ICommandSuggestion> ProtectedSuggestAsync(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
+        protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             if (context == null) yield break;
             if (context.HasInput(out var input)) {
                 if (context.HasCommander(out var commander)) {
@@ -28,7 +28,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasInput(out var input)) {
                 if (context.HasCommander(out var commander)) {

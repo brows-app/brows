@@ -19,7 +19,7 @@ namespace Brows {
         private DriveType? DriveType;
         private bool? IsReady;
         private string Name;
-        private bool Refreshed;
+        private Task Refreshed;
         private bool Refreshing;
         private DirectoryInfo RootDirectory;
         private long? TotalFreeSpace;
@@ -27,7 +27,6 @@ namespace Brows {
         private string VolumeLabel;
 
         private readonly CancellationToken CancellationToken;
-        private readonly object Locker = new object();
 
         private static DriveInfoWrapper Default { get; } = new DriveInfoWrapper(null, default);
 
@@ -43,62 +42,58 @@ namespace Brows {
 
         private static IEnumerable<(IEntryData Data, double Width)> ColumnTable(DriveInfoWrapper item) {
             return new List<(IEntryData, double)> {
-                (new DataItem(nameof(AvailableFreeSpace), item, i => i.AvailableFreeSpace) { Alignment = Align.Right, Converter = EntryDataConverter.FileSystemSize },
+                (DataItem.For(nameof(AvailableFreeSpace), item, i => i.AvailableFreeSpace, alignment: Align.Right, converter: EntryDataConverter.FileSystemSize),
                     75),
-                (new DataItem(nameof(DriveFormat), item, i => i.DriveFormat),
+                (DataItem.For(nameof(DriveFormat), item, i => i.DriveFormat),
                     75),
-                (new DataItem(nameof(DriveType), item, i => i.DriveType),
+                (DataItem.For(nameof(DriveType), item, i => i.DriveType),
                     75),
-                (new DataItem(nameof(IsReady), item, i => i.IsReady) { Converter = EntryDataConverter.BooleanYesNo },
+                (DataItem.For(nameof(IsReady), item, i => i.IsReady, converter: EntryDataConverter.BooleanYesNo),
                     75),
-                (new DataItem(nameof(Name), item, i => i.Name),
+                (DataItem.For(nameof(Name), item, i => i.Name),
                     250),
-                (new DataItem(nameof(RootDirectory), item, i => i.RootDirectory),
+                (DataItem.For(nameof(RootDirectory), item, i => i.RootDirectory),
                     75),
-                (new DataItem(nameof(TotalFreeSpace), item, i => i.TotalFreeSpace) { Alignment = Align.Right, Converter = EntryDataConverter.FileSystemSize },
+                (DataItem.For(nameof(TotalFreeSpace), item, i => i.TotalFreeSpace, alignment: Align.Right, converter: EntryDataConverter.FileSystemSize),
                     75),
-                (new DataItem(nameof(TotalSize), item, i => i.TotalSize) { Alignment = Align.Right, Converter = EntryDataConverter.FileSystemSize },
+                (DataItem.For(nameof(TotalSize), item, i => i.TotalSize, alignment: Align.Right, converter: EntryDataConverter.FileSystemSize),
                     75),
-                (new DataItem(nameof(VolumeLabel), item, i => i.VolumeLabel),
+                (DataItem.For(nameof(VolumeLabel), item, i => i.VolumeLabel),
                     100)
             };
         }
 
-        private async Task<object> Get(Func<DriveInfoWrapper, object> func) {
+        private async Task<T> Get<T>(Func<DriveInfoWrapper, T> func) {
             if (null == func) throw new ArgumentNullException(nameof(func));
-            if (Refreshed == false) {
-                await Async.Run(CancellationToken, () => {
-                    lock (Locker) {
-                        if (Refreshed == false) {
-                            Refreshed = true;
-                            Refreshing = true;
-                            if (Log.Debug()) {
-                                Log.Debug(
-                                    nameof(Refreshing),
-                                    $"{nameof(Info)} > {Info}");
-                            }
-                            try {
-                                var info = Info;
-                                DriveType = info?.DriveType;
-                                Name = info?.Name;
-                                RootDirectory = info?.RootDirectory;
+            if (Refreshed == null) {
+                Refreshed = Async.Run(CancellationToken, () => {
+                    Refreshing = true;
+                    if (Log.Debug()) {
+                        Log.Debug(
+                            nameof(Refreshing),
+                            $"{nameof(Info)} > {Info}");
+                    }
+                    try {
+                        var info = Info;
+                        DriveType = info?.DriveType;
+                        Name = info?.Name;
+                        RootDirectory = info?.RootDirectory;
 
-                                var ready = IsReady = info?.IsReady;
-                                if (ready == true) {
-                                    AvailableFreeSpace = info?.AvailableFreeSpace;
-                                    DriveFormat = info?.DriveFormat;
-                                    TotalFreeSpace = info?.TotalFreeSpace;
-                                    TotalSize = info?.TotalSize;
-                                    VolumeLabel = info?.VolumeLabel;
-                                }
-                            }
-                            finally {
-                                Refreshing = false;
-                            }
+                        var ready = IsReady = info?.IsReady;
+                        if (ready == true) {
+                            AvailableFreeSpace = info?.AvailableFreeSpace;
+                            DriveFormat = info?.DriveFormat;
+                            TotalFreeSpace = info?.TotalFreeSpace;
+                            TotalSize = info?.TotalSize;
+                            VolumeLabel = info?.VolumeLabel;
                         }
+                    }
+                    finally {
+                        Refreshing = false;
                     }
                 });
             }
+            await Refreshed;
             return func(this);
         }
 
@@ -127,24 +122,32 @@ namespace Brows {
             return new DriveInfoWrapper(info, cancellationToken);
         }
 
-        private sealed class DataItem : EntryData {
-            protected sealed override Task<object> Access() {
+        private static class DataItem {
+            public static DataItem<T> For<T>(string name, DriveInfoWrapper wrap, Func<DriveInfoWrapper, T> func, IEntryDataConverter converter = null, EntryDataAlignment? alignment = null) {
+                return new DataItem<T>(name, wrap, func) {
+                    Alignment = alignment ?? EntryDataAlignment.Default,
+                    Converter = converter
+                };
+            }
+        }
+
+        private sealed class DataItem<T> : EntryData<T> {
+            protected sealed override Task<T> Access(CancellationToken cancellationToken) {
                 return Wrap.Get(Func);
+            }
+
+            protected sealed override void Refresh() {
+                Wrap.Refreshed = null;
             }
 
             public string Name { get; }
             public DriveInfoWrapper Wrap { get; }
-            public Func<DriveInfoWrapper, object> Func { get; }
+            public Func<DriveInfoWrapper, T> Func { get; }
 
-            public DataItem(string name, DriveInfoWrapper wrap, Func<DriveInfoWrapper, object> func) : base(name) {
+            public DataItem(string name, DriveInfoWrapper wrap, Func<DriveInfoWrapper, T> func) : base(name, wrap?.CancellationToken ?? default) {
                 Wrap = wrap ?? throw new ArgumentNullException(nameof(wrap));
                 Name = name;
                 Func = func;
-            }
-
-            public sealed override void Refresh() {
-                Wrap.Refreshed = false;
-                base.Refresh();
             }
         }
     }

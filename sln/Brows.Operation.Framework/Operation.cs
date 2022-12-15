@@ -14,7 +14,7 @@ namespace Brows {
 
         public object CancelCommand => Request.Create(
             owner: this,
-            execute: _ => { } /*Cancel()*/,
+            execute: _ => Cancel(),
             canExecute: _ => Progressing && !Canceling,
             dependencies: new[] {
                 nameof(Progressing),
@@ -27,7 +27,7 @@ namespace Brows {
             dependencies: new[] {
                 nameof(Progressing) });
 
-        public Operation(OperationInfo info) : base(info) {
+        public Operation(string name) : base(name) {
         }
     }
 }

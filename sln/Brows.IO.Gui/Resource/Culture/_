@@ -19,6 +19,7 @@ FileSystemEntryData_CreationTime        = Date created
 FileSystemEntryData_CreationTimeUtc     = Date created (UTC)
 FileSystemEntryData_DirectorySize       = Directory size
 FileSystemEntryData_Extension           = Ext
+FileSystemEntryData_Kind                = Type
 FileSystemEntryData_LastAccessTime      = Date accessed
 FileSystemEntryData_LastAccessTimeUtc   = Date accessed (UTC)
 FileSystemEntryData_LastWriteTime       = Date modified

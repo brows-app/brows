@@ -24,6 +24,8 @@ namespace Brows {
             _SuggestionGroupKey = $"Command_Group_{nameof(Command)}");
         private string _SuggestionGroupKey;
 
+        protected static Task<bool> Completed { get; } = Task.FromResult(true);
+
         protected CommandSuggestionRelevance SuggestionRelevance =>
             _SuggestionRelevance ?? (
             _SuggestionRelevance = new CommandSuggestionRelevance());
@@ -70,15 +72,25 @@ namespace Brows {
             };
         }
 
-        protected virtual bool ProtectedWorkable(ICommandContext context) {
+        protected bool Operate(ICommandContext context, Func<IOperationProgress, CancellationToken, Task> task, Func<Task> then = null) {
+            if (context == null) return false;
+            if (context.HasPanel(out var active) == false) return false;
+            active.Operate(
+                name: context.HasInput(out var input) ? input : GetType().Name,
+                task: task,
+                then: then);
             return true;
         }
 
-        protected virtual Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) {
+        protected virtual bool Workable(ICommandContext context) {
+            return true;
+        }
+
+        protected virtual Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
             return Task.FromResult(false);
         }
 
-        protected virtual async IAsyncEnumerable<ICommandSuggestion> ProtectedSuggestAsync(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
+        protected virtual async IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             if (context == null) yield break;
             if (context.HasInfo(out var info)) {
                 var command = info.Command;
@@ -116,22 +128,22 @@ namespace Brows {
             _KeyboardTriggers = new HashSet<KeyboardTrigger>(DefaultTriggers.OfType<KeyboardTrigger>()));
         private IEnumerable<KeyboardTrigger> _KeyboardTriggers;
 
-        public bool Workable(ICommandContext context) {
-            return ProtectedWorkable(context);
-        }
-
-        public Task<bool> WorkAsync(ICommandContext context, CancellationToken cancellationToken) {
-            return ProtectedWorkAsync(context, cancellationToken);
-        }
-
-        public IAsyncEnumerable<ICommandSuggestion> SuggestAsync(ICommandContext context, CancellationToken cancellationToken) {
-            return ProtectedSuggestAsync(context, cancellationToken);
-        }
-
         protected class ArgumentAttribute : CommandArgumentAttribute {
         }
 
         protected class SwitchAttribute : CommandSwitchAttribute {
+        }
+
+        bool ICommand.Workable(ICommandContext context) {
+            return Workable(context);
+        }
+
+        Task<bool> ICommand.Work(ICommandContext context, CancellationToken cancellationToken) {
+            return Work(context, cancellationToken);
+        }
+
+        IAsyncEnumerable<ICommandSuggestion> ICommand.Suggest(ICommandContext context, CancellationToken cancellationToken) {
+            return Suggest(context, cancellationToken);
         }
     }
 
@@ -151,13 +163,13 @@ namespace Brows {
             return new Context(context, CommandLine.Parser);
         }
 
-        protected virtual bool ProtectedWorkable(Context context) => base.ProtectedWorkable(context);
-        protected virtual Task<bool> ProtectedWorkAsync(Context context, CancellationToken cancellationToken) => base.ProtectedWorkAsync(context, cancellationToken);
-        protected virtual IAsyncEnumerable<ICommandSuggestion> ProtectedSuggestAsync(Context context, CancellationToken cancellationToken) => base.ProtectedSuggestAsync(context, cancellationToken);
+        protected virtual bool Workable(Context context) => base.Workable(context);
+        protected virtual Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) => base.Work(context, cancellationToken);
+        protected virtual IAsyncEnumerable<ICommandSuggestion> SuggestAsync(Context context, CancellationToken cancellationToken) => base.Suggest(context, cancellationToken);
 
-        protected sealed override bool ProtectedWorkable(ICommandContext context) => ProtectedWorkable(NewContext(context));
-        protected sealed override Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) => ProtectedWorkAsync(NewContext(context), cancellationToken);
-        protected sealed override IAsyncEnumerable<ICommandSuggestion> ProtectedSuggestAsync(ICommandContext context, CancellationToken cancellationToken) => ProtectedSuggestAsync(NewContext(context), cancellationToken);
+        protected sealed override bool Workable(ICommandContext context) => Workable(NewContext(context));
+        protected sealed override Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) => WorkAsync(NewContext(context), cancellationToken);
+        protected sealed override IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, CancellationToken cancellationToken) => SuggestAsync(NewContext(context), cancellationToken);
 
         public override string HelpLine => Help.HelpLine;
 

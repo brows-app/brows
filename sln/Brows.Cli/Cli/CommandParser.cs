@@ -65,13 +65,16 @@ namespace Brows.Cli {
                         j += (argSetCount - 1);
                     }
                     else {
-                        var count = argSetCount = argProperty.Set(new[] { tokens[i + j] }, argOrd, obj);
+                        var arguments = tokens.Skip(i + j).Take(1).ToArray();
+                        var count = argSetCount = argProperty.Set(arguments, argOrd, obj);
                         if (count > 0) {
                             argSet = true;
                             argOrd++;
                         }
                         else {
-                            argSet = false;
+                            if (argProperty.Required) {
+                                argSet = false;
+                            }
                         }
                     }
                     i += j;

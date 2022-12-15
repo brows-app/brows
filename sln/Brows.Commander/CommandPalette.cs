@@ -187,7 +187,7 @@ namespace Brows {
 
         private async Task<bool> Execute(IEnumerable<ICommand> options, ICommandContext context) {
             foreach (var command in options) {
-                var worked = await command.WorkAsync(context, CancellationToken.None);
+                var worked = await command.Work(context, CancellationToken.None);
                 if (worked) {
                     if (context.HasFlag(out var flag)) {
                         if (flag.PersistInput) {

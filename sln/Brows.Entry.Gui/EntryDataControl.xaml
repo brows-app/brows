@@ -15,10 +15,13 @@
             </Style.Triggers>
         </Style>
     </UserControl.Style>
-    <local:EntryDataTextBlock Text="{Binding ConvertedValue}">
+    <local:EntryDataTextBlock>
         <local:EntryDataTextBlock.Style>
             <Style TargetType="{x:Type local:EntryDataTextBlock}" BasedOn="{StaticResource {x:Type local:EntryDataTextBlock}}">
                 <Style.Triggers>
+                    <DataTrigger Binding="{Binding Ready}" Value="True">
+                        <Setter Property="Text" Value="{Binding Display}"/>
+                    </DataTrigger>
                     <DataTrigger Binding="{Binding AccessingFlag}" Value="True">
                         <Setter Property="Foreground" Value="{DynamicResource Global_Warning_Foreground_Brush}"/>
                     </DataTrigger>

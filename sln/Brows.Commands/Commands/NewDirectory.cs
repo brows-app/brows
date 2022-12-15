@@ -13,7 +13,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasPanel(out var active)) {
                 if (context.HasKey(out _)) {
@@ -28,7 +28,7 @@ namespace Brows.Commands {
                     var dir = parameter.DirectoryName?.Trim() ?? "";
                     var open = parameter.Open;
                     if (dir != "") {
-                        await active.Deploy(cancellationToken, createDirectories: new[] { dir }, then: async () => {
+                        active.Deploy(createDirectories: new[] { dir }, then: async () => {
                             if (open) {
                                 await active.OpenCreated(dir, cancellationToken);
                             }

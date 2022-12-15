@@ -22,7 +22,7 @@
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Error}" Value="{x:Null}">
                     <Setter Property="Background" Value="{DynamicResource OperationControl_Default_Background}"/>
-                    <Setter Property="ToolTip" Value="{Binding Description}"/>
+                    <Setter Property="ToolTip" Value="{Binding Data}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Relevant}" Value="True">
                     <Setter Property="Visibility" Value="Visible"/>
@@ -39,6 +39,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Depth"/>
                 <ColumnDefinition SharedSizeGroup="Name"/>
+                <ColumnDefinition SharedSizeGroup="Data"/>
                 <ColumnDefinition SharedSizeGroup="Progress"/>
                 <ColumnDefinition SharedSizeGroup="Target"/>
                 <ColumnDefinition/>
@@ -46,18 +47,19 @@
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="{Binding DepthString}" TextAlignment="Right"/>
             <TextBlock Grid.Column="1" Text="{Binding Name}"/>
-            <TextBlock Grid.Column="2" Text="{Binding Progress, Mode=OneWay, Converter={x:Static brows:ValueConverter.FileSize}, ConverterParameter='0.00'}"/>
-            <TextBlock Grid.Column="3" Text="{Binding Target, Mode=OneWay, Converter={x:Static brows:ValueConverter.FileSize}, ConverterParameter='0.00'}"/>
+            <TextBlock Grid.Column="2" Text="{Binding Data}"/>
+            <TextBlock Grid.Column="3" Text="{Binding Progress}"/>
+            <TextBlock Grid.Column="4" Text="{Binding Target}"/>
             <local:OperationProgressBar 
-                Grid.Column="4" 
+                Grid.Column="5" 
                 Maximum="100" 
                 Value="{Binding ProgressPercent, Mode=OneWay}" 
                 Visibility="{Binding Error, Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Collapsed, FallbackValue=Visible}"/>
             <TextBlock 
-                Grid.Column="4"
+                Grid.Column="5"
                 Text="{Binding Error.Message}"
                 Visibility="{Binding Error, Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
-            <ContentControl Grid.Column="5">
+            <ContentControl Grid.Column="6">
                 <ContentControl.Style>
                     <Style TargetType="ContentControl">
                         <Setter Property="Content" Value="{x:Null}"/>

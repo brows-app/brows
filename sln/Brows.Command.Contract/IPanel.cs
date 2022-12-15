@@ -8,6 +8,7 @@ namespace Brows {
         int Column { get; }
         bool Active { get; }
         bool Activated { get; }
+        string Directory { get; }
         double ControlWidth { get; }
         double ControlHeight { get; }
         IPanelID ID { get; }
@@ -24,9 +25,10 @@ namespace Brows {
         Task<bool> HistoryBack(CancellationToken cancellationToken);
         Task<bool> HistoryForward(CancellationToken cancellationToken);
         IEnumerable<IEntry> Selection();
-        Task Deploy(IPayload payload, CancellationToken cancellationToken, Func<Task> then = null);
-        Task Deploy(
-            CancellationToken cancellationToken,
+        void Operate(IEntryOperation operation, Func<Task> then = null);
+        void Operate(string name, Func<IOperationProgress, CancellationToken, Task> task, Func<Task> then = null);
+        void Deploy(IPayload payload, Func<Task> then = null);
+        void Deploy(
             IEnumerable<string> copyFiles = null,
             IEnumerable<string> moveFiles = null,
             IEnumerable<string> createFiles = null,

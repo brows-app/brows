@@ -4,39 +4,48 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
+    using System.Linq;
     using Triggers;
 
     internal class Sort : Keyed<Sort.Info>, ICommandExport {
+        protected override string Key(string arg) {
+            return arg.TrimEnd('<', '>', '!');
+        }
+
         protected override IEnumerable<ITrigger> DefaultTriggers {
             get {
                 yield return new InputTrigger("sort");
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (context.HasPanel(out var active)) {
                 if (context.HasParameter(out var parameter)) {
-                    var sorting = parameter.Parse();
+                    var sorting = parameter.Sorting;
                     var sorted = active.Entries.SortColumns(sorting);
-                    if (sorted[0] != null) {
-                        return true;
+                    if (sorted.Any(s => s != null)) {
+                        return await Completed;
                     }
                 }
             }
-            await Task.CompletedTask;
             return false;
         }
 
-        public class Info {
-            [Argument(Name = "key")]
-            public string Key { get; set; }
-
-            public IReadOnlyDictionary<string, EntrySortDirection?> Parse() {
-                return new Dictionary<string, EntrySortDirection?> {
-                    { Key, EntrySortDirection.Ascending }
-                };
-            }
+        public class Info : KeyedInfo {
+            public IReadOnlyDictionary<string, EntrySortDirection?> Sorting =>
+                _Sorting ?? (
+                _Sorting = List
+                    .Select(arg => (
+                        Key: arg.TrimEnd('<', '>', '!'),
+                        Dir:
+                            arg.EndsWith('<') ? EntrySortDirection.Ascending :
+                            arg.EndsWith('>') ? EntrySortDirection.Descending :
+                            arg.EndsWith('!') ? default(EntrySortDirection?) :
+                            EntrySortDirection.Ascending
+                    ))
+                    .ToDictionary(item => item.Key, item => item.Dir));
+            private IReadOnlyDictionary<string, EntrySortDirection?> _Sorting;
         }
     }
 }

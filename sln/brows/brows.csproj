@@ -17,6 +17,7 @@
         <ProjectReference Include="..\Brows.Commands.Process.Gui\Brows.Commands.Process.Gui.csproj" />
         <ProjectReference Include="..\Brows.Commands.Process\Brows.Commands.Process.csproj" />
         <ProjectReference Include="..\Brows.Entry.Gui\Brows.Entry.Gui.csproj" />
+        <ProjectReference Include="..\Brows.IO.Compression.Commands.Compress\Brows.IO.Compression.Commands.Compress.csproj" />
         <ProjectReference Include="..\Brows.Translation\Brows.Translation.csproj" />
         <ProjectReference Include="..\Brows.Gui.Logger\Brows.Gui.Logger.csproj" />
         <ProjectReference Include="..\Brows.IO.Commands.Find.Gui\Brows.IO.Commands.Find.Gui.csproj" />

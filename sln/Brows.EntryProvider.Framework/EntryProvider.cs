@@ -43,6 +43,7 @@ namespace Brows {
         public virtual IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns { get; }
         public virtual IBookmark Bookmark { get; }
         public virtual Image Icon { get; }
+        public virtual string Directory { get; }
 
         public string ParentID {
             get => _ParentID;

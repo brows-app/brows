@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,6 +7,10 @@ namespace Brows {
     using ComponentModel;
 
     public class PanelID : NotifyPropertyChanged, IPanelID {
+        private static readonly PropertyChangedEventArgs ErrorEventArgs = new(nameof(Error));
+        private static readonly PropertyChangedEventArgs CanonicalEventArgs = new(nameof(Canonical));
+        private static readonly PropertyChangedEventArgs ValueEventArgs = new(nameof(Value));
+
         protected virtual bool HasCanonicalValue => false;
 
         protected virtual Task<string> GetCanonicalValue(CancellationToken cancellationToken) {
@@ -16,19 +21,19 @@ namespace Brows {
 
         public Exception Error {
             get => _Error;
-            private set => Change(ref _Error, value, nameof(Error));
+            private set => Change(ref _Error, value, ErrorEventArgs);
         }
         private Exception _Error;
 
         public bool Canonical {
             get => _Canonical;
-            private set => Change(ref _Canonical, value, nameof(Canonical));
+            private set => Change(ref _Canonical, value, CanonicalEventArgs);
         }
         private bool _Canonical;
 
         public string Value {
             get => _Value;
-            private set => Change(ref _Value, value, nameof(Value));
+            private set => Change(ref _Value, value, ValueEventArgs);
         }
         private string _Value;
 

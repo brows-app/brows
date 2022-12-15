@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,23 +14,20 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (context.HasPanel(out var active)) {
                 if (context.HasParameter(out var parameter)) {
-                    var removed = active.Entries.RemoveColumns(parameter.Key);
+                    var removed = active.Entries.RemoveColumns(parameter.List.ToArray());
                     if (removed[0] != null) {
-                        return true;
+                        return await Completed;
                     }
                 }
             }
-            await Task.CompletedTask;
             return false;
         }
 
-        public class Info {
-            [Argument(Name = "key")]
-            public string Key { get; set; }
+        public class Info : KeyedInfo {
         }
     }
 }

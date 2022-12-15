@@ -1,8 +1,9 @@
+using System.ComponentModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows.Gui {
     using Logger;
-    using System.Threading.Tasks;
 
     public abstract class ImageSourceProvided : Image {
         public CancellationToken CancellationToken { get; }
@@ -13,6 +14,9 @@ namespace Brows.Gui {
     }
 
     public class ImageSourceProvided<TInput> : ImageSourceProvided {
+        private static readonly PropertyChangedEventArgs SourceLoadedEventArgs = new(nameof(SourceLoaded));
+        private static readonly PropertyChangedEventArgs SourceLoadingEventArgs = new(nameof(SourceLoading));
+
         private ILog Log =>
             _Log ?? (
             _Log = Logging.For(typeof(ImageSourceProvided<TInput>)));
@@ -46,13 +50,13 @@ namespace Brows.Gui {
 
         public bool SourceLoaded {
             get => _SourceLoaded;
-            private set => Change(ref _SourceLoaded, value, nameof(SourceLoaded));
+            private set => Change(ref _SourceLoaded, value, SourceLoadedEventArgs);
         }
         private bool _SourceLoaded;
 
         public bool SourceLoading {
             get => _SourceLoading;
-            private set => Change(ref _SourceLoading, value, nameof(SourceLoading));
+            private set => Change(ref _SourceLoading, value, SourceLoadingEventArgs);
         }
         private bool _SourceLoading;
 

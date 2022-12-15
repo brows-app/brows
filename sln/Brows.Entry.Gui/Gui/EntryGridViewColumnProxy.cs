@@ -47,11 +47,6 @@ namespace Brows.Gui {
             return column;
         }
 
-        public string BindingValuePath =>
-            _BindingValuePath ?? (
-            _BindingValuePath = $"Item[{Key}].Value");
-        private string _BindingValuePath;
-
         public string Key { get; }
         public IEntryColumn Info { get; }
 

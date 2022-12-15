@@ -14,7 +14,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (context.HasCommander(out var commander)) {
                 if (context.HasPanel(out var active)) {

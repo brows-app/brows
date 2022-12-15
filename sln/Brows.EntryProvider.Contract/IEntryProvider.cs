@@ -3,6 +3,7 @@ using System.Collections.Generic;
 namespace Brows {
     public interface IEntryProvider : IPanelProvider {
         string ParentID { get; }
+        string Directory { get; }
         IReadOnlySet<string> DataKeyDefaults { get; }
         IReadOnlySet<string> DataKeyOptions { get; }
         IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns { get; }

@@ -14,7 +14,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (context.HasPanel(out var active)) {
                 if (context.HasKey(out _)) {
@@ -29,8 +29,7 @@ namespace Brows.Commands {
                     var name = parameter.Name?.Trim() ?? "";
                     if (name != "") {
                         var open = parameter.Open;
-                        await active.Deploy(
-                            cancellationToken: cancellationToken,
+                        active.Deploy(
                             createFiles: new[] { name },
                             then: async () => {
                                 if (open) {

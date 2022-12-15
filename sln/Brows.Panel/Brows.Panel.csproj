@@ -6,6 +6,7 @@
         <ProjectReference Include="..\Brows.ComponentModel.NotifyPropertyChanged\Brows.ComponentModel.NotifyPropertyChanged.csproj" />
         <ProjectReference Include="..\Brows.Command.Contract\Brows.Command.Contract.csproj" />
         <ProjectReference Include="..\Brows.EntryProvider.Contract\Brows.EntryProvider.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Operation.Framework\Brows.Operation.Framework.csproj" />
         <ProjectReference Include="..\Brows.Threading.Tasks.TaskHandler\Brows.Threading.Tasks.TaskHandler.csproj" />
         <ProjectReference Include="..\Brows.Request\Brows.Request.csproj" />
     </ItemGroup>

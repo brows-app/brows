@@ -223,6 +223,9 @@ namespace Brows {
             _PanelID = new FileSystemPanelID(Info));
         private IPanelID _PanelID;
 
+        public override string Directory =>
+            PanelID.Value;
+
         public override IReadOnlySet<string> DataKeyDefaults => FileSystemEntryData.Defaults;
         public override IReadOnlySet<string> DataKeyOptions => FileSystemEntryData.Options;
         public override IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns => FileSystemEntryData.Columns;

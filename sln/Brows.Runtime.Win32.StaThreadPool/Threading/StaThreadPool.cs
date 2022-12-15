@@ -112,8 +112,8 @@ namespace Brows.Threading {
         }
 
         private async Task<TResult> Work<TResult>(string name, StaThreadWorkItem<TResult> item, CancellationToken cancellationToken) {
-            if (Log.Info()) {
-                Log.Info($"{nameof(Work)} [{name}]");
+            if (Log.Debug()) {
+                Log.Debug($"{nameof(Work)} [{name}]");
             }
             return await DoWork(item, cancellationToken);
         }

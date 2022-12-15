@@ -52,9 +52,7 @@ namespace Brows {
 
         private void Control_Drop(object sender, DropEventArgs e) {
             if (e != null) {
-                if (TaskHandler.Idle) {
-                    TaskHandler.Begin(Deploy(e.Payload, default));
-                }
+                Deploy(e.Payload, default);
             }
         }
 
@@ -79,7 +77,9 @@ namespace Brows {
             var d = new PanelDeployment(payload, this, Dialog, Operations, true);
             var op = Provider?.Operator(d);
             if (op != null) {
-                await op.Deploy(cancellationToken);
+                await using (op) {
+                    await op.Deploy(cancellationToken);
+                }
             }
         }
 
@@ -104,7 +104,7 @@ namespace Brows {
             EntryCollection.PropertyChanged -= EntryCollection_PropertyChanged;
             EntryCollection.SelectionChanged -= EntryCollection_SelectionChanged;
             EntryCollection.Clear();
-            EntryCollection.ClearSort();
+            //EntryCollection.ClearSort();
             EntryCollection.ColumnInfo = null;
             EntryCollection.ColumnLookup = null;
             EntryCollection.ColumnDefaults = null;
@@ -168,9 +168,8 @@ namespace Brows {
             return true;
         }
 
-        public Panel(EntryProviderFactoryCollection providerFactory) {
-            ProviderFactory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
-        }
+        public string Directory =>
+            Provider?.Directory;
 
         public Action<Panel> Activating {
             get => _Activating;
@@ -297,8 +296,6 @@ namespace Brows {
         }
         private IOperationCollection _Operations;
 
-        public EntryProviderFactoryCollection ProviderFactory { get; }
-
         public object HistoryBackRequest => Request.CreateAsync(
             owner: this,
             execute: async (_, token) => await HistoryBack(token),
@@ -313,6 +310,12 @@ namespace Brows {
             owner: this,
             execute: async (_, token) => await OpenParent(token),
             canExecute: _ => true);
+
+        public EntryProviderFactoryCollection ProviderFactory { get; }
+
+        public Panel(EntryProviderFactoryCollection providerFactory) {
+            ProviderFactory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
+        }
 
         public async Task Open(string id, CancellationToken cancellationToken) {
             if (Log.Info()) {
@@ -356,12 +359,11 @@ namespace Brows {
             return false;
         }
 
-        public async Task Close(CancellationToken cancellationToken) {
+        public void Close() {
             if (Log.Info()) {
                 Log.Info(nameof(Close));
             }
             Stop();
-            await Task.CompletedTask;
         }
 
         public async Task<bool> HistoryBack(CancellationToken cancellationToken) {
@@ -423,25 +425,16 @@ namespace Brows {
                 .ToList();
         }
 
-        public Task Deploy(IPayload payload, CancellationToken cancellationToken, Func<Task> then = null) {
-            var task = DeployAsync(payload, cancellationToken);
-            if (then != null) {
-                var scheduler = TaskScheduler.Default;
-                var continuationOptions =
-                    TaskContinuationOptions.AttachedToParent |
-                    TaskContinuationOptions.ExecuteSynchronously |
-                    TaskContinuationOptions.HideScheduler |
-                    TaskContinuationOptions.OnlyOnRanToCompletion;
-                task = task.ContinueWith(_ => {
-                    TaskHandler.Begin(then());
-                }, cancellationToken, continuationOptions, scheduler);
-            }
-            TaskHandler.Begin(task);
-            return Task.CompletedTask;
+        public void Deploy(IPayload payload, Func<Task> then = null) {
+            TaskHandler.Begin(async (cancellationToken) => {
+                await DeployAsync(payload, cancellationToken);
+                if (then != null) {
+                    await then();
+                }
+            });
         }
 
-        public Task Deploy(
-            CancellationToken cancellationToken,
+        public void Deploy(
             IEnumerable<string> copyFiles = null,
             IEnumerable<string> moveFiles = null,
             IEnumerable<string> createFiles = null,
@@ -458,7 +451,7 @@ namespace Brows {
             bool? nativeRenameOnCollision = null,
             bool? nativeFailEarly = null,
             Func<Task> then = null) {
-            return Deploy(cancellationToken: cancellationToken, then: then, payload: new PanelPayload {
+            Deploy(then: then, payload: new PanelPayload {
                 CopyEntries = copyEntries,
                 CopyFiles = copyFiles,
                 CreateDirectories = createDirectories,
@@ -493,23 +486,47 @@ namespace Brows {
             Activated = false;
         }
 
+        public void Operate(IEntryOperation operation, Func<Task> then = null) {
+            if (null == operation) throw new ArgumentNullException(nameof(operation));
+            TaskHandler.Begin(async () => {
+                await using (var manager = new OperationManager(Operations, Dialog)) {
+                    var operable = manager.Operable(name: operation.Name);
+                    await operable.Operate(operation.Task);
+                }
+                if (then != null) {
+                    await then();
+                }
+            });
+        }
+
+        public void Operate(string name, Func<IOperationProgress, CancellationToken, Task> task, Func<Task> then = null) {
+            Operate(
+                operation: new PanelOperation {
+                    Name = name,
+                    Task = task
+                },
+                then: then);
+        }
+
         IPanelProvider IPanel.Provider => Provider;
 
         Task IEntryProviderTarget.Add(IEntry entry, CancellationToken cancellationToken) {
             if (entry != null) {
                 entry.Begin(this);
-                EntryCollection.Add(entry);
-                if (EntryCollection.CurrentItem == null) {
-                    var currentHistory = History.Current;
-                    if (currentHistory != null) {
-                        if (currentHistory.CurrentEntryID == entry.ID) {
-                            EntryCollection.MoveCurrentItemTo(entry);
-                            if (Active) {
-                                Activate();
+                TaskHandler.Begin(async () => {
+                    await EntryCollection.Add(entry, cancellationToken);
+                    if (EntryCollection.CurrentItem == null) {
+                        var currentHistory = History.Current;
+                        if (currentHistory != null) {
+                            if (currentHistory.CurrentEntryID == entry.ID) {
+                                EntryCollection.MoveCurrentItemTo(entry);
+                                if (Active) {
+                                    Activate();
+                                }
                             }
                         }
                     }
-                }
+                });
             }
             return Task.CompletedTask;
         }

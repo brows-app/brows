@@ -13,6 +13,21 @@ namespace Brows.IO {
             return await Async.Run(cancellationToken, () => fileInfo.Exists);
         }
 
+        public static async Task<long> LengthAsync(this FileInfo fileInfo, CancellationToken cancellationToken) {
+            if (fileInfo == null) throw new ArgumentNullException(nameof(fileInfo));
+            return await Async.Run(cancellationToken, () => fileInfo.Length);
+        }
+
+        public static async Task<DateTime> LastWriteTimeAsync(this FileInfo fileInfo, CancellationToken cancellationToken) {
+            if (fileInfo == null) throw new ArgumentNullException(nameof(fileInfo));
+            return await Async.Run(cancellationToken, () => fileInfo.LastWriteTime);
+        }
+
+        public static async Task<DateTime> LastWriteTimeUtcAsync(this FileInfo fileInfo, CancellationToken cancellationToken) {
+            if (fileInfo == null) throw new ArgumentNullException(nameof(fileInfo));
+            return await Async.Run(cancellationToken, () => fileInfo.LastWriteTimeUtc);
+        }
+
         public static async Task<FileInfo> TryNewAsync(string path, CancellationToken cancellationToken) {
             return await Async.Run(cancellationToken, () => {
                 try {

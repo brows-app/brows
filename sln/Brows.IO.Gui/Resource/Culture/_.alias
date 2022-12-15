@@ -30,6 +30,8 @@ Extension           = ext
 
 IsReady             = ready
 
+Kind                = type
+
 LastAccessTime      = date-accessed
 LastAccessTimeUtc   = date-accessed-utc
 

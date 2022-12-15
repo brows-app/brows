@@ -1,11 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Brows {
     using ComponentModel;
 
     internal class CommandSuggestion : NotifyPropertyChanged, ICommandSuggestion {
+        private static readonly PropertyChangedEventArgs HelpEventArgs = new(nameof(Help));
+        private static readonly PropertyChangedEventArgs RelevanceEventArgs = new(nameof(Relevance));
+        private static readonly PropertyChangedEventArgs InputEventArgs = new(nameof(Input));
+        private static readonly PropertyChangedEventArgs GroupEventArgs = new(nameof(Group));
+        private static readonly PropertyChangedEventArgs DescriptionEventArgs = new(nameof(Description));
+        private static readonly PropertyChangedEventArgs[] DescriptionExistsEventArgs = new PropertyChangedEventArgs[] {
+            new(nameof(DescriptionExists))
+        };
+
         private IEnumerable<string> InputAliases =>
             Command.InputTriggers.SelectMany(trigger => trigger.Alias).Distinct();
 
@@ -14,31 +24,31 @@ namespace Brows {
 
         public string Help {
             get => _Help ?? Input;
-            set => Change(ref _Help, value, nameof(Help));
+            set => Change(ref _Help, value, HelpEventArgs);
         }
         private string _Help;
 
         public int Relevance {
             get => _Relevance;
-            set => Change(ref _Relevance, value, nameof(Relevance));
+            set => Change(ref _Relevance, value, RelevanceEventArgs);
         }
         private int _Relevance;
 
         public string Input {
             get => _Input;
-            set => Change(ref _Input, value, nameof(Input));
+            set => Change(ref _Input, value, InputEventArgs);
         }
         private string _Input;
 
         public string Group {
             get => _Group;
-            set => Change(ref _Group, value, nameof(Group));
+            set => Change(ref _Group, value, GroupEventArgs);
         }
         private string _Group;
 
         public string Description {
             get => _Description;
-            set => Change(ref _Description, value, nameof(Description), nameof(DescriptionExists));
+            set => Change(ref _Description, value, DescriptionEventArgs, DescriptionExistsEventArgs);
         }
         private string _Description;
 

@@ -17,10 +17,10 @@ namespace Brows {
             Active = panel;
         }
 
-        private async Task<bool> Closed(Panel panel, CancellationToken cancellationToken) {
+        private bool Closed(Panel panel) {
             if (panel != null) {
                 panel.Activating = null;
-                await panel.Close(cancellationToken);
+                panel.Close();
                 return true;
             }
             return false;
@@ -46,7 +46,7 @@ namespace Brows {
                 Dialog = dialog,
                 Operations = operations,
                 Activating = Activating,
-                Column = List.Count,
+                Column = Count,
                 SharedHistory = SharedHistory
             };
 
@@ -58,10 +58,10 @@ namespace Brows {
             return panel;
         }
 
-        public async Task Remove(IPanel item, CancellationToken cancellationToken) {
+        public void Remove(IPanel item) {
             if (null == item) throw new ArgumentNullException(nameof(item));
 
-            var closed = await Closed(item as Panel, cancellationToken);
+            var closed = Closed(item as Panel);
             if (closed) {
                 if (List.Remove(item)) {
                     var active = default(Panel);

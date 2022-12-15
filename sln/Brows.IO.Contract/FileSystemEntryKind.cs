@@ -1,7 +1,8 @@
 namespace Brows {
     public enum FileSystemEntryKind {
-        File,
+        Default = 0,
         Directory,
+        File,
         Unknown
     }
 }

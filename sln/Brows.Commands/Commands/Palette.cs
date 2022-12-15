@@ -12,7 +12,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> ProtectedWorkAsync(ICommandContext context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasCommander(out var commander)) {
                 await commander.ShowPalette("", cancellationToken);
