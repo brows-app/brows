@@ -5,5 +5,7 @@
         <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
         <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
         <ProjectReference Include="..\Brows.Request\Brows.Request.csproj" />
+        <ProjectReference Include="..\Brows.Translation\Brows.Translation.csproj" />
+        <ProjectReference Include="..\Domore.Converting\Domore.Converting.csproj" />
     </ItemGroup>
 </Project>

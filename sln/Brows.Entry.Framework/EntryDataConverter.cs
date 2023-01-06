@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Domore.Converting;
+using System;
 using System.Globalization;
 using CONVERT = System.Convert;
 
 namespace Brows {
-    using IO;
     using Translation;
 
     public abstract class EntryDataConverter : IEntryDataConverter {
@@ -24,10 +24,26 @@ namespace Brows {
         public static EntryDataConverter BooleanYesNo { get; } = new BooleanYesNoConverter();
         public static EntryDataConverter FileSystemSize { get; } = new FileSystemSizeConverter();
 
-        private class DateTimeConverter : EntryDataConverter {
+        private sealed class FileSystemSizeConverter : EntryDataConverter {
+            public string Format { get; set; } = "0.#";
+
+            public sealed override string Convert(object value, object parameter, CultureInfo culture) {
+                if (value == null) return null;
+
+                var converted = Try(CONVERT.ToInt64, value, out var length);
+                if (converted == false) return null;
+
+                var format = parameter?.ToString() ?? Format;
+                var readable = FileSize.From(length, format, culture);
+                return readable;
+            }
+        }
+
+
+        private sealed class DateTimeConverter : EntryDataConverter {
             public string Format { get; set; } = "yyyy-MM-dd HH:mm:ss";
 
-            public override string Convert(object value, object parameter, CultureInfo culture) {
+            public sealed override string Convert(object value, object parameter, CultureInfo culture) {
                 if (value == null) return null;
 
                 var converted = Try(CONVERT.ToDateTime, value, out var dateTime);
@@ -39,8 +55,8 @@ namespace Brows {
             }
         }
 
-        private class BooleanYesNoConverter : EntryDataConverter {
-            public override string Convert(object value, object parameter, CultureInfo culture) {
+        private sealed class BooleanYesNoConverter : EntryDataConverter {
+            public sealed override string Convert(object value, object parameter, CultureInfo culture) {
                 if (value == null) return null;
 
                 var converted = Try(CONVERT.ToBoolean, value, out var boolean);

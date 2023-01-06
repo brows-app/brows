@@ -1,3 +1,4 @@
+using Domore.Notification;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,9 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace Brows.Collections.ObjectModel {
-    using ComponentModel;
-
-    public abstract class CollectionSource : NotifyPropertyChanged, IEnumerable {
+    public abstract class CollectionSource : Notifier, IEnumerable {
         private readonly ICollection Collection;
 
         private CollectionSource(ICollection collection) {

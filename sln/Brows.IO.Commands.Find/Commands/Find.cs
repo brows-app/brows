@@ -79,7 +79,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override IAsyncEnumerable<ICommandSuggestion> SuggestAsync(Context context, CancellationToken cancellationToken) {
+        protected override IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, CancellationToken cancellationToken) {
             if (context != null) {
                 if (context.DidTrigger(this)) {
                     if (context.HasData(out _) == false) {
@@ -92,10 +92,10 @@ namespace Brows.Commands {
                     }
                 }
             }
-            return base.SuggestAsync(context, cancellationToken);
+            return base.Suggest(context, cancellationToken);
         }
 
-        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasKey(out var key)) {
                 return await Work(context, key, cancellationToken);

@@ -1,16 +1,13 @@
-﻿using System.IO;
+﻿using Domore.Logs;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
     using IO;
-    using Logger;
 
     internal sealed class DirectorySize : EntryData<long?> {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(DirectorySize)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(DirectorySize));
 
         protected sealed override void Refresh() {
             Set(null);
@@ -23,23 +20,21 @@ namespace Brows {
             }
             var value = 0L;
             Set(value);
-            await Log.Performance(directory.Name, async () => {
-                try {
-                    await foreach (var file in directory.RecurseFilesAsync(cancellationToken)) {
-                        Set(value += file.Length);
-                    }
+            try {
+                await foreach (var file in directory.RecurseFilesAsync(cancellationToken)) {
+                    Set(value += await file.LengthAsync(cancellationToken));
                 }
-                catch {
-                    Set(null);
-                    throw;
-                }
-            });
+            }
+            catch {
+                Set(null);
+                throw;
+            }
             return Value;
         }
 
         public DirectoryInfo Directory { get; }
 
-        public DirectorySize(DirectoryInfo directory, CancellationToken cancellationToken) : base(nameof(DirectorySize), cancellationToken) {
+        public DirectorySize(string key, DirectoryInfo directory, CancellationToken cancellationToken) : base(key, cancellationToken) {
             Directory = directory;
         }
     }

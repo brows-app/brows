@@ -5,30 +5,30 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using Data;
+    using Config;
 
     internal class BookmarkOpen : Command, ICommandExport {
-        private DataManager<BookmarkCollection> Data =>
+        private BookmarkConfig Data =>
             _Data ?? (
-            _Data = new DataManager<BookmarkCollection>());
-        private DataManager<BookmarkCollection> _Data;
+            _Data = new BookmarkConfig());
+        private BookmarkConfig _Data;
 
         protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
-            var model = await Data.Load(cancellationToken);
+            var data = await Data.Load(cancellationToken);
             if (context.HasInput(out var input) == true) {
-                foreach (var item in model.Items) {
+                foreach (var item in data.Bookmark) {
                     var key = item.Key;
                     var keyRelevance = SuggestionRelevance.From(key, input);
                     if (keyRelevance.HasValue) {
                         yield return Suggestion(
                             context: context,
-                            description: item.Value,
+                            description: item.Loc,
                             group: nameof(BookmarkOpen),
                             input: key,
                             relevance: keyRelevance.Value);
                     }
                     else {
-                        var value = item.Value;
+                        var value = item.Loc;
                         var valueRelevance = SuggestionRelevance.From(value, input);
                         if (valueRelevance.HasValue) {
                             yield return Suggestion(
@@ -48,10 +48,10 @@ namespace Brows.Commands {
             if (context == null) return false;
             if (context.HasInput(out var input)) {
                 var model = await Data.Load(cancellationToken);
-                var items = model.Items;
+                var items = model.Bookmark;
                 foreach (var item in items) {
                     if (input.Equals(item.Key, StringComparison.CurrentCultureIgnoreCase)) {
-                        return await context.OpenOrAddPanel(item.Value, cancellationToken);
+                        return await context.OpenOrAddPanel(item.Loc, cancellationToken);
                     }
                 }
             }

@@ -28,6 +28,9 @@ namespace Brows {
                         break;
                     }
                 }
+                if (Content == null) {
+                    Content = Key;
+                }
             }
             base.OnPropertyChanged(e);
         }

@@ -1,3 +1,4 @@
+using Domore.Logs;
 using System;
 using System.IO;
 using System.Threading;
@@ -5,14 +6,10 @@ using System.Threading.Tasks;
 
 namespace Brows {
     using IO;
-    using Logger;
     using Threading.Tasks;
 
     internal class FileSystemNotifier {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(FileSystemNotifier)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(FileSystemNotifier));
 
         private FileSystemWatch Watch =>
             _Watch ?? (

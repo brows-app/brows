@@ -1,8 +1,8 @@
-﻿namespace Brows.Gui {
-    using ComponentModel;
-    using Logger;
+﻿using Domore.Logs;
+using Domore.Notification;
 
-    public class LogItem : NotifyPropertyChanged {
+namespace Brows.Gui {
+    public class LogItem : Notifier {
         public string Message {
             get => _Message;
             set => Change(ref _Message, value, nameof(Message));

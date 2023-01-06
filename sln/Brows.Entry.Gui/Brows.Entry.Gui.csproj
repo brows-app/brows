@@ -7,8 +7,8 @@
       <EmbeddedResource Include="Resource\Culture\_" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
       <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
       <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
+      <ProjectReference Include="..\Brows.Translation\Brows.Translation.csproj" />
     </ItemGroup>
 </Project>

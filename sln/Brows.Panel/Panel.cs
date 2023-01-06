@@ -1,3 +1,5 @@
+using Domore.Logs;
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,23 +8,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
     using Gui;
-    using Logger;
     using Threading.Tasks;
 
-    internal class Panel : NotifyPropertyChanged, IPanel, IEntryProviderTarget, IPayloadTarget, IControlled<IPanelController> {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(Panel)));
-        private ILog _Log;
+    internal class Panel : Notifier, IPanel, IEntryProviderTarget, IPayloadTarget, IControlled<IPanelController> {
+        private static readonly ILog Log = Logging.For(typeof(Panel));
 
-        private PanelHistory History { get; } = new PanelHistory();
-        private TaskHandler TaskHandler { get; } = new TaskHandler<Panel>();
-        private EntryCollection EntryCollection { get; } = new EntryCollection();
+        private readonly PanelHistory History = new PanelHistory();
+        private readonly TaskHandler TaskHandler = new TaskHandler<Panel>();
+        private readonly EntryCollection EntryCollection = new EntryCollection();
 
         private IEntryProvider Provider;
-        private IReadOnlySet<string> DataKeyOptions;
 
         private IEntry CurrentEntry {
             get => _CurrentEntry;
@@ -107,32 +103,26 @@ namespace Brows {
             //EntryCollection.ClearSort();
             EntryCollection.ColumnInfo = null;
             EntryCollection.ColumnLookup = null;
-            EntryCollection.ColumnDefaults = null;
+            EntryCollection.ColumnDefault = null;
         }
 
-        private void Restart(IEntryProvider provider) {
+        private async Task Restart(IEntryProvider provider, CancellationToken cancellationToken) {
             if (null == provider) throw new ArgumentNullException(nameof(provider));
             if (Log.Info()) {
                 Log.Info(
                     nameof(Restart),
                     $"{nameof(provider)} > {provider?.GetType()?.Name}");
             }
+            await provider.Init(cancellationToken);
+
             Stop();
             Provider = provider;
 
             EntryCollection.CurrentChanged += EntryCollection_CurrentChanged;
             EntryCollection.PropertyChanged += EntryCollection_PropertyChanged;
             EntryCollection.SelectionChanged += EntryCollection_SelectionChanged;
-            EntryCollection.ColumnInfo = provider.DataKeyColumns;
-            EntryCollection.ColumnLookup = provider.DataKeyLookup;
-            EntryCollection.ColumnDefaults = provider.DataKeyDefaults;
+            await EntryCollection.Load(provider, cancellationToken);
 
-            if (DataKeyOptions != provider.DataKeyOptions) {
-                DataKeyOptions = provider.DataKeyOptions;
-                EntryCollection.ClearColumns();
-                EntryCollection.ClearSort();
-                EntryCollection.RefreshColumns();
-            }
             provider.Begin(this);
             ID = provider.PanelID;
             Icon = provider.Icon;
@@ -152,7 +142,7 @@ namespace Brows {
             History.Set(provider.PanelID);
             History.SettingBack = false;
             History.SettingForward = false;
-            Restart(provider);
+            await Restart(provider, cancellationToken);
             return true;
         }
 
@@ -164,7 +154,7 @@ namespace Brows {
             if (provider == null) {
                 return false;
             }
-            Restart(provider);
+            await Restart(provider, cancellationToken);
             return true;
         }
 
@@ -276,6 +266,7 @@ namespace Brows {
             get => _PreviewMode;
             set {
                 if (Change(ref _PreviewMode, value, nameof(PreviewMode))) {
+                    Preview?.Set(null);
                     Preview = _PreviewMode == PanelPreviewMode.None
                         ? null
                         : new Preview(CurrentEntry);
@@ -398,11 +389,14 @@ namespace Brows {
             return false;
         }
 
-        public Task Refresh(CancellationToken _) {
+        public void Reset() {
+            EntryCollection.ResetColumns(Provider?.DataKeySorting);
+        }
+
+        public void Refresh() {
             if (Log.Info()) {
                 Log.Info(nameof(Refresh));
             }
-
             var provider = Provider;
             if (provider != null) {
                 provider.Refresh();
@@ -412,11 +406,12 @@ namespace Brows {
             //if (id != null) {
             //    Open(id.Value);
             //}
-            return Task.CompletedTask;
         }
 
-        public Task Save(CancellationToken cancellationToken) {
-            return Task.CompletedTask;
+        public void Save() {
+            TaskHandler.Begin(async cancellationToken => {
+                await EntryCollection.Save(Provider, cancellationToken);
+            });
         }
 
         public IEnumerable<IEntry> Selection() {

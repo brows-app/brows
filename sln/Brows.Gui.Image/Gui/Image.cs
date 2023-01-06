@@ -1,7 +1,7 @@
-namespace Brows.Gui {
-    using ComponentModel;
+using Domore.Notification;
 
-    public abstract class Image : NotifyPropertyChanged {
+namespace Brows.Gui {
+    public abstract class Image : Notifier {
         public abstract object Source { get; }
         public abstract ImageSize Size { get; set; }
     }

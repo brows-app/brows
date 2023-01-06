@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />
-        <ProjectReference Include="..\Brows.Logger\Brows.Logger.csproj" />
+        <ProjectReference Include="..\Domore.Logs\Domore.Logs.csproj" />
         <ProjectReference Include="..\Brows.Threading.Tasks.Async\Brows.Threading.Tasks.Async.csproj" />
     </ItemGroup>
 </Project>

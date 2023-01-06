@@ -1,21 +1,18 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
     using Cli;
-    using ComponentModel.Composition.Hosting;
-    using Logger;
+    using Composition.Hosting;
     using Threading.Tasks;
 
     public class CommanderService {
-        private readonly List<Commander> Commanders = new List<Commander>();
+        private static readonly ILog Log = Logging.For(typeof(CommanderService));
 
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(CommanderService)));
-        private ILog _Log;
+        private readonly List<Commander> Commanders = new List<Commander>();
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
@@ -27,29 +24,24 @@ namespace Brows {
             _Composer = new Composer());
         private Composer _Composer;
 
-        private Composition Composition =>
-            _Composition ?? (
-            _Composition = Composer.Compose());
-        private Composition _Composition;
-
         private ICommandLine CommandLine =>
             _CommandLine ?? (
             _CommandLine = new CommandLine());
         private ICommandLine _CommandLine;
 
-        private ICommanderMessageQueue MessageQueue =>
-            _MessageQueue ?? (
-            _MessageQueue = new TcpMessageQueue());
-        private ICommanderMessageQueue _MessageQueue;
+        private CommanderMessenger Messenger =>
+            _Messenger ?? (
+            _Messenger = new CommanderMessenger());
+        private CommanderMessenger _Messenger;
 
         private CommandCollection Commands =>
             _Commands ?? (
-            _Commands = new CommandCollection(Composition.Command.Collection));
+            _Commands = new CommandCollection(Composition.Commands));
         private CommandCollection _Commands;
 
         private EntryProviderFactoryCollection EntryProviderFactory =>
             _EntryProviderFactory ?? (
-            _EntryProviderFactory = new EntryProviderFactoryCollection(Composition.EntryProviderFactory.Collection));
+            _EntryProviderFactory = new EntryProviderFactoryCollection(Composition.EntryProviderFactories));
         private EntryProviderFactoryCollection _EntryProviderFactory;
 
         private void Commander_Closed(object sender, EventArgs e) {
@@ -103,11 +95,7 @@ namespace Brows {
 
         private async Task Service() {
             Load(await Commander(first: true, CancellationToken.None));
-            await foreach (var s in MessageQueue.Read(default)) {
-                if (Log.Info()) {
-                    Log.Info($"{nameof(MessageQueue.Read)} > {s}");
-                }
-                //var command = CommandLine.Parser.Parse<CommanderCommand>(s);
+            await foreach (var message in Messenger.Receive(default)) {
                 Load(await Commander(first: false, CancellationToken.None));
             }
         }
@@ -130,10 +118,18 @@ namespace Brows {
         public event CommanderLoggerEventHandler Logger;
 
         public IEnumerable<IComponentResource> ComponentResources =>
-            Composition.ComponentResource.Collection;
+            Composition.ComponentResources;
 
-        public async Task Post(string message, CancellationToken cancellationToken) {
-            await MessageQueue.Write(message, cancellationToken);
+        public IProgramComposition Composition =>
+            _Composition ?? (
+            _Composition = Composer.ProgramComposition());
+        private IProgramComposition _Composition;
+
+        public CommanderService(IProgramComposition composition) {
+            _Composition = composition;
+        }
+
+        public CommanderService() : this(null) {
         }
 
         public void Begin() {
@@ -141,6 +137,11 @@ namespace Brows {
                 Log.Info(nameof(Begin));
             }
             TaskHandler.Begin(Service);
+        }
+
+        public static async Task Post(string message, CancellationToken cancellationToken) {
+            var messenger = new CommanderMessenger();
+            await messenger.Send(message, cancellationToken);
         }
 
         public static class Import {

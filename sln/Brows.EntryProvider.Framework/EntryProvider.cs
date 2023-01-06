@@ -1,3 +1,5 @@
+using Domore.Logs;
+using Domore.Notification;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,23 +9,21 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
     using Gui;
-    using Logger;
     using Threading.Tasks;
     using Translation;
 
-    public abstract class EntryProvider : NotifyPropertyChanged, IEntryProvider {
+    public abstract class EntryProvider : Notifier, IEntryProvider {
+        private static readonly ILog Log = Logging.For(typeof(EntryProvider));
+
         private IEntryProviderTarget Target;
         private CancellationTokenSource CancellationTokenSource;
 
         private ITranslation Translate =>
             Global.Translation;
 
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(EntryProvider)));
-        private ILog _Log;
+        private EntryConfig Config =>
+            EntryProviderConfig.Instance;
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
@@ -33,14 +33,16 @@ namespace Brows {
         protected IEntryBrowser Browser =>
             Target;
 
-        protected virtual Task RefreshAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-        protected virtual Task EndAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-        protected virtual Task BeginAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+        protected virtual Task Init(CancellationToken cancellationToken) => Task.CompletedTask;
+        protected virtual Task Refresh(CancellationToken cancellationToken) => Task.CompletedTask;
+        protected virtual Task End(CancellationToken cancellationToken) => Task.CompletedTask;
+        protected virtual Task Begin(CancellationToken cancellationToken) => Task.CompletedTask;
 
         public abstract IPanelID PanelID { get; }
-        public abstract IReadOnlySet<string> DataKeyDefaults { get; }
-        public virtual IReadOnlySet<string> DataKeyOptions => DataKeyDefaults;
+        public abstract IReadOnlySet<string> DataKeyDefault { get; }
+        public virtual IReadOnlySet<string> DataKeyOptions => DataKeyDefault;
         public virtual IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns { get; }
+        public virtual IReadOnlyDictionary<string, EntrySortDirection?> DataKeySorting { get; }
         public virtual IBookmark Bookmark { get; }
         public virtual Image Icon { get; }
         public virtual string Directory { get; }
@@ -100,31 +102,38 @@ namespace Brows {
             }
         }
 
-        public void Begin(IEntryProviderTarget target) {
+        void IEntryProvider.Begin(IEntryProviderTarget target) {
             if (Log.Info()) {
                 Log.Info(nameof(Begin));
             }
             Target = target;
             CancellationTokenSource = new CancellationTokenSource();
             PanelID?.Begin(CancellationTokenSource.Token);
-            TaskHandler.Begin(BeginAsync(CancellationTokenSource.Token));
+            TaskHandler.Begin(Begin(CancellationTokenSource.Token));
         }
 
-        public void End() {
+        void IEntryProvider.End() {
             if (Log.Info()) {
                 Log.Info(nameof(End));
             }
-            CancellationTokenSource.Cancel();
-            CancellationTokenSource.Dispose();
+            CancellationTokenSource?.Cancel();
+            CancellationTokenSource?.Dispose();
             Target = null;
-            TaskHandler.Begin(EndAsync(CancellationToken.None));
+            TaskHandler.Begin(End(CancellationToken.None));
         }
 
-        public void Refresh() {
+        void IEntryProvider.Refresh() {
             if (Log.Info()) {
                 Log.Info(nameof(Refresh));
             }
-            TaskHandler.Begin(RefreshAsync(CancellationTokenSource.Token));
+            TaskHandler.Begin(Refresh(CancellationTokenSource?.Token ?? default));
+        }
+
+        async Task IEntryProvider.Init(CancellationToken cancellationToken) {
+            if (Log.Info()) {
+                Log.Info(nameof(Init));
+            }
+            await Init(cancellationToken);
         }
 
         public abstract class Of<TEntry> : EntryProvider where TEntry : Entry {
@@ -134,6 +143,7 @@ namespace Brows {
 
             protected async Task Provide(TEntry entry, CancellationToken cancellationToken) {
                 if (null == entry) throw new ArgumentNullException(nameof(entry));
+                entry.Config = Config;
                 List.Add(entry);
                 var target = Target;
                 if (target != null) {
@@ -142,11 +152,13 @@ namespace Brows {
             }
 
             protected async Task Revoke(TEntry entry, CancellationToken cancellationToken) {
+                if (null == entry) throw new ArgumentNullException(nameof(entry));
                 List.Remove(entry);
                 var target = Target;
                 if (target != null) {
                     await target.Remove(entry, cancellationToken);
                 }
+                entry.Config = null;
             }
         }
     }

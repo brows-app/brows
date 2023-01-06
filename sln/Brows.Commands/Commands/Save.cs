@@ -9,14 +9,14 @@ namespace Brows.Commands {
         protected override IEnumerable<ITrigger> DefaultTriggers {
             get {
                 yield return new KeyboardTrigger(KeyboardKey.S, KeyboardModifiers.Control);
-                yield return new InputTrigger("save");
             }
         }
 
-        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
-            if (context?.HasPanel(out var active) == true) {
-                await active.Save(cancellationToken);
-                return true;
+        protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
+            if (context == null) return false;
+            if (context.HasPanel(out var active)) {
+                active.Save();
+                return await Worked;
             }
             return false;
         }

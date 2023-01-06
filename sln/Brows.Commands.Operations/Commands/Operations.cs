@@ -13,7 +13,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async IAsyncEnumerable<ICommandSuggestion> SuggestAsync(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
+        protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             if (context == null) yield break;
             if (context.DidTrigger(this)) {
                 if (context.HasCommander(out var commander)) {
@@ -23,12 +23,12 @@ namespace Brows.Commands {
                     }
                 }
             }
-            await foreach (var suggestion in base.SuggestAsync(context, cancellationToken)) {
+            await foreach (var suggestion in base.Suggest(context, cancellationToken)) {
                 yield return suggestion;
             }
         }
 
-        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasCommander(out var commander)) {
                 commander.Operations?.Clear();

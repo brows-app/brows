@@ -17,8 +17,9 @@ namespace Brows {
         PanelPreviewMode PreviewMode { get; set; }
         void Activate();
         bool Input(string text);
-        Task Refresh(CancellationToken cancellationToken);
-        Task Save(CancellationToken cancellationToken);
+        void Reset();
+        void Refresh();
+        void Save();
         Task Open(string id, CancellationToken cancellationToken);
         Task OpenParent(CancellationToken cancellationToken);
         Task<bool> OpenCreated(string createdName, CancellationToken cancellationToken);

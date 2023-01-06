@@ -2,6 +2,8 @@ namespace Brows {
     using Gui;
 
     public interface IEntry {
+        event EntryRefreshedEventHandler Refreshed;
+
         IEntryData this[string key] { get; }
 
         string ID { get; }
@@ -15,12 +17,13 @@ namespace Brows {
         IPreviewText PreviewText { get; }
 
         void Begin(IEntryBrowser browser);
+        void Begin(IEntryView view);
         void End();
         void Open();
         void Notify(bool state);
         void Refresh(EntryRefresh flags);
-        void Refresh(params string[] keys);
         void Rename(string name);
         string Rename();
+        T Config<T>() where T : new();
     }
 }

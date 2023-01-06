@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Domore.Net.Sockets {
+    using IPC;
+
+    internal sealed class TcpMessenger : Messenger {
+        private TcpClientServer ClientServer =>
+            _ClientServer ?? (
+            _ClientServer = new TcpClientServer(Factory.Directory));
+        private TcpClientServer _ClientServer;
+
+        public MessengerFactory Factory { get; }
+
+        public TcpMessenger(MessengerFactory factory) {
+            Factory = factory ?? throw new ArgumentNullException(nameof(factory));
+        }
+
+        public sealed override async Task Send(string message, CancellationToken cancellationToken) {
+            var writer = await ClientServer.ConnectWriter(cancellationToken);
+            if (writer != null) {
+                using (writer) {
+                    await writer.Write(message, cancellationToken);
+                    Factory.OnMessageSent(message);
+                }
+            }
+        }
+
+        public sealed override async IAsyncEnumerable<string> Receive([EnumeratorCancellation] CancellationToken cancellationToken) {
+            using (var reader = await ClientServer.StartReader(cancellationToken)) {
+                var exit = false;
+                for (; ; ) {
+                    if (cancellationToken.IsCancellationRequested) {
+                        break;
+                    }
+                    if (exit) {
+                        break;
+                    }
+                    var reads = reader.ReadClient(cancellationToken);
+                    await using (var read = reads.GetAsyncEnumerator(cancellationToken)) {
+                        var next = false;
+                        try {
+                            next = await read.MoveNextAsync();
+                        }
+                        catch (Exception ex) {
+                            var e = Factory.OnError(ex);
+                            exit = e?.Exit ?? false;
+                        }
+                        if (next) {
+                            var message = read.Current;
+                            Factory.OnMessageReceived(message);
+                            yield return message;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

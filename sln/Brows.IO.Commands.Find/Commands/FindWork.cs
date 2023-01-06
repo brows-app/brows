@@ -1,18 +1,15 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
     using IO;
-    using Logger;
     using Threading.Tasks;
 
     internal class FindWork {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(FindWork)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(FindWork));
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (

@@ -1,22 +1,22 @@
-﻿using System;
+﻿using Domore.Threading;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.IO {
     using Gui;
-    using Threading;
     using Threading.Tasks;
 
-    internal class Win32FileSystemProvider : FileSystemProvider {
+    internal sealed class Win32FileSystemProvider : FileSystemProvider {
         private IconInput IconInput =>
             _IconInput ?? (
             _IconInput = new IconInput(IconStock.Unknown));
         private IconInput _IconInput;
 
-        private StaThreadPool ThreadPool { get; }
+        private STAThreadPool ThreadPool { get; }
 
-        private Win32FileSystemProvider(DirectoryInfo info, StaThreadPool threadPool) : base(info) {
+        private Win32FileSystemProvider(DirectoryInfo info, STAThreadPool threadPool) : base(info) {
             ThreadPool = threadPool ?? throw new ArgumentNullException(nameof(threadPool));
         }
 
@@ -29,16 +29,16 @@ namespace Brows.IO {
             _Icon = new ImageSourceProvided<IIconInput>(IconInput, new IconProvider(Info), CancellationToken.None) { Size = new ImageSize(16, 16) });
         private Image _Icon;
 
-        public override IOperator Operator(IOperatorDeployment deployment) {
+        public sealed override IOperator Operator(IOperatorDeployment deployment) {
             return new Win32FileOperator(Info, deployment, ThreadPool);
         }
 
-        public override Task<bool> CaseSensitive(CancellationToken cancellationToken) {
+        public sealed override Task<bool> CaseSensitive(CancellationToken cancellationToken) {
             return Win32Path.IsCaseSensitive(Path, cancellationToken);
         }
 
-        private class IconProvider : IIconProvider {
-            private IIconProvider Provider { get; } = Win32Gui.IconProvider;
+        private sealed class IconProvider : IIconProvider {
+            private IIconProvider Provider { get; } = Win32Provider.Icon;
 
             public DirectoryInfo Info { get; }
 
@@ -70,17 +70,24 @@ namespace Brows.IO {
             }
         }
 
-        public class Factory : EntryProviderFactory, IEntryProviderFactoryExport {
-            private readonly StaThreadPool ThreadPool = new StaThreadPool(nameof(Win32FileSystemProvider));
+        public sealed class Factory : EntryProviderFactory, IEntryProviderFactoryExport {
+            private readonly STAThreadPool ThreadPool = new STAThreadPool(nameof(Win32FileSystemProvider));
 
-            public override async Task<IEntryProvider> CreateFor(string id, CancellationToken cancellationToken) {
-                var info = await DirectoryInfoExtension.TryNewAsync(id, cancellationToken);
-                if (info == null) return null;
-
-                var exists = await info.ExistsAsync(cancellationToken);
-                if (exists == false) return null;
-
-                return new Win32FileSystemProvider(info, ThreadPool);
+            public sealed override async Task<IEntryProvider> CreateFor(string id, CancellationToken cancellationToken) {
+                var info = await Async.Run(cancellationToken, () => {
+                    try {
+                        var info = new DirectoryInfo(id);
+                        return info.Exists
+                            ? info
+                            : null;
+                    }
+                    catch {
+                        return null;
+                    }
+                });
+                return info == null
+                    ? null
+                    : new Win32FileSystemProvider(info, ThreadPool);
             }
         }
     }

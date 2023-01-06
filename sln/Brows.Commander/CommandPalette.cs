@@ -1,3 +1,5 @@
+using Domore.Logs;
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,22 +7,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
     using Gui;
-    using Logger;
     using Threading.Tasks;
     using Triggers;
 
-    internal class CommandPalette : NotifyPropertyChanged, ICommandPalette, IControlled<ICommandPaletteController> {
+    internal class CommandPalette : Notifier, ICommandPalette, IControlled<ICommandPaletteController> {
+        private static readonly ILog Log = Logging.For(typeof(CommandPalette));
+
         private int InputDelay = 100;
         private bool InputSuggesting = true;
         private object InputState = new object();
         private CommandSuggestionCollector SuggestionCollector;
-
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(CommandPalette)));
-        private ILog _Log;
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (

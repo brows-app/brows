@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Domore.Logs;
+using Domore.Runtime.InteropServices;
+using Domore.Runtime.InteropServices.ComTypes;
+using Domore.Runtime.Win32;
+using Domore.Threading;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -6,17 +11,9 @@ using System.Threading.Tasks;
 
 namespace Brows.IO {
     using Extensions;
-    using Logger;
-    using Runtime.InteropServices;
-    using Runtime.InteropServices.ComTypes;
-    using Runtime.Win32;
-    using Threading;
 
     internal class Win32FileOperator : Operator {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(Win32FileOperator)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(Win32FileOperator));
 
         private async Task<bool> Delete(FileOperationState state, CancellationToken cancellationToken) {
             var fop = state.FileOperation;
@@ -204,9 +201,9 @@ namespace Brows.IO {
             DirectoryInfo.FullName;
 
         public DirectoryInfo DirectoryInfo { get; }
-        public StaThreadPool ThreadPool { get; }
+        public STAThreadPool ThreadPool { get; }
 
-        public Win32FileOperator(DirectoryInfo directoryInfo, IOperatorDeployment deployment, StaThreadPool threadPool) : base(deployment) {
+        public Win32FileOperator(DirectoryInfo directoryInfo, IOperatorDeployment deployment, STAThreadPool threadPool) : base(deployment) {
             DirectoryInfo = directoryInfo ?? throw new ArgumentNullException(nameof(directoryInfo));
             ThreadPool = threadPool ?? throw new ArgumentNullException(nameof(threadPool));
         }

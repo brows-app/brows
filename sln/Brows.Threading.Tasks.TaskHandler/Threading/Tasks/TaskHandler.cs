@@ -10,7 +10,7 @@ namespace Brows.Threading.Tasks {
         }
         private int _Task;
 
-        private async Task Run(Task task, bool ifIdle = false) {
+        private async Task Run(Task task, CancellationToken cancellationToken, bool ifIdle = false) {
             if (ifIdle && !Idle) return;
             if (task != null) {
                 Task++;
@@ -19,7 +19,7 @@ namespace Brows.Threading.Tasks {
                 }
                 catch (Exception ex) {
                     var canceled = ex as OperationCanceledException;
-                    if (canceled != null) {
+                    if (canceled != null && canceled.CancellationToken == cancellationToken) {
                         Canceled(canceled);
                     }
                     else {
@@ -45,18 +45,18 @@ namespace Brows.Threading.Tasks {
         }
 
         public async void Begin(Task task) {
-            await Run(task);
+            await Run(task, CancellationToken.None);
         }
 
         public async void Begin(Func<Task> task) {
             if (task != null) {
-                await Run(task());
+                await Run(task(), CancellationToken.None);
             }
         }
 
         public async void Begin(Func<CancellationToken, Task> task) {
             if (task != null) {
-                await Run(task(CancellationToken.None));
+                await Run(task(CancellationToken.None), CancellationToken.None);
             }
         }
     }

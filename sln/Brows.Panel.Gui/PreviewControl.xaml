@@ -2,33 +2,59 @@
              x:ClassModifier="internal"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:domore="http://schemas.enetty.com/xaml"
              xmlns:local="clr-namespace:Brows"
              xmlns:brows="http://schemas.brows.app/xaml">
-    <Grid DataContext="{Binding Entry}" 
-          Visibility="{Binding Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}">
-        <local:PreviewTextControl DataContext="{Binding PreviewText}">
-            <local:PreviewTextControl.Style>
-                <Style TargetType="local:PreviewTextControl">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Contents}" Value="{x:Null}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </local:PreviewTextControl.Style>
-        </local:PreviewTextControl>
-        <Image Source="{Binding PreviewImage.Source}">
-            <Image.Style>
-                <Style TargetType="Image">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding PreviewText.Contents}" Value="{x:Null}">
+    <Grid DataContext="{Binding Entry}" Visibility="{Binding Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}">
+        <Grid>
+            <domore:PreviewHandlerControl PreviewHandlerSource="{Binding File}" x:Name="PreviewHandlerControl" x:FieldModifier="internal">
+                <domore:PreviewHandlerControl.Style>
+                    <Style TargetType="domore:PreviewHandlerControl">
+                        <Setter Property="Visibility" Value="Hidden"/>
+                        <Style.Triggers>
+                            <Trigger Property="PreviewHandlerWorking" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </domore:PreviewHandlerControl.Style>
+            </domore:PreviewHandlerControl>
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PreviewHandlerWorking, ElementName=PreviewHandlerControl}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <local:PreviewTextControl DataContext="{Binding PreviewText}">
+                    <local:PreviewTextControl.Style>
+                        <Style TargetType="local:PreviewTextControl">
                             <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Image.Style>
-        </Image>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Contents}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </local:PreviewTextControl.Style>
+                </local:PreviewTextControl>
+                <Image Source="{Binding PreviewImage.Source}">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PreviewText.Contents}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

@@ -1,12 +1,11 @@
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
 namespace Brows {
-    using ComponentModel;
-
-    internal class CommandSuggestion : NotifyPropertyChanged, ICommandSuggestion {
+    internal class CommandSuggestion : Notifier, ICommandSuggestion {
         private static readonly PropertyChangedEventArgs HelpEventArgs = new(nameof(Help));
         private static readonly PropertyChangedEventArgs RelevanceEventArgs = new(nameof(Relevance));
         private static readonly PropertyChangedEventArgs InputEventArgs = new(nameof(Input));

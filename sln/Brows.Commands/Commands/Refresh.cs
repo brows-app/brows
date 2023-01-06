@@ -13,9 +13,10 @@ namespace Brows.Commands {
         }
 
         protected override async Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) {
-            if (context?.HasPanel(out var panel) == true) {
-                await panel.Refresh(cancellationToken);
-                return true;
+            if (context == null) return false;
+            if (context.HasPanel(out var panel)) {
+                panel.Refresh();
+                return await Worked;
             }
             return false;
         }

@@ -11,7 +11,7 @@ namespace Brows.Gui {
         IReadOnlyList<IEntry> SelectedEntries { get; }
         bool Focus();
         bool MoveCurrentTo(IEntry entry);
-        void Sort(IReadOnlyDictionary<string, EntrySortDirection?> sorting);
+        void Sort(IEntrySorting sorting);
         void Removed(IEntry entry);
         void AddColumn(string key, IEntryColumn info);
         bool HasColumn(string key);

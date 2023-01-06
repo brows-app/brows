@@ -4,6 +4,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Brows.Cli\Brows.Cli.csproj" />
         <ProjectReference Include="..\Brows.Command.Contract\Brows.Command.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Translation\Brows.Translation.csproj" />
         <ProjectReference Include="..\Brows.Triggers\Brows.Triggers.csproj" />
     </ItemGroup>
 </Project>

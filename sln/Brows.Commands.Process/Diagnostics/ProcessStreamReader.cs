@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -7,13 +8,9 @@ using System.Threading.Tasks;
 
 namespace Brows.Diagnostics {
     using Gui;
-    using Logger;
 
     internal class ProcessStreamReader {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(ProcessStreamReader)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(ProcessStreamReader));
 
         private async IAsyncEnumerable<string> ReadAll([EnumeratorCancellation] CancellationToken cancellationToken) {
             var buffer = new char[256];

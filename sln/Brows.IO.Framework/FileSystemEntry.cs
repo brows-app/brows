@@ -1,21 +1,42 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace Brows {
+    using Config;
     using Gui;
+    using IO;
 
     public abstract class FileSystemEntry : Entry, IFileSystemEntry {
         private IReadOnlyDictionary<string, IEntryData> Data =>
             _Data ?? (
-            _Data = Wrap.Data());
+            _Data = CreateData().ToDictionary(d => d.Key, d => d));
         private IReadOnlyDictionary<string, IEntryData> _Data;
 
-        internal FileSystemInfoWrapper Wrap =>
-            _Wrap ?? (
-            _Wrap = FileSystemInfoWrapper.For(Info, CancellationToken));
-        private FileSystemInfoWrapper _Wrap;
+        private PropertySystemConfig PropertySystem =>
+            _PropertySystem ?? (
+            _PropertySystem = PropertySystemConfig.Instance);
+        private PropertySystemConfig _PropertySystem;
+
+        private IEnumerable<IEntryData> CreateData() {
+            var wrap = new FileSystemInfoWrapper(Info, PropertyProvider, ViewColumns, CancellationToken);
+            var propSys = PropertySystem.For(wrap, CancellationToken);
+            var infoData = FileInfoData.For(wrap, CancellationToken);
+            var otherData = new IEntryData[] {
+                Entry.ThumbnailData,
+                new FileChecksum(nameof(FileInfoExtension.ChecksumMD5), FileInfo, CancellationToken),
+                new FileChecksum(nameof(FileInfoExtension.ChecksumSHA1), FileInfo, CancellationToken),
+                new FileChecksum(nameof(FileInfoExtension.ChecksumSHA256), FileInfo, CancellationToken),
+                new FileChecksum(nameof(FileInfoExtension.ChecksumSHA512), FileInfo, CancellationToken),
+                new DirectorySize(nameof(DirectorySize), DirectoryInfo, CancellationToken) { Alignment = EntryDataAlignment.Right, Converter = EntryDataConverter.FileSystemSize }
+            };
+            var allData = infoData.Concat(propSys).Concat(otherData);
+            return allData;
+        }
+
+        protected abstract IFilePropertyProvider PropertyProvider { get; }
 
         protected override IReadOnlySet<string> Keys =>
             _Keys ?? (
@@ -57,19 +78,6 @@ namespace Brows {
             Kind = Info is DirectoryInfo
                 ? FileSystemEntryKind.Directory
                 : FileSystemEntryKind.File;
-        }
-
-        public FileSystemEntry(string path, FileSystemEntryKind kind, CancellationToken cancellationToken) : base(cancellationToken) {
-            Path = path;
-            Kind = kind;
-            switch (Kind) {
-                case FileSystemEntryKind.Directory:
-                    Info = new DirectoryInfo(Path);
-                    break;
-                default:
-                    Info = new FileInfo(Path);
-                    break;
-            }
         }
     }
 }

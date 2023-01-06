@@ -1,11 +1,19 @@
-using System;
+using Domore.Notification;
 
 namespace Brows {
-    using ComponentModel;
     using Gui;
 
-    public class Preview : NotifyPropertyChanged, IControlled<IPreviewController> {
-        private void Control_SizeChanged(object sender, EventArgs e) {
+    public class Preview : Notifier, IControlled<IPreviewController> {
+        private void Entry_Refreshed(object sender, EntryRefreshedEventArgs e) {
+            var entry = sender as IEntry;
+            if (entry != null) {
+                if (entry == Entry) {
+                    Controller?.Refresh();
+                }
+                else {
+                    entry.Refreshed -= Entry_Refreshed;
+                }
+            }
         }
 
         public IEntry Entry {
@@ -21,10 +29,10 @@ namespace Brows {
                 var newValue = value;
                 if (Change(ref _Controller, newValue, nameof(Controller))) {
                     if (oldValue != null) {
-                        oldValue.SizeChanged -= Control_SizeChanged;
+                        oldValue.Config = null;
                     }
                     if (newValue != null) {
-                        newValue.SizeChanged += Control_SizeChanged;
+                        newValue.Config = () => Entry?.Config<PreviewConfig>();
                     }
                 }
             }
@@ -32,16 +40,20 @@ namespace Brows {
         private IPreviewController _Controller;
 
         public Preview(IEntry entry = null) {
-            Entry = entry;
+            Set(entry);
         }
 
         public void Set(IEntry entry) {
             if (Entry != entry) {
-                Entry?.Notify(false);
-                Entry?.PreviewText?.Stop();
-                Entry?.Refresh(EntryRefresh.PreviewImage | EntryRefresh.PreviewText);
-                Entry?.Notify(true);
-                Entry = entry;
+                var oldEntry = Entry;
+                var newEntry = Entry = entry;
+                if (newEntry != null) {
+                    newEntry.Refreshed += Entry_Refreshed;
+                }
+                if (oldEntry != null) {
+                    oldEntry.Refreshed -= Entry_Refreshed;
+                    oldEntry.PreviewText?.Stop();
+                }
             }
         }
     }

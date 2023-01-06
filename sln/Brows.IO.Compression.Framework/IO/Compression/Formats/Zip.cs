@@ -1,17 +1,14 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.IO.Compression.Formats {
-    using Logger;
     using Threading.Tasks;
 
     internal class Zip : CompressionFormat {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(Zip)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(Zip));
 
         private CompressionInput Input =>
             _Input ?? (

@@ -18,14 +18,14 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (context.HasPanel(out var active)) {
                 if (context.HasParameter(out var parameter)) {
                     var sorting = parameter.Sorting;
                     var sorted = active.Entries.SortColumns(sorting);
                     if (sorted.Any(s => s != null)) {
-                        return await Completed;
+                        return await Worked;
                     }
                 }
             }
@@ -33,9 +33,9 @@ namespace Brows.Commands {
         }
 
         public class Info : KeyedInfo {
-            public IReadOnlyDictionary<string, EntrySortDirection?> Sorting =>
+            public IEntrySorting Sorting =>
                 _Sorting ?? (
-                _Sorting = List
+                _Sorting = EntrySorting.From(List
                     .Select(arg => (
                         Key: arg.TrimEnd('<', '>', '!'),
                         Dir:
@@ -44,8 +44,8 @@ namespace Brows.Commands {
                             arg.EndsWith('!') ? default(EntrySortDirection?) :
                             EntrySortDirection.Ascending
                     ))
-                    .ToDictionary(item => item.Key, item => item.Dir));
-            private IReadOnlyDictionary<string, EntrySortDirection?> _Sorting;
+                    .ToDictionary(item => item.Key, item => item.Dir)));
+            private IEntrySorting _Sorting;
         }
     }
 }

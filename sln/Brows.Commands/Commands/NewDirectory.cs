@@ -13,7 +13,7 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasPanel(out var active)) {
                 if (context.HasKey(out _)) {

@@ -1,13 +1,13 @@
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Brows {
     using Cli;
-    using ComponentModel;
     using Triggers;
 
-    public class CommandContext : NotifyPropertyChanged, ICommandContext {
+    public class CommandContext : Notifier, ICommandContext {
         private static readonly IReadOnlySet<ICommand> EmptyCommands = new HashSet<ICommand>(0);
 
         private IReadOnlySet<ICommand> TriggeredCommands;

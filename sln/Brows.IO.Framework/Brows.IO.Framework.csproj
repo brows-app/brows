@@ -2,6 +2,7 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="..\Brows.Config.Framework\Brows.Config.Framework.csproj" />
         <ProjectReference Include="..\Brows.Dialogs\Brows.Dialogs.csproj" />
         <ProjectReference Include="..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
         <ProjectReference Include="..\Brows.EntryProvider.Framework\Brows.EntryProvider.Framework.csproj" />

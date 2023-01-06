@@ -1,22 +1,18 @@
-﻿using System;
+﻿using Domore.Logs;
+using Domore.Runtime.InteropServices;
+using Domore.Threading;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.IO {
-    using Logger;
-    using Runtime.InteropServices;
-    using Threading;
-
     internal class Win32FileLinkResolver {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(Win32FileLinkResolver)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(Win32FileLinkResolver));
 
-        public StaThreadPool ThreadPool { get; }
+        public STAThreadPool ThreadPool { get; }
 
-        public Win32FileLinkResolver(StaThreadPool threadPool) {
+        public Win32FileLinkResolver(STAThreadPool threadPool) {
             ThreadPool = threadPool ?? throw new ArgumentNullException(nameof(threadPool));
         }
 
@@ -32,7 +28,7 @@ namespace Brows.IO {
             }
             try {
                 return await ThreadPool.Work(
-                    name: nameof(Resolve),
+                    name: nameof(Win32FileLinkResolver),
                     cancellationToken: cancellationToken,
                     work: () => {
                         using (var wrapper = new ShellWrapper()) {

@@ -1,7 +1,7 @@
-namespace Brows.Collections.Generic {
-    using ComponentModel;
+using Domore.Notification;
 
-    public class EnumerableOptions : NotifyPropertyChanged {
+namespace Brows.Collections.Generic {
+    public class EnumerableOptions : Notifier {
         public EnumerableDelayOptions Delay {
             get => _Delay;
             set => Change(ref _Delay, value, nameof(Delay));

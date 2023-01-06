@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Domore.Notification;
+using System;
 using System.Reflection;
 
 namespace Brows {
-    using ComponentModel;
-
-    internal class CommanderManual : NotifyPropertyChanged {
+    internal class CommanderManual : Notifier {
         public string Version =>
             _Version ?? (
             _Version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);

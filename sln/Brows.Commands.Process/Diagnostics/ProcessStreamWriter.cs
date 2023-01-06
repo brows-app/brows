@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -6,13 +7,9 @@ using System.Threading.Tasks;
 
 namespace Brows.Diagnostics {
     using Gui;
-    using Logger;
 
     internal class ProcessStreamWriter {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(ProcessStreamWriter)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(ProcessStreamWriter));
 
         public StreamWriter StreamWriter { get; }
         public ProcessLogState State { get; }

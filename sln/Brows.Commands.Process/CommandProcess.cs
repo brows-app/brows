@@ -1,12 +1,12 @@
+using Domore.Notification;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
     using Diagnostics;
 
-    internal class CommandProcess : NotifyPropertyChanged {
+    internal class CommandProcess : Notifier {
         private ProcessDefault Default =>
             _Default ?? (
             _Default = new ProcessDefault());

@@ -1,7 +1,7 @@
-﻿namespace Brows {
-    using ComponentModel;
+﻿using Domore.Notification;
 
-    public class CommandContextHint : NotifyPropertyChanged, ICommandContextHint {
+namespace Brows {
+    public class CommandContextHint : Notifier, ICommandContextHint {
         public ICommand Command { get; }
 
         public CommandContextHint(ICommand command) {

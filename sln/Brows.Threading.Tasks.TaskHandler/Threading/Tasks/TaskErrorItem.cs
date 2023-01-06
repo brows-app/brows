@@ -1,9 +1,8 @@
+using Domore.Notification;
 using System;
 
 namespace Brows.Threading.Tasks {
-    using ComponentModel;
-
-    public class TaskErrorItem : NotifyPropertyChanged {
+    public class TaskErrorItem : Notifier {
         public string Trace { get; }
         public DateTime Time { get; }
 

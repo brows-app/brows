@@ -3,7 +3,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.Commands\Brows.Commands.csproj" />
-        <ProjectReference Include="..\Brows.Data.Framework\Brows.Data.Framework.csproj" />
+        <ProjectReference Include="..\Brows.Config.Framework\Brows.Config.Framework.csproj" />
         <ProjectReference Include="..\Brows.Panel\Brows.Panel.csproj" />
     </ItemGroup>
 </Project>

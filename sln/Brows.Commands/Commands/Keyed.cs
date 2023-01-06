@@ -30,10 +30,10 @@ namespace Brows.Commands {
             return false;
         }
 
-        protected override async IAsyncEnumerable<ICommandSuggestion> SuggestAsync(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
+        protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             if (null == context) throw new ArgumentNullException(nameof(context));
             if (Triggered(context)) {
-                await foreach (var suggestion in base.SuggestAsync(context, cancellationToken)) {
+                await foreach (var suggestion in base.Suggest(context, cancellationToken)) {
                     if (context.HasProvider(out var provider)) {
                         var keyAlias = provider.DataKeyAlias();
                         var keyItems = keyAlias.AllKeys
@@ -72,7 +72,7 @@ namespace Brows.Commands {
                 }
             }
             else {
-                await foreach (var suggestion in base.SuggestAsync(context, cancellationToken)) {
+                await foreach (var suggestion in base.Suggest(context, cancellationToken)) {
                     yield return suggestion;
                 }
             }

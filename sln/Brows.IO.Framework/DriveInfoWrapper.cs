@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,12 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Logger;
     using Threading.Tasks;
     using Align = EntryDataAlignment;
 
     internal class DriveInfoWrapper {
-        private readonly ILog Log = Logging.For(typeof(DriveInfoWrapper));
+        private static readonly ILog Log = Logging.For(typeof(DriveInfoWrapper));
+
         private readonly DriveInfo Info;
 
         private long? AvailableFreeSpace;

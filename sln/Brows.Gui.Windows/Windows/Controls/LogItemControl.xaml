@@ -5,7 +5,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:gui="clr-namespace:Brows.Gui;assembly=Brows.Gui.Framework"
-             xmlns:log="clr-namespace:Brows.Logger;assembly=Brows.Logger"
+             xmlns:log="clr-namespace:Domore.Logs;assembly=Domore.Logs"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type={x:Type gui:LogItem}, IsDesignTimeCreatable=False}">
     <TextBlock Text="{Binding Message}">

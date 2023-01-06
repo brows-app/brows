@@ -13,12 +13,12 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (context.HasPanel(out var active)) {
                 var entries = active.Selection();
                 active.Deploy(copyEntries: entries, nativeRenameOnCollision: true);
-                return await Completed;
+                return await Worked;
             }
             return false;
         }

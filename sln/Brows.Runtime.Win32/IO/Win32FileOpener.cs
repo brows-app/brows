@@ -1,19 +1,16 @@
-﻿using System.ComponentModel;
+﻿using Domore.Logs;
+using Domore.Runtime.Win32;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.IO {
-    using Logger;
-    using Runtime.Win32;
     using Threading.Tasks;
 
     internal class Win32FileOpener {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(Win32FileOpener)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(Win32FileOpener));
 
         public async Task Open(string file, CancellationToken cancellationToken) {
             if (Log.Info()) {
@@ -29,7 +26,7 @@ namespace Brows.IO {
                 lpVerb = null, //"open",
                 nShow = (int)SW.SHOW,
             };
-            var success = await Async.Run(cancellationToken, () => shell32.ShellExecuteExW(ref info));
+            var success = await Async.With(cancellationToken).Run(() => shell32.ShellExecuteExW(ref info));
             if (success == false) throw new Win32Exception();
         }
     }

@@ -1,3 +1,4 @@
+using Domore.Logs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,14 +10,11 @@ using PATH = System.IO.Path;
 
 namespace Brows {
     using IO;
-    using Logger;
     using Threading.Tasks;
 
     public abstract class FileSystemProvider : EntryProvider<FileSystemEntry> {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(FileSystemProvider)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(FileSystemProvider));
+        private static readonly FileSystemColumn Column = new FileSystemColumn();
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
@@ -163,9 +161,9 @@ namespace Brows {
 
         protected abstract FileSystemEntry Create(FileSystemInfo info, CancellationToken cancellationToken);
 
-        protected override async Task BeginAsync(CancellationToken cancellationToken) {
+        protected sealed override async Task Begin(CancellationToken cancellationToken) {
             if (Log.Info()) {
-                Log.Info(nameof(BeginAsync));
+                Log.Info(nameof(Begin));
             }
             var parent = await Info.ParentAsync(cancellationToken);
             if (parent == null) {
@@ -189,18 +187,16 @@ namespace Brows {
             thisNotifier.Notified += ThisNotifier_Notified;
             thisNotifier.Begin(cancellationToken);
 
-            await Log.Performance(Info.FullName, async () => {
-                var infos = EnumerateFileSystemInfosAsync(cancellationToken);
-                await foreach (var info in infos) {
-                    var entry = Create(info, cancellationToken);
-                    await Provide(entry, cancellationToken);
-                }
-            });
+            var infos = EnumerateFileSystemInfosAsync(cancellationToken);
+            await foreach (var info in infos) {
+                var entry = Create(info, cancellationToken);
+                await Provide(entry, cancellationToken);
+            }
         }
 
-        protected override async Task RefreshAsync(CancellationToken cancellationToken) {
+        protected sealed override async Task Refresh(CancellationToken cancellationToken) {
             if (Log.Info()) {
-                Log.Info(nameof(RefreshAsync));
+                Log.Info(nameof(Refresh));
             }
             var dict = Existing.ToDictionary(entry => entry.Info.FullName, entry => entry);
             var infos = EnumerateFileSystemInfosAsync(cancellationToken);
@@ -218,29 +214,44 @@ namespace Brows {
             }
         }
 
-        public override IPanelID PanelID =>
+        protected sealed override async Task Init(CancellationToken cancellationToken) {
+            if (Log.Info()) {
+                Log.Info(nameof(Init));
+            }
+            await Column.Init(cancellationToken);
+        }
+
+        public sealed override IPanelID PanelID =>
             _PanelID ?? (
             _PanelID = new FileSystemPanelID(Info));
         private IPanelID _PanelID;
 
-        public override string Directory =>
+        public sealed override string Directory =>
             PanelID.Value;
 
-        public override IReadOnlySet<string> DataKeyDefaults => FileSystemEntryData.Defaults;
-        public override IReadOnlySet<string> DataKeyOptions => FileSystemEntryData.Options;
-        public override IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns => FileSystemEntryData.Columns;
+        public sealed override IReadOnlySet<string> DataKeyOptions =>
+            Column.Options;
+
+        public sealed override IReadOnlyDictionary<string, IEntryColumn> DataKeyColumns =>
+            Column.Columns;
+
+        public sealed override IReadOnlySet<string> DataKeyDefault =>
+            Column.Default;
+
+        public sealed override IReadOnlyDictionary<string, EntrySortDirection?> DataKeySorting =>
+            Column.Sorting;
 
         public FileSystemProviderOptions Options =>
             _Options ?? (
             _Options = new FileSystemProviderOptions { });
         private FileSystemProviderOptions _Options;
 
-        public override IBookmark Bookmark =>
+        public sealed override IBookmark Bookmark =>
             _Bookmark ?? (
             _Bookmark = new PathBookmark());
         private IBookmark _Bookmark;
 
-        public override string CreatedID(string createdName) {
+        public sealed override string CreatedID(string createdName) {
             return PATH.Combine(Path, createdName);
         }
     }

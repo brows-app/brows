@@ -1,16 +1,15 @@
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
     using Gui;
     using Threading.Tasks;
 
-    public abstract class Entry : NotifyPropertyChanged, IEntry {
+    public abstract class Entry : Notifier, IEntry {
         private static readonly PropertyChangedEventArgs IconEventArgs = new(nameof(Icon));
         private static readonly PropertyChangedEventArgs OverlayEventArgs = new(nameof(Overlay));
         private static readonly PropertyChangedEventArgs ThumbnailEventArgs = new(nameof(Thumbnail));
@@ -19,6 +18,7 @@ namespace Brows {
         private static readonly PropertyChangedEventArgs SelectedEventArgs = new(nameof(Selected));
 
         private IEntryBrowser Browser;
+        private IEntryView View;
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
@@ -31,6 +31,9 @@ namespace Brows {
         protected abstract IOverlayProvider OverlayProvider { get; }
         protected abstract IPreviewProvider PreviewProvider { get; }
         protected abstract IThumbnailProvider ThumbnailProvider { get; }
+
+        protected IReadOnlyList<string> ViewColumns =>
+            View?.Columns ?? Array.Empty<string>();
 
         protected virtual IconInput IconInput =>
             _IconInput ?? (
@@ -74,6 +77,8 @@ namespace Brows {
 
         public static string ThumbnailKey => ThumbnailData.Key;
         public static IEntryData ThumbnailData { get; } = new EntryThumbnailData();
+
+        public event EntryRefreshedEventHandler Refreshed;
 
         public string Rename {
             get => _Rename;
@@ -127,23 +132,21 @@ namespace Brows {
         }
         private bool _Selected;
 
+        public EntryConfig Config {
+            get => _Config;
+            set => Change(ref _Config, value, nameof(Config));
+        }
+        private EntryConfig _Config;
+
         public object OpenCommand => Request.Create(
             owner: this,
             execute: _ => Open(),
             canExecute: _ => true);
 
         public void Open() {
-            var tokn = CancellationToken;
-            var task = Open(tokn);
-            TaskHandler.Begin(task);
-        }
-
-        public virtual void Refresh(params string[] keys) {
-            foreach (var key in Keys) {
-                if (keys.Contains(key)) {
-                    this[key].Refresh();
-                }
-            }
+            TaskHandler.Begin(async cancellationToken => {
+                await Open(cancellationToken);
+            });
         }
 
         public virtual void Refresh(EntryRefresh flags) {
@@ -167,6 +170,7 @@ namespace Brows {
             if (flags.HasFlag(EntryRefresh.Overlay)) {
                 Overlay = null;
             }
+            Refreshed?.Invoke(this, new EntryRefreshedEventArgs(flags));
         }
 
         public void Notify(bool state) {
@@ -179,6 +183,10 @@ namespace Brows {
 
         void IEntry.Begin(IEntryBrowser browser) {
             Browser = browser;
+        }
+
+        void IEntry.Begin(IEntryView view) {
+            View = view;
         }
 
         void IEntry.End() {
@@ -194,6 +202,13 @@ namespace Brows {
             rename = Rename;
             Rename = null;
             return rename;
+        }
+
+        T IEntry.Config<T>() {
+            var config = Config;
+            return config == null
+                ? default
+                : config.Configure<T>();
         }
     }
 }

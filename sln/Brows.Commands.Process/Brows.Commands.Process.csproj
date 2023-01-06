@@ -7,7 +7,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj" />
         <ProjectReference Include="..\Brows.Command.Framework\Brows.Command.Framework.csproj" />
-        <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
+        <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
         <ProjectReference Include="..\Brows.Translation\Brows.Translation.csproj" />
         <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
         <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />

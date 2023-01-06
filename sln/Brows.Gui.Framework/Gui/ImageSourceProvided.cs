@@ -1,10 +1,9 @@
+using Domore.Logs;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Gui {
-    using Logger;
-
     public abstract class ImageSourceProvided : Image {
         public CancellationToken CancellationToken { get; }
 
@@ -14,13 +13,10 @@ namespace Brows.Gui {
     }
 
     public class ImageSourceProvided<TInput> : ImageSourceProvided {
+        private static readonly ILog Log = Logging.For(typeof(ImageSourceProvided<TInput>));
+
         private static readonly PropertyChangedEventArgs SourceLoadedEventArgs = new(nameof(SourceLoaded));
         private static readonly PropertyChangedEventArgs SourceLoadingEventArgs = new(nameof(SourceLoading));
-
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(ImageSourceProvided<TInput>)));
-        private ILog _Log;
 
         private async Task SourceLoad() {
             var provider = Provider;

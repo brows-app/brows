@@ -1,3 +1,5 @@
+using Domore.Logs;
+using Domore.Notification;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -5,14 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
-    using Logger;
-
-    internal class OperationBase : NotifyPropertyChanged, IOperation, IOperable {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(OperationBase)));
-        private ILog _Log;
+    internal class OperationBase : Notifier, IOperation, IOperable {
+        private static readonly ILog Log = Logging.For(typeof(OperationBase));
 
         private bool MakingRelevant;
         private Stopwatch Stopwatch;

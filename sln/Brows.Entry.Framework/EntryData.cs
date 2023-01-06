@@ -1,3 +1,5 @@
+using Domore.Logs;
+using Domore.Notification;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,10 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
-    using Logger;
+    public abstract class EntryData : Notifier {
+        private static readonly ILog Log = Logging.For(typeof(EntryData));
 
-    public abstract class EntryData : NotifyPropertyChanged {
         private static readonly PropertyChangedEventArgs AccessingEventArgs = new(nameof(Accessing));
         private static readonly PropertyChangedEventArgs AccessingFlagEventArgs = new(nameof(AccessingFlag));
         private static readonly PropertyChangedEventArgs AccessCanceledEventArgs = new(nameof(AccessCanceled));
@@ -22,11 +23,6 @@ namespace Brows {
         private static readonly PropertyChangedEventArgs[] DisplayEventArgs = new PropertyChangedEventArgs[] {
             new(nameof(Display))
         };
-
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(EntryData)));
-        private ILog _Log;
 
         private EntryData(string key, CancellationToken cancellationToken) {
             Key = key;

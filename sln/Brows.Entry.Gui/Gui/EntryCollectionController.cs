@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 
 namespace Brows.Gui {
-    using Logger;
     using System.Windows.Data;
 
     internal class EntryCollectionController : CollectionController<IEntryCollectionController>, IEntryCollectionController {
@@ -103,7 +103,7 @@ namespace Brows.Gui {
             }
         }
 
-        public void Sort(IReadOnlyDictionary<string, EntrySortDirection?> sorting) {
+        public void Sort(IEntrySorting sorting) {
             foreach (var list in Columns.Values) {
                 foreach (var column in list) {
                     if (sorting == null) {
@@ -134,7 +134,7 @@ namespace Brows.Gui {
 
             var sort = ListCollectionView.CustomSort as EntryComparer;
             if (sort != null) {
-                var sorting = sort.Sort;
+                var sorting = sort.Sorting;
                 if (sorting != null) {
                     if (sorting.TryGetValue(key, out var value)) {
                         col.Sorting(value);

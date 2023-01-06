@@ -1,12 +1,12 @@
+using Domore.Logs;
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
 
 namespace Brows.Threading.Tasks {
-    using ComponentModel;
-    using Logger;
+    public abstract class TaskError : Notifier {
+        private static readonly ILog Log = Logging.For(typeof(TaskError));
 
-    public abstract class TaskError : NotifyPropertyChanged {
-        private readonly ILog Log = Logging.For(typeof(TaskError));
         private readonly List<TaskErrorItem> InstanceList = new List<TaskErrorItem>();
         private static readonly List<TaskErrorItem> StaticList = new List<TaskErrorItem>();
 

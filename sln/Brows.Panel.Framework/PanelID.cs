@@ -1,12 +1,11 @@
+using Domore.Notification;
 using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
-
-    public class PanelID : NotifyPropertyChanged, IPanelID {
+    public class PanelID : Notifier, IPanelID {
         private static readonly PropertyChangedEventArgs ErrorEventArgs = new(nameof(Error));
         private static readonly PropertyChangedEventArgs CanonicalEventArgs = new(nameof(Canonical));
         private static readonly PropertyChangedEventArgs ValueEventArgs = new(nameof(Value));

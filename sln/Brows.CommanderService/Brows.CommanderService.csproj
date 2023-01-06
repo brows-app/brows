@@ -3,9 +3,8 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.Cli\Brows.Cli.csproj" />
-        <ProjectReference Include="..\Brows.CommanderMessageQueue\Brows.CommanderMessageQueue.csproj" />
         <ProjectReference Include="..\Brows.Commander\Brows.Commander.csproj" />
-        <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
-        <ProjectReference Include="..\Brows.Net.Sockets\Brows.Net.Sockets.csproj" />
+        <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
+        <ProjectReference Include="..\Domore.IPC\Domore.IPC.csproj" />
     </ItemGroup>
 </Project>

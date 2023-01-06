@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Brows.ComponentModel.NotifyPropertyChanged\Brows.ComponentModel.NotifyPropertyChanged.csproj" />
-        <ProjectReference Include="..\Brows.Logger\Brows.Logger.csproj" />
+        <PackageReference Include="Domore.Notification" Version="2.2.0.12" />
+        <ProjectReference Include="..\Domore.Logs\Domore.Logs.csproj" />
     </ItemGroup>
 </Project>

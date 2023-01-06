@@ -2,7 +2,7 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Domore.Notification" Version="2.1.0.11" />
+        <PackageReference Include="Domore.Notification" Version="2.2.0.12" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.Threading.Tasks.Async\Brows.Threading.Tasks.Async.csproj" />

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using Data;
+    using Config;
     using Triggers;
 
     internal class Bookmark : Command<Bookmark.Parameter>, ICommandExport {
@@ -14,10 +14,10 @@ namespace Brows.Commands {
             { nameof(Add), new KeyboardGesture(KeyboardKey.D, KeyboardModifiers.Control) },
             { nameof(AddAll), new KeyboardGesture(KeyboardKey.D, KeyboardModifiers.Control | KeyboardModifiers.Shift) } };
 
-        private DataManager<BookmarkCollection> Data =>
-            _Data ?? (
-            _Data = new DataManager<BookmarkCollection>());
-        private DataManager<BookmarkCollection> _Data;
+        private BookmarkConfig Config =>
+            _Config ?? (
+            _Config = new BookmarkConfig());
+        private BookmarkConfig _Config;
 
         private async Task<bool> Add(ICommandContext context, IEnumerable<string> values, CancellationToken cancellationToken) {
             if (values == null) return false;
@@ -25,13 +25,10 @@ namespace Brows.Commands {
             if (context.CanBookmark(out var bookmark)) {
                 foreach (var value in values) {
                     if (value != null) {
-                        var collection = await Data.Load(cancellationToken);
-                        var items = collection.Items;
-                        var existing = items
-                            .Select(item => new KeyValuePair<string, string>(item.Key, item.Value))
-                            .ToList();
-                        var newItem = await bookmark.MakeFrom(value, existing, cancellationToken);
-                        collection.Add(newItem);
+                        var config = await Config.Load(cancellationToken);
+                        var existing = config.Bookmark.ToDictionary(b => b.Key, b => b.Loc);
+                        var bookmarked = await bookmark.MakeFrom(value, existing, cancellationToken);
+                        await Config.Add(bookmarked.Key, bookmarked.Value, cancellationToken);
                     }
                 }
                 return true;
@@ -101,25 +98,25 @@ namespace Brows.Commands {
             }
         }
 
-        protected override async IAsyncEnumerable<ICommandSuggestion> SuggestAsync(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
+        protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             if (context != null) {
                 if (context.DidTrigger(this)) {
                     if (context.HasData(out _) == false) {
-                        var collection = await Data.Load(cancellationToken);
-                        if (collection.Items.Any()) {
-                            var data = new BookmarkData(this, context, collection);
+                        var config = await Config.Load(cancellationToken);
+                        if (config.Bookmark.Count > 0) {
+                            var data = new BookmarkData(this, context, Config);
                             context.SetData(data);
                             context.SetHint(data);
                         }
                     }
                 }
             }
-            await foreach (var suggestion in base.SuggestAsync(context, cancellationToken)) {
+            await foreach (var suggestion in base.Suggest(context, cancellationToken)) {
                 yield return suggestion;
             }
         }
 
-        protected override async Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) {
+        protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasKey(out var key)) {
                 return await Work(context, key, cancellationToken);

@@ -1,12 +1,11 @@
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Brows {
-    using ComponentModel;
-
-    internal class DialogManager : NotifyPropertyChanged, IDialogManager {
+    internal class DialogManager : Notifier, IDialogManager {
         private readonly Stack<IDialog> Stack = new Stack<IDialog>();
 
         public Application Application { get; }

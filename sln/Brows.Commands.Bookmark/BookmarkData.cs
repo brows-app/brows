@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Brows {
-    using Data;
+    using Config;
     using Threading.Tasks;
 
     internal class BookmarkData : CommandContextData, ICommandContextHint {
@@ -12,19 +12,19 @@ namespace Brows {
 
         public override object Current => Collection;
 
-        public BookmarkCollection Collection { get; }
+        public BookmarkConfig Collection { get; }
         public ICommandContext Context { get; }
 
-        public BookmarkData(ICommand command, ICommandContext context, BookmarkCollection collection) : base(command) {
+        public BookmarkData(ICommand command, ICommandContext context, BookmarkConfig collection) : base(command) {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             Collection = collection ?? throw new ArgumentNullException(nameof(collection));
         }
 
         public override ICommandContextData Enter() {
-            var item = Collection.Controller?.CurrentItem;
+            var item = Collection.CurrentItem;
             if (item != null) {
-                TaskHandler.Begin(async token => {
-                    await Context.OpenOrAddPanel(item.Value, token);
+                TaskHandler.Begin(async cancellationToken => {
+                    await Context.OpenOrAddPanel(item.Loc, cancellationToken);
                 });
             }
             Flag = new CommandContextFlag { PersistInput = false };
@@ -32,15 +32,19 @@ namespace Brows {
         }
 
         public override ICommandContextData Remove() {
-            var item = Collection.Controller?.CurrentItem;
+            var item = Collection.CurrentItem;
             if (item != null) {
-                Collection.Remove(new[] { item.Key });
+                TaskHandler.Begin(async cancellationToken => {
+                    await Collection.Remove(item.Key, cancellationToken);
+                });
             }
             return this;
         }
 
         public override ICommandContextData Clear() {
-            Collection.Clear();
+            TaskHandler.Begin(async cancellationToken => {
+                await Collection.Clear(cancellationToken);
+            });
             return this;
         }
     }

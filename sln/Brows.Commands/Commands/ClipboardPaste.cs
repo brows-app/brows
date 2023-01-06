@@ -18,7 +18,7 @@ namespace Brows.Commands {
                 if (context.HasPanel(out var active)) {
                     var files = clipboard.GetFileDropList();
                     active.Deploy(copyFiles: files);
-                    return await Completed;
+                    return await Worked;
                 }
             }
             return false;

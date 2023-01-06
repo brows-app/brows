@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Domore.Runtime.Win32;
+using System;
 
 namespace Brows.IO.Extensions {
-    using Runtime.Win32;
-
     internal static class PayloadExtension {
         public static uint Win32Flags(this IPayload payload) {
             if (null == payload) throw new ArgumentNullException(nameof(payload));

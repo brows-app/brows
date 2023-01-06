@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Domore.Runtime.InteropServices;
+using Domore.Runtime.Win32;
+using System;
 using System.Threading;
 
 namespace Brows.IO {
-    using Runtime.InteropServices;
-    using Runtime.Win32;
-
     internal class Win32ProgressSink : FileOperationProgressSink {
         public IOperationProgress Progress { get; }
         public CancellationToken CancellationToken => Progress.CancellationToken;

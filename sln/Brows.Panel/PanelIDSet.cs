@@ -1,10 +1,9 @@
+using Domore.Logs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Brows {
-    using Logger;
-
     public class PanelIDSet<T> where T : IPanelID {
         private static readonly ILog Log = Logging.For(typeof(PanelIDSet<T>));
 

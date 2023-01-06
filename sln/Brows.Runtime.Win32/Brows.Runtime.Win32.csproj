@@ -4,11 +4,13 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
+        <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
         <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
         <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />
         <ProjectReference Include="..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
         <ProjectReference Include="..\Brows.Operation.Framework\Brows.Operation.Framework.csproj" />
-        <ProjectReference Include="..\Brows.Runtime.Win32.StaThreadPool\Brows.Runtime.Win32.StaThreadPool.csproj" />
+        <ProjectReference Include="..\Domore.Win32.STAThreadPool\Domore.Win32.STAThreadPool.csproj" />
+        <ProjectReference Include="..\Domore.Win32.Windows\Domore.Win32.Windows.csproj" />
+        <ProjectReference Include="..\Domore.Win32\Domore.Win32.csproj" />
     </ItemGroup>
 </Project>

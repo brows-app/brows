@@ -6,7 +6,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.Command.Framework\Brows.Command.Framework.csproj" />
-        <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
+        <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
         <ProjectReference Include="..\Brows.Dialogs\Brows.Dialogs.csproj" />
         <ProjectReference Include="..\Brows.EntryProvider.Framework\Brows.EntryProvider.Framework.csproj" />
         <ProjectReference Include="..\Brows.IO.Contract\Brows.IO.Contract.csproj" />

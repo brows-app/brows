@@ -19,14 +19,14 @@ namespace Brows {
             }
         }
 
-        public IReadOnlyDictionary<string, EntrySortDirection?> Sort { get; }
+        public IEntrySorting Sorting { get; }
 
-        public EntryComparer(IReadOnlyDictionary<string, EntrySortDirection?> sort) {
-            Sort = sort ?? throw new ArgumentNullException(nameof(sort));
+        public EntryComparer(IEntrySorting sorting) {
+            Sorting = sorting ?? throw new ArgumentNullException(nameof(sorting));
         }
 
         public int Compare(IEntry x, IEntry y) {
-            foreach (var sort in Sort) {
+            foreach (var sort in Sorting) {
                 var sortKey = sort.Key;
                 var xData = x?[sortKey];
                 var yData = y?[sortKey];

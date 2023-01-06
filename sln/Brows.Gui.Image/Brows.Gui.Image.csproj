@@ -2,6 +2,6 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Brows.ComponentModel.NotifyPropertyChanged\Brows.ComponentModel.NotifyPropertyChanged.csproj" />
+        <PackageReference Include="Domore.Notification" Version="2.2.0.12" />
     </ItemGroup>
 </Project>

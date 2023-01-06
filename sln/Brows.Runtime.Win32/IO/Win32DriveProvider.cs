@@ -6,7 +6,7 @@ namespace Brows.IO {
     using Gui;
 
     internal class Win32DriveProvider : DriveProvider {
-        private IIconProvider IconProvider { get; } = Win32Gui.IconProvider;
+        private IIconProvider IconProvider { get; } = Win32Provider.Icon;
 
         private IconInput IconInput =>
             _IconInput ?? (

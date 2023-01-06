@@ -1,26 +1,23 @@
+using Domore.Logs;
+using Domore.Notification;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using ComponentModel;
-    using Data;
+    using Config;
     using Gui;
     using IO;
-    using Logger;
     using Threading.Tasks;
     using Triggers;
 
-    public class Commander : NotifyPropertyChanged, ICommander, IControlled<ICommanderController> {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(Commander)));
-        private ILog _Log;
+    public class Commander : Notifier, ICommander, IControlled<ICommanderController> {
+        private static readonly ILog Log = Logging.For(typeof(Commander));
 
-        private DataManager<CommanderThemeModel> ThemeData =>
-            _ThemeData ?? (
-            _ThemeData = new DataManager<CommanderThemeModel>());
-        private DataManager<CommanderThemeModel> _ThemeData;
+        private CommanderThemeConfig ThemeConfig =>
+            _ThemeConfig ?? (
+            _ThemeConfig = new CommanderThemeConfig());
+        private CommanderThemeConfig _ThemeConfig;
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
@@ -33,13 +30,11 @@ namespace Brows {
         private PanelCollection _PanelCollection;
 
         private void Controller_Loaded(object sender, EventArgs e) {
-            TaskHandler.Begin(async token => {
-                await AddPanel("", token);
+            TaskHandler.Begin(async cancellationToken => {
+                await AddPanel("", cancellationToken);
                 if (First) {
-                    await ShowPalette("?", 0, 1, token);
-                    var
-                    theme = await ThemeData.Load(token);
-                    Theme = new CommanderTheme(theme.Base, theme.Background, theme.Foreground);
+                    await ShowPalette("?", 0, 1, cancellationToken);
+                    Theme = await ThemeConfig.Load(cancellationToken);
                     Themed?.Invoke(this, EventArgs.Empty);
                 }
             });
@@ -266,11 +261,7 @@ namespace Brows {
         public async Task SetTheme(string @base, string background, string foreground, CancellationToken cancellationToken) {
             Theme = new CommanderTheme(@base, background, foreground);
             Themed?.Invoke(this, EventArgs.Empty);
-            var
-            model = await ThemeData.Load(cancellationToken);
-            model.Base = @base;
-            model.Background = background;
-            model.Foreground = foreground;
+            await ThemeConfig.Save(Theme, cancellationToken);
         }
 
         public async Task ShowLog(CancellationToken cancellationToken) {

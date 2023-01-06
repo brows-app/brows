@@ -1,7 +1,7 @@
-﻿namespace Brows.Collections.Generic {
-    using ComponentModel;
+﻿using Domore.Notification;
 
-    public class EnumerableDelayOptions : NotifyPropertyChanged {
+namespace Brows.Collections.Generic {
+    public class EnumerableDelayOptions : Notifier {
         public int Limit {
             get => _Limit;
             set => Change(ref _Limit, value, nameof(Limit));

@@ -1,17 +1,13 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.IO.Compression {
-    using Logger;
-
     internal class CompressionInput {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(CompressionInput)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(CompressionInput));
 
         private static StringComparer PathComparer =>
             _PathComparer ?? (

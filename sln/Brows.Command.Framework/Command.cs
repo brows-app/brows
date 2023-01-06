@@ -24,7 +24,7 @@ namespace Brows {
             _SuggestionGroupKey = $"Command_Group_{nameof(Command)}");
         private string _SuggestionGroupKey;
 
-        protected static Task<bool> Completed { get; } = Task.FromResult(true);
+        protected static readonly Task<bool> Worked = Task.FromResult(true);
 
         protected CommandSuggestionRelevance SuggestionRelevance =>
             _SuggestionRelevance ?? (
@@ -164,12 +164,12 @@ namespace Brows {
         }
 
         protected virtual bool Workable(Context context) => base.Workable(context);
-        protected virtual Task<bool> WorkAsync(Context context, CancellationToken cancellationToken) => base.Work(context, cancellationToken);
-        protected virtual IAsyncEnumerable<ICommandSuggestion> SuggestAsync(Context context, CancellationToken cancellationToken) => base.Suggest(context, cancellationToken);
+        protected virtual Task<bool> Work(Context context, CancellationToken cancellationToken) => base.Work(context, cancellationToken);
+        protected virtual IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, CancellationToken cancellationToken) => base.Suggest(context, cancellationToken);
 
         protected sealed override bool Workable(ICommandContext context) => Workable(NewContext(context));
-        protected sealed override Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) => WorkAsync(NewContext(context), cancellationToken);
-        protected sealed override IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, CancellationToken cancellationToken) => SuggestAsync(NewContext(context), cancellationToken);
+        protected sealed override Task<bool> Work(ICommandContext context, CancellationToken cancellationToken) => Work(NewContext(context), cancellationToken);
+        protected sealed override IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, CancellationToken cancellationToken) => Suggest(NewContext(context), cancellationToken);
 
         public override string HelpLine => Help.HelpLine;
 

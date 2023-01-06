@@ -5,7 +5,6 @@
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\Brows.Commands.Process\Brows.Commands.Process.csproj" />
-      <ProjectReference Include="..\Brows.ComponentModel.Composition\Brows.ComponentModel.Composition.csproj" />
       <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
       <ProjectReference Include="..\Brows.Triggers.Gui\Brows.Triggers.Gui.csproj" />
     </ItemGroup>

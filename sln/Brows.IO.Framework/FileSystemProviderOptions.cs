@@ -1,9 +1,10 @@
+using Domore.Notification;
+
 namespace Brows {
     using Collections.Generic;
-    using ComponentModel;
     using IO;
 
-    public class FileSystemProviderOptions : NotifyPropertyChanged {
+    public class FileSystemProviderOptions : Notifier {
         public DirectoryEnumerableOptions Enumerable {
             get => _Enumerable ?? (_Enumerable = new DirectoryEnumerableOptions {
                 Delay = new EnumerableDelayOptions {

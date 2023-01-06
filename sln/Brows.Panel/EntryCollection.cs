@@ -6,11 +6,15 @@ using System.Threading.Tasks;
 
 namespace Brows {
     using Collections.ObjectModel;
+    using Config;
     using Gui;
     using Threading.Tasks;
 
     internal class EntryCollection : CollectionSource<IEntry>, IEntryCollection, IControlled<IEntryCollectionController> {
-        private readonly List<string> Columns = new List<string>();
+        private readonly List<string> Columns = new();
+        private readonly EntryCollectionConfig Config = new();
+
+        private Type ProviderType;
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
@@ -37,7 +41,7 @@ namespace Brows {
                         .SelectMany(s => entries.Select(e => e[s.Key].Ready));
                     await Task.WhenAll(ready);
                 }
-                Sorting = sorting;
+                Sorting = EntrySorting.From(sorting);
                 Controller?.Sort(Sorting);
             }
         }
@@ -53,11 +57,11 @@ namespace Brows {
         public event EventHandler CurrentChanged;
         public event EventHandler SelectionChanged;
 
-        public IEnumerable<string> ColumnDefaults {
-            get => _ColumnDefaults ?? (_ColumnDefaults = Array.Empty<string>());
-            set => Change(ref _ColumnDefaults, value, nameof(ColumnDefaults));
+        public IEnumerable<string> ColumnDefault {
+            get => _ColumnDefault ?? (_ColumnDefault = Array.Empty<string>());
+            set => Change(ref _ColumnDefault, value, nameof(ColumnDefault));
         }
-        private IEnumerable<string> _ColumnDefaults;
+        private IEnumerable<string> _ColumnDefault;
 
         public IReadOnlyDictionary<string, IEntryColumn> ColumnInfo {
             get => _ColumnInfo ?? (_ColumnInfo = new Dictionary<string, IEntryColumn>());
@@ -97,11 +101,11 @@ namespace Brows {
 
         private IEntryCollectionController _Controller;
 
-        public IReadOnlyDictionary<string, EntrySortDirection?> Sorting {
-            get => _Sorting ?? (_Sorting = new Dictionary<string, EntrySortDirection?>());
+        public IEntrySorting Sorting {
+            get => _Sorting ?? (_Sorting = EntrySorting.Empty);
             private set => Change(ref _Sorting, value, nameof(Sorting));
         }
-        private IReadOnlyDictionary<string, EntrySortDirection?> _Sorting;
+        private IEntrySorting _Sorting;
 
         public object SortCommand => Request.Create(
             execute: arg => {
@@ -124,6 +128,8 @@ namespace Brows {
 
         public async Task<bool> Add(IEntry item, CancellationToken cancellationToken) {
             if (item != null) {
+                item.Begin(new EntryView(Columns));
+
                 var sorting = Sorting;
                 if (sorting.Count > 0) {
                     var ready = sorting
@@ -155,6 +161,10 @@ namespace Brows {
                 return Columns.Contains(key);
             }
             return false;
+        }
+
+        public IReadOnlyList<string> GetColumns() {
+            return Columns;
         }
 
         public string[] AddColumns(params string[] names) {
@@ -195,14 +205,17 @@ namespace Brows {
             if (controller != null) {
                 controller.ClearColumns();
 
-                var keys = Columns.Count == 0 ? ColumnDefaults : Columns;
-                foreach (var key in keys) {
+                var columns = Columns;
+                if (columns.Count == 0) {
+                    columns.AddRange(ColumnDefault);
+                }
+                foreach (var key in columns) {
                     controller.AddColumn(key, Column(key));
                 }
             }
         }
 
-        public string[] SortColumns(IReadOnlyDictionary<string, EntrySortDirection?> sorting) {
+        public string[] SortColumns(IEntrySorting sorting) {
             if (sorting == null) {
                 Sorting = null;
                 Controller?.Sort(null);
@@ -222,6 +235,21 @@ namespace Brows {
             return names;
         }
 
+        public string[] SortColumns(IReadOnlyDictionary<string, EntrySortDirection?> sorting) {
+            return SortColumns(EntrySorting.From(sorting));
+        }
+
+        public string[] SortColumns(IReadOnlyDictionary<string, EntrySortDirection> sorting) {
+            return SortColumns(EntrySorting.From(sorting));
+        }
+
+        public void ResetColumns(IReadOnlyDictionary<string, EntrySortDirection?> sorting) {
+            ClearColumns();
+            ClearSort();
+            RefreshColumns();
+            SortColumns(sorting);
+        }
+
         public bool? MoveCurrentItemTo(IEntry entry) {
             return Controller?.MoveCurrentTo(entry);
         }
@@ -233,6 +261,25 @@ namespace Brows {
         public void ClearSort() {
             Sorting = null;
             Controller?.Sort(null);
+        }
+
+        public async Task Load(IEntryProvider provider, CancellationToken cancellationToken) {
+            if (null == provider) throw new ArgumentNullException(nameof(provider));
+
+            ColumnInfo = provider.DataKeyColumns;
+            ColumnLookup = provider.DataKeyLookup;
+            ColumnDefault = provider.DataKeyDefault;
+
+            var providerType = provider.GetType();
+            if (providerType != ProviderType) {
+                ProviderType = providerType;
+                ResetColumns(provider.DataKeySorting);
+            }
+            await Config.Load(provider, this, cancellationToken);
+        }
+
+        public async Task Save(IEntryProvider provider, CancellationToken cancellationToken) {
+            await Config.Save(provider, this, cancellationToken);
         }
     }
 }

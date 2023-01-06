@@ -1,15 +1,11 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace Brows.Gui {
-    using Logger;
-
     public class CollectionController<TController> : Controller<TController>, ICollectionController where TController : class {
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(CollectionController<TController>)));
-        private ILog _Log;
+        private static readonly ILog Log = Logging.For(typeof(CollectionController<TController>));
 
         private ListCollectionView CollectionView =>
             _CollectionView ?? (

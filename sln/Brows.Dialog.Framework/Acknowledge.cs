@@ -1,7 +1,7 @@
-namespace Brows {
-    using ComponentModel;
+using Domore.Notification;
 
-    public class Acknowledge : NotifyPropertyChanged, IAcknowledge {
+namespace Brows {
+    public class Acknowledge : Notifier, IAcknowledge {
         protected virtual void OnAcknowledged(AcknowledgedEventArgs e) =>
             Acknowledged?.Invoke(this, e);
 

@@ -1,11 +1,10 @@
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Brows {
-    using ComponentModel;
-
-    internal class PanelInput : NotifyPropertyChanged {
+    internal class PanelInput : Notifier {
         private readonly Stopwatch Stopwatch = new Stopwatch();
 
         public IEnumerable<IEntry> Entries {

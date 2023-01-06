@@ -1,23 +1,20 @@
-﻿using System;
+﻿using Domore.Logs;
+using Domore.Notification;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Diagnostics {
-    using ComponentModel;
     using Gui;
-    using Logger;
     using Threading.Tasks;
 
-    internal class ProcessWrapper : NotifyPropertyChanged {
+    internal class ProcessWrapper : Notifier {
+        private static readonly ILog Log = Logging.For(typeof(ProcessWrapper));
+
         private Process Process;
         private ProcessStreamWriter Writer;
         private CancellationTokenSource CancellationTokenSource;
-
-        private ILog Log =>
-            _Log ?? (
-            _Log = Logging.For(typeof(ProcessWrapper)));
-        private ILog _Log;
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
