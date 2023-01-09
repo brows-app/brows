@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Threading.Tasks {
     public static class Async {
-        private class ThreadPoolWork : IThreadPoolWork {
+        private struct ThreadPoolWork : IThreadPoolWork {
             public CancellationToken CancellationToken { get; }
 
             public ThreadPoolWork(CancellationToken cancellationToken) {

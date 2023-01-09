@@ -10,10 +10,10 @@ namespace Brows {
     internal sealed class FileSystemColumn {
         private static readonly IComponentResourceKey Resolver = new FileSystemComponentKey();
 
-        private PropertySystemConfig PropertySystem =>
+        private PropSysConfig PropertySystem =>
             _PropertySystem ?? (
-            _PropertySystem = PropertySystemConfig.Instance);
-        private PropertySystemConfig _PropertySystem;
+            _PropertySystem = PropSysConfig.Instance);
+        private PropSysConfig _PropertySystem;
 
         public IReadOnlyList<FilePropertyData> Properties { get; private set; }
         public IReadOnlySet<string> Options { get; private set; }

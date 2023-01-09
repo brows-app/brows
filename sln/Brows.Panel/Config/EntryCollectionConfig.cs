@@ -48,7 +48,7 @@ namespace Brows.Config {
         public async Task Load(IEntryProvider provider, EntryCollection entries, CancellationToken cancellationToken) {
             if (null == entries) throw new ArgumentNullException(nameof(entries));
             var id = await ID(provider, cancellationToken);
-            var manager = Config.Manage<Entries>(id);
+            var manager = Configure.Data<Entries>(id);
             var config = await manager.Load(cancellationToken);
             var columns = config.Columns;
             if (columns.Count > 0) {
@@ -65,7 +65,7 @@ namespace Brows.Config {
         public async Task Save(IEntryProvider provider, EntryCollection entries, CancellationToken cancellationToken) {
             if (null == entries) throw new ArgumentNullException(nameof(entries));
             var id = await ID(provider, cancellationToken);
-            var manager = Config.Manage<Entries>(id);
+            var manager = Configure.Data<Entries>(id);
             var columns = entries.GetColumns();
             var sorting = entries.Sorting;
             var config = await manager.Load(cancellationToken);

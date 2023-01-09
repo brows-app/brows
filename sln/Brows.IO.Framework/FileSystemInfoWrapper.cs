@@ -13,10 +13,10 @@ namespace Brows {
     internal class FileSystemInfoWrapper {
         private static readonly ILog Log = Logging.For(typeof(FileSystemInfoWrapper));
 
-        private PropertySystemConfig PropertySystem =>
+        private PropSysConfig PropertySystem =>
             _PropertySystem ?? (
-            _PropertySystem = PropertySystemConfig.Instance);
-        private PropertySystemConfig _PropertySystem;
+            _PropertySystem = PropSysConfig.Instance);
+        private PropSysConfig _PropertySystem;
 
         private readonly FileInfo File;
         private readonly DirectoryInfo Directory;

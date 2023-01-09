@@ -1,9 +1,17 @@
 using Domore.Notification;
 
 namespace Brows {
+    using Config;
     using Gui;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     public class Preview : Notifier, IControlled<IPreviewController> {
+        private static IConfig<PreviewConfig> Config =>
+            _Config ?? (
+            _Config = Configure.File<PreviewConfig>());
+        private static IConfig<PreviewConfig> _Config;
+
         private void Entry_Refreshed(object sender, EntryRefreshedEventArgs e) {
             var entry = sender as IEntry;
             if (entry != null) {
@@ -32,7 +40,7 @@ namespace Brows {
                         oldValue.Config = null;
                     }
                     if (newValue != null) {
-                        newValue.Config = () => Entry?.Config<PreviewConfig>();
+                        newValue.Config = () => Config.Loaded;
                     }
                 }
             }
@@ -41,6 +49,10 @@ namespace Brows {
 
         public Preview(IEntry entry = null) {
             Set(entry);
+        }
+
+        public static async Task Init(CancellationToken cancellationToken) {
+            await Config.Load(cancellationToken);
         }
 
         public void Set(IEntry entry) {

@@ -12,22 +12,26 @@ namespace Brows.IO {
     internal class Win32FileOpener {
         private static readonly ILog Log = Logging.For(typeof(Win32FileOpener));
 
-        public async Task Open(string file, CancellationToken cancellationToken) {
+        public async Task Open(string file, string with, CancellationToken cancellationToken) {
             if (Log.Info()) {
-                Log.Info(
-                    nameof(Open),
-                    $"{nameof(file)} > {file}");
+                Log.Info(nameof(Open) + " > " + file);
             }
             var info = new SHELLEXECUTEINFOW {
                 cbSize = (uint)Marshal.SizeOf<SHELLEXECUTEINFOW>(),
                 fMask = (uint)(SEE_MASK.INVOKEIDLIST | SEE_MASK.FLAG_NO_UI | SEE_MASK.FLAG_LOG_USAGE),
                 lpDirectory = Path.GetDirectoryName(file),
                 lpFile = file,
-                lpVerb = null, //"open",
+                lpVerb = null,
                 nShow = (int)SW.SHOW,
             };
+            if (with != null) {
+                info.lpFile = with;
+                info.lpParameters = $"\"{file}\"";
+            }
             var success = await Async.With(cancellationToken).Run(() => shell32.ShellExecuteExW(ref info));
-            if (success == false) throw new Win32Exception();
+            if (success == false) {
+                throw new Win32Exception();
+            }
         }
     }
 }

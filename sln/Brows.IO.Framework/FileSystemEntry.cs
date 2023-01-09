@@ -15,14 +15,14 @@ namespace Brows {
             _Data = CreateData().ToDictionary(d => d.Key, d => d));
         private IReadOnlyDictionary<string, IEntryData> _Data;
 
-        private PropertySystemConfig PropertySystem =>
-            _PropertySystem ?? (
-            _PropertySystem = PropertySystemConfig.Instance);
-        private PropertySystemConfig _PropertySystem;
+        private PropSysConfig PropSys =>
+            _PropSys ?? (
+            _PropSys = PropSysConfig.Instance);
+        private PropSysConfig _PropSys;
 
         private IEnumerable<IEntryData> CreateData() {
             var wrap = new FileSystemInfoWrapper(Info, PropertyProvider, ViewColumns, CancellationToken);
-            var propSys = PropertySystem.For(wrap, CancellationToken);
+            var propSys = PropSys.For(wrap, CancellationToken);
             var infoData = FileInfoData.For(wrap, CancellationToken);
             var otherData = new IEntryData[] {
                 Entry.ThumbnailData,

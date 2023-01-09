@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Brows {
     using Threading.Tasks;
@@ -49,10 +48,9 @@ namespace Brows {
         public override ICommandContextData Enter() {
             var findItem = Item?.CurrentItem;
             if (findItem != null) {
-                var path = findItem.Info.FullName;
-                var directory = Path.GetDirectoryName(path);
+                var target = findItem.TargetDirectory;
                 TaskHandler.Begin(async token => {
-                    await Context.OpenOrAddPanel(directory, token);
+                    await Context.OpenOrAddPanel(target, token);
                 });
             }
             Flag = new CommandContextFlag { PersistInput = false };

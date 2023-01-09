@@ -87,7 +87,7 @@ namespace Brows.IO {
         }
 
         public static async Task<DirectoryInfo> TryNewAsync(string path, CancellationToken cancellationToken) {
-            return await Async.Run(cancellationToken, () => {
+            return await Async.With(cancellationToken).Run(() => {
                 try {
                     return new DirectoryInfo(path);
                 }
@@ -99,7 +99,7 @@ namespace Brows.IO {
 
         public static async Task<bool> ExistsAsync(this DirectoryInfo directoryInfo, CancellationToken cancellationToken) {
             if (null == directoryInfo) throw new ArgumentNullException(nameof(directoryInfo));
-            return await Async.Run(cancellationToken, () => directoryInfo.Exists);
+            return await Async.With(cancellationToken).Run(() => directoryInfo.Exists);
         }
 
         public static Task<DirectoryInfo> ParentAsync(this DirectoryInfo directoryInfo, CancellationToken cancellationToken) {

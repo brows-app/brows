@@ -12,7 +12,7 @@ namespace Brows {
         private MessengerFactory Factory {
             get {
                 if (_Factory == null) {
-                    _Factory = new MessengerFactory { Directory = Path.Combine(Config.Config.Root, nameof(Domore.IPC)) };
+                    _Factory = new MessengerFactory { Directory = Path.Combine(Config.Configure.Root, nameof(Domore.IPC)) };
                     _Factory.ErrorHandler += Factory_ErrorHandler;
                     _Factory.MessageHandler += Factory_MessageHandler;
                 }

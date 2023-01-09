@@ -8,9 +8,20 @@ namespace Brows {
                 ? Info.Name + Path.DirectorySeparatorChar
                 : Info.Name;
 
-        public string FullPath => Info.FullName;
-        public string RelativeDirectory => Path.GetDirectoryName(FullPath).Replace(FindRoot.FullName, "").TrimStart(
-            Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        public string FullPath =>
+            Info.FullName;
+
+        public string TargetDirectory =>
+            Info is DirectoryInfo directory
+                ? directory.FullName
+                : Path.GetDirectoryName(Info.FullName);
+
+        public string RelativeDirectory =>
+            Path.GetDirectoryName(FullPath)
+                .Replace(FindRoot.FullName, "")
+                .TrimStart(
+                    Path.DirectorySeparatorChar,
+                    Path.AltDirectorySeparatorChar);
 
         public FileSystemInfo Info { get; }
         public DirectoryInfo FindRoot { get; }

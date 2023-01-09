@@ -74,7 +74,7 @@ namespace Brows.IO {
             private readonly STAThreadPool ThreadPool = new STAThreadPool(nameof(Win32FileSystemProvider));
 
             public sealed override async Task<IEntryProvider> CreateFor(string id, CancellationToken cancellationToken) {
-                var info = await Async.Run(cancellationToken, () => {
+                var info = await Async.With(cancellationToken).Run(() => {
                     try {
                         var info = new DirectoryInfo(id);
                         return info.Exists

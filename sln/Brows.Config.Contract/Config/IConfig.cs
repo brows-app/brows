@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 
 namespace Brows.Config {
-    public interface IConfigManager {
+    public interface IConfig {
     }
 
-    public interface IConfigManager<TConfig> : IConfigManager {
-        TConfig Get();
+    public interface IConfig<TConfig> : IConfig {
+        TConfig Loaded { get; }
         Task<TConfig> Load(CancellationToken cancellationToken);
     }
 }

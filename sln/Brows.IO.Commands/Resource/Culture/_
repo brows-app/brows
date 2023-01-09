@@ -1,1 +1,3 @@
-﻿Command_Group_OpenDirectory = Directories
+﻿Command_Description_OpenDirectory = Open the directory in this panel
+
+Command_Group_OpenDirectory = Directories

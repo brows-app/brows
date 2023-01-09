@@ -22,9 +22,6 @@ namespace Brows {
         private ITranslation Translate =>
             Global.Translation;
 
-        private EntryConfig Config =>
-            EntryProviderConfig.Instance;
-
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
             _TaskHandler = new TaskHandler<EntryProvider>());
@@ -143,7 +140,6 @@ namespace Brows {
 
             protected async Task Provide(TEntry entry, CancellationToken cancellationToken) {
                 if (null == entry) throw new ArgumentNullException(nameof(entry));
-                entry.Config = Config;
                 List.Add(entry);
                 var target = Target;
                 if (target != null) {
@@ -158,7 +154,6 @@ namespace Brows {
                 if (target != null) {
                     await target.Remove(entry, cancellationToken);
                 }
-                entry.Config = null;
             }
         }
     }

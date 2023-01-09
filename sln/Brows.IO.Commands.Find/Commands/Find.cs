@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands {
     using IO;
-    using Threading.Tasks;
     using Triggers;
 
     internal class Find : Command<Find.Parameter>, ICommandExport {
@@ -13,11 +12,6 @@ namespace Brows.Commands {
             _FindCommand ?? (
             _FindCommand = new FindCommand());
         private FindCommand _FindCommand;
-
-        private TaskHandler TaskHandler =>
-            _TaskHandler ?? (
-            _TaskHandler = new TaskHandler<Find>());
-        private TaskHandler _TaskHandler;
 
         private async Task<DirectoryInfo> Root(Context context, CancellationToken cancellationToken) {
             if (context == null) return null;

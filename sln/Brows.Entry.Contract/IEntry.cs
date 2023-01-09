@@ -20,10 +20,10 @@ namespace Brows {
         void Begin(IEntryView view);
         void End();
         void Open();
+        void Edit();
         void Notify(bool state);
         void Refresh(EntryRefresh flags);
         void Rename(string name);
         string Rename();
-        T Config<T>() where T : new();
     }
 }

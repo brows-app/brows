@@ -73,6 +73,10 @@ namespace Brows {
             return Browse(ID, cancellationToken);
         }
 
+        protected virtual Task<bool> Edit(CancellationToken cancellationToken) {
+            return Task.FromResult(false);
+        }
+
         protected abstract IEntryData Get(string key);
 
         public static string ThumbnailKey => ThumbnailData.Key;
@@ -132,12 +136,6 @@ namespace Brows {
         }
         private bool _Selected;
 
-        public EntryConfig Config {
-            get => _Config;
-            set => Change(ref _Config, value, nameof(Config));
-        }
-        private EntryConfig _Config;
-
         public object OpenCommand => Request.Create(
             owner: this,
             execute: _ => Open(),
@@ -146,6 +144,12 @@ namespace Brows {
         public void Open() {
             TaskHandler.Begin(async cancellationToken => {
                 await Open(cancellationToken);
+            });
+        }
+
+        public void Edit() {
+            TaskHandler.Begin(async cancellationToken => {
+                await Edit(cancellationToken);
             });
         }
 
@@ -202,13 +206,6 @@ namespace Brows {
             rename = Rename;
             Rename = null;
             return rename;
-        }
-
-        T IEntry.Config<T>() {
-            var config = Config;
-            return config == null
-                ? default
-                : config.Configure<T>();
         }
     }
 }

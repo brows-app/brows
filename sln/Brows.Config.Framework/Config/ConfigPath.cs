@@ -1,19 +1,10 @@
-﻿using Domore.Converting;
-using System;
+﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Config {
-    internal class ConfigPath {
-        private static string Encode(string s) {
-            var utf8bytes = Encoding.UTF8.GetBytes(s);
-            var base32hex = Base32HexString.From(utf8bytes);
-            var sanitized = base32hex.Replace('=', '_');
-            return sanitized;
-        }
-
+    internal static class ConfigPath {
         private static string LocalApplicationData() {
             return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create);
         }
@@ -32,11 +23,10 @@ namespace Brows.Config {
             return root;
         }
 
-        public async Task<string> Ready(string type, string id, string extension, CancellationToken cancellationToken) {
-            var root = await Task.Run(() => CreateRoot(cancellationToken), cancellationToken);
-            var file = Encode("T=" + type + ";ID=" + id);
-            var path = Path.Combine(root, Path.ChangeExtension(file, extension));
-            return path;
+        public static async Task<string> Ready(CancellationToken cancellationToken) {
+            return await Task.Run(cancellationToken: cancellationToken, function: async () => {
+                return await CreateRoot(cancellationToken);
+            });
         }
 
         public static string Root =>

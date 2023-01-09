@@ -106,13 +106,12 @@ namespace Brows {
             EntryCollection.ColumnDefault = null;
         }
 
-        private async Task Restart(IEntryProvider provider, CancellationToken cancellationToken) {
+        private async Task StartProvider(IEntryProvider provider, CancellationToken cancellationToken) {
             if (null == provider) throw new ArgumentNullException(nameof(provider));
             if (Log.Info()) {
-                Log.Info(
-                    nameof(Restart),
-                    $"{nameof(provider)} > {provider?.GetType()?.Name}");
+                Log.Info(nameof(StartProvider) + " > " + provider?.GetType()?.Name);
             }
+            await Preview.Init(cancellationToken);
             await provider.Init(cancellationToken);
 
             Stop();
@@ -130,9 +129,7 @@ namespace Brows {
 
         private async Task<bool> StartID(string id, CancellationToken cancellationToken) {
             if (Log.Info()) {
-                Log.Info(
-                    nameof(StartID),
-                    $"{nameof(id)} > {id}");
+                Log.Info(nameof(StartID) + " > " + id);
             }
             var provider = await ProviderFactory.CreateFor(id, cancellationToken);
             if (provider == null) {
@@ -142,7 +139,7 @@ namespace Brows {
             History.Set(provider.PanelID);
             History.SettingBack = false;
             History.SettingForward = false;
-            await Restart(provider, cancellationToken);
+            await StartProvider(provider, cancellationToken);
             return true;
         }
 
@@ -154,7 +151,7 @@ namespace Brows {
             if (provider == null) {
                 return false;
             }
-            await Restart(provider, cancellationToken);
+            await StartProvider(provider, cancellationToken);
             return true;
         }
 

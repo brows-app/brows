@@ -11,10 +11,10 @@ namespace Brows.Config {
     internal sealed class BookmarkConfig : Notifier, IControlled<IBookmarkConfigController> {
         private IBookmarkConfigController Controller;
 
-        private IConfigManager<Bookmarks> Manager =>
-            _Manager ?? (
-            _Manager = Config.Manage<Bookmarks>());
-        private IConfigManager<Bookmarks> _Manager;
+        private IConfig<Bookmarks> Config =>
+            _Config ?? (
+            _Config = Configure.Data<Bookmarks>());
+        private IConfig<Bookmarks> _Config;
 
         public object Items {
             get => _Items ?? (_Items = Array.Empty<Bookmark>());
@@ -26,7 +26,7 @@ namespace Brows.Config {
             Controller?.CurrentItem as Bookmark;
 
         public async Task<Bookmarks> Load(CancellationToken cancellationToken) {
-            var config = await Manager.Load(cancellationToken);
+            var config = await Config.Load(cancellationToken);
             Items = config.Bookmark;
             return config;
         }
@@ -37,7 +37,7 @@ namespace Brows.Config {
                 var v = value?.Trim() ?? "";
                 if (v != "") {
                     var
-                    config = await Manager.Load(cancellationToken);
+                    config = await Config.Load(cancellationToken);
                     config.Bookmark = config.Bookmark
                         .Where(b => b.Key != k)
                         .Append(new Bookmark { Key = k, Loc = v })
@@ -51,7 +51,7 @@ namespace Brows.Config {
             var k = key?.Trim() ?? "";
             if (k != "") {
                 var
-                config = await Manager.Load(cancellationToken);
+                config = await Config.Load(cancellationToken);
                 config.Bookmark = config.Bookmark
                     .Where(b => b.Key != k)
                     .ToList();
@@ -61,7 +61,7 @@ namespace Brows.Config {
 
         public async Task Clear(CancellationToken cancellationToken) {
             var
-            config = await Manager.Load(cancellationToken);
+            config = await Config.Load(cancellationToken);
             config.Bookmark = new List<Bookmark>();
             Items = config.Bookmark;
         }
