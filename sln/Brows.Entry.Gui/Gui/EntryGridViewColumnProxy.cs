@@ -17,7 +17,7 @@ namespace Brows.Gui {
 
         private IEnumerable<object> ResourceKeys() {
             var key = Key;
-            var resolver = Info?.Resolver;
+            var resolver = Agent?.Resolver;
             if (resolver != null) {
                 yield return resolver.For(key);
             }
@@ -35,24 +35,24 @@ namespace Brows.Gui {
                 }
             }
             if (dataTemplate == null) {
-                dataTemplate = EntryGridViewColumnCellTemplate.Build(Key, Info);
+                dataTemplate = EntryGridViewColumnCellTemplate.Build(Key, Agent);
             }
             var column = new EntryGridViewColumn {
                 CellTemplate = dataTemplate,
-                Width = Info?.Width ?? double.NaN
+                Width = Agent?.Width ?? double.NaN
             };
             if (column.Header == null) {
-                column.Header = new EntryGridViewColumnHeader(Info?.Resolver) { Key = Key };
+                column.Header = new EntryGridViewColumnHeader(Agent?.Resolver) { Key = Key };
             }
             return column;
         }
 
         public string Key { get; }
-        public IEntryColumn Info { get; }
+        public IEntryColumn Agent { get; }
 
-        public EntryGridViewColumnProxy(string key, IEntryColumn info) {
+        public EntryGridViewColumnProxy(string key, IEntryColumn agent) {
             Key = key;
-            Info = info;
+            Agent = agent;
         }
 
         public void Sorting(EntrySortDirection? direction) {

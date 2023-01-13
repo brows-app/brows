@@ -3,7 +3,7 @@ using System.Windows.Data;
 
 namespace Brows.Gui {
     internal class EntryGridViewColumnCellTemplate {
-        public static DataTemplate Build(string key, IEntryColumn info) {
+        public static DataTemplate Build(string key, IEntryColumn column) {
             var
             factory = new FrameworkElementFactory(typeof(EntryDataControl));
             factory.Name = nameof(EntryDataControl);

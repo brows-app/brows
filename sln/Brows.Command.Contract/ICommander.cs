@@ -9,12 +9,11 @@ namespace Brows {
         ICommandPalette Palette { get; }
         IOperationCollection Operations { get; }
 
-        Task AddPanel(string id, CancellationToken cancellationToken);
-        Task RemovePanel(IPanel panel, CancellationToken cancellationToken);
-        Task ShowPalette(string input, CancellationToken cancellationToken);
-        Task ShowPalette(string input, int selectedStart, int selectedLength, CancellationToken cancellationToken);
-        Task ShowLog(CancellationToken cancellationToken);
-        Task SetTheme(string @base, string background, string foreground, CancellationToken cancellationToken);
+        Task<bool> AddPanel(string id, CancellationToken cancellationToken);
+        Task<bool> RemovePanel(IPanel panel, CancellationToken cancellationToken);
+        Task<bool> ShowPalette(string input, CancellationToken cancellationToken);
+        Task<bool> ShowPalette(string input, int selectedStart, int selectedLength, CancellationToken cancellationToken);
+        Task<bool> SetTheme(string @base, string background, string foreground, CancellationToken cancellationToken);
         void Close();
         void Exit();
     }

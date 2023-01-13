@@ -2,6 +2,15 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
+      <None Remove="Resource\Culture\_" />
+      <None Remove="Resource\Culture\_.alias" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="Resource\Culture\_" />
+      <EmbeddedResource Include="Resource\Culture\_.alias" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
         <ProjectReference Include="..\Brows.Config.Framework\Brows.Config.Framework.csproj" />
         <ProjectReference Include="..\Brows.Dialogs\Brows.Dialogs.csproj" />
         <ProjectReference Include="..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />

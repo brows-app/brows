@@ -3,6 +3,5 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.Gui.Image\Brows.Gui.Image.csproj" />
-        <ProjectReference Include="..\Brows.Triggers\Brows.Triggers.csproj" />
     </ItemGroup>
 </Project>

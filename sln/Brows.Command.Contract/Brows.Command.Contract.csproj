@@ -6,6 +6,6 @@
         <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
         <ProjectReference Include="..\Brows.Operation.Contract\Brows.Operation.Contract.csproj" />
         <ProjectReference Include="..\Brows.Panel.Contract\Brows.Panel.Contract.csproj" />
-        <ProjectReference Include="..\Brows.Triggers\Brows.Triggers.csproj" />
+        <ProjectReference Include="..\Brows.Trigger.Contract\Brows.Trigger.Contract.csproj" />
     </ItemGroup>
 </Project>

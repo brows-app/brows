@@ -1,17 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using Triggers;
-
     internal class Theme : Command<Theme.Parameter>, ICommandExport {
-        protected override IEnumerable<ITrigger> DefaultTriggers {
-            get {
-                yield return new InputTrigger("theme");
-            }
-        }
-
         protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasCommander(out var commander)) {

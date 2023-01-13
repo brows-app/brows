@@ -14,6 +14,7 @@ namespace Brows.Config {
         }
 
         public class Of<TData> : ConfigDataManager, IConfig<TData> where TData : INotifyPropertyChanged, new() {
+            private Task<TData> LoadTask;
             private Guid ChangeState = Guid.NewGuid();
             private readonly int ChangeDelay = 1000;
 
@@ -41,9 +42,12 @@ namespace Brows.Config {
             public Of(string id) : base(id) {
             }
 
-            public async Task<TData> Load(CancellationToken cancellationToken) {
+            public async ValueTask<TData> Load(CancellationToken cancellationToken) {
                 if (Loaded == null) {
-                    Loaded = await Payload(new TData()).Load(cancellationToken);
+                    if (LoadTask == null) {
+                        LoadTask = Payload(new TData()).Load(cancellationToken);
+                    }
+                    Loaded = await LoadTask;
                     Loaded.PropertyChanged += Loaded_PropertyChanged;
                 }
                 return Loaded;

@@ -6,7 +6,6 @@ using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace Brows.Gui {
-    using Triggers;
     using Windows.Input;
 
     internal class CommanderController : Controller<ICommanderController>, ICommanderController {
@@ -19,17 +18,17 @@ namespace Brows.Gui {
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) {
             if (e != null) {
-                var key = (KeyboardKey)e.ReferencedKey();
-                var modifiers = (KeyboardModifiers)e.ModifierKeys();
-                var eventArgs = new KeyboardKeyEventArgs(key, modifiers);
-                var eventHandler = WindowKeyboardKeyDown;
+                var key = (PressKey)e.ReferencedKey();
+                var modifiers = (PressModifiers)e.ModifierKeys();
+                var eventArgs = new CommanderPressEventArgs(key, modifiers);
+                var eventHandler = WindowPress;
                 if (eventHandler != null) {
                     eventHandler.Invoke(this, eventArgs);
                 }
                 var handled = e.Handled = eventArgs.Triggered;
                 if (handled == false) {
-                    if (key == KeyboardKey.Space) {
-                        var input = new InputEventArgs(" ");
+                    if (key == PressKey.Space) {
+                        var input = new CommanderInputEventArgs(" ");
                         var handler = WindowInput;
                         if (handler != null) {
                             handler.Invoke(this, input);
@@ -43,7 +42,7 @@ namespace Brows.Gui {
         private void Window_PreviewTextInput(object sender, TextCompositionEventArgs e) {
             if (e != null) {
                 var text = e.Text;
-                var args = new InputEventArgs(text);
+                var args = new CommanderInputEventArgs(text);
                 var handler = WindowInput;
                 if (handler != null) {
                     handler.Invoke(this, args);
@@ -74,8 +73,8 @@ namespace Brows.Gui {
         }
 
         public event EventHandler WindowClosed;
-        public event InputEventHandler WindowInput;
-        public event KeyboardKeyEventHandler WindowKeyboardKeyDown;
+        public event CommanderInputEventHandler WindowInput;
+        public event CommanderPressEventHandler WindowPress;
 
         public new CommanderControl UserControl { get; }
 

@@ -6,7 +6,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Brows.Gui {
-    using Triggers;
     using Windows.Input;
 
     internal class CommandPaletteController : Controller<ICommandPaletteController>, ICommandPaletteController {
@@ -36,9 +35,9 @@ namespace Brows.Gui {
             if (e.OriginalSource != InputTextBox) {
                 return;
             }
-            var key = (KeyboardKey)e.ReferencedKey();
-            var modifiers = (KeyboardModifiers)e.ModifierKeys();
-            var eventArgs = new KeyboardKeyEventArgs(key, modifiers);
+            var key = (PressKey)e.ReferencedKey();
+            var modifiers = (PressModifiers)e.ModifierKeys();
+            var eventArgs = new CommanderPressEventArgs(key, modifiers);
             var eventHandler = KeyboardKeyDown;
             if (eventHandler != null) {
                 eventHandler.Invoke(this, eventArgs);
@@ -72,7 +71,7 @@ namespace Brows.Gui {
 
         public event EventHandler CurrentSuggestionChanged;
         public event EventHandler LostFocus;
-        public event KeyboardKeyEventHandler KeyboardKeyDown;
+        public event CommanderPressEventHandler KeyboardKeyDown;
 
         public CommandPaletteInputTextBox InputTextBox => UserControl.InputTextBox;
         public new CommandPaletteControl UserControl { get; }
@@ -102,11 +101,11 @@ namespace Brows.Gui {
             UserControl.InputTextBox.Select(start, length);
         }
 
-        void ICommandPaletteController.ScrollSuggestionData(KeyboardKey key) {
+        void ICommandPaletteController.ScrollSuggestionData(PressKey key) {
             var listBox = UserControl?.SuggestionDataControl?.FindVisualChild<ListBox>();
             var scrollViewer = UserControl?.SuggestionDataControl?.FindVisualChild<ScrollViewer>();
             switch (key) {
-                case KeyboardKey.Down:
+                case PressKey.Down:
                     if (listBox != null) {
                         listBox.MoveDown();
                     }
@@ -114,7 +113,7 @@ namespace Brows.Gui {
                         scrollViewer?.LineDown();
                     }
                     break;
-                case KeyboardKey.Up:
+                case PressKey.Up:
                     if (listBox != null) {
                         listBox.MoveUp();
                     }
@@ -122,7 +121,7 @@ namespace Brows.Gui {
                         scrollViewer?.LineUp();
                     }
                     break;
-                case KeyboardKey.PageDown:
+                case PressKey.PageDown:
                     if (listBox != null) {
                         listBox.MovePageDown();
                     }
@@ -130,7 +129,7 @@ namespace Brows.Gui {
                         scrollViewer?.PageDown();
                     }
                     break;
-                case KeyboardKey.PageUp:
+                case PressKey.PageUp:
                     if (listBox != null) {
                         listBox.MovePageUp();
                     }

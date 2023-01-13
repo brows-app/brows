@@ -11,9 +11,6 @@ namespace Domore.Runtime.InteropServices {
 
     internal class PreviewWorkerCLSID {
         private static readonly ConcurrentDictionary<string, Guid> Cache = new ConcurrentDictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
-        //{
-        //    { ".pdf", new Guid("3A84F9C2-6164-485C-A7D9-4B27F8AC009E") }
-        //};
 
         private async Task<Guid> Get(string extension, CancellationToken cancellationToken) {
             return await ThreadPool.Work(nameof(PreviewWorkerCLSID), cancellationToken: cancellationToken, work: () => {
@@ -45,6 +42,9 @@ namespace Domore.Runtime.InteropServices {
         }
 
         public async Task<Guid> For(string extension, CancellationToken cancellationToken) {
+            if (string.IsNullOrWhiteSpace(extension)) {
+                return Guid.Empty;
+            }
             if (Cache.TryGetValue(extension, out var value) == false) {
                 Cache[extension] = value = await Get(extension, cancellationToken);
             }

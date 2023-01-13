@@ -14,6 +14,11 @@ namespace Brows.IO {
             _IconInput = new IconInput(IconStock.Unknown));
         private IconInput _IconInput;
 
+        private Win32Provide Provider =>
+            _Provider ?? (
+            _Provider = new Win32Provide());
+        private Win32Provide _Provider;
+
         private STAThreadPool ThreadPool { get; }
 
         private Win32FileSystemProvider(DirectoryInfo info, STAThreadPool threadPool) : base(info) {
@@ -21,7 +26,7 @@ namespace Brows.IO {
         }
 
         protected override FileSystemEntry Create(FileSystemInfo info, CancellationToken cancellationToken) {
-            return new Win32FileSystemEntry(info, cancellationToken);
+            return new Win32FileSystemEntry(info, Provider, cancellationToken);
         }
 
         public override Image Icon =>

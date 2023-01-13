@@ -6,6 +6,5 @@
     <ItemGroup>
         <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
         <ProjectReference Include="..\Brows.IO.Commands.Find\Brows.IO.Commands.Find.csproj" />
-        <ProjectReference Include="..\Brows.Triggers.Gui\Brows.Triggers.Gui.csproj" />
     </ItemGroup>
 </Project>

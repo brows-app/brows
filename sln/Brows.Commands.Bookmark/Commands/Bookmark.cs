@@ -6,14 +6,8 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands {
     using Config;
-    using Triggers;
 
     internal class Bookmark : Command<Bookmark.Parameter>, ICommandExport {
-        private readonly Dictionary<string, KeyboardGesture> Key = new Dictionary<string, KeyboardGesture> {
-            { nameof(View), new KeyboardGesture(KeyboardKey.B, KeyboardModifiers.Control) },
-            { nameof(Add), new KeyboardGesture(KeyboardKey.D, KeyboardModifiers.Control) },
-            { nameof(AddAll), new KeyboardGesture(KeyboardKey.D, KeyboardModifiers.Control | KeyboardModifiers.Shift) } };
-
         private BookmarkConfig Config =>
             _Config ?? (
             _Config = new BookmarkConfig());
@@ -55,47 +49,9 @@ namespace Brows.Commands {
         private async Task<bool> View(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasCommander(out var commander)) {
-                await commander.ShowPalette(InputTrigger(), cancellationToken);
-                return true;
+                return await commander.ShowPalette($"{InputTrigger()} ", cancellationToken);
             }
             return false;
-        }
-
-        private async Task<bool> Work(Context context, KeyboardGesture key, CancellationToken cancellationToken) {
-            if (context == null) return false;
-            if (key.Equals(Key[nameof(Add)])) {
-                if (context.HasPanel(out var active)) {
-                    return await Add(context, new[] { active.ID?.Value }, cancellationToken);
-                }
-            }
-            if (key.Equals(Key[nameof(AddAll)])) {
-                return await AddAll(context, cancellationToken);
-            }
-            if (key.Equals(Key[nameof(View)])) {
-                return await View(context, cancellationToken);
-            }
-            return false;
-        }
-
-        private async Task<bool> Work(Context context, Parameter parameter, CancellationToken cancellationToken) {
-            if (context == null) return false;
-            if (parameter == null) return false;
-            if (parameter.All) {
-                return await AddAll(context, cancellationToken);
-            }
-            if (parameter.Add) {
-                return await AddActive(context, cancellationToken);
-            }
-            return false;
-        }
-
-        protected override IEnumerable<ITrigger> DefaultTriggers {
-            get {
-                yield return new KeyboardTrigger(Key[nameof(View)]);
-                yield return new KeyboardTrigger(Key[nameof(Add)]);
-                yield return new KeyboardTrigger(Key[nameof(AddAll)]);
-                yield return new InputTrigger("bookmark", "bm");
-            }
         }
 
         protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
@@ -118,13 +74,15 @@ namespace Brows.Commands {
 
         protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
-            if (context.HasKey(out var key)) {
-                return await Work(context, key, cancellationToken);
-            }
             if (context.HasParameter(out var parameter)) {
-                return await Work(context, parameter, cancellationToken);
+                if (parameter.All) {
+                    return await AddAll(context, cancellationToken);
+                }
+                if (parameter.Add) {
+                    return await AddActive(context, cancellationToken);
+                }
             }
-            return false;
+            return await View(context, cancellationToken);
         }
 
         public class Parameter {

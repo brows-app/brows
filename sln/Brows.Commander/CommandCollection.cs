@@ -1,42 +1,39 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
-    using Triggers;
-
     public class CommandCollection : ICommandCollection {
         private readonly List<ICommand> List;
 
-        private Dictionary<KeyboardGesture, HashSet<ICommand>> KeyboardDictionary {
+        private Dictionary<PressGesture, HashSet<ICommand>> PressSet {
             get {
-                if (_KeyboardDictionary == null) {
-                    _KeyboardDictionary = new Dictionary<KeyboardGesture, HashSet<ICommand>>();
+                if (_PressSet == null) {
+                    _PressSet = new Dictionary<PressGesture, HashSet<ICommand>>();
                     foreach (var item in List) {
-                        foreach (var keyboardTrigger in item.KeyboardTriggers) {
-                            var gesture = keyboardTrigger.Gesture;
-                            var list = _KeyboardDictionary.ContainsKey(gesture) ?
-                                _KeyboardDictionary[gesture] :
-                                _KeyboardDictionary[gesture] = new HashSet<ICommand>();
-                            list.Add(item);
+                        var press = item.Trigger?.Press;
+                        if (press != null) {
+                            foreach (var p in press) {
+                                var gesture = p.Gesture;
+                                var list = _PressSet.ContainsKey(gesture) ?
+                                    _PressSet[gesture] :
+                                    _PressSet[gesture] = new HashSet<ICommand>();
+                                list.Add(item);
+                            }
                         }
                     }
                 }
-                return _KeyboardDictionary;
+                return _PressSet;
             }
         }
-        private Dictionary<KeyboardGesture, HashSet<ICommand>> _KeyboardDictionary;
+        private Dictionary<PressGesture, HashSet<ICommand>> _PressSet;
 
-        private Dictionary<string, HashSet<ICommand>> InputDictionary {
-            get {
-                if (_InputDictionary == null) {
-                    _InputDictionary = new Dictionary<string, HashSet<ICommand>>();
-                }
-                return _InputDictionary;
-            }
-        }
-        private Dictionary<string, HashSet<ICommand>> _InputDictionary;
+        private Dictionary<string, HashSet<ICommand>> InputSet =>
+            _InputSet ?? (
+            _InputSet = new());
+        private Dictionary<string, HashSet<ICommand>> _InputSet;
 
         public CommandCollection(IEnumerable<ICommand> items) {
             List = new List<ICommand>(items);
@@ -52,13 +49,17 @@ namespace Brows {
             return false;
         }
 
-        public bool Triggered(InputTrigger trigger, out IReadOnlySet<ICommand> commands) {
-            if (null == trigger) throw new ArgumentNullException(nameof(trigger));
-            var s = trigger.Value;
-            if (InputDictionary.TryGetValue(s, out var list) == false) {
-                InputDictionary[s] = list = List.Where(c => c.InputTriggers.Any(t => t.Triggered(s))).ToHashSet();
+        public bool Triggered(string input, out IReadOnlySet<ICommand> commands) {
+            var s = input;
+            if (InputSet.TryGetValue(s, out var list) == false) {
+                InputSet[s] = list = List.Where(c => c.Trigger?.Input?.Triggered(s) ?? false).ToHashSet();
             }
-            if (list.Count > 0) {
+            commands = list;
+            return commands.Count > 0;
+        }
+
+        public bool Triggered(PressGesture press, out IReadOnlySet<ICommand> commands) {
+            if (PressSet.TryGetValue(press, out var list)) {
                 commands = list;
                 return true;
             }
@@ -66,24 +67,8 @@ namespace Brows {
             return false;
         }
 
-        public bool Triggered(KeyboardTrigger trigger, out IReadOnlySet<ICommand> commands) {
-            if (null == trigger) throw new ArgumentNullException(nameof(trigger));
-            if (KeyboardDictionary.TryGetValue(trigger.Gesture, out var list)) {
-                commands = list;
-                return true;
-            }
-            commands = null;
-            return false;
-        }
-
-        public bool Triggered(ITrigger trigger, out IReadOnlySet<ICommand> commands) {
-            if (trigger is InputTrigger i) {
-                return Triggered(i, out commands);
-            }
-            if (trigger is KeyboardTrigger k) {
-                return Triggered(k, out commands);
-            }
-            throw new ArgumentException(paramName: nameof(trigger), message: $"{nameof(trigger)} [{trigger}]");
+        public async Task Init(CancellationToken cancellationToken) {
+            await Task.WhenAll(List.Select(item => item.Init(cancellationToken)));
         }
 
         IEnumerator<ICommand> IEnumerable<ICommand>.GetEnumerator() {

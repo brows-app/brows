@@ -24,10 +24,10 @@ namespace Brows {
             _Composer = new Composer());
         private Composer _Composer;
 
-        private ICommandLine CommandLine =>
+        private Cli.ICommandLine CommandLine =>
             _CommandLine ?? (
             _CommandLine = new CommandLine());
-        private ICommandLine _CommandLine;
+        private Cli.ICommandLine _CommandLine;
 
         private CommanderMessenger Messenger =>
             _Messenger ?? (
@@ -66,23 +66,19 @@ namespace Brows {
             OnThemed(new CommanderThemedEventArgs(commander.Theme));
         }
 
-        private void Commander_Logger(object sender, EventArgs e) {
-            Logger?.Invoke(this, new CommanderLoggerEventArgs());
-        }
-
-        private async Task<Commander> Commander(bool first, CancellationToken cancellationToken) {
+        private async Task<Commander> Commander(bool first, string[] load, CancellationToken cancellationToken) {
+            await Commands.Init(cancellationToken);
             var commander = new Commander {
                 Clipboard = Import.Clipboard,
                 Commands = Commands,
                 Dialog = new DialogState(Import.DialogFactory.Create()),
                 EntryProviderFactory = EntryProviderFactory,
-                First = first
+                First = first,
+                Load = load
             };
-            await Task.CompletedTask;
             commander.Closed += Commander_Closed;
             commander.Exited += Commander_Exited;
             commander.Loaded += Commander_Loaded;
-            commander.Logger += Commander_Logger;
             commander.Themed += Commander_Themed;
             Commanders.Add(commander);
             return commander;
@@ -94,9 +90,9 @@ namespace Brows {
         }
 
         private async Task Service() {
-            Load(await Commander(first: true, CancellationToken.None));
+            Load(await Commander(first: true, load: null, CancellationToken.None));
             await foreach (var message in Messenger.Receive(default)) {
-                Load(await Commander(first: false, CancellationToken.None));
+                Load(await Commander(first: false, load: new[] { message }, CancellationToken.None));
             }
         }
 
@@ -115,7 +111,6 @@ namespace Brows {
         public event CommanderExitedEventHandler Exited;
         public event CommanderLoadedEventHandler Loaded;
         public event CommanderThemedEventHandler Themed;
-        public event CommanderLoggerEventHandler Logger;
 
         public IEnumerable<IComponentResource> ComponentResources =>
             Composition.ComponentResources;

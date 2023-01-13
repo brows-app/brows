@@ -19,7 +19,7 @@ namespace Brows {
             var dispose = new List<Task>();
             var commands = Commands;
             var suggestions = commands.Select(c => c.Suggest(Context, cancellationToken));
-            var enumerators = suggestions.Select(s => s.GetAsyncEnumerator()).ToList();
+            var enumerators = suggestions.Select(s => s.GetAsyncEnumerator(cancellationToken)).ToList();
             var tasks = enumerators.Select(e => e.MoveNextAsync().AsTask()).ToList();
             try {
                 for (; ; ) {

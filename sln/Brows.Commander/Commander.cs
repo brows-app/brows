@@ -9,7 +9,6 @@ namespace Brows {
     using Gui;
     using IO;
     using Threading.Tasks;
-    using Triggers;
 
     public class Commander : Notifier, ICommander, IControlled<ICommanderController> {
         private static readonly ILog Log = Logging.For(typeof(Commander));
@@ -31,9 +30,11 @@ namespace Brows {
 
         private void Controller_Loaded(object sender, EventArgs e) {
             TaskHandler.Begin(async cancellationToken => {
-                await AddPanel("", cancellationToken);
+                foreach (var id in Load) {
+                    await AddPanel(id, cancellationToken);
+                }
                 if (First) {
-                    await ShowPalette("?", 0, 1, cancellationToken);
+                    await ShowPalette("? ", 0, 2, cancellationToken);
                     Theme = await ThemeConfig.Load(cancellationToken);
                     Themed?.Invoke(this, EventArgs.Empty);
                 }
@@ -45,19 +46,19 @@ namespace Brows {
             OnClosed(e);
         }
 
-        private void Controller_WindowInput(object sender, InputEventArgs e) {
+        private void Controller_WindowInput(object sender, CommanderInputEventArgs e) {
             if (e != null) {
                 e.Triggered = Input(e.Text);
             }
         }
 
-        private void Controller_WindowKeyboardKeyDown(object sender, KeyboardKeyEventArgs e) {
+        private void Controller_WindowPress(object sender, CommanderPressEventArgs e) {
             if (e != null) {
                 e.Triggered = Input(e.Key, e.Modifiers);
             }
         }
 
-        private bool Input(KeyboardKey key, KeyboardModifiers modifiers) {
+        private bool Input(PressKey key, PressModifiers modifiers) {
             if (Palette != null) return false;
             if (Dialog?.Current != null) return false;
 
@@ -70,10 +71,12 @@ namespace Brows {
                     panel.Activate();
                 }
             }
-            var trigger = new KeyboardTrigger(key, modifiers);
-            if (Commands.Triggered(trigger, out var commands)) {
-                var context = new CommandContext(this, trigger);
+            var press = new PressGesture(key, modifiers);
+            if (Commands.Triggered(press, out var commands)) {
                 foreach (var command in commands) {
+                    var shortcut = command.Trigger.Press[press].Shortcut;
+                    var cmdLine = new CommandLine(shortcut);
+                    var context = new CommandContext(this, cmdLine, press);
                     if (command.Workable(context)) {
                         command.Work(context, default).ContinueWith(task => {
                             var exception = task.Exception;
@@ -136,13 +139,13 @@ namespace Brows {
                         oldValue.Loaded -= Controller_Loaded;
                         oldValue.WindowClosed -= Controller_WindowClosed;
                         oldValue.WindowInput -= Controller_WindowInput;
-                        oldValue.WindowKeyboardKeyDown -= Controller_WindowKeyboardKeyDown;
+                        oldValue.WindowPress -= Controller_WindowPress;
                     }
                     if (newValue != null) {
                         newValue.Loaded += Controller_Loaded;
                         newValue.WindowClosed += Controller_WindowClosed;
                         newValue.WindowInput += Controller_WindowInput;
-                        newValue.WindowKeyboardKeyDown += Controller_WindowKeyboardKeyDown;
+                        newValue.WindowPress += Controller_WindowPress;
                     }
                     var dialog = Dialog;
                     if (dialog != null) {
@@ -164,6 +167,12 @@ namespace Brows {
             set => Change(ref _First, value, nameof(First));
         }
         private bool _First;
+
+        public string[] Load {
+            get => _Load ?? (_Load = new[] { "" });
+            set => _Load = value;
+        }
+        private string[] _Load;
 
         public ICommandPalette Palette {
             get => _Palette;
@@ -203,51 +212,51 @@ namespace Brows {
         public IPanelCollection Panels =>
             PanelCollection;
 
-        public async Task AddPanel(string id, CancellationToken cancellationToken) {
+        public async Task<bool> AddPanel(string id, CancellationToken cancellationToken) {
             if (Log.Info()) {
-                Log.Info(
-                    nameof(AddPanel),
-                    $"{nameof(id)} > {id}");
+                Log.Info(nameof(AddPanel) + " > " + id);
             }
             var panel = await PanelCollection.Add(id, Dialog, Operations, EntryProviderFactory, cancellationToken);
             Controller?.AddPanel(panel);
+            return true;
         }
 
-        public async Task RemovePanel(IPanel panel, CancellationToken cancellationToken) {
+        public async Task<bool> RemovePanel(IPanel panel, CancellationToken cancellationToken) {
             if (Log.Info()) {
-                Log.Info(
-                    nameof(RemovePanel),
-                    $"{nameof(panel)} > {panel}");
+                Log.Info(nameof(RemovePanel) + " > " + panel);
             }
             PanelCollection.Remove(panel);
             Controller?.RemovePanel(panel);
             await Task.CompletedTask;
+            return true;
         }
 
-        public Task ShowPalette(string input, CancellationToken cancellationToken) {
+        public Task<bool> ShowPalette(string input, CancellationToken cancellationToken) {
             return ShowPalette(input, 0, 0, cancellationToken);
         }
 
-        public Task ShowPalette(string input, int selectedStart, int selectedLength, CancellationToken cancellationToken) {
-            if (Palette == null) {
-                var palette = new CommandPalette(this);
-                void palette_Loaded(object sender, EventArgs e) {
-                    if (selectedLength > 0) {
-                        palette.SelectInput(selectedStart, selectedLength);
-                    }
-                }
-                void palette_Escaping(object sender, EventArgs e) {
-                    palette.Loaded -= palette_Loaded;
-                    palette.Escaping -= palette_Escaping;
-                    Palette = null;
-                    Panels.Active?.Activate();
-                }
-                palette.Loaded += palette_Loaded;
-                palette.Escaping += palette_Escaping;
-                palette.Input = input;
-                Palette = palette;
+        public async Task<bool> ShowPalette(string input, int selectedStart, int selectedLength, CancellationToken cancellationToken) {
+            if (Palette != null) {
+                await Task.CompletedTask;
+                return false;
             }
-            return Task.CompletedTask;
+            var palette = new CommandPalette(this);
+            void palette_Loaded(object sender, EventArgs e) {
+                if (selectedLength > 0) {
+                    palette.SelectInput(selectedStart, selectedLength);
+                }
+            }
+            void palette_Escaping(object sender, EventArgs e) {
+                palette.Loaded -= palette_Loaded;
+                palette.Escaping -= palette_Escaping;
+                Palette = null;
+                Panels.Active?.Activate();
+            }
+            palette.Loaded += palette_Loaded;
+            palette.Escaping += palette_Escaping;
+            palette.Input = input;
+            Palette = palette;
+            return true;
         }
 
         public void Close() {
@@ -258,15 +267,11 @@ namespace Brows {
             OnExited(EventArgs.Empty);
         }
 
-        public async Task SetTheme(string @base, string background, string foreground, CancellationToken cancellationToken) {
+        public async Task<bool> SetTheme(string @base, string background, string foreground, CancellationToken cancellationToken) {
             Theme = new CommanderTheme(@base, background, foreground);
             Themed?.Invoke(this, EventArgs.Empty);
             await ThemeConfig.Save(Theme, cancellationToken);
-        }
-
-        public async Task ShowLog(CancellationToken cancellationToken) {
-            OnLogger(EventArgs.Empty);
-            await Task.CompletedTask;
+            return true;
         }
     }
 }

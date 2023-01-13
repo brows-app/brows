@@ -14,14 +14,14 @@ namespace Brows.IO {
             _Opener = new Win32FileOpener());
         private Win32FileOpener _Opener;
 
-        private Win32FileLinkResolver LinkResolver => Win32Provider.FileLinkResolver;
+        private Win32FileLinkResolver LinkResolver => Provide.FileLinkResolver;
 
-        protected sealed override IIconProvider IconProvider => Win32Provider.Icon;
-        protected sealed override IOverlayProvider OverlayProvider => Win32Provider.Overlay;
-        protected sealed override IPreviewProvider PreviewProvider => Win32Provider.Preview;
-        protected sealed override IThumbnailProvider ThumbnailProvider => Win32Provider.Thumbnail;
+        protected sealed override IIconProvider IconProvider => Provide.Icon;
+        protected sealed override IPreviewProvider PreviewProvider => Provide.Preview;
+        protected sealed override IOverlayProvider OverlayProvider => Provide.Overlay;
+        protected sealed override IThumbnailProvider ThumbnailProvider => Provide.Thumbnail;
         protected sealed override IFilePropertyProvider PropertyProvider => Kind == FileSystemEntryKind.File
-            ? Win32Provider.Property
+            ? Provide.Property
             : null;
 
         protected sealed override async Task<bool> Open(CancellationToken cancellationToken) {
@@ -69,7 +69,10 @@ namespace Brows.IO {
             return true;
         }
 
-        public Win32FileSystemEntry(FileSystemInfo info, CancellationToken cancellationToken) : base(info, cancellationToken) {
+        public Win32Provide Provide { get; }
+
+        public Win32FileSystemEntry(FileSystemInfo info, Win32Provide provide, CancellationToken cancellationToken) : base(info, cancellationToken) {
+            Provide = provide ?? throw new ArgumentNullException(nameof(provide));
         }
 
         private class EntryConfig {

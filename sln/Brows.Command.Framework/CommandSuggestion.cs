@@ -16,7 +16,10 @@ namespace Brows {
         };
 
         private IEnumerable<string> InputAliases =>
-            Command.InputTriggers.SelectMany(trigger => trigger.Alias).Distinct();
+            Command.Trigger?.Input?.Aliases?.AsEnumerable() ??
+            Array.Empty<string>();
+
+        public static readonly string DescriptionHidden = nameof(DescriptionHidden);
 
         public Command Command { get; }
         public ICommandContext Context { get; }
@@ -55,13 +58,15 @@ namespace Brows {
             string.Join(",", InputAliases);
 
         public string KeyboardTrigger =>
-            string.Join(",", Command.KeyboardTriggers);
+            string.Join(",",
+                Command.Trigger?.Press?.AsEnumerable() ??
+                Array.Empty<ITriggerPress>());
 
         public bool InputAliasExists =>
             InputAliases.Any();
 
         public bool KeyboardTriggerExists =>
-            Command.KeyboardTriggers.Any();
+            Command.Trigger?.Press?.Any() ?? false;
 
         public bool DescriptionExists =>
             !string.IsNullOrWhiteSpace(Description);

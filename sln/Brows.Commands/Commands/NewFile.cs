@@ -1,19 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using Triggers;
-
     internal class NewFile : Command<NewFile.Info>, ICommandExport {
-        protected override IEnumerable<ITrigger> DefaultTriggers {
-            get {
-                yield return new KeyboardTrigger(KeyboardKey.N, KeyboardModifiers.Control | KeyboardModifiers.Shift | KeyboardModifiers.Alt);
-                yield return new InputTrigger("newfile", "newf", "nf");
-            }
-        }
-
         protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (context.HasPanel(out var active)) {

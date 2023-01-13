@@ -4,15 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using Triggers;
-
     internal class Manual : Command, ICommandExport {
-        protected override IEnumerable<ITrigger> DefaultTriggers {
-            get {
-                yield return new InputTrigger("?");
-            }
-        }
-
         protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             if (context == null) yield break;
             if (context.DidTrigger(this)) {

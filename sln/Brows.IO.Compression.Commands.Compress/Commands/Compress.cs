@@ -1,21 +1,12 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
     using IO.Compression;
-    using Triggers;
 
     internal class Compress : Command<Compress.Parameter>, ICommandExport {
-        protected override IEnumerable<ITrigger> DefaultTriggers {
-            get {
-                yield return new InputTrigger("zip");
-                yield return new InputTrigger("compress");
-            }
-        }
-
         protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasPanel(out var active) == false) {

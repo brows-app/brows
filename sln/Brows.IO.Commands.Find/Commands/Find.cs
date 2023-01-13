@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands {
     using IO;
-    using Triggers;
 
     internal class Find : Command<Find.Parameter>, ICommandExport {
         private FindCommand FindCommand =>
@@ -28,10 +27,11 @@ namespace Brows.Commands {
             return null;
         }
 
-        private async Task<bool> Work(Context context, KeyboardGesture _, CancellationToken cancellationToken) {
+        private async Task<bool> Work(Context context, PressGesture _, CancellationToken cancellationToken) {
             var root = await Root(context, cancellationToken);
-            if (root == null) return false;
-
+            if (root == null) {
+                return false;
+            }
             if (context.HasCommander(out var commander)) {
                 await commander.ShowPalette("find ", cancellationToken);
                 return true;
@@ -64,13 +64,6 @@ namespace Brows.Commands {
                 return true;
             }
             return false;
-        }
-
-        protected override IEnumerable<ITrigger> DefaultTriggers {
-            get {
-                yield return new InputTrigger("find");
-                yield return new KeyboardTrigger(KeyboardKey.F, KeyboardModifiers.Control);
-            }
         }
 
         protected override IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, CancellationToken cancellationToken) {

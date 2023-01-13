@@ -1,17 +1,13 @@
 using Domore.Logs;
 using Domore.Notification;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
     using Gui;
     using Threading.Tasks;
-    using Translation;
 
     public abstract class EntryProvider : Notifier, IEntryProvider {
         private static readonly ILog Log = Logging.For(typeof(EntryProvider));
@@ -19,13 +15,15 @@ namespace Brows {
         private IEntryProviderTarget Target;
         private CancellationTokenSource CancellationTokenSource;
 
-        private ITranslation Translate =>
-            Global.Translation;
-
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
             _TaskHandler = new TaskHandler<EntryProvider>());
         private TaskHandler _TaskHandler;
+
+        private EntryProviderDataKey DataKey =>
+            _DataKey ?? (
+            _DataKey = new(DataKeyOptions));
+        private EntryProviderDataKey _DataKey;
 
         protected IEntryBrowser Browser =>
             Target;
@@ -57,46 +55,16 @@ namespace Brows {
             return null;
         }
 
-        public NameValueCollection DataKeyAlias() {
-            if (_DataKeyAlias == null) {
-                _DataKeyAlias = new NameValueCollection();
-
-                var options = DataKeyOptions;
-                foreach (var option in options) {
-                    var optionAliases = Translate.Alias(option);
-                    if (optionAliases.Length == 0) {
-                        _DataKeyAlias.Add(option, option);
-                    }
-                    else {
-                        foreach (var optionAlias in optionAliases) {
-                            _DataKeyAlias.Add(option, optionAlias);
-                        }
-                    }
-                }
-            }
-            return _DataKeyAlias;
-        }
-        private NameValueCollection _DataKeyAlias;
-
-        public string DataKeyLookup(string alias) {
-            foreach (var item in DataKeyLookup(new[] { alias })) {
-                return item.ToString();
-            }
-            return null;
+        IReadOnlyDictionary<string, IReadOnlySet<string>> IPanelProvider.DataKeyAlias() {
+            return DataKey.Alias;
         }
 
-        public IEnumerable DataKeyLookup(params string[] aliases) {
-            var options = DataKeyOptions;
-            foreach (var option in options) {
-                var optionAliases = Translate.Alias(option).Append(option);
-                foreach (var optionAlias in optionAliases) {
-                    var aliased = aliases.Any(alias => string.Equals(optionAlias, alias, StringComparison.CurrentCultureIgnoreCase));
-                    if (aliased) {
-                        yield return option;
-                        break;
-                    }
-                }
-            }
+        string IPanelProvider.DataKeyLookup(string alias) {
+            return DataKey.Lookup(alias);
+        }
+
+        IReadOnlySet<string> IPanelProvider.DataKeyPossible(string part) {
+            return DataKey.Possible(part);
         }
 
         void IEntryProvider.Begin(IEntryProviderTarget target) {

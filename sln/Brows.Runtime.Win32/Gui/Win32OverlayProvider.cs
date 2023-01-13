@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Gui {
-    internal class Win32OverlayProvider : OverlayProvider {
+    internal sealed class Win32OverlayProvider : OverlayProvider {
         private static readonly ILog Log = Logging.For(typeof(Win32OverlayProvider));
 
         private readonly ConcurrentDictionary<string, object> OverlayCache = new ConcurrentDictionary<string, object>();
@@ -48,7 +48,7 @@ namespace Brows.Gui {
             });
         }
 
-        private async Task<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> GetIdentifiers() {
+        private async ValueTask<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> GetIdentifiers() {
             if (Identifiers != null) return Identifiers;
             if (IdentifiersTask != null) return Identifiers = await IdentifiersTask;
             return Identifiers = await (IdentifiersTask = InitIdentifiers());
@@ -62,27 +62,38 @@ namespace Brows.Gui {
             var overlaySrc = await ThreadPool.Work(nameof(GetOverlayIcon), cancellationToken: cancellationToken, work: () => {
                 var memberOption = allOptions.Select(i => i.IsMemberOf(path) ? i : null);
                 var memberOptions = memberOption.Where(i => i != null).ToList();
-                if (Log.Info()) {
-                    Log.Info($"{nameof(memberOptions)} > {memberOptions.Count}");
-                }
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var topOption = default(ShellIconOverlayIdentifierWrapper);
                 var topPriority = int.MaxValue;
-                if (memberOptions.Count == 1) {
-                    topOption = memberOptions[0];
-                    topPriority = 0;
-                }
-                if (memberOptions.Count > 1) {
-                    var priorities = memberOptions.Select(i => (Option: i, Priority: i.GetPriority()));
-                    foreach (var item in priorities) {
+                switch (memberOptions.Count) {
+                    case 0:
+                        if (Log.Debug()) {
+                            Log.Debug(nameof(memberOptions) + " > " + memberOptions.Count);
+                        }
+                        break;
+                    case 1:
                         if (Log.Info()) {
-                            Log.Info($"{item.Option.Name} > {item.Priority}");
+                            Log.Info(nameof(memberOptions) + " > " + memberOptions[0].Name);
                         }
-                        if (item.Priority < topPriority) {
-                            topOption = item.Option;
-                            topPriority = item.Priority;
+                        topOption = memberOptions[0];
+                        topPriority = 0;
+                        break;
+                    case > 1:
+                        var priorities = memberOptions.Select(i => (Option: i, Priority: i.GetPriority()));
+                        foreach (var item in priorities) {
+                            if (Log.Info()) {
+                                Log.Info(item.Option.Name + " > " + item.Priority);
+                            }
+                            if (item.Priority < topPriority) {
+                                topOption = item.Option;
+                                topPriority = item.Priority;
+                            }
                         }
-                    }
+                        break;
                 }
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (topOption != null) {
                     var key = topOption.Name;
                     var cache = OverlayCache;
@@ -102,7 +113,7 @@ namespace Brows.Gui {
             ThreadPool = threadPool;
         }
 
-        public override Task<object> GetImageSource(IOverlayInput input, ImageSize size, CancellationToken cancellationToken) {
+        public sealed override Task<object> GetImageSource(IOverlayInput input, ImageSize size, CancellationToken cancellationToken) {
             if (null == input) throw new ArgumentNullException(nameof(input));
             return GetOverlayIcon(input.ID, cancellationToken);
         }

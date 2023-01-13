@@ -5,21 +5,36 @@ using System.Linq;
 
 namespace Brows {
     using Cli;
-    using Triggers;
 
     public class CommandContext : Notifier, ICommandContext {
         private static readonly IReadOnlySet<ICommand> EmptyCommands = new HashSet<ICommand>(0);
 
-        private IReadOnlySet<ICommand> TriggeredCommands;
-
         private string Input =>
             _Input ?? (
-            _Input = Info?.Input?.Trim() ?? "");
+            _Input = Line?.HasInput(out var input) == true
+                ? input.Trim()
+                : "");
         private string _Input;
 
-        public ITrigger Trigger { get; }
+        private CommandContext(ICommander commander, ICommandLine line = null, PressGesture? press = null) {
+            Commander = commander ?? throw new ArgumentNullException(nameof(commander));
+            Line = line;
+            Press = press;
+        }
+
+        public IReadOnlySet<ICommand> TriggeringCommands =>
+            _TriggeringCommands ?? (
+            _TriggeringCommands =
+                Line != null && Line.HasCommand(out var command) && Commander.Commands.Triggered(command, out var lineCommands)
+                ? lineCommands
+                : Press.HasValue && Commander.Commands.Triggered(Press.Value, out var pressCommands)
+                    ? pressCommands
+                    : EmptyCommands);
+        private IReadOnlySet<ICommand> _TriggeringCommands;
+
         public ICommander Commander { get; }
-        public ICommandInfo Info { get; }
+        public ICommandLine Line { get; }
+        public PressGesture? Press { get; }
 
         public ICommandContextFlag Flag {
             get => _Flag;
@@ -27,34 +42,20 @@ namespace Brows {
         }
         private ICommandContextFlag _Flag;
 
-        public CommandContext(ICommander commander, ITrigger trigger, ICommandInfo info = null) {
-            Commander = commander ?? throw new ArgumentNullException(nameof(commander));
-            Trigger = trigger;
-            Info = info;
+        public CommandContext(ICommander commander, ICommandLine line) : this(commander, line: line, press: null) {
         }
 
-        public bool HasTriggered(out IReadOnlySet<ICommand> commands) {
-            if (TriggeredCommands == null) {
-                if (Commander.Commands.Triggered(Trigger, out var triggeredCommands)) {
-                    TriggeredCommands = triggeredCommands;
-                }
-                if (TriggeredCommands == null) {
-                    TriggeredCommands = EmptyCommands;
-                }
-            }
-            if (TriggeredCommands.Count > 0) {
-                commands = TriggeredCommands;
-                return true;
-            }
-            commands = null;
-            return false;
+        public CommandContext(ICommander commander, ICommandLine line, PressGesture press) : this(commander, line, press: (PressGesture?)press) {
+        }
+
+        public bool MayTrigger(ICommand command) {
+            return TriggeringCommands.Contains(command);
         }
 
         public bool DidTrigger(ICommand command) {
-            if (HasTriggered(out var commands)) {
-                return commands.Contains(command);
-            }
-            return false;
+            return
+                MayTrigger(command) && (
+                Line?.HasTrigger(out _) ?? true);
         }
 
         public virtual void SetData(ICommandContextData data) {
@@ -78,11 +79,6 @@ namespace Brows {
             return flag != null;
         }
 
-        public bool HasTrigger(out ITrigger trigger) {
-            trigger = Trigger;
-            return trigger != null;
-        }
-
         public bool HasClipboard(out IClipboard clipboard) {
             clipboard = Commander?.Clipboard;
             return clipboard != null;
@@ -98,14 +94,19 @@ namespace Brows {
             return commander != null;
         }
 
-        public bool HasInfo(out ICommandInfo info) {
-            info = Info;
-            return info != null;
+        public bool HasLine(out ICommandLine line) {
+            line = Line;
+            return line != null;
         }
 
         public bool HasInput(out string value) {
             value = Input;
             return value != "";
+        }
+
+        public bool HasEntries(out IEntryCollection entries) {
+            entries = Commander?.Panels?.Active?.Entries;
+            return entries != null;
         }
 
         public bool HasPanel(out IPanel active) {
@@ -149,12 +150,12 @@ namespace Brows {
             return false;
         }
 
-        public bool HasKey(out KeyboardGesture gesture) {
-            if (Trigger is KeyboardTrigger kt) {
-                gesture = kt.Gesture;
+        public bool HasKey(out PressGesture gesture) {
+            if (Press.HasValue) {
+                gesture = Press.Value;
                 return true;
             }
-            gesture = default(KeyboardGesture);
+            gesture = default;
             return false;
         }
 
@@ -184,9 +185,8 @@ namespace Brows {
         public bool HasParameter(out TParameter parameter) {
             if (ParameterParsed == false) {
                 ParameterParsed = true;
-                if (Agent.HasInfo(out var info)) {
-                    var p = info.Parameter?.Trim() ?? "";
-                    if (p != "") {
+                if (Agent.HasLine(out var line)) {
+                    if (line.HasParameter(out var p)) {
                         Parameter = Factory();
                         try {
                             Parser.Parse(p, Parameter);
@@ -231,6 +231,10 @@ namespace Brows {
             return Agent.HasCommander(out commander);
         }
 
+        public bool HasEntries(out IEntryCollection entries) {
+            return Agent.HasEntries(out entries);
+        }
+
         public bool HasInput(out string value) {
             return Agent.HasInput(out value);
         }
@@ -251,7 +255,7 @@ namespace Brows {
             return Agent.HasPanels(mode, out active, out passive);
         }
 
-        public bool HasKey(out KeyboardGesture gesture) {
+        public bool HasKey(out PressGesture gesture) {
             return Agent.HasKey(out gesture);
         }
 
@@ -259,16 +263,16 @@ namespace Brows {
             return Agent.HasProvider(out provider);
         }
 
-        public bool HasInfo(out ICommandInfo info) {
-            return Agent.HasInfo(out info);
-        }
-
-        public bool HasTrigger(out ITrigger trigger) {
-            return Agent.HasTrigger(out trigger);
+        public bool HasLine(out ICommandLine line) {
+            return Agent.HasLine(out line);
         }
 
         public bool DidTrigger(ICommand command) {
             return Agent.DidTrigger(command);
+        }
+
+        public bool MayTrigger(ICommand command) {
+            return Agent.MayTrigger(command);
         }
 
         public void SetHint(ICommandContextHint hint) {

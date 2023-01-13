@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands {
     using Extensions;
-    using Triggers;
 
     internal sealed class Process : Command, ICommandExport {
         private readonly CommandProcessHistory History = new CommandProcessHistory();
@@ -23,13 +22,12 @@ namespace Brows.Commands {
                 context.SetData(data);
                 context.SetHint(data);
 
-                if (context.HasInfo(out var info)) {
-                    var process = info.Parameter?.Trim() ?? "";
-                    if (process != "") {
+                if (context.HasLine(out var line)) {
+                    if (line.HasParameter(out var parameter)) {
                         var history = History.Get(cancellationToken);
                         var inputTrigger = InputTrigger();
                         await foreach (var item in history) {
-                            var relevance = SuggestionRelevance.From(item, process);
+                            var relevance = SuggestionRelevance.From(item, parameter);
                             if (relevance.HasValue) {
                                 yield return Suggestion(
                                     context: context,
@@ -41,13 +39,6 @@ namespace Brows.Commands {
                         }
                     }
                 }
-            }
-        }
-
-        protected sealed override IEnumerable<ITrigger> DefaultTriggers {
-            get {
-                yield return new InputTrigger(">");
-                yield return new KeyboardTrigger(KeyboardKey.OemPeriod, KeyboardModifiers.Shift);
             }
         }
 
@@ -71,18 +62,19 @@ namespace Brows.Commands {
             }
             var process = CommandProcess;
             var workingDirectory = await context.WorkingDirectory(cancellationToken);
-            if (context.HasInfo(out var info)) {
-                var p = info.Parameter;
-                var t = InputTrigger();
-                context.SetFlag(new CommandContextFlag {
-                    PersistInput = true,
-                    RefreshInput = true,
-                    SetInput = $"{t} {p}",
-                    SelectInputLength = p.Length,
-                    SelectInputStart = t.Length + 1
-                });
-                await History.Add(p, cancellationToken);
-                await process.Start(p, workingDirectory, cancellationToken);
+            if (context.HasLine(out var line)) {
+                if (line.HasParameter(out var p)) {
+                    var t = InputTrigger();
+                    context.SetFlag(new CommandContextFlag {
+                        PersistInput = true,
+                        RefreshInput = true,
+                        SetInput = $"{t} {p}",
+                        SelectInputLength = p.Length,
+                        SelectInputStart = t.Length + 1
+                    });
+                    await History.Add(p, cancellationToken);
+                    await process.Start(p, workingDirectory, cancellationToken);
+                }
             }
             else {
                 await process.Start("", workingDirectory, cancellationToken);

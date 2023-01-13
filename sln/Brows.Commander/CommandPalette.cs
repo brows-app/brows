@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 namespace Brows {
     using Gui;
     using Threading.Tasks;
-    using Triggers;
 
     internal class CommandPalette : Notifier, ICommandPalette, IControlled<ICommandPaletteController> {
         private static readonly ILog Log = Logging.For(typeof(CommandPalette));
@@ -29,14 +28,14 @@ namespace Brows {
             _SuggestionCollection = new CommandSuggestionCollection());
         private CommandSuggestionCollection _SuggestionCollection;
 
-        private Dictionary<KeyboardGesture, Action> KeyMap =>
+        private Dictionary<PressGesture, Action> KeyMap =>
             _KeyMap ?? (
-            _KeyMap = new Dictionary<KeyboardGesture, Action> {
-                { new KeyboardGesture(KeyboardKey.Enter, KeyboardModifiers.None),
+            _KeyMap = new Dictionary<PressGesture, Action> {
+                { new PressGesture(PressKey.Enter, PressModifiers.None),
                     () => TaskHandler.Begin(Enter) },
-                { new KeyboardGesture(KeyboardKey.Escape, KeyboardModifiers.None),
+                { new PressGesture(PressKey.Escape, PressModifiers.None),
                     Escape },
-                { new KeyboardGesture(KeyboardKey.Tab, KeyboardModifiers.None),
+                { new PressGesture(PressKey.Tab, PressModifiers.None),
                     Tab },
                 { CommandContextDataGesture.Next,
                     () => Change(SuggestionData?.Next()) },
@@ -45,19 +44,19 @@ namespace Brows {
                 { CommandContextDataGesture.Enter,
                     () => Change(SuggestionData?.Enter()) },
                 { CommandContextDataGesture.Up,
-                    () => Controller?.ScrollSuggestionData(KeyboardKey.Up) },
+                    () => Controller?.ScrollSuggestionData(PressKey.Up) },
                 { CommandContextDataGesture.Down,
-                    () => Controller?.ScrollSuggestionData(KeyboardKey.Down) },
+                    () => Controller?.ScrollSuggestionData(PressKey.Down) },
                 { CommandContextDataGesture.PageUp,
-                    () => Controller?.ScrollSuggestionData(KeyboardKey.PageUp) },
+                    () => Controller?.ScrollSuggestionData(PressKey.PageUp) },
                 { CommandContextDataGesture.PageDown,
-                    () => Controller?.ScrollSuggestionData(KeyboardKey.PageDown) },
+                    () => Controller?.ScrollSuggestionData(PressKey.PageDown) },
                 { CommandContextDataGesture.Remove,
                     () => Change(SuggestionData?.Remove()) },
                 { CommandContextDataGesture.Clear,
                     () => Change(SuggestionData?.Clear()) }
             });
-        private Dictionary<KeyboardGesture, Action> _KeyMap;
+        private Dictionary<PressGesture, Action> _KeyMap;
 
         private void Change(ICommandContextData data) {
             var escape = false;
@@ -76,10 +75,8 @@ namespace Brows {
         }
 
         private CommandContext CreateContext(string input) {
-            var inp = input?.Trim() ?? "";
-            var info = new CommandInfo(inp);
-            var trigger = new InputTrigger(info.Command);
-            return new CommandContext(Commander, trigger, info);
+            var line = new CommandLine(input);
+            return new CommandContext(Commander, line);
         }
 
         private void Controller_Loaded(object sender, EventArgs e) {
@@ -103,7 +100,7 @@ namespace Brows {
             Escape();
         }
 
-        private void Controller_KeyboardKeyDown(object sender, KeyboardKeyEventArgs e) {
+        private void Controller_KeyboardKeyDown(object sender, CommanderPressEventArgs e) {
             if (e != null) {
                 if (KeyMap.TryGetValue(e.Gesture, out var action)) {
                     action();
@@ -214,14 +211,15 @@ namespace Brows {
                 return false;
             }
             var context = CreateContext(input);
-            var commands = Commander.Commands;
-            if (commands.Triggered(context.Trigger, out var triggered)) {
+            var triggered = context.TriggeringCommands;
+            if (triggered.Count > 0) {
                 var triggeredCommands = triggered.Where(c => c.Workable(context));
                 var triggeredCommandExecuted = await Execute(triggeredCommands, context);
                 if (triggeredCommandExecuted) {
                     return true;
                 }
             }
+            var commands = Commander.Commands;
             if (commands.Arbitrary(out var arbitrary)) {
                 var arbitraryCommands = arbitrary.Where(c => c.Workable(context));
                 var arbitraryCommandExecuted = await Execute(arbitraryCommands, context);
@@ -339,7 +337,7 @@ namespace Brows {
                                 InputSuggestion = null;
                                 if (InputSuggesting) {
                                     StopSuggesting();
-                                    StartSuggesting(_Input);
+                                    StartSuggesting(Input);
                                 }
                             }
                         });

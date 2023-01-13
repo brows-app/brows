@@ -124,9 +124,9 @@ namespace Brows.Gui {
                 : new EntryComparer(sorting);
         }
 
-        public void AddColumn(string key, IEntryColumn info) {
+        public void AddColumn(string key, IEntryColumn column) {
             var
-            col = new EntryGridViewColumnProxy(key, info);
+            col = new EntryGridViewColumnProxy(key, column);
             col.AddTo(GridView);
             var
             list = List(key);

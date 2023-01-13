@@ -36,18 +36,9 @@ namespace Brows.Windows {
             new AppTheme(App, Components, e?.Theme);
         }
 
-        private void Service_Logger(object sender, CommanderLoggerEventArgs e) {
-            if (e != null) {
-                //var
-                //window = new GraphicalLogServiceWindow();
-                //window.Show();
-            }
-        }
-
         private void App_Startup(object sender, StartupEventArgs e) {
             Service.Exited += Service_Exited;
             Service.Loaded += Service_Loaded;
-            Service.Logger += Service_Logger;
             Service.Themed += Service_Themed;
             Service.Begin();
         }

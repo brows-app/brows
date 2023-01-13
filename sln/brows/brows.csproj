@@ -10,6 +10,8 @@
         <ProjectReference Include="..\Brows.CommanderService\Brows.CommanderService.csproj" />
         <ProjectReference Include="..\Brows.Commands.Bookmark.Gui\Brows.Commands.Bookmark.Gui.csproj" />
         <ProjectReference Include="..\Brows.Commands.Bookmark\Brows.Commands.Bookmark.csproj" />
+        <ProjectReference Include="..\Brows.Commands.DataKey.Gui\Brows.Commands.DataKey.Gui.csproj" />
+        <ProjectReference Include="..\Brows.Commands.DataKey\Brows.Commands.DataKey.csproj" />
         <ProjectReference Include="..\Brows.Commands.Manual.Gui\Brows.Commands.Manual.Gui.csproj" />
         <ProjectReference Include="..\Brows.Commands.Manual\Brows.Commands.Manual.csproj" />
         <ProjectReference Include="..\Brows.Commands.Operations\Brows.Commands.Operations.csproj" />
@@ -23,7 +25,6 @@
         <ProjectReference Include="..\Brows.IO.Commands.Find.Gui\Brows.IO.Commands.Find.Gui.csproj" />
         <ProjectReference Include="..\Brows.IO.Commands.Find\Brows.IO.Commands.Find.csproj" />
         <ProjectReference Include="..\Brows.IO.Commands\Brows.IO.Commands.csproj" />
-        <ProjectReference Include="..\Brows.IO.Gui\Brows.IO.Gui.csproj" />
         <ProjectReference Include="..\Brows.Runtime.Win32\Brows.Runtime.Win32.csproj" />
         <ProjectReference Include="..\Brows.Commands\Brows.Commands.csproj" />
     </ItemGroup>

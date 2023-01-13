@@ -68,9 +68,9 @@ namespace Brows {
         public FileInfo FileInfo => Info as FileInfo;
         public DirectoryInfo DirectoryInfo => Info as DirectoryInfo;
 
-        public override string ID => Info.FullName;
-        public override string Name => Info.Name;
-        public override string File => Info.FullName;
+        public sealed override string ID => Info.FullName;
+        public sealed override string Name => Info.Name;
+        public sealed override string File => Info.FullName;
 
         public FileSystemEntry(FileSystemInfo info, CancellationToken cancellationToken) : base(cancellationToken) {
             Info = info ?? throw new ArgumentNullException(nameof(info)); ;

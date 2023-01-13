@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 
 namespace Brows {
-    using Triggers;
-
     public interface ICommandContext {
         void SetHint(ICommandContextHint hint);
         void SetData(ICommandContextData data);
@@ -12,15 +10,16 @@ namespace Brows {
         bool CanBookmark(out IBookmark bookmark);
         bool HasClipboard(out IClipboard clipboard);
         bool HasCommander(out ICommander commander);
+        bool HasEntries(out IEntryCollection entries);
         bool HasInput(out string value);
         bool HasPanel(out IPanel active);
         bool HasPanel(int column, out IPanel panel);
         bool HasPanels(out IReadOnlyList<IPanel> collection);
         bool HasPanels(PanelPassiveMode mode, out IPanel active, out IPanel passive);
-        bool HasKey(out KeyboardGesture gesture);
+        bool HasKey(out PressGesture gesture);
         bool HasProvider(out IPanelProvider provider);
-        bool HasInfo(out ICommandInfo info);
-        bool HasTrigger(out ITrigger trigger);
+        bool HasLine(out ICommandLine line);
+        bool MayTrigger(ICommand command);
         bool DidTrigger(ICommand command);
     }
 }

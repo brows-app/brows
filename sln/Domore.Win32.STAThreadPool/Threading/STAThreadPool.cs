@@ -5,22 +5,34 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.Threading {
+    using Logs;
+
     public class STAThreadPool {
+        private static readonly ILog Log = Logging.For(typeof(STAThreadPool));
+
         private long WorkerID;
         private Timer Timer;
         private TimeSpan TimerPeriod = TimeSpan.FromMinutes(1);
-        private readonly List<STAThreadWorker> Workers = new List<STAThreadWorker>();
+        private readonly object TimerLock = new();
+        private readonly List<STAThreadWorker> Workers = new();
 
         private void TimerStart() {
-            Timer?.Change(Timeout.Infinite, Timeout.Infinite);
-            Timer?.Dispose();
-            Timer = new Timer(TimerCallback, null, TimerPeriod, Timeout.InfiniteTimeSpan);
+            lock (TimerLock) {
+                Timer?.Change(Timeout.Infinite, Timeout.Infinite);
+                Timer?.Dispose();
+                Timer = new Timer(TimerCallback, null, TimerPeriod, Timeout.InfiniteTimeSpan);
+            }
         }
 
         private void TimerCallback(object _) {
-            Timer?.Change(Timeout.Infinite, Timeout.Infinite);
-            Timer?.Dispose();
-            Timer = null;
+            if (Log.Info()) {
+                Log.Info(nameof(TimerCallback));
+            }
+            lock (TimerLock) {
+                Timer?.Change(Timeout.Infinite, Timeout.Infinite);
+                Timer?.Dispose();
+                Timer = null;
+            }
             lock (Workers) {
                 if (Workers.Count <= WorkerCountMin) {
                     return;
@@ -128,6 +140,9 @@ namespace Domore.Threading {
         }
 
         public void Empty() {
+            if (Log.Info()) {
+                Log.Info(nameof(Empty));
+            }
             lock (Workers) {
                 var workers = new List<STAThreadWorker>(Workers);
                 foreach (var worker in workers) {

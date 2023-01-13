@@ -8,8 +8,6 @@
       <ProjectReference Include="..\Brows.Gui.Windows.AppComponent\Brows.Gui.Windows.AppComponent.csproj" />
       <ProjectReference Include="..\Brows.Operation.Gui\Brows.Operation.Gui.csproj" />
       <ProjectReference Include="..\Brows.Panel.Gui\Brows.Panel.Gui.csproj" />
-      <ProjectReference Include="..\Brows.Triggers.Gui\Brows.Triggers.Gui.csproj" />
-      <ProjectReference Include="..\Brows.Triggers\Brows.Triggers.csproj" />
       <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
     </ItemGroup>
 </Project>

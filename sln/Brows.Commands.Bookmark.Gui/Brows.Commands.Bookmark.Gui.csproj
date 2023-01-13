@@ -6,7 +6,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Brows.Commands.Bookmark\Brows.Commands.Bookmark.csproj" />
         <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
-        <ProjectReference Include="..\Brows.Triggers.Gui\Brows.Triggers.Gui.csproj" />
     </ItemGroup>
     <ItemGroup>
       <Page Update="Resource\Culture\_.xaml">

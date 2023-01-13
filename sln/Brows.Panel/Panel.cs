@@ -307,9 +307,7 @@ namespace Brows {
 
         public async Task Open(string id, CancellationToken cancellationToken) {
             if (Log.Info()) {
-                Log.Info(
-                    nameof(Open),
-                    $"{nameof(id)} > {id}");
+                Log.Info(nameof(Open) + " > " + id);
             }
             var started = await StartID(id, cancellationToken);
             if (started == false) {

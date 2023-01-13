@@ -13,7 +13,7 @@ namespace Brows.Gui {
         bool MoveCurrentTo(IEntry entry);
         void Sort(IEntrySorting sorting);
         void Removed(IEntry entry);
-        void AddColumn(string key, IEntryColumn info);
+        void AddColumn(string key, IEntryColumn column);
         bool HasColumn(string key);
         bool RemoveColumn(string key);
         void ClearColumns();

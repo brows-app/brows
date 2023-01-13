@@ -1,17 +1,14 @@
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using Triggers;
-
     internal class Select : Command<Select.Parameter>, ICommandExport {
-        protected override IEnumerable<ITrigger> DefaultTriggers {
-            get {
-                yield return TriggerInput;
-                //yield return TriggerSelectAll;
-            }
-        }
+        //protected override IEnumerable<ITrigger> DefaultTriggers {
+        //    get {
+        //        yield return TriggerInput;
+        //        //yield return TriggerSelectAll;
+        //    }
+        //}
 
         protected override async Task<bool> Work(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
@@ -44,7 +41,7 @@ namespace Brows.Commands {
             return false;
         }
 
-        public InputTrigger TriggerInput { get; set; } = new InputTrigger("select", "sel");
+        //public InputTrigger TriggerInput { get; set; } = new InputTrigger("select", "sel");
         //public KeyboardTrigger TriggerSelectAll { get; set; } = new KeyboardTrigger(KeyboardKey.A, KeyboardModifiers.Control);
 
         public class Parameter {

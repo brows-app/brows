@@ -37,10 +37,6 @@
                 <TextBlock
                     Text="{Binding Description, Mode=OneWay}" 
                     Visibility="{Binding DescriptionExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
-                <local:CommandSuggestionContentControl
-                    Content="{Binding Command}"
-                    ContentTemplateSelector="{Binding Item[Command_Description], Source={x:Static brows:AppComponent.DataTemplateSelector}}"
-                    Visibility="{Binding DescriptionExists, Converter={x:Static brows:ValueConverter.FalseFallback}, ConverterParameter=Collapsed, FallbackValue=Visible}"/>
             </StackPanel>
         </DataTemplate>
     </ListView.ItemTemplate>

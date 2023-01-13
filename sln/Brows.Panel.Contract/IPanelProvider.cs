@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,8 +10,8 @@ namespace Brows {
         IPanelID PanelID { get; }
         IBookmark Bookmark { get; }
         string DataKeyLookup(string alias);
-        IEnumerable DataKeyLookup(params string[] alias);
-        NameValueCollection DataKeyAlias();
+        IReadOnlySet<string> DataKeyPossible(string part);
+        IReadOnlyDictionary<string, IReadOnlySet<string>> DataKeyAlias();
         Task<bool> CaseSensitive(CancellationToken cancellationToken);
     }
 }
