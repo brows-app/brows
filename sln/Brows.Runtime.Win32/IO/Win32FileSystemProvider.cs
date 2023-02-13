@@ -9,6 +9,13 @@ namespace Brows.IO {
     using Threading.Tasks;
 
     internal sealed class Win32FileSystemProvider : FileSystemProvider {
+        private TaskCache<bool> CaseSensitiveCache =>
+            _CaseSensitiveCache ?? (
+            _CaseSensitiveCache = new TaskCache<bool>(async cancellationToken => {
+                return await Win32Path.IsCaseSensitive(Path, cancellationToken);
+            }));
+        private TaskCache<bool> _CaseSensitiveCache;
+
         private IconInput IconInput =>
             _IconInput ?? (
             _IconInput = new IconInput(IconStock.Unknown));
@@ -38,8 +45,8 @@ namespace Brows.IO {
             return new Win32FileOperator(Info, deployment, ThreadPool);
         }
 
-        public sealed override Task<bool> CaseSensitive(CancellationToken cancellationToken) {
-            return Win32Path.IsCaseSensitive(Path, cancellationToken);
+        public sealed override ValueTask<bool> CaseSensitive(CancellationToken cancellationToken) {
+            return CaseSensitiveCache.Ready(cancellationToken);
         }
 
         private sealed class IconProvider : IIconProvider {
@@ -57,7 +64,7 @@ namespace Brows.IO {
                 if (rootName != null) {
                     var infoName = Info.FullName;
                     if (infoName == rootName) {
-                        var drives = await Async.Run(cancellationToken, () => DriveInfo.GetDrives());
+                        var drives = await Async.With(cancellationToken).Run(() => DriveInfo.GetDrives());
                         foreach (var drive in drives) {
                             var driveName = drive?.Name;
                             if (driveName == rootName) {

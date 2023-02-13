@@ -4,37 +4,45 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Config {
-    internal static class ConfigPath {
-        private static string LocalApplicationData() {
-            return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create);
-        }
-
-        private static async Task<string> CreateRoot(CancellationToken cancellationToken) {
-            var root = Root;
-            if (Directory.Exists(root) == false) {
-                Directory.CreateDirectory(root);
-                for (; ; ) {
-                    if (Directory.Exists(root)) {
-                        break;
-                    }
-                    await Task.Delay(10, cancellationToken);
-                }
-            }
-            return root;
-        }
-
-        public static async Task<string> Ready(CancellationToken cancellationToken) {
+    public static class ConfigPath {
+        private static async Task<string> Ready(string directory, CancellationToken cancellationToken) {
             return await Task.Run(cancellationToken: cancellationToken, function: async () => {
-                return await CreateRoot(cancellationToken);
+                if (Directory.Exists(directory) == false) {
+                    Directory.CreateDirectory(directory);
+                    for (; ; ) {
+                        if (Directory.Exists(directory)) {
+                            break;
+                        }
+                        await Task.Delay(1, cancellationToken);
+                    }
+                }
+                return directory;
             });
         }
 
-        public static string Root =>
-            _Root ?? (
-            _Root = Path.Combine(
-                LocalApplicationData(),
+        public static Task<string> DataReady(CancellationToken cancellationToken) {
+            return Ready(DataRoot, cancellationToken);
+        }
+
+        public static Task<string> FileReady(CancellationToken cancellationToken) {
+            return Ready(FileRoot, cancellationToken);
+        }
+
+        public static string DataRoot =>
+            _DataRoot ?? (
+            _DataRoot = Path.Combine(
+                Environment.GetFolderPath(
+                    Environment.SpecialFolder.LocalApplicationData,
+                    Environment.SpecialFolderOption.DoNotVerify),
                 "Brows",
                 "data"));
-        private static string _Root;
+        private static string _DataRoot;
+
+        public static string FileRoot =>
+            _FileRoot ?? (
+            _FileRoot = Path.Combine(
+                Path.GetDirectoryName(Environment.ProcessPath),
+                "brows.config"));
+        private static string _FileRoot;
     }
 }

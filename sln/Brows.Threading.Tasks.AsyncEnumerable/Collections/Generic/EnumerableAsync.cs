@@ -26,7 +26,7 @@ namespace Brows.Collections.Generic {
         public EnumerableOptions Options { get; }
 
         public async IAsyncEnumerable<T> Enumerate([EnumeratorCancellation] CancellationToken cancellationToken = default) {
-            var enumerable = await Async.Run(cancellationToken, () => Factory());
+            var enumerable = await Async.With(cancellationToken).Run(() => Factory());
             if (enumerable == null) yield break;
 
             var options = Options;
@@ -34,7 +34,8 @@ namespace Brows.Collections.Generic {
             var limit = delay?.Limit;
             var count = delay?.Limit;
             var threshold = delay?.Threshold;
-            var milliseconds = delay?.Milliseconds;
+            var thresholdReached = false;
+            var millisecondsDelay = delay?.Milliseconds ?? 0;
             var mode = options.Mode;
             var e =
                 mode == EnumerableMode.Default ? enumerable.Async(cancellationToken) :
@@ -45,9 +46,12 @@ namespace Brows.Collections.Generic {
                     break;
                 }
                 if (delay != null) {
-                    if (--threshold <= 0) {
+                    if (thresholdReached == false) {
+                        thresholdReached = --threshold <= 0;
+                    }
+                    else {
                         if (--count <= 0) {
-                            await Task.Delay(milliseconds.Value, cancellationToken);
+                            await Task.Delay(millisecondsDelay, cancellationToken);
                             count = limit;
                         }
                     }

@@ -3,5 +3,6 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.Gui.Image\Brows.Gui.Image.csproj" />
+        <ProjectReference Include="..\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj" />
     </ItemGroup>
 </Project>

@@ -117,7 +117,7 @@ namespace Brows {
         public async Task<T> Get<T>(Func<FileSystemInfoWrapper, T> func) {
             if (null == func) throw new ArgumentNullException(nameof(func));
             if (RefreshedInfo == null) {
-                RefreshedInfo = Async.Run(CancellationToken, () => {
+                RefreshedInfo = Async.With(CancellationToken).Run(() => {
                     if (Log.Debug()) {
                         Log.Debug(
                             nameof(RefreshingInfo),

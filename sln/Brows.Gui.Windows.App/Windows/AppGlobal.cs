@@ -8,7 +8,7 @@ namespace Brows.Windows {
 
         public AppGlobal(WindowsApplication app) {
             App = app ?? throw new ArgumentNullException(nameof(app));
-            Global.Translation = App.Instance.Components.Translation();
+            Global.Translation = App.Service.Components.Translation();
         }
     }
 }

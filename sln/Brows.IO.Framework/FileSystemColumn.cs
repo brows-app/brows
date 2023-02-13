@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Brows {
     using Config;
-    using IO;
+    using FILECHECKSUM = IO.FileChecksum;
 
     internal sealed class FileSystemColumn {
         private static readonly IComponentResourceKey Resolver = new FileSystemComponentKey();
@@ -28,12 +28,14 @@ namespace Brows {
                 Properties = properties;
                 Columns =
                     new (string, double)[] {
-                    (Entry.ThumbnailKey, 100),
-                    (nameof(FileInfoExtension.ChecksumMD5),     250),
-                    (nameof(FileInfoExtension.ChecksumSHA1),    250),
-                    (nameof(FileInfoExtension.ChecksumSHA256),  250),
-                    (nameof(FileInfoExtension.ChecksumSHA512),  250),
-                    (nameof(DirectorySize), 75)
+                        (Entry.ThumbnailKey, 100),
+                        (nameof(FILECHECKSUM.ChecksumMD5),     250),
+                        (nameof(FILECHECKSUM.ChecksumSHA1),    250),
+                        (nameof(FILECHECKSUM.ChecksumSHA256),  250),
+                        (nameof(FILECHECKSUM.ChecksumSHA512),  250),
+                        (nameof(DirectorySize), 75),
+                        (nameof(DirectoryFileCount), 50),
+                        (nameof(DirectoryDirectoryCount), 50)
                     }
                     .Concat(FileInfoData.Available.Select(d => (d.Key, d.Width)))
                     .Concat(Properties.Select(p => (p.Key, p.Width)))
@@ -45,9 +47,8 @@ namespace Brows {
                 Options = new HashSet<string>(Columns.Keys);
                 Default = new HashSet<string> {
                     nameof(FileSystemInfoWrapper.Name),
-                    nameof(FileSystemInfoWrapper.Length),
                     nameof(FileSystemInfoWrapper.LastWriteTime),
-                    nameof(FileSystemInfoWrapper.Extension)
+                    nameof(FileSystemInfoWrapper.Length)
                 };
                 Sorting = new Dictionary<string, EntrySortDirection?> {
                     { nameof(FileSystemInfoWrapper.Kind), EntrySortDirection.Ascending }

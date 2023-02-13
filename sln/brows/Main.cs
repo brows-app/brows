@@ -1,16 +1,17 @@
-﻿using Domore.Logs;
+﻿using Domore.Runtime.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using LOG = Domore.Logs.Log;
 
 namespace Brows {
     using Composition.Hosting;
+    using Config;
 
     internal static class Main {
-        private static readonly ILog Log = Logging.For(typeof(Main));
-
         private class Program {
             private IProgram Default =>
                 _Default ?? (
@@ -28,9 +29,21 @@ namespace Brows {
             private IReadOnlyList<IProgram> _Programs;
 
             private ProgramCommand Command { get; }
+            private ProgramConsole Console { get; }
 
-            private Program(ProgramCommand command) {
+            private Program(ProgramConsole console, ProgramCommand command) {
+                Console = console ?? throw new ArgumentNullException(nameof(console));
                 Command = command ?? throw new ArgumentNullException(nameof(command));
+            }
+
+            private async Task<ProgramConfig> Config(IProgram program, CancellationToken cancellationToken) {
+                var dir = await ConfigPath.FileReady(cancellationToken);
+                var log = Path.Combine(dir, "log.conf");
+                LOG.Conf.Configure(log);
+
+                var file = Configure.File<ProgramConfig>();
+                var conf = await file.Load(cancellationToken);
+                return conf;
             }
 
             private bool ProgramNameValid(string s) {
@@ -54,13 +67,20 @@ namespace Brows {
                 if (program == null) {
                     program = Default;
                 }
-                return await program.Run(Command, cancellationToken);
+                var config = await Config(program, cancellationToken);
+                if (config.Console) {
+                    Console.Show();
+                }
+                return await program.Run(Command, Console, cancellationToken);
             }
 
             private static async Task<int> Main(string[] args) {
                 var command = new ProgramCommand(Environment.CommandLine, args);
-                var program = new Program(command);
-                return await program.Run(CancellationToken.None);
+                var console = new ProgramConsole();
+                var program = new Program(console, command);
+                using (program.Console) {
+                    return await program.Run(CancellationToken.None);
+                }
             }
         }
 
@@ -78,6 +98,61 @@ namespace Brows {
             public ProgramCommand(string line, IReadOnlyList<string> args) {
                 Line = line;
                 Args = args ?? throw new ArgumentNullException(nameof(args));
+            }
+        }
+
+        private class ProgramConfig {
+            public bool Console { get; set; } = true;
+        }
+
+        private class ProgramConsole : IProgramConsole, IDisposable {
+            private readonly object Locker = new();
+            private bool Alloc;
+            private bool Shown;
+
+            public bool Show() {
+                if (Shown == false) {
+                    lock (Locker) {
+                        if (Shown == false) {
+                            Shown = true;
+                            Alloc = kernel32.AttachConsole(-1)
+                                ? false
+                                : kernel32.AllocConsole();
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            public bool Hide() {
+                if (Shown) {
+                    lock (Locker) {
+                        if (Shown) {
+                            Shown = false;
+                            if (Alloc) {
+                                Alloc = false;
+                                try {
+                                    kernel32.FreeConsole();
+                                }
+                                catch {
+                                }
+                            }
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            void IDisposable.Dispose() {
+                if (Alloc) {
+                    try {
+                        kernel32.FreeConsole();
+                    }
+                    catch {
+                    }
+                }
             }
         }
     }

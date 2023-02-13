@@ -3,21 +3,21 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using IO;
+    using FILECHECKSUM = IO.FileChecksum;
 
     internal class FileChecksum : EntryData<string> {
         protected override async Task<string> Access(CancellationToken cancellationToken) {
             var file = File;
             if (file != null) {
                 switch (Key) {
-                    case nameof(FileInfoExtension.ChecksumMD5):
-                        return await file.ChecksumMD5(cancellationToken);
-                    case nameof(FileInfoExtension.ChecksumSHA1):
-                        return await file.ChecksumSHA1(cancellationToken);
-                    case nameof(FileInfoExtension.ChecksumSHA256):
-                        return await file.ChecksumSHA256(cancellationToken);
-                    case nameof(FileInfoExtension.ChecksumSHA512):
-                        return await file.ChecksumSHA512(cancellationToken);
+                    case nameof(FILECHECKSUM.ChecksumMD5):
+                        return await FILECHECKSUM.ChecksumMD5(file, cancellationToken);
+                    case nameof(FILECHECKSUM.ChecksumSHA1):
+                        return await FILECHECKSUM.ChecksumSHA1(file, cancellationToken);
+                    case nameof(FILECHECKSUM.ChecksumSHA256):
+                        return await FILECHECKSUM.ChecksumSHA256(file, cancellationToken);
+                    case nameof(FILECHECKSUM.ChecksumSHA512):
+                        return await FILECHECKSUM.ChecksumSHA512(file, cancellationToken);
                 }
             }
             return null;

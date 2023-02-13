@@ -9,8 +9,8 @@ namespace Brows {
     using IO;
 
     public sealed class PathBookmark : IBookmark {
-        public Task<bool> Exists(string value, CancellationToken cancellationToken) {
-            return DirectoryAsync.Exists(value, cancellationToken);
+        public async Task<bool> Exists(string value, CancellationToken cancellationToken) {
+            return null != await FileSystem.DirectoryExists(value, cancellationToken);
         }
 
         public Task<KeyValuePair<string, string>> MakeFrom(string value, IEnumerable<KeyValuePair<string, string>> existing, CancellationToken cancellationToken) {

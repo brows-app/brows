@@ -18,6 +18,7 @@
         <ProjectReference Include="..\Brows.Commands.Process.Gui\Brows.Commands.Process.Gui.csproj" />
         <ProjectReference Include="..\Brows.Commands.Process\Brows.Commands.Process.csproj" />
         <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
+        <ProjectReference Include="..\Brows.Config.Commands\Brows.Config.Commands.csproj" />
         <ProjectReference Include="..\Brows.Entry.Gui\Brows.Entry.Gui.csproj" />
         <ProjectReference Include="..\Brows.Gui.Windows.App\Brows.Gui.Windows.App.csproj" />
         <ProjectReference Include="..\Brows.IO.Compression.Commands.Compress\Brows.IO.Compression.Commands.Compress.csproj" />
@@ -27,11 +28,41 @@
         <ProjectReference Include="..\Brows.IO.Commands\Brows.IO.Commands.csproj" />
         <ProjectReference Include="..\Brows.Runtime.Win32\Brows.Runtime.Win32.csproj" />
         <ProjectReference Include="..\Brows.Commands\Brows.Commands.csproj" />
+        <ProjectReference Include="..\Domore.Logs.Conf\Domore.Logs.Conf.csproj" />
     </ItemGroup>
     <ItemGroup>
-      <None Update="brows.conf">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="brows.config\find.conf">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\log.conf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\program.conf">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\preview.conf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\entry.conf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\panel.conf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\key.conf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\propsys.conf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
     </ItemGroup>
     <Target Name="GetTargetPath" Returns="@(Brows_SetupOutputPath)">
         <ItemGroup Condition="'$(OutputType)' == 'Library'">

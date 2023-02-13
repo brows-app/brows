@@ -1,6 +1,8 @@
-﻿using Domore.Logs;
+﻿using Domore.Collections.Generic;
+using Domore.Logs;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,32 +36,34 @@ namespace Brows.IO.Compression {
                     }
                     continue;
                 }
-                var dir = await DirectoryInfoExtension.TryNewAsync(path, cancellationToken);
+
+                var dir = await FileSystem.DirectoryExists(path, cancellationToken);
                 if (dir != null) {
-                    var dirExists = await dir.ExistsAsync(cancellationToken);
-                    if (dirExists) {
-                        var dirFiles = dir.RecurseFilesAsync(cancellationToken);
-                        await foreach (var dirFile in dirFiles) {
-                            target.Add(1);
-                            info.Data("Add {0}", dirFile.Name);
-                            if (Log.Info()) {
-                                Log.Info($"{nameof(files.Add)} > {dirFile.FullName}");
-                            }
-                            await files.Add(dirFile, cancellationToken);
-                            progress.Add(1);
+                    var dirEnum = dir.EnumerateFiles(searchPattern: "*", enumerationOptions: new EnumerationOptions {
+                        AttributesToSkip = 0,
+                        IgnoreInaccessible = true,
+                        RecurseSubdirectories = true,
+                        ReturnSpecialDirectories = false
+                    });
+                    var dirAsync = dirEnum.CollectAsync(cancellationToken);
+                    var dirFiles = dirAsync.FlattenAsync(cancellationToken);
+                    await foreach (var dirFile in dirFiles) {
+                        target.Add(1);
+                        info.Data("Add {0}", dirFile.Name);
+                        if (Log.Info()) {
+                            Log.Info($"{nameof(files.Add)} > {dirFile.FullName}");
                         }
+                        await files.Add(dirFile, cancellationToken);
+                        progress.Add(1);
                     }
                 }
-                var file = await FileInfoExtension.TryNewAsync(path, cancellationToken);
+                var file = await FileSystem.FileExists(path, cancellationToken);
                 if (file != null) {
-                    var fileExists = await file.ExistsAsync(cancellationToken);
-                    if (fileExists) {
-                        if (Log.Info()) {
-                            Log.Info($"{nameof(files.Add)} > {file.FullName}");
-                        }
-                        info.Data("Add {0}", file.Name);
-                        await files.Add(file, cancellationToken);
+                    if (Log.Info()) {
+                        Log.Info($"{nameof(files.Add)} > {file.FullName}");
                     }
+                    info.Data("Add {0}", file.Name);
+                    await files.Add(file, cancellationToken);
                 }
                 progress.Add(1);
             }

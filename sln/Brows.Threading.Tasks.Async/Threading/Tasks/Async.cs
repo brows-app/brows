@@ -30,20 +30,18 @@ namespace Brows.Threading.Tasks {
             return new ThreadPoolWork(cancellationToken);
         }
 
-        public static Task Run(CancellationToken cancellationToken, Action action) {
-            if (null == action) throw new ArgumentNullException(nameof(action));
-            if (cancellationToken.IsCancellationRequested) {
-                return Task.FromCanceled(cancellationToken);
+        public static async Task Await(Task task) {
+            if (task != null) {
+                await task;
             }
-            return Task.Run(() => action(), cancellationToken);
+            await Task.CompletedTask;
         }
 
-        public static Task<T> Run<T>(CancellationToken cancellationToken, Func<T> function) {
-            if (null == function) throw new ArgumentNullException(nameof(function));
-            if (cancellationToken.IsCancellationRequested) {
-                return Task.FromCanceled<T>(cancellationToken);
+        public static async Task<T> Await<T>(Task<T> task) {
+            if (task != null) {
+                return await task;
             }
-            return Task.Run(() => function(), cancellationToken);
+            return await Task.FromResult<T>(default);
         }
     }
 }

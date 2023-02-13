@@ -16,10 +16,10 @@ namespace Brows.Diagnostics {
                 process.StartInfo.FileName = "cmd.exe";
                 process.StartInfo.UseShellExecute = true;
                 process.StartInfo.WorkingDirectory = workingDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                await Async.Run(cancellationToken, process.Start);
+                await Async.With(cancellationToken).Run(process.Start);
             }
             finally {
-                await Async.Run(CancellationToken.None, process.Dispose);
+                await Async.With(CancellationToken.None).Run(process.Dispose);
             }
         }
     }

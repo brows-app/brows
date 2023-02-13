@@ -7,12 +7,6 @@ namespace Brows {
     internal class PanelInput : Notifier {
         private readonly Stopwatch Stopwatch = new Stopwatch();
 
-        public IEnumerable<IEntry> Entries {
-            get => _Entries ?? (_Entries = new List<IEntry>());
-            set => Change(ref _Entries, value, nameof(Entries));
-        }
-        private IEnumerable<IEntry> _Entries;
-
         public TimeSpan Timeout {
             get => _Timeout;
             set => Change(ref _Timeout, value, nameof(Timeout));
@@ -37,7 +31,8 @@ namespace Brows {
             Stopwatch.Reset();
         }
 
-        public IEntry Add(string value) {
+        public IEntry Add(string value, IEnumerable<IEntry> entries) {
+            if (null == entries) throw new ArgumentNullException(nameof(entries));
             if (value == null) {
                 Text = null;
                 return null;
@@ -53,12 +48,12 @@ namespace Brows {
             Text = text;
             Stopwatch.Restart();
 
-            foreach (var entry in Entries) {
+            foreach (var entry in entries) {
                 if (entry.Name.StartsWith(text, StringComparison.CurrentCultureIgnoreCase)) {
                     return Match = entry;
                 }
             }
-            foreach (var entry in Entries) {
+            foreach (var entry in entries) {
                 if (entry.Name.Contains(text, StringComparison.CurrentCultureIgnoreCase)) {
                     return Match = entry;
                 }

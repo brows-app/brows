@@ -15,7 +15,7 @@ namespace Brows.Collections.Generic {
 
         private static async Task<IEnumerator<T>> GetEnumeratorAsync<T>(this IEnumerable<T> enumerable, CancellationToken cancellationToken) {
             if (null == enumerable) throw new ArgumentNullException(nameof(enumerable));
-            return await ASYNC.Run(cancellationToken, enumerable.GetEnumerator);
+            return await ASYNC.With(cancellationToken).Run(enumerable.GetEnumerator);
         }
 
         public static async IAsyncEnumerable<T> Async<T>(this IEnumerable<T> enumerable, [EnumeratorCancellation] CancellationToken cancellationToken = default) {

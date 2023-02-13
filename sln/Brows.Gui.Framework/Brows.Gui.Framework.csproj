@@ -3,8 +3,10 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj" />
+        <ProjectReference Include="..\Brows.Config.Framework\Brows.Config.Framework.csproj" />
         <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
-        <ProjectReference Include="..\Brows.IO.PreviewTextReader\Brows.IO.PreviewTextReader.csproj" />
+        <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />
+        <ProjectReference Include="..\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj" />
         <ProjectReference Include="..\Domore.Logs\Domore.Logs.csproj" />
     </ItemGroup>
 </Project>

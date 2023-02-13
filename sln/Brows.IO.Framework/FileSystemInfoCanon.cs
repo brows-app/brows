@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using IO;
+    using Threading.Tasks;
 
     public class FileSystemInfoCanon {
         private EnumerationOptions EnumerationOptions =>
@@ -26,21 +26,19 @@ namespace Brows {
             var parts = new List<string>();
             var parent = dir.Parent;
             while (parent != null) {
-                var part = default(FileSystemInfo);
-                var eOpts = EnumerationOptions;
-                var dOpts = DirectoryEnumerableOptions.Default;
-                var infos = parent.EnumerateFileSystemInfosAsync(dir.Name, eOpts, dOpts, cancellationToken);
-                await foreach (var info in infos) {
-                    part = info;
-                    break;
-                }
+                var opts = EnumerationOptions;
+                var part = await Async.With(cancellationToken).Run(() => {
+                    foreach (var info in parent.EnumerateFileSystemInfos(dir.Name, opts)) {
+                        return info;
+                    }
+                    return null;
+                });
                 if (part != null) {
                     parts.Add(part.Name);
                 }
                 dir = parent;
                 parent = dir.Parent;
             }
-
             var root = dir.FullName;
             if (root.Contains(':')) {
                 root = root.ToUpper();
@@ -48,10 +46,8 @@ namespace Brows {
             else {
                 root = string.Join("\\", root.Split('\\').Select(part => part.ToUpper()));
             }
-
             parts.Add(root);
             parts.Reverse();
-
             return Path.Combine(parts.ToArray());
         }
 

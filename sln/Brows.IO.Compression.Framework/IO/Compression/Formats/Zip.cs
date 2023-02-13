@@ -37,7 +37,7 @@ namespace Brows.IO.Compression.Formats {
                         Log.Info(nameof(ZipFileExtensions.CreateEntryFromFile) + " > " + name);
                     }
                     info.Data("Create {0}", name);
-                    await Async.Run(cancellationToken, () => {
+                    await Async.With(cancellationToken).Run(() => {
                         if (level.HasValue) {
                             zip.CreateEntryFromFile(path, name, level.Value);
                         }

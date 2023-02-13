@@ -220,7 +220,7 @@ namespace Brows {
 
         public PanelInput Input =>
             _Input ?? (
-            _Input = new PanelInput { Entries = EntryCollection });
+            _Input = new PanelInput());
         private PanelInput _Input;
 
         public PanelState State {
@@ -411,6 +411,7 @@ namespace Brows {
 
         public IEnumerable<IEntry> Selection() {
             return EntryCollection
+                .Items
                 .Where(entry => entry.Selected)
                 .ToList();
         }
@@ -500,37 +501,49 @@ namespace Brows {
 
         IPanelProvider IPanel.Provider => Provider;
 
-        Task IEntryProviderTarget.Add(IEntry entry, CancellationToken cancellationToken) {
-            if (entry != null) {
+        Task IEntryProviderTarget.Add(IReadOnlyCollection<IEntry> entries, CancellationToken cancellationToken) {
+            if (null == entries) throw new ArgumentNullException(nameof(entries));
+            foreach (var entry in entries) {
                 entry.Begin(this);
-                TaskHandler.Begin(async () => {
-                    await EntryCollection.Add(entry, cancellationToken);
+            }
+            TaskHandler.Begin(cancellationToken, async cancellationToken => {
+                var added = await EntryCollection.Add(entries, cancellationToken);
+                if (added) {
                     if (EntryCollection.CurrentItem == null) {
                         var currentHistory = History.Current;
                         if (currentHistory != null) {
-                            if (currentHistory.CurrentEntryID == entry.ID) {
-                                EntryCollection.MoveCurrentItemTo(entry);
+                            var currentEntry = entries.FirstOrDefault(e => e.ID == currentHistory.CurrentEntryID);
+                            if (currentEntry != null) {
+                                EntryCollection.MoveCurrentItemTo(currentEntry);
                                 if (Active) {
                                     Activate();
                                 }
                             }
                         }
                     }
-                });
-            }
+                }
+            });
             return Task.CompletedTask;
         }
 
-        Task IEntryProviderTarget.Remove(IEntry entry, CancellationToken cancellationToken) {
-            if (entry != null) {
+        Task IEntryProviderTarget.Remove(IReadOnlyCollection<IEntry> entries, CancellationToken cancellationToken) {
+            if (null == entries) throw new ArgumentNullException(nameof(entries));
+            foreach (var entry in entries) {
                 entry.End();
-                EntryCollection.Remove(entry);
             }
+            TaskHandler.Begin(cancellationToken, async cancellatoinToken => {
+                var removed = await EntryCollection.Remove(entries, cancellationToken);
+                if (removed) {
+                    if (Active) {
+                        Activate();
+                    }
+                }
+            });
             return Task.CompletedTask;
         }
 
-        async Task<bool> IEntryBrowser.Browse(string id, CancellationToken cancellationToken) {
-            var started = await StartID(id, cancellationToken);
+        async Task<bool> IEntryBrowser.Browse(string id, CancellationToken _) {
+            var started = await StartID(id, CancellationToken.None);
             return started;
         }
 
@@ -540,7 +553,7 @@ namespace Brows {
                     return false;
                 }
             }
-            var match = Input.Add(value);
+            var match = Input.Add(value, EntryCollection.Items);
             if (match != null) {
                 EntryCollection.MoveCurrentItemTo(match);
             }

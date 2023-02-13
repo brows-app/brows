@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 
 namespace Brows {
-    public interface IEntryCollection : IReadOnlyList<IEntry> {
+    public interface IEntryCollection {
+        int Count { get; }
+        IReadOnlyList<IEntry> Items { get; }
         bool HasColumn(string name);
         void ClearColumns();
         void RefreshColumns();

@@ -7,5 +7,5 @@
             <Setter Property="Focusable" Value="False"/>
         </Style>
     </UserControl.Style>
-    <local:EntryListView x:Name="ListView" ItemsSource="{Binding Source}"/>
+    <local:EntryListView x:Name="ListView"/>
 </UserControl>

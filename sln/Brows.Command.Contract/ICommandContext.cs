@@ -10,7 +10,7 @@ namespace Brows {
         bool CanBookmark(out IBookmark bookmark);
         bool HasClipboard(out IClipboard clipboard);
         bool HasCommander(out ICommander commander);
-        bool HasEntries(out IEntryCollection entries);
+        bool HasEntries(out IEntryCollection collection);
         bool HasInput(out string value);
         bool HasPanel(out IPanel active);
         bool HasPanel(int column, out IPanel panel);

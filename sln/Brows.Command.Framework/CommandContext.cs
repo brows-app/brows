@@ -104,9 +104,9 @@ namespace Brows {
             return value != "";
         }
 
-        public bool HasEntries(out IEntryCollection entries) {
-            entries = Commander?.Panels?.Active?.Entries;
-            return entries != null;
+        public bool HasEntries(out IEntryCollection collection) {
+            collection = Commander?.Panels?.Active?.Entries;
+            return collection != null;
         }
 
         public bool HasPanel(out IPanel active) {
@@ -231,8 +231,8 @@ namespace Brows {
             return Agent.HasCommander(out commander);
         }
 
-        public bool HasEntries(out IEntryCollection entries) {
-            return Agent.HasEntries(out entries);
+        public bool HasEntries(out IEntryCollection collection) {
+            return Agent.HasEntries(out collection);
         }
 
         public bool HasInput(out string value) {

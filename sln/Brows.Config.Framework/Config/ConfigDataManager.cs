@@ -13,8 +13,7 @@ namespace Brows.Config {
             ID = id;
         }
 
-        public class Of<TData> : ConfigDataManager, IConfig<TData> where TData : INotifyPropertyChanged, new() {
-            private Task<TData> LoadTask;
+        public class Of<TData> : ConfigDataManager, IConfig<TData> where TData : class, INotifyPropertyChanged, new() {
             private Guid ChangeState = Guid.NewGuid();
             private readonly int ChangeDelay = 1000;
 
@@ -22,6 +21,16 @@ namespace Brows.Config {
                 _TaskHandler ?? (
                 _TaskHandler = new TaskHandler<Of<TData>>());
             private TaskHandler _TaskHandler;
+
+            private TaskCache<TData> Cache =>
+                _Cache ?? (
+                _Cache = new TaskCache<TData>(async cancellationToken => {
+                    var
+                    loaded = await Payload(new TData()).Load(cancellationToken);
+                    loaded.PropertyChanged += Loaded_PropertyChanged;
+                    return loaded;
+                }));
+            private TaskCache<TData> _Cache;
 
             private ConfigDataPayload<TData> Payload(TData data) {
                 return ConfigDataPayload.For(data, ID);
@@ -37,20 +46,14 @@ namespace Brows.Config {
                 });
             }
 
-            public TData Loaded { get; private set; }
+            public TData Loaded =>
+                Cache.Result;
 
             public Of(string id) : base(id) {
             }
 
-            public async ValueTask<TData> Load(CancellationToken cancellationToken) {
-                if (Loaded == null) {
-                    if (LoadTask == null) {
-                        LoadTask = Payload(new TData()).Load(cancellationToken);
-                    }
-                    Loaded = await LoadTask;
-                    Loaded.PropertyChanged += Loaded_PropertyChanged;
-                }
-                return Loaded;
+            public ValueTask<TData> Load(CancellationToken cancellationToken) {
+                return Cache.Ready(cancellationToken);
             }
         }
     }

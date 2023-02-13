@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using IO;
+    using Domore.Collections.Generic;
     using System.Linq;
     using Threading.Tasks;
 
@@ -94,8 +94,9 @@ namespace Brows.Commands {
             }
             if (dirExists) {
                 var replace = root.Replace;
-                var options = SuggestionEnumerationOptions;
-                var directories = dir.EnumerateDirectoriesAsync(searchPattern, options, null, cancellationToken);
+                var enumerate = dir.EnumerateDirectories(searchPattern, SuggestionEnumerationOptions);
+                var collections = enumerate.CollectAsync(cancellationToken);
+                var directories = collections.FlattenAsync(cancellationToken);
                 await foreach (var directory in directories) {
                     yield return Suggestion(
                         context: context,

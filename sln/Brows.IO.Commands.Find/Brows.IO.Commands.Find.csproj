@@ -14,5 +14,7 @@
         <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
         <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />
         <ProjectReference Include="..\Brows.Match\Brows.Match.csproj" />
+        <ProjectReference Include="..\Domore.AsyncEnumerating\Domore.AsyncEnumerating.csproj" />
+        <ProjectReference Include="..\Domore.FileSystemEnumerating\Domore.FileSystemEnumerating.csproj" />
     </ItemGroup>
 </Project>

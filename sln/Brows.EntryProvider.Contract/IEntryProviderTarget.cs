@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
     public interface IEntryProviderTarget : IEntryBrowser {
-        Task Add(IEntry entry, CancellationToken cancellationToken);
-        Task Remove(IEntry entry, CancellationToken cancellationToken);
+        Task Add(IReadOnlyCollection<IEntry> entries, CancellationToken cancellationToken);
+        Task Remove(IReadOnlyCollection<IEntry> entries, CancellationToken cancellationToken);
     }
 }

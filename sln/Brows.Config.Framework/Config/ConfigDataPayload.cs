@@ -25,7 +25,7 @@ namespace Brows.Config {
         }
 
         private async Task<(string Head, string Path)> Path(CancellationToken cancellationToken) {
-            var root = await ConfigPath.Ready(cancellationToken);
+            var root = await ConfigPath.DataReady(cancellationToken);
             var head = Head();
             var path = PATH.Combine(root, head + ".brws");
             return (Head: head, Path: path);

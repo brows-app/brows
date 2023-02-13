@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0</TargetFrameworks>
+        <RootNamespace>Domore</RootNamespace>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Domore.Conf" Version="6.1.0.55" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
+      <ProjectReference Include="..\Domore.Logs\Domore.Logs.csproj" />
+    </ItemGroup>
+</Project>

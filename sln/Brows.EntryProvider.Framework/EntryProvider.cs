@@ -25,8 +25,13 @@ namespace Brows {
             _DataKey = new(DataKeyOptions));
         private EntryProviderDataKey _DataKey;
 
+        internal abstract Task Init(CancellationToken cancellationToken, bool @private);
+
         protected IEntryBrowser Browser =>
             Target;
+
+        protected CancellationToken CancellationToken =>
+            CancellationTokenSource?.Token ?? throw new InvalidOperationException();
 
         protected virtual Task Init(CancellationToken cancellationToken) => Task.CompletedTask;
         protected virtual Task Refresh(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -49,7 +54,7 @@ namespace Brows {
         private string _ParentID;
 
         public abstract IOperator Operator(IOperatorDeployment deployment);
-        public abstract Task<bool> CaseSensitive(CancellationToken cancellationToken);
+        public abstract ValueTask<bool> CaseSensitive(CancellationToken cancellationToken);
 
         public virtual string CreatedID(string createdName) {
             return null;
@@ -73,55 +78,65 @@ namespace Brows {
             }
             Target = target;
             CancellationTokenSource = new CancellationTokenSource();
-            PanelID?.Begin(CancellationTokenSource.Token);
-            TaskHandler.Begin(Begin(CancellationTokenSource.Token));
+            PanelID?.Begin(CancellationToken);
+            TaskHandler.Begin(Begin(CancellationToken));
         }
 
         void IEntryProvider.End() {
             if (Log.Info()) {
                 Log.Info(nameof(End));
             }
-            CancellationTokenSource?.Cancel();
-            CancellationTokenSource?.Dispose();
-            Target = null;
-            TaskHandler.Begin(End(CancellationToken.None));
+            using (CancellationTokenSource) {
+                CancellationTokenSource?.Cancel();
+                CancellationTokenSource = null;
+                Target = null;
+                TaskHandler.Begin(End(CancellationToken.None));
+            }
         }
 
         void IEntryProvider.Refresh() {
             if (Log.Info()) {
                 Log.Info(nameof(Refresh));
             }
-            TaskHandler.Begin(Refresh(CancellationTokenSource?.Token ?? default));
+            TaskHandler.Begin(Refresh(CancellationToken));
         }
 
         async Task IEntryProvider.Init(CancellationToken cancellationToken) {
             if (Log.Info()) {
                 Log.Info(nameof(Init));
             }
+            await Init(cancellationToken, @private: true);
             await Init(cancellationToken);
         }
 
         public abstract class Of<TEntry> : EntryProvider where TEntry : Entry {
-            private readonly List<TEntry> List = new List<TEntry>();
+            private EntryProvided<TEntry> Provision;
 
-            protected IEnumerable<TEntry> Existing => List;
-
-            protected async Task Provide(TEntry entry, CancellationToken cancellationToken) {
-                if (null == entry) throw new ArgumentNullException(nameof(entry));
-                List.Add(entry);
-                var target = Target;
-                if (target != null) {
-                    await target.Add(entry, cancellationToken);
-                }
+            internal sealed override async Task Init(CancellationToken cancellationToken, bool @private) {
+                Provided = Provision = new(await CaseSensitive(cancellationToken));
             }
 
-            protected async Task Revoke(TEntry entry, CancellationToken cancellationToken) {
-                if (null == entry) throw new ArgumentNullException(nameof(entry));
-                List.Remove(entry);
-                var target = Target;
-                if (target != null) {
-                    await target.Remove(entry, cancellationToken);
-                }
+            protected IEntryProvided<TEntry> Provided { get; private set; }
+
+            protected async Task Provide(IReadOnlyList<TEntry> entries, CancellationToken cancellationToken) {
+                Provision.Add(entries);
+                await Async.Await(
+                    Target?.Add(entries, cancellationToken));
+            }
+
+            protected Task Provide(TEntry entry, CancellationToken cancellationToken) {
+                return Provide(new[] { entry }, cancellationToken);
+            }
+
+            protected async Task Revoke(IReadOnlyList<TEntry> entries, CancellationToken cancellationToken) {
+                if (null == entries) throw new ArgumentNullException(nameof(entries));
+                Provision.Remove(entries);
+                await Async.Await(
+                    Target?.Remove(entries, cancellationToken));
+            }
+
+            protected Task Revoke(TEntry entry, CancellationToken cancellationToken) {
+                return Revoke(new[] { entry }, cancellationToken);
             }
         }
     }

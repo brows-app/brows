@@ -1,4 +1,3 @@
-using Domore.Conf;
 using Domore.Logs;
 using System;
 using System.Runtime.ExceptionServices;
@@ -11,6 +10,9 @@ namespace Brows.Windows {
         private readonly AppDomain Domain;
 
         private void Domain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e) {
+            if (Log.Debug()) {
+                Log.Debug(nameof(Domain.FirstChanceException), e?.Exception);
+            }
         }
 
         private void Domain_UnhandledException(object sender, UnhandledExceptionEventArgs e) {
@@ -57,7 +59,6 @@ namespace Brows.Windows {
         }
 
         private void Application_Startup(object sender, StartupEventArgs e) {
-            Conf.Configure(Logging.Config, "");
             if (Log.Info()) {
                 Log.Info(nameof(Application_Startup));
             }

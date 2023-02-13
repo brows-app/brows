@@ -13,9 +13,11 @@
         private IProgramComposition _Composition;
 
         public IProgramCommand Command { get; }
+        public IProgramConsole Console { get; }
 
-        public ProgramContext(IProgramCommand command) {
+        public ProgramContext(IProgramCommand command, IProgramConsole console) {
             Command = command;
+            Console = console;
         }
     }
 }

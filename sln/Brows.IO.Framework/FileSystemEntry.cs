@@ -7,7 +7,6 @@ using System.Threading;
 namespace Brows {
     using Config;
     using Gui;
-    using IO;
 
     public abstract class FileSystemEntry : Entry, IFileSystemEntry {
         private IReadOnlyDictionary<string, IEntryData> Data =>
@@ -26,11 +25,13 @@ namespace Brows {
             var infoData = FileInfoData.For(wrap, CancellationToken);
             var otherData = new IEntryData[] {
                 Entry.ThumbnailData,
-                new FileChecksum(nameof(FileInfoExtension.ChecksumMD5), FileInfo, CancellationToken),
-                new FileChecksum(nameof(FileInfoExtension.ChecksumSHA1), FileInfo, CancellationToken),
-                new FileChecksum(nameof(FileInfoExtension.ChecksumSHA256), FileInfo, CancellationToken),
-                new FileChecksum(nameof(FileInfoExtension.ChecksumSHA512), FileInfo, CancellationToken),
-                new DirectorySize(nameof(DirectorySize), DirectoryInfo, CancellationToken) { Alignment = EntryDataAlignment.Right, Converter = EntryDataConverter.FileSystemSize }
+                new FileChecksum(nameof(IO.FileChecksum.ChecksumMD5), FileInfo, CancellationToken),
+                new FileChecksum(nameof(IO.FileChecksum.ChecksumSHA1), FileInfo, CancellationToken),
+                new FileChecksum(nameof(IO.FileChecksum.ChecksumSHA256), FileInfo, CancellationToken),
+                new FileChecksum(nameof(IO.FileChecksum.ChecksumSHA512), FileInfo, CancellationToken),
+                new DirectorySize(nameof(DirectorySize), DirectoryInfo, CancellationToken) { Alignment = EntryDataAlignment.Right, Converter = EntryDataConverter.FileSystemSize },
+                new DirectoryFileCount(nameof(DirectoryFileCount), DirectoryInfo, CancellationToken) { Alignment = EntryDataAlignment.Right },
+                new DirectoryDirectoryCount(nameof(DirectoryDirectoryCount), DirectoryInfo, CancellationToken){ Alignment = EntryDataAlignment.Right }
             };
             var allData = infoData.Concat(propSys).Concat(otherData);
             return allData;
@@ -73,7 +74,7 @@ namespace Brows {
         public sealed override string File => Info.FullName;
 
         public FileSystemEntry(FileSystemInfo info, CancellationToken cancellationToken) : base(cancellationToken) {
-            Info = info ?? throw new ArgumentNullException(nameof(info)); ;
+            Info = info ?? throw new ArgumentNullException(nameof(info));
             Path = Info.FullName;
             Kind = Info is DirectoryInfo
                 ? FileSystemEntryKind.Directory

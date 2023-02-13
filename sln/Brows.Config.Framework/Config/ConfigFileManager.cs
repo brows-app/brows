@@ -1,4 +1,4 @@
-﻿using Domore.Conf;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,27 +6,26 @@ namespace Brows.Config {
     using Threading.Tasks;
 
     internal class ConfigFileManager {
-        private static readonly object ConfFile = new();
+        public class Of<TConfig> : ConfigFileManager, IConfig<TConfig> where TConfig : class, new() {
+            private TaskCache<TConfig> Cache =>
+                _Cache ?? (
+                _Cache = new(async cancellationToken => {
+                    EventHandler invalidated = default;
+                    var
+                    info = await ConfigFileInfo.Load<TConfig>(cancellationToken);
+                    info.Invalidated += invalidated = (s, e) => {
+                        info.Invalidated -= invalidated;
+                        _Cache = null;
+                    };
+                    return await info.Configure(cancellationToken);
+                }));
+            private TaskCache<TConfig> _Cache;
 
-        public class Of<TConfig> : ConfigFileManager, IConfig<TConfig> where TConfig : new() {
-            private Task<TConfig> Task;
+            public TConfig Loaded =>
+                Cache.Result;
 
-            public TConfig Loaded { get; private set; }
-
-            public async ValueTask<TConfig> Load(CancellationToken cancellationToken) {
-                if (Loaded == null) {
-                    if (Task == null) {
-                        Task = Async.With(cancellationToken).Run(() => {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            lock (ConfFile) {
-                                cancellationToken.ThrowIfCancellationRequested();
-                                return Conf.Configure(new TConfig());
-                            }
-                        });
-                    }
-                    Loaded = await Task;
-                }
-                return Loaded;
+            public ValueTask<TConfig> Load(CancellationToken cancellationToken) {
+                return Cache.Ready(cancellationToken);
             }
         }
     }

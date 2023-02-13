@@ -1,5 +1,6 @@
 ﻿using Domore.Logs;
 using Domore.Runtime.Win32;
+using Domore.Threading;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -9,8 +10,14 @@ using System.Threading.Tasks;
 namespace Brows.IO {
     using Threading.Tasks;
 
-    internal class Win32FileOpener {
+    internal sealed class Win32FileOpener {
         private static readonly ILog Log = Logging.For(typeof(Win32FileOpener));
+
+        public STAThreadPool ThreadPool { get; }
+
+        public Win32FileOpener(STAThreadPool threadPool) {
+            ThreadPool = threadPool;
+        }
 
         public async Task Open(string file, string with, CancellationToken cancellationToken) {
             if (Log.Info()) {
@@ -18,7 +25,7 @@ namespace Brows.IO {
             }
             var info = new SHELLEXECUTEINFOW {
                 cbSize = (uint)Marshal.SizeOf<SHELLEXECUTEINFOW>(),
-                fMask = (uint)(SEE_MASK.INVOKEIDLIST | SEE_MASK.FLAG_NO_UI | SEE_MASK.FLAG_LOG_USAGE),
+                fMask = (uint)(SEE_MASK.NOASYNC | SEE_MASK.INVOKEIDLIST | SEE_MASK.FLAG_NO_UI | SEE_MASK.FLAG_LOG_USAGE),
                 lpDirectory = Path.GetDirectoryName(file),
                 lpFile = file,
                 lpVerb = null,

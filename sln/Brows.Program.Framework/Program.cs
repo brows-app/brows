@@ -12,9 +12,9 @@ namespace Brows {
         string IProgram.Name =>
             Name;
 
-        async Task<int> IProgram.Run(IProgramCommand command, CancellationToken cancellationToken) {
+        public async Task<int> Run(IProgramCommand command, IProgramConsole console, CancellationToken cancellationToken) {
             if (null == command) throw new ArgumentNullException(nameof(command));
-            var context = new ProgramContext(command);
+            var context = new ProgramContext(command, console);
             return await Run(context, cancellationToken);
         }
     }

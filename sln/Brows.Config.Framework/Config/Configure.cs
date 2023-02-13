@@ -8,9 +8,9 @@ namespace Brows.Config {
         private static readonly Dictionary<Type, Dictionary<string, ConfigDataManager>> DataFile = new();
 
         public static string Root =>
-            ConfigPath.Root;
+            ConfigPath.DataRoot;
 
-        public static IConfig<TConfig> Data<TConfig>(string id = null) where TConfig : INotifyPropertyChanged, new() {
+        public static IConfig<TConfig> Data<TConfig>(string id = null) where TConfig : class, INotifyPropertyChanged, new() {
             var typ = typeof(TConfig);
             var key = id ?? typ.Name;
             if (DataFile.TryGetValue(typ, out var dataFile) == false) {
@@ -22,7 +22,7 @@ namespace Brows.Config {
             return (IConfig<TConfig>)data;
         }
 
-        public static IConfig<TConfig> File<TConfig>() where TConfig : new() {
+        public static IConfig<TConfig> File<TConfig>() where TConfig : class, new() {
             var type = typeof(TConfig);
             if (ConfFile.TryGetValue(type, out var conf) == false) {
                 ConfFile[type] = conf = new ConfigFileManager.Of<TConfig>();

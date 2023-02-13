@@ -24,13 +24,13 @@ namespace Brows.Commands {
                     var add = parameter.Add;
                     var all = parameter.All;
                     var entries = active.Entries;
-                    foreach (var entry in entries) {
+                    foreach (var entry in entries.Items) {
                         entry.Selected = all || (add && entry.Selected);
                     }
                     var pattern = parameter.Pattern?.Trim() ?? "";
                     if (pattern != "") {
                         var matcher = MatchAlgorithm.Create(ignoreCase: !parameter.CaseSensitive);
-                        var matches = matcher.Match(parameter.Pattern, entries, entry => entry.Name, cancellationToken);
+                        var matches = matcher.Match(parameter.Pattern, entries.Items, entry => entry.Name, cancellationToken);
                         await foreach (var match in matches) {
                             match.Selected = true;
                         }

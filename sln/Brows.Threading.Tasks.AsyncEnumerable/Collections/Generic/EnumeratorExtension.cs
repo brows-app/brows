@@ -9,7 +9,7 @@ namespace Brows.Collections.Generic {
     internal static class EnumeratorExtension {
         public static async Task<bool> MoveNextAsync<T>(this IEnumerator<T> enumerator, CancellationToken cancellationToken) {
             if (null == enumerator) throw new ArgumentNullException(nameof(enumerator));
-            return await Async.Run(cancellationToken, enumerator.MoveNext);
+            return await Async.With(cancellationToken).Run(enumerator.MoveNext);
         }
 
         public static async Task DisposeAsync<T>(this IEnumerator<T> enumerator) {

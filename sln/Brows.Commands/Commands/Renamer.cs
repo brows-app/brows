@@ -16,7 +16,7 @@ namespace Brows.Commands {
             var list = new List<IEntry>();
             if (context.HasPanel(out var active)) {
                 var selection = active.Selection().OrderBy(e => e.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
-                var entries = active.Entries.Except(selection).ToList();
+                var entries = active.Entries.Items.Except(selection).ToList();
                 var count = selection.Count;
                 if (count > 0) {
                     if (context.HasProvider(out var provider)) {

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <RootNamespace>Domore</RootNamespace>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
+        <ProjectReference Include="..\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj" />
+      <ProjectReference Include="..\Domore.Logs\Domore.Logs.csproj" />
+    </ItemGroup>
+</Project>

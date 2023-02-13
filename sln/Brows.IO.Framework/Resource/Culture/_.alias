@@ -1,58 +1,64 @@
-Attributes          = attributes
+Attributes              = attributes
 
-AvailableFreeSpace  = available-free-space
-AvailableFreeSpace  = available
+AvailableFreeSpace      = available-free-space
+AvailableFreeSpace      = available
 
-ChecksumMD5         = md5-checksum
-ChecksumMD5         = md5
+ChecksumMD5             = md5-checksum
+ChecksumMD5             = md5
 
-ChecksumSHA1        = sha1-checksum
-ChecksumSHA1        = sha1
+ChecksumSHA1            = sha1-checksum
+ChecksumSHA1            = sha1
 
-ChecksumSHA256      = sha256-checksum
-ChecksumSHA256      = sha256
+ChecksumSHA256          = sha256-checksum
+ChecksumSHA256          = sha256
 
-ChecksumSHA512      = sha512-checksum
-ChecksumSHA512      = sha512
+ChecksumSHA512          = sha512-checksum
+ChecksumSHA512          = sha512
 
-CreationTime        = date-created
-CreationTimeUtc     = date-created-UTC
+CreationTime            = date-created
+CreationTimeUtc         = date-created-UTC
 
-DirectorySize       = directory-size
-DirectorySize       = dir-size
+DirectoryDirectoryCount = directory-directory-count
+DirectoryDirectoryCount = dir-dir-count
 
-DriveFormat         = format
+DirectoryFileCount      = directory-file-count
+DirectoryFileCount      = dir-file-count
 
-DriveType           = type
+DirectorySize           = directory-size
+DirectorySize           = dir-size
 
-Extension           = extension
-Extension           = ext
+DriveFormat             = format
 
-IsReady             = ready
+DriveType               = type
 
-Kind                = type
+Extension               = extension
+Extension               = ext
 
-LastAccessTime      = date-accessed
-LastAccessTimeUtc   = date-accessed-utc
+IsReady                 = ready
 
-LastWriteTime       = date-modified
-LastWriteTimeUtc    = date-modified-utc
+Kind                    = type
 
-Length              = size
+LastAccessTime          = date-accessed
+LastAccessTimeUtc       = date-accessed-utc
 
-LinkTarget          = link
+LastWriteTime           = date-modified
+LastWriteTimeUtc        = date-modified-utc
 
-Name                = name
+Length                  = size
 
-RootDirectory       = root
+LinkTarget              = link
 
-Thumbnail           = thumbnail
-Thumbnail           = thumbnails
-Thumbnail           = thumb
-Thumbnail           = thumbs
+Name                    = name
 
-TotalFreeSpace      = free-space
+RootDirectory           = root
 
-TotalSize           = size
+Thumbnail               = thumbnail
+Thumbnail               = thumbnails
+Thumbnail               = thumb
+Thumbnail               = thumbs
 
-VolumeLabel         = label
+TotalFreeSpace          = free-space
+
+TotalSize               = size
+
+VolumeLabel             = label

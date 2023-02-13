@@ -12,9 +12,8 @@ namespace Brows.Commands {
                         entry.Open();
                     }
                 }
-                return true;
+                return await Worked;
             }
-            await Task.CompletedTask;
             return false;
         }
     }

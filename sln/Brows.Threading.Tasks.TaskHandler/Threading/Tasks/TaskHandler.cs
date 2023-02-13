@@ -59,6 +59,12 @@ namespace Brows.Threading.Tasks {
                 await Run(task(CancellationToken.None), CancellationToken.None);
             }
         }
+
+        public async void Begin(CancellationToken cancellationToken, Func<CancellationToken, Task> task) {
+            if (task != null) {
+                await Run(task(cancellationToken), cancellationToken);
+            }
+        }
     }
 
     public class TaskHandler<T> : TaskHandler {

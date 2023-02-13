@@ -17,8 +17,8 @@ namespace Brows.IO {
             return new Win32DriveEntry(info, cancellationToken);
         }
 
-        public override Task<bool> CaseSensitive(CancellationToken _) =>
-            Task.FromResult(false);
+        public override ValueTask<bool> CaseSensitive(CancellationToken _) =>
+            ValueTask.FromResult(false);
 
         public override Image Icon =>
             _Icon ?? (

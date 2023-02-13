@@ -20,9 +20,9 @@ namespace Brows.Gui {
         private IReadOnlyList<ShellIconOverlayIdentifierWrapper> Identifiers;
         private Task<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> IdentifiersTask;
 
-        private async Task<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> InitIdentifiers() {
+        private async Task<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> IdentifiersInit() {
             const string shellIconOverlayIdentifiers = @"Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers";
-            return await ThreadPool.Work(nameof(InitIdentifiers), cancellationToken: CancellationToken.None, work: () => {
+            return await ThreadPool.Work(nameof(IdentifiersInit), cancellationToken: CancellationToken.None, work: () => {
                 var list = new List<ShellIconOverlayIdentifierWrapper>();
                 using (var hive = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default)) {
                     using (var subKey = hive.OpenSubKey(shellIconOverlayIdentifiers)) {
@@ -34,7 +34,7 @@ namespace Brows.Gui {
                                 if (parsed) {
                                     if (Log.Info()) {
                                         Log.Info(
-                                            $"{nameof(InitIdentifiers)}",
+                                            $"{nameof(IdentifiersInit)}",
                                             $"{nameof(name)}  > {name}",
                                             $"{nameof(clsid)} > {clsid}");
                                     }
@@ -49,9 +49,13 @@ namespace Brows.Gui {
         }
 
         private async ValueTask<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> GetIdentifiers() {
-            if (Identifiers != null) return Identifiers;
-            if (IdentifiersTask != null) return Identifiers = await IdentifiersTask;
-            return Identifiers = await (IdentifiersTask = InitIdentifiers());
+            if (Identifiers == null) {
+                if (IdentifiersTask == null) {
+                    IdentifiersTask = IdentifiersInit();
+                }
+                Identifiers = await IdentifiersTask;
+            }
+            return Identifiers;
         }
 
         private async Task<object> GetOverlayIcon(string path, CancellationToken cancellationToken) {
@@ -110,7 +114,11 @@ namespace Brows.Gui {
         public STAThreadPool ThreadPool { get; }
 
         public Win32OverlayProvider(STAThreadPool threadPool) {
-            ThreadPool = threadPool;
+            //ThreadPool = threadPool;
+            ThreadPool = new STAThreadPool(nameof(Win32OverlayProvider)) {
+                TryWorkDelay = 10,
+                WorkerCountMax = 1
+            };
         }
 
         public sealed override Task<object> GetImageSource(IOverlayInput input, ImageSize size, CancellationToken cancellationToken) {

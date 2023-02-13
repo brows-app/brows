@@ -9,5 +9,6 @@
       <ProjectReference Include="..\Brows.Panel\Brows.Panel.csproj" />
       <ProjectReference Include="..\Brows.Gui.Windows\Brows.Gui.Windows.csproj" />
       <ProjectReference Include="..\Domore.Win32.Windows.PreviewHandlerControl\Domore.Win32.Windows.PreviewHandlerControl.csproj" />
+      <ProjectReference Include="..\Domore.Win32.Windows.PreviewTextControl\Domore.Win32.Windows.PreviewTextControl.csproj" />
     </ItemGroup>
 </Project>

@@ -1,9 +1,9 @@
+using Domore.Collections.Generic;
+using Domore.IO;
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using PATH = System.IO.Path;
@@ -16,139 +16,131 @@ namespace Brows {
         private static readonly ILog Log = Logging.For(typeof(FileSystemProvider));
         private static readonly FileSystemColumn Column = new FileSystemColumn();
 
+        private FileSystemEvent ThisEvent;
+        private FileSystemEvent ParentEvent;
+
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
             _TaskHandler = new TaskHandler<FileSystemProvider>());
         private TaskHandler _TaskHandler;
 
         private async Task<FileSystemEntry> Create(string path, CancellationToken cancellationToken) {
-            var file = await FileInfoExtension.TryNewAsync(path, cancellationToken);
+            var file = await FileSystem.FileExists(path, cancellationToken);
             if (file != null) {
-                var exists = await file.ExistsAsync(cancellationToken);
-                if (exists) {
-                    return Create(file, cancellationToken);
-                }
+                return Create(file, cancellationToken);
             }
-            var directory = await DirectoryInfoExtension.TryNewAsync(path, cancellationToken);
+            var directory = await FileSystem.DirectoryExists(path, cancellationToken);
             if (directory != null) {
-                var exists = await directory.ExistsAsync(cancellationToken);
-                if (exists) {
-                    return Create(directory, cancellationToken);
-                }
+                return Create(directory, cancellationToken);
             }
             return null;
         }
 
-        private async IAsyncEnumerable<FileSystemInfo> EnumerateFileSystemInfosAsync([EnumeratorCancellation] CancellationToken cancellationToken) {
-            var searchPattern = "*";
-            var enumerationOptions = new EnumerationOptions {
-                AttributesToSkip = 0
-            };
-            await foreach (var info in Info.EnumerateFileSystemInfosAsync(searchPattern, enumerationOptions, Options.Enumerable, cancellationToken)) {
-                var directory = info as DirectoryInfo;
-                if (directory != null) {
-                    if (directory.Attributes.HasFlag(FileAttributes.ReparsePoint) == false) {
-                        yield return directory;
-                    }
-                }
-                else {
-                    yield return info;
-                }
-            }
-        }
-
         private async Task HandleThisEventAsync(FileSystemEventArgs e, CancellationToken cancellationToken) {
-            if (null == e) throw new ArgumentNullException(nameof(e));
             if (Log.Info()) {
-                Log.Info(
-                    nameof(HandleThisEventAsync),
-                    nameof(e.ChangeType) + " > " + e.ChangeType,
-                    nameof(e.FullPath) + " > " + e.FullPath,
-                    nameof(e.Name) + " > " + e.Name);
+                Log.Info(nameof(HandleThisEventAsync));
             }
-
-            var changeType = e.ChangeType;
-            var oldName = e is RenamedEventArgs r ? r.OldName : null;
-            var name = e.Name;
-
-            switch (changeType) {
-                case WatcherChangeTypes.Changed: {
-                        var entry = Existing.FirstOrDefault(e => e.Name == name);
-                        if (entry != null) entry.Refresh(EntryRefresh.All);
-                        break;
-                    }
-                case WatcherChangeTypes.Created: {
-                        var entry = await Create(PATH.Combine(Path, name), cancellationToken);
-                        await Provide(entry, cancellationToken);
-                        break;
-                    }
-                case WatcherChangeTypes.Deleted: {
-                        var entry = Existing.FirstOrDefault(e => e.Name == name);
-                        if (entry != null) {
-                            await Revoke(entry, cancellationToken);
-                        }
-                        break;
-                    }
-                case WatcherChangeTypes.Renamed: {
-                        var oldEntry = Existing.FirstOrDefault(e => e.Name == oldName);
-                        if (oldEntry != null) {
-                            await Revoke(oldEntry, cancellationToken);
-                        }
-                        var entry = await Create(PATH.Combine(Path, name), cancellationToken);
-                        await Provide(entry, cancellationToken);
-                        break;
-                    }
+            if (e == null) {
+                return;
             }
+            var r = e as RenamedEventArgs;
+            if (r != null) {
+                if (Provided.HasName(r.OldName, out var oldEntry)) {
+                    if (await oldEntry.Exists(cancellationToken) == false) {
+                        await Revoke(oldEntry, cancellationToken);
+                    }
+                }
+            }
+            var changedName = e.Name;
+            var changedPath = e.FullPath;
+            var changedInfo = await FileSystem.InfoExists(changedPath, cancellationToken);
+            var entry = default(FileSystemEntry);
+            var entryExists = Provided.HasName(changedName, out entry);
+            if (entryExists) {
+                if (await entry.Exists(cancellationToken) == false) {
+                    await Revoke(entry, cancellationToken);
+                    entryExists = false;
+                }
+            }
+            if (changedInfo == null) {
+                return;
+            }
+            if (entryExists == false) {
+                entry = Create(changedInfo, cancellationToken);
+                await Provide(entry, cancellationToken);
+                return;
+            }
+            var info = entry.Info;
+            if (info.LastWriteTimeUtc == changedInfo.LastWriteTimeUtc) {
+                entry.Refresh(EntryRefresh.Data);
+                return;
+            }
+            entry.Refresh(EntryRefresh.All);
         }
 
-        private async Task HandleParentEventAsync(FileSystemEventArgs e, CancellationToken cancellationToken) {
-            if (null == e) throw new ArgumentNullException(nameof(e));
+        private async Task HandleParentEvent(FileSystemEventArgs e, CancellationToken cancellationToken) {
             if (Log.Info()) {
-                Log.Info(
-                    nameof(HandleParentEventAsync),
-                    nameof(e.ChangeType) + " > " + e.ChangeType,
-                    nameof(e.FullPath) + " > " + e.FullPath,
-                    nameof(e.Name) + " > " + e.Name);
+                Log.Info(nameof(HandleParentEvent));
             }
-
-            switch (e.ChangeType) {
-                case WatcherChangeTypes.Changed:
-                case WatcherChangeTypes.Deleted:
+            if (e == null) return;
+            if (e.ChangeType == WatcherChangeTypes.Renamed) {
+                var oldName = e is RenamedEventArgs renamed ? renamed.OldName : null;
+                var caseSensitive = await CaseSensitive(cancellationToken);
+                var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                var isThis = Info.Name.Equals(oldName, comparison);
+                if (isThis) {
+                    var newPath = PATH.Combine(ParentID, e.Name);
+                    var browser = Browser;
+                    if (browser != null) {
+                        await browser.Browse(newPath, cancellationToken);
+                        return;
+                    }
+                }
+            }
+            var exists = await Async.With(cancellationToken).Run(() => {
+                Info.Refresh();
+                return Info.Exists;
+            });
+            if (exists == false) {
+                var existing = await Async.With(cancellationToken).Run(() => {
                     var directory = Info;
-                    await directory.RefreshAsync(cancellationToken);
-
-                    var exists = await directory.ExistsAsync(cancellationToken);
-                    if (exists == false) {
-                        while (directory != null && await directory.ExistsAsync(cancellationToken) == false) {
-                            directory = await directory.ParentAsync(cancellationToken);
-                        }
-                        if (directory != null) {
-                            var browser = Browser;
-                            if (browser != null) {
-                                await browser.Browse(directory.FullName, cancellationToken);
-                            }
-                        }
+                    while (directory != null && directory.Exists == false) {
+                        directory = directory.Parent;
                     }
-                    break;
-                case WatcherChangeTypes.Renamed:
-                    var parent = ParentID;
-                    if (parent != null) {
-                        var newPath = PATH.Combine(parent, e.Name);
-                        var browser = Browser;
-                        if (browser != null) {
-                            await browser.Browse(newPath, cancellationToken);
-                        }
-                    }
-                    break;
+                    return directory?.FullName;
+                });
+                var browser = Browser;
+                if (browser != null) {
+                    await browser.Browse(existing, cancellationToken);
+                }
             }
         }
 
-        private void ThisNotifier_Notified(object sender, FileSystemEventArgs e) {
-            TaskHandler.Begin(HandleThisEventAsync(e, default));
+        private void ThisEvent_Handler(object sender, FileSystemEventArgs e) {
+            TaskHandler.Begin(HandleThisEventAsync(e, CancellationToken));
         }
 
-        private void ParentNotifier_Notified(object sender, FileSystemEventArgs e) {
-            TaskHandler.Begin(HandleParentEventAsync(e, default));
+        private void ParentEvent_Handler(object sender, FileSystemEventArgs e) {
+            TaskHandler.Begin(HandleParentEvent(e, CancellationToken));
+        }
+
+        private IAsyncEnumerable<IReadOnlyList<T>> Collect<T>(Func<FileSystemInfo, T> factory, CancellationToken cancellationToken) {
+            var enumeration = Info.EnumerateFileSystemInfos(
+                searchPattern: "*",
+                enumerationOptions: new EnumerationOptions {
+                    AttributesToSkip = 0
+                });
+            var collect = enumeration.CollectAsync(
+                cancellationToken: cancellationToken,
+                options: new CollectAsyncOptions<FileSystemInfo, T> {
+                    Mode = CollectAsyncMode.Channel,
+                    Skip = info =>
+                        info is DirectoryInfo directory &&
+                        directory.Attributes.HasFlag(FileAttributes.ReparsePoint),
+                    Ticks = 100,
+                    Transform = factory
+                });
+            return collect;
         }
 
         protected string Path { get; }
@@ -161,36 +153,33 @@ namespace Brows {
 
         protected abstract FileSystemEntry Create(FileSystemInfo info, CancellationToken cancellationToken);
 
+        protected override Task End(CancellationToken cancellationToken) {
+            if (ThisEvent != null) ThisEvent.Handler -= ThisEvent_Handler;
+            if (ParentEvent != null) ParentEvent.Handler -= ParentEvent_Handler;
+            return base.End(cancellationToken);
+        }
+
         protected sealed override async Task Begin(CancellationToken cancellationToken) {
             if (Log.Info()) {
                 Log.Info(nameof(Begin));
             }
-            var parent = await Info.ParentAsync(cancellationToken);
+            var parent = await Async.With(cancellationToken).Run(() => Info.Parent);
             if (parent == null) {
                 ParentID = DriveProvider.DriveProviderID;
             }
             else {
-                var exists = await parent.ExistsAsync(cancellationToken);
-                if (exists) {
+                var parentExists = await Async.With(cancellationToken).Run(() => parent.Exists);
+                if (parentExists) {
                     var parentDirectory = ParentID = parent.FullName;
-                    var
-                    parentNotifier = new FileSystemNotifier();
-                    parentNotifier.Path = parentDirectory;
-                    parentNotifier.Filter = Info.Name;
-                    parentNotifier.Notified += ParentNotifier_Notified;
-                    parentNotifier.Begin(cancellationToken);
+                    ParentEvent = new FileSystemEvent(parentDirectory);
+                    ParentEvent.Handler += ParentEvent_Handler;
                 }
             }
-            var
-            thisNotifier = new FileSystemNotifier();
-            thisNotifier.Path = Info.FullName;
-            thisNotifier.Notified += ThisNotifier_Notified;
-            thisNotifier.Begin(cancellationToken);
-
-            var infos = EnumerateFileSystemInfosAsync(cancellationToken);
-            await foreach (var info in infos) {
-                var entry = Create(info, cancellationToken);
-                await Provide(entry, cancellationToken);
+            ThisEvent = new FileSystemEvent(Path);
+            ThisEvent.Handler += ThisEvent_Handler;
+            var collect = Collect(info => Create(info, cancellationToken), cancellationToken);
+            await foreach (var group in collect) {
+                await Provide(group, cancellationToken);
             }
         }
 
@@ -198,19 +187,25 @@ namespace Brows {
             if (Log.Info()) {
                 Log.Info(nameof(Refresh));
             }
-            var dict = Existing.ToDictionary(entry => entry.Info.FullName, entry => entry);
-            var infos = EnumerateFileSystemInfosAsync(cancellationToken);
-            await foreach (var info in infos) {
-                if (dict.Remove(info.FullName, out var value)) {
-                    value.Refresh(EntryRefresh.All);
-                }
-                else {
-                    value = Create(info, cancellationToken);
-                    await Provide(value, cancellationToken);
+            var ids = Provided.IDSet();
+            var collections = Collect(info => info, cancellationToken);
+            await foreach (var collection in collections) {
+                foreach (var info in collection) {
+                    var id = info.FullName;
+                    if (Provided.HasID(id, out var entry)) {
+                        entry.Refresh(EntryRefresh.All);
+                    }
+                    else {
+                        entry = Create(info, cancellationToken);
+                        await Provide(entry, cancellationToken);
+                    }
+                    ids.Remove(id);
                 }
             }
-            foreach (var item in dict) {
-                await Revoke(item.Value, cancellationToken);
+            foreach (var id in ids) {
+                if (Provided.HasID(id, out var entry)) {
+                    await Revoke(entry, cancellationToken);
+                }
             }
         }
 
@@ -240,11 +235,6 @@ namespace Brows {
 
         public sealed override IReadOnlyDictionary<string, EntrySortDirection?> DataKeySorting =>
             Column.Sorting;
-
-        public FileSystemProviderOptions Options =>
-            _Options ?? (
-            _Options = new FileSystemProviderOptions { });
-        private FileSystemProviderOptions _Options;
 
         public sealed override IBookmark Bookmark =>
             _Bookmark ?? (

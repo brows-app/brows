@@ -9,7 +9,7 @@ namespace Brows.Extensions {
         public static async Task<string> WorkingDirectory(this IPanel panel, CancellationToken cancellationToken) {
             if (null == panel) throw new ArgumentNullException(nameof(panel));
             var id = panel.ID?.Value;
-            var exists = await DirectoryAsync.Exists(id, cancellationToken);
+            var exists = null != await FileSystem.DirectoryExists(id, cancellationToken);
             if (exists) {
                 return id;
             }

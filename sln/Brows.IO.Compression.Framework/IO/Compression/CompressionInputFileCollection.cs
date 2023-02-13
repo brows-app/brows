@@ -29,7 +29,7 @@ namespace Brows.IO.Compression {
         }
 
         public async IAsyncEnumerable<(string Name, FileInfo File)> Files([EnumeratorCancellation] CancellationToken cancellationToken) {
-            var common = PathExtension.SkipCommonOf(Path.Keys, PathComparer);
+            var common = FileSystemPath.SkipCommonOf(Path.Keys, PathComparer);
             foreach (var item in common) {
                 if (cancellationToken.IsCancellationRequested) {
                     break;

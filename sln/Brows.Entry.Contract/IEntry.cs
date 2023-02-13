@@ -14,16 +14,17 @@ namespace Brows {
         Image Icon { get; }
         Image Thumbnail { get; }
         Image PreviewImage { get; }
-        IPreviewText PreviewText { get; }
 
         void Begin(IEntryBrowser browser);
         void Begin(IEntryView view);
         void End();
         void Open();
         void Edit();
-        void Notify(bool state);
+        void Detail();
         void Refresh(EntryRefresh flags);
         void Rename(string name);
         string Rename();
+        T State<T>();
+        T State<T>(T value);
     }
 }

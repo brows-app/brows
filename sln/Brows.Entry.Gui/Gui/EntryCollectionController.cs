@@ -1,13 +1,13 @@
 ﻿using Domore.Logs;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Brows.Gui {
-    using System.Windows.Data;
-
-    internal class EntryCollectionController : CollectionController<IEntryCollectionController>, IEntryCollectionController {
+    internal sealed class EntryCollectionController : CollectionController<IEntryCollectionController>, IEntryCollectionController {
         private static readonly ILog Log = Logging.For(typeof(EntryCollectionController));
 
         private Dictionary<string, List<EntryGridViewColumnProxy>> Columns = new Dictionary<string, List<EntryGridViewColumnProxy>>();
@@ -50,6 +50,10 @@ namespace Brows.Gui {
         public EntryCollectionController(EntryCollectionControl userControl) : base(userControl, userControl.ListView) {
             UserControl = userControl ?? throw new ArgumentNullException(nameof(userControl));
             UserControl.ListView.SelectionChanged += ListView_SelectionChanged;
+        }
+
+        public void Source(IEnumerable collection) {
+            ListView.ItemsSource = collection;
         }
 
         public bool MoveCurrentTo(IEntry item) {
@@ -97,7 +101,7 @@ namespace Brows.Gui {
             return false;
         }
 
-        public void Removed(IEntry entry) {
+        public void Removed() {
             if (Focused) {
                 Focus();
             }
@@ -162,10 +166,5 @@ namespace Brows.Gui {
         public void ClearColumns() {
             GridView.Columns.Clear();
         }
-
-        IEnumerable<string> IEntryCollectionController.Columns =>
-            Columns
-                .Where(c => c.Value.Count > 0)
-                .Select(c => c.Key);
     }
 }

@@ -12,6 +12,6 @@ namespace Brows {
         string DataKeyLookup(string alias);
         IReadOnlySet<string> DataKeyPossible(string part);
         IReadOnlyDictionary<string, IReadOnlySet<string>> DataKeyAlias();
-        Task<bool> CaseSensitive(CancellationToken cancellationToken);
+        ValueTask<bool> CaseSensitive(CancellationToken cancellationToken);
     }
 }

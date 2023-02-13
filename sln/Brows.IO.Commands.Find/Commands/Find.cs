@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using IO;
+    using Threading.Tasks;
 
     internal class Find : Command<Find.Parameter>, ICommandExport {
         private FindCommand FindCommand =>
@@ -16,12 +16,21 @@ namespace Brows.Commands {
             if (context == null) return null;
             if (context.HasPanel(out var panel)) {
                 var path = panel.ID?.Value;
-                if (path == null) return null;
-
-                var directory = await DirectoryInfoExtension.TryNewAsync(path, cancellationToken);
+                if (path == null) {
+                    return null;
+                }
+                var directory = await Async.With(cancellationToken).Run(() => {
+                    var dir = default(DirectoryInfo);
+                    try {
+                        dir = new DirectoryInfo(path);
+                    }
+                    catch {
+                        return null;
+                    }
+                    return dir.Exists ? dir : null;
+                });
                 if (directory != null) {
-                    var exists = await directory.ExistsAsync(cancellationToken);
-                    if (exists) return directory;
+                    return directory;
                 }
             }
             return null;

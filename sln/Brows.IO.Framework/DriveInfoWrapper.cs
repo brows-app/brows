@@ -67,7 +67,7 @@ namespace Brows {
         private async Task<T> Get<T>(Func<DriveInfoWrapper, T> func) {
             if (null == func) throw new ArgumentNullException(nameof(func));
             if (Refreshed == null) {
-                Refreshed = Async.Run(CancellationToken, () => {
+                Refreshed = Async.With(CancellationToken).Run(() => {
                     Refreshing = true;
                     if (Log.Debug()) {
                         Log.Debug(

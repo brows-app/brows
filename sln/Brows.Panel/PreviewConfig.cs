@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domore.Text;
+using System;
 using System.Collections.Generic;
 
 namespace Brows {
@@ -10,6 +11,14 @@ namespace Brows {
             set => _CLSID = value;
         }
         private Dictionary<string, Guid> _CLSID;
+
+        public DecodedTextOptions TextOptions {
+            get => _TextOptions ?? (_TextOptions = new DecodedTextOptions());
+            set => _TextOptions = value;
+        }
+        private DecodedTextOptions _TextOptions;
+
+        public long? TextFileLengthMax { get; set; }
 
         Guid? IPreviewConfig.CLSID(string extension) {
             return CLSID.TryGetValue(extension, out var value)

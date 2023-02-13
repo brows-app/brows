@@ -8,6 +8,7 @@ Command_Description_CopyPrev        = Copy selection to the previous panel
 Command_Description_Cycle           = Activate the next panel
 Command_Description_CycleBack       = Activate the previous panel
 Command_Description_Delete          = Delete the selection
+Command_Description_Detail          = Show property details about the selected item
 Command_Description_Escape          = Escape from the current context
 Command_Description_Exit            = Shut down the application process
 Command_Description_Explorer        = Open this location in File Explorer

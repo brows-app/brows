@@ -14,11 +14,15 @@ namespace Brows {
         private static readonly PropertyChangedEventArgs OverlayEventArgs = new(nameof(Overlay));
         private static readonly PropertyChangedEventArgs ThumbnailEventArgs = new(nameof(Thumbnail));
         private static readonly PropertyChangedEventArgs PreviewImageEventArgs = new(nameof(PreviewImage));
-        private static readonly PropertyChangedEventArgs PreviewTextEventArgs = new(nameof(PreviewText));
         private static readonly PropertyChangedEventArgs SelectedEventArgs = new(nameof(Selected));
 
         private IEntryBrowser Browser;
         private IEntryView View;
+
+        private EntryState _State =>
+            __State ?? (
+            __State = new EntryState());
+        private EntryState __State;
 
         private TaskHandler TaskHandler =>
             _TaskHandler ?? (
@@ -77,6 +81,10 @@ namespace Brows {
             return Task.FromResult(false);
         }
 
+        protected virtual Task<bool> Detail(CancellationToken cancellationToken) {
+            return Task.FromResult(false);
+        }
+
         protected abstract IEntryData Get(string key);
 
         public static string ThumbnailKey => ThumbnailData.Key;
@@ -90,15 +98,18 @@ namespace Brows {
         }
         private string _Rename;
 
-        public IEntryData this[string key] {
-            get {
-                return Get(key);
-            }
-        }
+        public IEntryData this[string key] => Get(key);
 
+        public object State => _State;
         public abstract string ID { get; }
         public virtual string File => null;
         public virtual string Name => ID;
+
+        public object PreviewContent {
+            get => _PreviewContent;
+            set => Change(ref _PreviewContent, value, nameof(PreviewContent));
+        }
+        private object _PreviewContent;
 
         public Image Icon {
             get => _Icon ?? (_Icon = new ImageSourceProvided<IIconInput>(IconInput, IconProvider, CancellationToken));
@@ -124,12 +135,6 @@ namespace Brows {
         }
         private Image _PreviewImage;
 
-        public IPreviewText PreviewText {
-            get => _PreviewText ?? (_PreviewText = new PreviewText(PreviewInput, PreviewProvider, CancellationToken));
-            private set => Change(ref _PreviewText, value, PreviewTextEventArgs);
-        }
-        private IPreviewText _PreviewText;
-
         public bool Selected {
             get => _Selected;
             set => Change(ref _Selected, value, SelectedEventArgs);
@@ -142,15 +147,15 @@ namespace Brows {
             canExecute: _ => true);
 
         public void Open() {
-            TaskHandler.Begin(async cancellationToken => {
-                await Open(cancellationToken);
-            });
+            TaskHandler.Begin(async () => await Open(CancellationToken));
         }
 
         public void Edit() {
-            TaskHandler.Begin(async cancellationToken => {
-                await Edit(cancellationToken);
-            });
+            TaskHandler.Begin(async () => await Edit(CancellationToken));
+        }
+
+        public void Detail() {
+            TaskHandler.Begin(async () => await Detail(CancellationToken));
         }
 
         public virtual void Refresh(EntryRefresh flags) {
@@ -162,11 +167,9 @@ namespace Brows {
             if (flags.HasFlag(EntryRefresh.Icon)) {
                 Icon = null;
             }
-            if (flags.HasFlag(EntryRefresh.PreviewImage)) {
+            if (flags.HasFlag(EntryRefresh.Preview)) {
                 PreviewImage = null;
-            }
-            if (flags.HasFlag(EntryRefresh.PreviewText)) {
-                PreviewText = null;
+                PreviewContent = null;
             }
             if (flags.HasFlag(EntryRefresh.Thumbnail)) {
                 Thumbnail = null;
@@ -175,10 +178,6 @@ namespace Brows {
                 Overlay = null;
             }
             Refreshed?.Invoke(this, new EntryRefreshedEventArgs(flags));
-        }
-
-        public void Notify(bool state) {
-            NotifyState = state;
         }
 
         public override string ToString() {
@@ -206,6 +205,14 @@ namespace Brows {
             rename = Rename;
             Rename = null;
             return rename;
+        }
+
+        T IEntry.State<T>() {
+            return _State.Get<T>();
+        }
+
+        T IEntry.State<T>(T value) {
+            return _State.Set(value);
         }
     }
 }

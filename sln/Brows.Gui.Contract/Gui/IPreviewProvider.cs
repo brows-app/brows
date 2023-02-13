@@ -1,8 +1,9 @@
-using System.Collections.Generic;
+using Domore.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows.Gui {
     public interface IPreviewProvider : IImageSourceProvider<IPreviewInput> {
-        IAsyncEnumerable<string> GetPreviewText(IPreviewInput input, CancellationToken cancellationToken);
+        Task<DecodedText> GetPreviewText(IPreviewInput input, DecodedTextBuilder builder, CancellationToken cancellationToken);
     }
 }

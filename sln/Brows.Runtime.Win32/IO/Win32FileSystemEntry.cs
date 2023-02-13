@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,16 +7,8 @@ using System.Threading.Tasks;
 namespace Brows.IO {
     using Config;
     using Gui;
-    using System;
 
     internal sealed class Win32FileSystemEntry : FileSystemEntry {
-        private Win32FileOpener Opener =>
-            _Opener ?? (
-            _Opener = new Win32FileOpener());
-        private Win32FileOpener _Opener;
-
-        private Win32FileLinkResolver LinkResolver => Provide.FileLinkResolver;
-
         protected sealed override IIconProvider IconProvider => Provide.Icon;
         protected sealed override IPreviewProvider PreviewProvider => Provide.Preview;
         protected sealed override IOverlayProvider OverlayProvider => Provide.Overlay;
@@ -27,7 +20,8 @@ namespace Brows.IO {
         protected sealed override async Task<bool> Open(CancellationToken cancellationToken) {
             if (Info is FileInfo) {
                 var file = File;
-                var link = await LinkResolver.Resolve(file, cancellationToken);
+                var rslv = Provide.FileLinkResolver;
+                var link = await rslv.Resolve(file, cancellationToken);
                 if (link != null) {
                     var browsed = await Browse(link, cancellationToken);
                     if (browsed) {
@@ -38,7 +32,7 @@ namespace Brows.IO {
             var opened = await base.Open(cancellationToken);
             if (opened == false) {
                 var file = File;
-                var open = Opener;
+                var open = Provide.FileOpener;
                 await open.Open(file, null, cancellationToken);
             }
             return true;
@@ -64,8 +58,15 @@ namespace Brows.IO {
                 return false;
             }
             var file = File;
-            var open = Opener;
+            var open = Provide.FileOpener;
             await open.Open(file, editor, cancellationToken);
+            return true;
+        }
+
+        protected override async Task<bool> Detail(CancellationToken cancellationToken) {
+            var file = File;
+            var detail = Provide.FileProperties;
+            await detail.Show(file, cancellationToken);
             return true;
         }
 

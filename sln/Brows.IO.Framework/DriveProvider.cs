@@ -10,16 +10,13 @@ namespace Brows {
 
         protected override async Task Begin(CancellationToken cancellationToken) {
             var drives = await Task.Run(DriveInfo.GetDrives, cancellationToken);
-            foreach (var drive in drives) {
-                await Provide(Create(drive, cancellationToken), cancellationToken);
-            }
+            var entries = drives.Select(d => Create(d, cancellationToken)).ToList();
+            await Provide(entries, cancellationToken);
         }
 
         protected override async Task Refresh(CancellationToken cancellationToken) {
-            var drives = Existing.ToList();
-            foreach (var drive in drives) {
-                await Revoke(drive, cancellationToken);
-            }
+            var drives = Provided.All.ToList();
+            await Revoke(drives, cancellationToken);
             await Begin(cancellationToken);
         }
 
