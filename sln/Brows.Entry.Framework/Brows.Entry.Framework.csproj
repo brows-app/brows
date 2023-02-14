@@ -8,7 +8,4 @@
         <ProjectReference Include="..\Brows.Translation\Brows.Translation.csproj" />
         <ProjectReference Include="..\Domore.Converting\Domore.Converting.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Gui\" />
-    </ItemGroup>
 </Project>

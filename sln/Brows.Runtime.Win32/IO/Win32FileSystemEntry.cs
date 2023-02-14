@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PATH = System.IO.Path;
 
 namespace Brows.IO {
     using Config;
@@ -39,23 +41,33 @@ namespace Brows.IO {
         }
 
         protected sealed override async Task<bool> Edit(CancellationToken cancellationToken) {
-            var editor = default(string);
             var config = await Configure.File<EntryConfig>().Load(cancellationToken);
-            if (config != null) {
-                var extension = FileInfo?.Extension;
-                if (extension != null) {
-                    editor = config.Editor.TryGetValue(extension, out var extensionEditor)
-                        ? extensionEditor
-                        : null;
-                }
+            var editor = default(string);
+            var editors = config?.Editor ?? new();
+            var extension = FileInfo?.Extension;
+            if (extension != null) {
+                editor = config.Editor.TryGetValue(extension, out var extensionEditor)
+                    ? extensionEditor
+                    : null;
                 if (editor == null) {
-                    editor = config.Editor.TryGetValue("*", out var defaultEditor)
-                        ? defaultEditor
-                        : null;
+                    var key = config.Editor.Keys.LastOrDefault(k => k
+                        .Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .Contains(extension, StringComparer.OrdinalIgnoreCase));
+                    if (key != null) {
+                        editor = config.Editor[extension] = config.Editor[key];
+                    }
                 }
             }
             if (editor == null) {
+                editor = config.Editor.TryGetValue("*", out var defaultEditor)
+                    ? defaultEditor
+                    : null;
+            }
+            if (editor == null) {
                 return false;
+            }
+            if (PATH.IsPathFullyQualified(editor) == false) {
+                editor = await Provide.FileLocator.Program(editor, cancellationToken) ?? editor;
             }
             var file = File;
             var open = Provide.FileOpener;

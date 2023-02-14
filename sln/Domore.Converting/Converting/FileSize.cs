@@ -3,38 +3,46 @@
 namespace Domore.Converting {
     public static class FileSize {
         public static string From(long fileLength, string format, IFormatProvider formatProvider) {
+            string frmt = string.IsNullOrWhiteSpace(format) ? null : format;
             string unit;
-            double read;
+            double size;
             var abs = (fileLength < 0 ? -fileLength : fileLength);
-            if (abs >= 0x1000000000000000) {
-                unit = "EiB";
-                read = (fileLength >> 50);
+            switch (abs) {
+                case >= 0x1000000000000000:
+                    unit = "EiB";
+                    size = (fileLength >> 50);
+                    frmt = frmt ?? "0.######";
+                    break;
+                case >= 0x4000000000000:
+                    unit = "PiB";
+                    size = (fileLength >> 40);
+                    frmt = frmt ?? "0.#####";
+                    break;
+                case >= 0x10000000000:
+                    unit = "TiB";
+                    size = (fileLength >> 30);
+                    frmt = frmt ?? "0.####";
+                    break;
+                case >= 0x40000000:
+                    unit = "GiB";
+                    size = (fileLength >> 20);
+                    frmt = frmt ?? "0.###";
+                    break;
+                case >= 0x100000:
+                    unit = "MiB";
+                    size = (fileLength >> 10);
+                    frmt = frmt ?? "0.##";
+                    break;
+                case >= 0x400:
+                    unit = "KiB";
+                    size = fileLength;
+                    frmt = frmt ?? "0.#";
+                    break;
+                default:
+                    return fileLength.ToString("0 B");
             }
-            else if (abs >= 0x4000000000000) {
-                unit = "PiB";
-                read = (fileLength >> 40);
-            }
-            else if (abs >= 0x10000000000) {
-                unit = "TiB";
-                read = (fileLength >> 30);
-            }
-            else if (abs >= 0x40000000) {
-                unit = "GiB";
-                read = (fileLength >> 20);
-            }
-            else if (abs >= 0x100000) {
-                unit = "MiB";
-                read = (fileLength >> 10);
-            }
-            else if (abs >= 0x400) {
-                unit = "KiB";
-                read = fileLength;
-            }
-            else {
-                return fileLength.ToString("0 B");
-            }
-            read = (read / 1024);
-            return read.ToString(format, formatProvider) + " " + unit;
+            size = (size / 1024);
+            return size.ToString(frmt, formatProvider) + " " + unit;
         }
     }
 }

@@ -3,7 +3,7 @@
     <CompositeCollection x:Key="Manual_TextCollection">
         <TextBlock>
             <Run Text="Brows" FontWeight="Bold"/>
-            <Run Text="is a keyboard-centric, multi-panel file browser."/>
+            <Run Text="is a multi-panel file-system browser for developers and power users."/>
         </TextBlock>
         <TextBlock>
             <Run Text="Control+N" Style="{DynamicResource CommandContextData_KeyboardKey}"/>

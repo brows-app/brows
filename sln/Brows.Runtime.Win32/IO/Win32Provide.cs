@@ -10,5 +10,6 @@
         public Win32FileLinkResolver FileLinkResolver { get; set; } = Win32Provider.FileLinkResolver;
         public Win32FileOpener FileOpener { get; set; } = Win32Provider.FileOpener;
         public Win32FileProperties FileProperties { get; set; } = Win32Provider.FileProperties;
+        public Win32FileLocator FileLocator { get; set; } = Win32Provider.FileLocator;
     }
 }

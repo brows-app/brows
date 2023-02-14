@@ -14,5 +14,6 @@ namespace Brows.IO {
         public static Win32FileLinkResolver FileLinkResolver { get; } = new Win32FileLinkResolver(ThreadPool);
         public static Win32FileOpener FileOpener { get; } = new Win32FileOpener(ThreadPool);
         public static Win32FileProperties FileProperties { get; } = new Win32FileProperties(ThreadPool);
+        public static Win32FileLocator FileLocator { get; } = new Win32FileLocator(ThreadPool);
     }
 }

@@ -31,7 +31,35 @@
         <ProjectReference Include="..\Domore.Logs.Conf\Domore.Logs.Conf.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <None Update="brows.config\find.conf">
+        <None Update="brows.config\default\entry.conf.default">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\default\find.conf.default">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\default\key.conf.default">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\default\log.conf.default">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\default\panel.conf.default">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\default\preview.conf.default">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\default\program.conf.default">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="brows.config\default\propsys.conf.default">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
@@ -48,18 +76,6 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="brows.config\entry.conf">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="brows.config\panel.conf">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="brows.config\key.conf">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="brows.config\propsys.conf">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>

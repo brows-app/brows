@@ -1,8 +1,13 @@
-﻿cmd[Bookmark]           .inp                            = bookmark|bm
+﻿#
+# WARNING: This file will be overwritten when a new version of the application is installed.
+# To customize the application's configuration, copy this file to its directory's parent and
+# remove the .default extension.
+#
+
+cmd[Bookmark]           .inp                            = bookmark|bm
 cmd[Bookmark]           .key[Control+B]                 = *
 cmd[Bookmark]           .key[Control+D]                 = * --add
 cmd[Bookmark]           .key[Control+Shift+D]           = * --all
-
 cmd[Hide]               .inp                            = hide
 cmd[Show]               .inp                            = show
 cmd[Sort]               .inp                            = sort

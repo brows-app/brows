@@ -25,20 +25,17 @@ namespace Brows {
         public static EntryDataConverter FileSystemSize { get; } = new FileSystemSizeConverter();
 
         private sealed class FileSystemSizeConverter : EntryDataConverter {
-            public string Format { get; set; } = "0.#";
-
             public sealed override string Convert(object value, object parameter, CultureInfo culture) {
                 if (value == null) return null;
 
                 var converted = Try(CONVERT.ToInt64, value, out var length);
                 if (converted == false) return null;
 
-                var format = parameter?.ToString() ?? Format;
+                var format = parameter?.ToString();
                 var readable = FileSize.From(length, format, culture);
                 return readable;
             }
         }
-
 
         private sealed class DateTimeConverter : EntryDataConverter {
             public string Format { get; set; } = "yyyy-MM-dd HH:mm:ss";
