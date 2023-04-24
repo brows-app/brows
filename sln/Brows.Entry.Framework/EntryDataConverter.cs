@@ -1,11 +1,8 @@
-﻿using Domore.Converting;
-using System;
+﻿using System;
 using System.Globalization;
 using CONVERT = System.Convert;
 
 namespace Brows {
-    using Translation;
-
     public abstract class EntryDataConverter : IEntryDataConverter {
         protected bool Try<T>(Func<object, T> conversion, object input, out T result) {
             try {
@@ -23,19 +20,6 @@ namespace Brows {
         public static EntryDataConverter DateTime { get; } = new DateTimeConverter();
         public static EntryDataConverter BooleanYesNo { get; } = new BooleanYesNoConverter();
         public static EntryDataConverter FileSystemSize { get; } = new FileSystemSizeConverter();
-
-        private sealed class FileSystemSizeConverter : EntryDataConverter {
-            public sealed override string Convert(object value, object parameter, CultureInfo culture) {
-                if (value == null) return null;
-
-                var converted = Try(CONVERT.ToInt64, value, out var length);
-                if (converted == false) return null;
-
-                var format = parameter?.ToString();
-                var readable = FileSize.From(length, format, culture);
-                return readable;
-            }
-        }
 
         private sealed class DateTimeConverter : EntryDataConverter {
             public string Format { get; set; } = "yyyy-MM-dd HH:mm:ss";
@@ -61,8 +45,66 @@ namespace Brows {
 
                 var yesNo = boolean ? "Yes" : "No";
                 var key = $"EntryData_{yesNo}";
-                var s = Global.Translation.Value(key);
+                var s = Translation.Global.Value(key);
                 return s;
+            }
+        }
+
+        private sealed class FileSystemSizeConverter : EntryDataConverter {
+            public sealed override string Convert(object value, object parameter, CultureInfo culture) {
+                if (value == null) return null;
+
+                var converted = Try(CONVERT.ToInt64, value, out var length);
+                if (converted == false) return null;
+
+                var format = parameter?.ToString();
+                var readable = FileSize.From(length, format, culture);
+                return readable;
+            }
+        }
+
+        private static class FileSize {
+            public static string From(long fileLength, string format, IFormatProvider formatProvider) {
+                string frmt = string.IsNullOrWhiteSpace(format) ? null : format;
+                string unit;
+                double size;
+                var abs = (fileLength < 0 ? -fileLength : fileLength);
+                switch (abs) {
+                    case >= 0x1000000000000000:
+                        unit = "EiB";
+                        size = (fileLength >> 50);
+                        frmt = frmt ?? "0.##";
+                        break;
+                    case >= 0x4000000000000:
+                        unit = "PiB";
+                        size = (fileLength >> 40);
+                        frmt = frmt ?? "0.##";
+                        break;
+                    case >= 0x10000000000:
+                        unit = "TiB";
+                        size = (fileLength >> 30);
+                        frmt = frmt ?? "0.##";
+                        break;
+                    case >= 0x40000000:
+                        unit = "GiB";
+                        size = (fileLength >> 20);
+                        frmt = frmt ?? "0.##";
+                        break;
+                    case >= 0x100000:
+                        unit = "MiB";
+                        size = (fileLength >> 10);
+                        frmt = frmt ?? "0.##";
+                        break;
+                    case >= 0x400:
+                        unit = "KiB";
+                        size = fileLength;
+                        frmt = frmt ?? "0.#";
+                        break;
+                    default:
+                        return fileLength.ToString("0 B");
+                }
+                size = (size / 1024);
+                return size.ToString(frmt, formatProvider) + " " + unit;
             }
         }
     }

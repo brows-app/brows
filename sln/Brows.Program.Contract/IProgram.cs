@@ -4,6 +4,6 @@ using System.Threading.Tasks;
 namespace Brows {
     public interface IProgram {
         string Name { get; }
-        Task<int> Run(IProgramCommand command, IProgramConsole console, CancellationToken cancellationToken);
+        Task<int> Run(IProgramContext context, CancellationToken cancellationToken);
     }
 }

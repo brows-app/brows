@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+      <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />
+    </ItemGroup>
+</Project>

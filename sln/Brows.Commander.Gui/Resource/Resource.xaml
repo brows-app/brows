@@ -1,33 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:s="clr-namespace:System;assembly=mscorlib">
-    <SolidColorBrush x:Key="CommandPaletteInput_Default_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity=".1"/>
-    <SolidColorBrush x:Key="CommandPaletteInput_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".9"/>
-    <SolidColorBrush x:Key="CommandPaletteInput_Selection_Background" Color="{DynamicResource Global_Default_Foreground}"/>
-    <FontFamily x:Key="CommandPaletteInput_Default_FontFamily">Consolas</FontFamily>
-    <s:Double x:Key="CommandPaletteInput_Default_FontSize">16</s:Double>
-    <FontWeight x:Key="CommandPaletteInput_Default_FontWeight">Normal</FontWeight>
-
-    <SolidColorBrush x:Key="CommandSuggestionDescription_Default_Background" Color="Transparent"/>
-    <SolidColorBrush x:Key="CommandSuggestionDescription_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".8"/>
-    <FontFamily x:Key="CommandSuggestionDescription_Default_FontFamily"></FontFamily>
-    <s:Double x:Key="CommandSuggestionDescription_Default_FontSize">12</s:Double>
-    <FontStyle x:Key="CommandSuggestionDescription_Default_FontStyle">Normal</FontStyle>
-    <FontWeight x:Key="CommandSuggestionDescription_Default_FontWeight">Normal</FontWeight>
-
-    <SolidColorBrush x:Key="CommandSuggestionGroup_Default_Background" Color="Transparent"/>
-    <SolidColorBrush x:Key="CommandSuggestionGroup_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".8"/>
-    <FontFamily x:Key="CommandSuggestionGroup_Default_FontFamily"></FontFamily>
-    <s:Double x:Key="CommandSuggestionGroup_Default_FontSize">16</s:Double>
-    <FontStyle x:Key="CommandSuggestionGroup_Default_FontStyle"></FontStyle>
-    <FontWeight x:Key="CommandSuggestionGroup_Default_FontWeight">Bold</FontWeight>
-
-    <SolidColorBrush x:Key="CommandSuggestionInput_Default_Background" Color="Transparent"/>
-    <SolidColorBrush x:Key="CommandSuggestionInput_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".9"/>
-    <FontFamily x:Key="CommandSuggestionInput_Default_FontFamily">Consolas</FontFamily>
-    <s:Double x:Key="CommandSuggestionInput_Default_FontSize">16</s:Double>
-    <FontWeight x:Key="CommandSuggestionInput_Default_FontWeight">Normal</FontWeight>
-
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Style x:Key="CommandContextData_KeyboardKey">
         <Setter Property="TextElement.FontStyle" Value="Italic"/>
         <Setter Property="TextElement.FontWeight" Value="Bold"/>
@@ -105,5 +77,10 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="PanelStateTextBlockStyle">
+        <Setter Property="Background" Value="{DynamicResource Global_Default_Transparent_Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
     </Style>
 </ResourceDictionary>

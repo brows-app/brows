@@ -39,31 +39,7 @@
                         </RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
-                        <Grid.Style>
-                            <Style TargetType="Grid">
-                                <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
-                            </Style>
-                        </Grid.Style>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <local:CommandPaletteInputTextBox 
-                            Grid.Row="0" 
-                            x:Name="InputTextBox" 
-                            Focusable="True"
-                            Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}"/>
-                        <local:CommandPaletteInputTextBox 
-                            Grid.Row="0" 
-                            Focusable="False"
-                            IsEnabled="False" 
-                            Text="{Binding InputSuggestion, Mode=OneWay}"/>
-                        <local:CommandSuggestionListView 
-                            Grid.Row="1" 
-                            x:Name="CommandSuggestionListView"
-                            Focusable="False"                                                         
-                            ItemsSource="{Binding SuggestionSource}" 
-                            IsSynchronizedWithCurrentItem="True"/>
+                        <local:CommandPaletteInputControl DataContext="{Binding Input}"/>
                     </Grid>
                     <Grid Grid.Row="1">
                         <Grid.Style>

@@ -1,0 +1,7 @@
+﻿<UserControl x:Class="Brows.PanelProviderControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:brows="http://schemas.brows.app/xaml">
+    <ContentControl Content="{Binding}" 
+                    ContentTemplateSelector="{Binding Item[PanelProvider], Source={x:Static brows:AppComponent.DataTemplateSelector}}"/>
+</UserControl>

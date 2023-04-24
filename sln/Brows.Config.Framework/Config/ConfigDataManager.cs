@@ -14,19 +14,15 @@ namespace Brows.Config {
         }
 
         public class Of<TData> : ConfigDataManager, IConfig<TData> where TData : class, INotifyPropertyChanged, new() {
-            private Guid ChangeState = Guid.NewGuid();
+            private int ChangeState;
             private readonly int ChangeDelay = 1000;
-
-            private TaskHandler TaskHandler =>
-                _TaskHandler ?? (
-                _TaskHandler = new TaskHandler<Of<TData>>());
-            private TaskHandler _TaskHandler;
+            private readonly SemaphoreSlim ChangeLocker = new(1, 1);
 
             private TaskCache<TData> Cache =>
                 _Cache ?? (
-                _Cache = new TaskCache<TData>(async cancellationToken => {
+                _Cache = new TaskCache<TData>(async token => {
                     var
-                    loaded = await Payload(new TData()).Load(cancellationToken);
+                    loaded = await Payload(new TData()).Load(token);
                     loaded.PropertyChanged += Loaded_PropertyChanged;
                     return loaded;
                 }));
@@ -36,14 +32,21 @@ namespace Brows.Config {
                 return ConfigDataPayload.For(data, ID);
             }
 
-            private void Loaded_PropertyChanged(object sender, EventArgs e) {
-                var state = ChangeState = Guid.NewGuid();
-                TaskHandler.Begin(async cancellationToken => {
-                    await Task.Delay(ChangeDelay, cancellationToken);
-                    if (ChangeState == state) {
-                        await Payload(Loaded).Save(cancellationToken);
+            private async void Loaded_PropertyChanged(object sender, EventArgs e) {
+                var changeState = ChangeState = ChangeState + 1; await Task.Delay(ChangeDelay);
+                if (changeState == ChangeState) {
+                    await ChangeLocker.WaitAsync();
+                    try {
+                        if (changeState == ChangeState) {
+                            ChangeState = 0;
+                            var payload = Payload(Loaded);
+                            await payload.Save(CancellationToken.None);
+                        }
                     }
-                });
+                    finally {
+                        ChangeLocker.Release();
+                    }
+                }
             }
 
             public TData Loaded =>
@@ -52,8 +55,8 @@ namespace Brows.Config {
             public Of(string id) : base(id) {
             }
 
-            public ValueTask<TData> Load(CancellationToken cancellationToken) {
-                return Cache.Ready(cancellationToken);
+            public ValueTask<TData> Load(CancellationToken token) {
+                return Cache.Ready(token);
             }
         }
     }

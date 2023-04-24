@@ -8,8 +8,4 @@ namespace Brows {
         void Refresh();
         int Compare(IEntryData other);
     }
-
-    public interface IEntryData<T> : IEntryData {
-        new T Value { get; }
-    }
 }

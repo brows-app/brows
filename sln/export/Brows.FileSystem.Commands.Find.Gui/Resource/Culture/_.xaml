@@ -1,0 +1,52 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:framework="clr-namespace:Brows;assembly=Brows.Entry.Framework">
+    <Style TargetType="TextBlock" x:Key="FileSystemFindResult_TextBlock_MatchMatched" BasedOn="{StaticResource FileSystemFindResult_TextBlock}">
+        <Setter Property="Text" Value="{Binding MatchMatched, StringFormat='Matched {0} items'}"/>
+    </Style>
+    <Style TargetType="TextBlock" x:Key="FileSystemFindResult_TextBlock_MatchTried" BasedOn="{StaticResource FileSystemFindResult_TextBlock}">
+        <Setter Property="Text" Value="{Binding MatchTried, StringFormat='Checking {0} items'}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Complete}" Value="True">
+                <Setter Property="Text" Value="{Binding MatchTried, StringFormat='Checked {0} items'}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="TextBlock" x:Key="FileSystemFindResult_TextBlock_Root" BasedOn="{StaticResource FileSystemFindResult_TextBlock}">
+        <Setter Property="Text" Value="{Binding Root, StringFormat='Searching {0}'}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Complete}" Value="True">
+                <Setter Property="Text" Value="{Binding Root, StringFormat='Searched {0}'}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <DataTemplate x:Key="CommandContextHint_FileSystemFindData">
+        <StackPanel>
+            <Control Template="{DynamicResource CommandContextDataGesture_Hint_Down_Up}"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Enter}"/>
+                <TextBlock Text=" to open the found item's location."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Previous}"/>
+                <TextBlock Text=" or "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Next}"/>
+                <TextBlock Text=" to cycle through the result history."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Remove}"/>
+                <TextBlock Text=" to remove this result."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Clear}"/>
+                <TextBlock Text=" to remove all completed results."/>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

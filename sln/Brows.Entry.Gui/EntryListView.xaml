@@ -5,7 +5,6 @@
           xmlns:local="clr-namespace:Brows"
           VirtualizingStackPanel.IsVirtualizing="True"
           VirtualizingStackPanel.VirtualizationMode="Recycling"
-          ScrollViewer.IsDeferredScrollingEnabled="True"
           MaxHeight="1000">
     <ListView.Style>
         <Style TargetType="ListView">

@@ -2,6 +2,8 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <ProjectReference Include="..\Brows.Operation.Contract\Brows.Operation.Contract.csproj" />
+      <ProjectReference Include="..\Brows.Composition.Contract\Brows.Composition.Contract.csproj" />
+      <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
+      <ProjectReference Include="..\domore\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj" />
     </ItemGroup>
 </Project>

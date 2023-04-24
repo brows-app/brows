@@ -1,15 +1,13 @@
 using Domore.Logs;
 using Domore.Notification;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    public abstract class EntryData : Notifier {
+    internal sealed class EntryData : Notifier, IEntryData {
         private static readonly ILog Log = Logging.For(typeof(EntryData));
 
         private static readonly PropertyChangedEventArgs AccessingEventArgs = new(nameof(Accessing));
@@ -17,21 +15,61 @@ namespace Brows {
         private static readonly PropertyChangedEventArgs AccessCanceledEventArgs = new(nameof(AccessCanceled));
         private static readonly PropertyChangedEventArgs AccessErrorEventArgs = new(nameof(AccessError));
         private static readonly PropertyChangedEventArgs AccessExceptionEventArgs = new(nameof(AccessException));
-        private static readonly PropertyChangedEventArgs AlignmentEventArgs = new(nameof(Alignment));
-        private static readonly PropertyChangedEventArgs ConverterEventArgs = new(nameof(Converter));
-        private static readonly PropertyChangedEventArgs ConverterParameterEventArgs = new(nameof(ConverterParameter));
-        private static readonly PropertyChangedEventArgs[] DisplayEventArgs = new PropertyChangedEventArgs[] {
-            new(nameof(Display))
-        };
+        private static readonly PropertyChangedEventArgs[] DisplayEventArgs = new PropertyChangedEventArgs[] { new(nameof(Display)) };
+        private static readonly PropertyChangedEventArgs ReadyEventArgs = new(nameof(Ready));
+        private static readonly PropertyChangedEventArgs ValueEventArgs = new(nameof(Value));
 
-        private EntryData(string key, CancellationToken cancellationToken) {
-            Key = key;
-            CancellationToken = cancellationToken;
+        private Task<object> ReadyTask;
+
+        private async Task<object> AccessValue(CancellationToken token) {
+            Accessing = true;
+            AccessError = false;
+            AccessCanceled = false;
+            AccessException = null;
+            _ = Task.Delay(100, token).ContinueWith(task => {
+                if (task.IsCompletedSuccessfully) {
+                    if (Accessing) {
+                        AccessingFlag = true;
+                    }
+                }
+            }, token);
+            try {
+                return await Definition.GetValue(
+                    entry: Entry,
+                    progress: value => Value = value,
+                    cancellationToken: token);
+            }
+            catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
+                if (Log.Info()) {
+                    Log.Info(nameof(canceled));
+                }
+                AccessCanceled = true;
+                return default;
+            }
+            catch (Exception ex) {
+                if (Log.Warn()) {
+                    Log.Warn(ex ?? nameof(Exception) as object);
+                }
+                AccessError = true;
+                AccessException = ex;
+                return default;
+            }
+            finally {
+                Accessing = false;
+                AccessingFlag = false;
+            }
         }
 
-        internal abstract object GetValue();
-
-        protected virtual void Refresh() {
+        private async void ReadyInit() {
+            try {
+                Value = await (ReadyTask = AccessValue(Token));
+            }
+            catch (OperationCanceledException canceled) when (canceled.CancellationToken == Token) {
+                if (Log.Debug()) {
+                    Log.Debug(Log.Join(nameof(ReadyInit), nameof(canceled)));
+                }
+                Value = null;
+            }
         }
 
         public bool Accessing {
@@ -64,154 +102,75 @@ namespace Brows {
         }
         private Exception _AccessException;
 
-        public EntryDataAlignment Alignment {
-            get => _Alignment;
-            set => Change(ref _Alignment, value, AlignmentEventArgs);
+        public object Value {
+            get => _Value;
+            private set => Change(ref _Value, value, ValueEventArgs, DisplayEventArgs);
         }
-        private EntryDataAlignment _Alignment;
-
-        public IEntryDataConverter Converter {
-            get => _Converter;
-            set => Change(ref _Converter, value, ConverterEventArgs, DisplayEventArgs);
-        }
-        private IEntryDataConverter _Converter;
-
-        public object ConverterParameter {
-            get => _ConverterParameter;
-            set => Change(ref _ConverterParameter, value, ConverterParameterEventArgs, DisplayEventArgs);
-        }
-        private object _ConverterParameter;
+        private object _Value;
 
         public object Display {
             get {
-                var value = GetValue();
-                var converter = Converter;
+                var converter = Definition.Converter;
                 return converter == null
-                    ? value
-                    : converter.Convert(value, ConverterParameter, CultureInfo.CurrentUICulture);
+                    ? Value
+                    : converter.Convert(Value, Definition.ConverterParameter, CultureInfo.CurrentUICulture);
             }
         }
 
-        public string Key { get; }
-        public CancellationToken CancellationToken { get; }
-
-        public abstract class Of<T> : EntryData, IEntryData, IEntryData<T> {
-            private static readonly PropertyChangedEventArgs ReadyEventArgs = new(nameof(Ready));
-            private static readonly PropertyChangedEventArgs ValueEventArgs = new(nameof(Value));
-
-            private Task<T> ReadyTask;
-
-            private async Task<T> AccessValue(CancellationToken cancellationToken) {
-                Accessing = true;
-                AccessError = false;
-                AccessCanceled = false;
-                AccessException = null;
-                _ = Task.Delay(100, cancellationToken).ContinueWith(task => {
-                    if (task.IsCompletedSuccessfully) {
-                        if (Accessing) {
-                            AccessingFlag = true;
-                        }
-                    }
-                }, cancellationToken);
-                try {
-                    return await Access(cancellationToken);
+        public bool Ready {
+            get {
+                if (ReadyTask == null) {
+                    ReadyInit();
                 }
-                catch (Exception ex) {
-                    if (ex is OperationCanceledException canceled && canceled.CancellationToken == cancellationToken) {
-                        if (Log.Info()) {
-                            Log.Info(nameof(OperationCanceledException));
-                        }
-                        AccessCanceled = true;
-                    }
-                    else {
-                        if (Log.Warn()) {
-                            Log.Warn(ex ?? nameof(Exception) as object);
-                        }
-                        AccessError = true;
-                        AccessException = ex;
-                    }
-                    return default;
-                }
-                finally {
-                    Accessing = false;
-                    AccessingFlag = false;
-                }
+                return _Ready = true;
             }
-
-            private async void ReadyInit(CancellationToken cancellationToken) {
-                try {
-                    Set(await (ReadyTask = AccessValue(cancellationToken)));
-                }
-                catch {
-                    Set(default);
-                }
-            }
-
-            internal sealed override object GetValue() {
-                return Value;
-            }
-
-            protected Of(string key, CancellationToken cancellationToken) : base(key, cancellationToken) {
-            }
-
-            protected abstract Task<T> Access(CancellationToken cancellationToken);
-
-            protected void Set(T value) {
-                Value = value;
-            }
-
-            public T Value {
-                get => _Value;
-                private set => Change(ref _Value, value, ValueEventArgs, DisplayEventArgs);
-            }
-            private T _Value;
-
-            public bool Ready {
-                get {
-                    if (ReadyTask == null) {
-                        ReadyInit(CancellationToken);
-                    }
-                    return _Ready = true;
-                }
-                private set {
-                    Change(ref _Ready, value, ReadyEventArgs);
-                }
-            }
-            private bool _Ready;
-
-            object IEntryData.Value =>
-                Value;
-
-            Task IEntryData.Ready {
-                get {
-                    if (ReadyTask == null) {
-                        ReadyInit(CancellationToken);
-                    }
-                    return ReadyTask;
-                }
-            }
-
-            void IEntryData.Refresh() {
-                Refresh();
-                ReadyTask = null;
-                Ready = false;
-            }
-
-            int IEntryData.Compare(IEntryData other) {
-                try {
-                    return other is IEntryData<T> t
-                        ? Comparer<T>.Default.Compare(Value, t.Value)
-                        : Comparer.Default.Compare(Value, other?.Value);
-                }
-                catch {
-                    return 0;
-                }
+            private set {
+                Change(ref _Ready, value, ReadyEventArgs);
             }
         }
-    }
+        private bool _Ready;
 
-    public abstract class EntryData<TValue> : EntryData.Of<TValue> {
-        protected EntryData(string key, CancellationToken cancellationToken) : base(key, cancellationToken) {
+        public string Key =>
+            Definition.Key;
+
+        public EntryDataAlignment Alignment =>
+            Definition.Alignment;
+
+        public IEntry Entry { get; }
+        public IEntryDataDefinition Definition { get; }
+        public CancellationToken Token { get; }
+
+        public EntryData(IEntry entry, IEntryDataDefinition definition, CancellationToken token) {
+            Entry = entry ?? throw new ArgumentNullException(nameof(entry));
+            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+            Token = token;
+        }
+
+        Task IEntryData.Ready {
+            get {
+                if (ReadyTask == null) {
+                    ReadyInit();
+                }
+                return ReadyTask;
+            }
+        }
+
+        void IEntryData.Refresh() {
+            Definition.RefreshValue(Entry);
+            ReadyTask = null;
+            Ready = false;
+        }
+
+        int IEntryData.Compare(IEntryData other) {
+            try {
+                if (other is EntryData entryData) {
+                    return Definition.CompareValue(Entry, entryData.Entry);
+                }
+                return 0;
+            }
+            catch {
+                return 0;
+            }
         }
     }
 }

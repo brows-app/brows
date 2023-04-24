@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Resource\Culture\_" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Brows.Composition.Contract\Brows.Composition.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Translation.Framework\Brows.Translation.Framework.csproj" />
+        <ProjectReference Include="..\Brows.Trigger.Contract\Brows.Trigger.Contract.csproj" />
+    </ItemGroup>
+</Project>

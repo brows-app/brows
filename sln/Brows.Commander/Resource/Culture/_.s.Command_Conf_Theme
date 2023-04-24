@@ -1,0 +1,16 @@
+﻿# example:
+# {input} light bg=lightgreen fg=darkred
+
+# The name of the theme to load. Options
+# include "light" and "dark".
+Base = 
+
+# Set the background color. Leave this
+# blank to use the default background
+# color of the base theme.
+BG = 
+
+# Set the foreground color. Leave this
+# blank to use the default foreground
+# color of the base theme.
+FG = 

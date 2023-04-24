@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="Resource\Culture\_" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
+    </ItemGroup>
+</Project>

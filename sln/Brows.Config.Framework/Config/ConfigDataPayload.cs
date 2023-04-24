@@ -1,38 +1,21 @@
 ﻿using Domore.Conf.Extensions;
-using Domore.Converting;
 using Domore.Logs;
 using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FILE = System.IO.File;
 using PATH = System.IO.Path;
 
 namespace Brows.Config {
     internal class ConfigDataPayload {
         private static readonly ILog Log = Logging.For(typeof(ConfigDataPayload));
 
-        private static string Encode32(string s) {
-            var utf8bytes = Encoding.UTF8.GetBytes(s);
-            var base32hex = Base32HexString.From(utf8bytes);
-            return base32hex;
-        }
-
-        private static string Encode64(string s) {
-            var utf8bytes = Encoding.UTF8.GetBytes(s);
-            var base64str = Convert.ToBase64String(utf8bytes);
-            return base64str;
-        }
-
-        private async Task<(string Head, string Path)> Path(CancellationToken cancellationToken) {
+        private async Task<(string Head, string Path)> File(CancellationToken cancellationToken) {
             var root = await ConfigPath.DataReady(cancellationToken);
-            var head = Head();
+            var head = ConfigDataHead.For(Type, ID);
             var path = PATH.Combine(root, head + ".brws");
             return (Head: head, Path: path);
-        }
-
-        private string Head() {
-            return ".01@" + Encode32(Type) + "#" + Encode32(ID);
         }
 
         public string ID { get; }
@@ -55,21 +38,22 @@ namespace Brows.Config {
                 var data = Data;
                 var text = data?.ConfText(key: "", multiline: true);
                 if (text != null) {
-                    var file = await Path(cancellationToken);
-                    var fileText = file.Head + Environment.NewLine + Environment.NewLine + text;
+                    string comment(string s) => $"# {s}";
+                    var file = await File(cancellationToken);
+                    var fileText = string.Join(Environment.NewLine, comment(file.Head), comment(Type), comment(ID), "", text);
                     if (Log.Info()) {
                         Log.Info(
                             nameof(Save) + " > " + Type,
                             nameof(file) + " > " + file.Path);
                     }
-                    await File.WriteAllTextAsync(file.Path, fileText, cancellationToken);
+                    await FILE.WriteAllTextAsync(file.Path, fileText, cancellationToken);
                 }
                 return data;
             }
 
             public sealed override async Task<TData> Load(CancellationToken cancellationToken) {
                 var data = Data;
-                var file = await Path(cancellationToken);
+                var file = await File(cancellationToken);
                 if (Log.Info()) {
                     Log.Info(
                         nameof(Load) + " > " + Type,
@@ -77,7 +61,7 @@ namespace Brows.Config {
                 }
                 var text = default(string);
                 try {
-                    text = await File.ReadAllTextAsync(file.Path, cancellationToken);
+                    text = await System.IO.File.ReadAllTextAsync(file.Path, cancellationToken);
                 }
                 catch (FileNotFoundException) {
                     return data;

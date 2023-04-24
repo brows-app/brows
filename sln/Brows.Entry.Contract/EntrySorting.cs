@@ -13,6 +13,13 @@ namespace Brows {
                 Agent = agent ?? throw new ArgumentNullException(nameof(agent));
             }
 
+            public IEntrySorting Change(string key, EntrySortDirection? value) {
+                var
+                agent = Agent.ToDictionary(pair => pair.Key, pair => pair.Value);
+                agent[key] = value;
+                return From(agent);
+            }
+
             public EntrySortDirection? this[string key] => Agent[key];
             public int Count => Agent.Count;
             public IEnumerable<string> Keys => Agent.Keys;
@@ -35,6 +42,14 @@ namespace Brows {
 
         public static IEntrySorting From(IReadOnlyDictionary<string, EntrySortDirection> sorting) {
             return From(sorting?.ToDictionary(s => s.Key, s => (EntrySortDirection?)s.Value));
+        }
+
+        public static IEntrySorting From(IEnumerable<KeyValuePair<string, EntrySortDirection>> sorting) {
+            var dictionary = new Dictionary<string, EntrySortDirection?>();
+            foreach (var pair in sorting) {
+                dictionary[pair.Key] = pair.Value;
+            }
+            return From(dictionary);
         }
     }
 }

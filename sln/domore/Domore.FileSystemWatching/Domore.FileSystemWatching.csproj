@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domore.Logs\Domore.Logs.csproj" />
+        <ProjectReference Include="..\Domore.Win32\Domore.Win32.csproj" />
+    </ItemGroup>
+</Project>

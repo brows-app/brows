@@ -1,0 +1,71 @@
+﻿#
+# WARNING: This file will be overwritten when a new version of the application is installed.
+# To customize the application's configuration, copy this file to its directory's parent and
+# remove the .default extension.
+#
+
+cmd[AddPanel]                       .press[CTRL+N]              = *
+cmd[Bookmark]                       .input                      = bookmark|bm
+cmd[Bookmark]                       .press[CTRL+B]              = *
+cmd[Bookmark]                       .press[CTRL+D]              = * add=true
+cmd[ClipboardCopy]                  .press[CTRL+C]              = *
+cmd[ClipboardPaste]                 .press[CTRL+V]              = *
+cmd[Close]                          .input                      = close
+cmd[Close]                          .press[ALT+F4]              = *
+cmd[Config]                         .input                      = config|conf
+cmd[Copy]                           .input                      = copy|c
+cmd[Cycle]                          .press[TAB]                 = *
+cmd[CycleBack]                      .press[SHIFT+TAB]           = *
+cmd[Delete]                         .input                      = delete
+cmd[Delete]                         .press[DEL]                 = *
+cmd[Drives]                         .input                      = drives
+cmd[Escape]                         .press[ESC]                 = *
+cmd[Exit]                           .input                      = exit
+cmd[Hide]                           .input                      = hide
+cmd[HistoryBack]                    .press[Back|ALT+LEFT]       = *
+cmd[HistoryForward]                 .press[ALT+RIGHT]           = *
+cmd[Manual]                         .input                      = ?
+cmd[Move]                           .input                      = move|m
+cmd[Open]                           .input                      = open
+cmd[Open]                           .press[ENTER]               = *
+cmd[Open]                           .press[ENTER+CTRL]          = * p
+cmd[Open]                           .press[ENTER+CTRL+SHIFT]    = * w
+cmd[Open]                           .click[2L]                  = *
+cmd[Operations]                     .input                      = !
+cmd[Palette]                        .press[CTRL+L]              = *
+cmd[Preview]                        .input                      = preview
+cmd[Preview]                        .press[ALT+P]               = *
+cmd[Process]                        .input                      = >
+cmd[Process]                        .press[SHIFT+.]             = *
+cmd[Refresh]                        .press[CTRL+R]              = *
+cmd[RefreshAll]                     .press[CTRL+SHIFT+R]        = *
+cmd[RemovePanel]                    .input                      = remove-panel|remp
+cmd[RemovePanel]                    .press[CTRL+W]              = *
+cmd[Reset]                          .press[ALT+CTRL+R]          = *
+cmd[ResetAll]                       .press[ALT+CTRL+SHIFT+R]    = *
+cmd[Save]                           .press[CTRL+S]              = *
+cmd[Select]                         .input                      = select|sel
+cmd[Show]                           .input                      = show
+cmd[Sort]                           .input                      = sort
+cmd[Theme]                          .input                      = theme
+cmd[Up]                             .input                      = up
+cmd[Up]                             .press[ALT+UP]              = *
+
+cmd[FileSystem_CreateDirectory]     .input                      = new-dir|newd|nd
+cmd[FileSystem_CreateDirectory]     .press[CTRL+SHIFT+N]        = *
+cmd[FileSystem_CreateFile]          .input                      = new-file|newf|nf
+cmd[FileSystem_CreateFile]          .press[ALT+CTRL+SHIFT+N]    = *
+cmd[FileSystem_Delete]              .input                      = delete
+cmd[FileSystem_Delete]              .press[DEL]                 = *
+cmd[FileSystem_Delete]              .press[SHIFT+DEL]           = * unrecoverable=true
+cmd[FileSystem_Edit]                .input                      = edit
+cmd[FileSystem_Edit]                .press[CTRL+E]              = *
+cmd[FileSystem_Find]                .input                      = find
+cmd[FileSystem_Find]                .press[CTRL+F]              = *
+cmd[FileSystem_NativeBrowse]        .input                      = explorer
+cmd[FileSystem_NativeBrowse]        .press[ALT+F10]             = *
+cmd[FileSystem_NativeDetail]        .input                      = detail
+cmd[FileSystem_NativeDetail]        .press[ALT+ENTER]           = *
+cmd[FileSystem_Rename]              .input                      = rename
+cmd[FileSystem_Rename]              .press[F2]                  = *
+cmd[FileSystem_Zip]                 .input                      = zip

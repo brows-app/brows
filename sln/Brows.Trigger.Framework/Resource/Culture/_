@@ -1,0 +1,35 @@
+﻿PressGesture_Delimiter  = +
+
+PressModifiers_None     = None
+PressModifiers_Alt      = Alt
+PressModifiers_Control  = Ctrl
+PressModifiers_Shift    = Shift
+PressModifiers_Windows  = Win
+
+PressKey_D0             = 0
+PressKey_D1             = 1
+PressKey_D2             = 2
+PressKey_D3             = 3
+PressKey_D4             = 4
+PressKey_D5             = 5
+PressKey_D6             = 6
+PressKey_D7             = 7
+PressKey_D8             = 8
+PressKey_D9             = 9
+PressKey_Delete         = Del
+PressKey_Escape         = Esc
+PressKey_OemComma       = ,
+PressKey_OemPeriod      = .
+PressKey_OemSemicolon   = ;
+
+ClickGesture_Delimiter  = +
+
+ClickModifiers_None     = None
+ClickModifiers_Alt      = Alt
+ClickModifiers_Control  = Ctrl
+ClickModifiers_Shift    = Shift
+ClickModifiers_Windows  = Win
+
+ClickButton_Left        = L
+ClickButton_Middle      = M
+ClickButton_Right       = R

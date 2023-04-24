@@ -2,12 +2,10 @@
 using System.Windows;
 
 namespace Brows {
-    using Translation;
-
     partial class EntryGridViewColumnHeader {
         private static ITranslation Translate =>
             _Translate ?? (
-            _Translate = Global.Translation);
+            _Translate = Translation.Global);
         private static ITranslation _Translate;
 
         private IEnumerable<string> ResourceKeys() {
@@ -20,16 +18,22 @@ namespace Brows {
         }
 
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e) {
-            if (e.Property == KeyProperty) {
-                foreach (var key in ResourceKeys()) {
-                    var content = Translate.Value(key);
-                    if (content != null) {
-                        Content = content;
-                        break;
-                    }
+            if (e.Property == KeyProperty || e.Property == DisplayProperty) {
+                var display = Display;
+                if (display != null) {
+                    Content = display;
                 }
-                if (Content == null) {
-                    Content = Key;
+                else {
+                    foreach (var key in ResourceKeys()) {
+                        var content = Translate.Value(key);
+                        if (content != null) {
+                            Content = content;
+                            break;
+                        }
+                    }
+                    if (Content == null) {
+                        Content = Key;
+                    }
                 }
             }
             base.OnPropertyChanged(e);
@@ -40,14 +44,24 @@ namespace Brows {
             propertyType: typeof(string),
             ownerType: typeof(EntryGridViewColumnHeader));
 
+        public static readonly DependencyProperty DisplayProperty = DependencyProperty.Register(
+            name: nameof(Display),
+            propertyType: typeof(string),
+            ownerType: typeof(EntryGridViewColumnHeader));
+
         public string Key {
-            get => (string)GetValue(KeyProperty);
+            get => GetValue(KeyProperty) as string;
             set => SetValue(KeyProperty, value);
         }
 
-        public IComponentResourceKey Resolver { get; }
+        public string Display {
+            get => GetValue(DisplayProperty) as string;
+            set => SetValue(DisplayProperty, value);
+        }
 
-        public EntryGridViewColumnHeader(IComponentResourceKey resolver) {
+        public IExportResourceKey Resolver { get; }
+
+        public EntryGridViewColumnHeader(IExportResourceKey resolver) {
             Resolver = resolver;
             InitializeComponent();
         }

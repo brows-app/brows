@@ -6,8 +6,6 @@ using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace Brows.Gui {
-    using Windows.Input;
-
     internal class CommanderController : Controller<ICommanderController>, ICommanderController {
         private Window Window;
         private object WindowHandle;
@@ -18,17 +16,10 @@ namespace Brows.Gui {
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) {
             if (e != null) {
-                var key = (PressKey)e.ReferencedKey();
-                var modifiers = (PressModifiers)e.ModifierKeys();
-                var eventArgs = new CommanderPressEventArgs(key, modifiers);
-                var eventHandler = WindowPress;
-                if (eventHandler != null) {
-                    eventHandler.Invoke(this, eventArgs);
-                }
-                var handled = e.Handled = eventArgs.Triggered;
+                var handled = e.Trigger(a => WindowGesture?.Invoke(this, a));
                 if (handled == false) {
-                    if (key == PressKey.Space) {
-                        var input = new CommanderInputEventArgs(" ");
+                    if (e.Key == Key.Space) {
+                        var input = new InputEventArgs(" ");
                         var handler = WindowInput;
                         if (handler != null) {
                             handler.Invoke(this, input);
@@ -39,10 +30,28 @@ namespace Brows.Gui {
             }
         }
 
+        private void Window_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            if (e != null) {
+                if (e.OriginalSource is FrameworkElement element) {
+                    var dataContext = element.DataContext;
+                    if (dataContext is IEntry || dataContext is IEntryData) {
+                        var button = (ClickButton)e.ChangedButton;
+                        var modifiers = (ClickModifiers)Keyboard.Modifiers;
+                        var eventArgs = new GestureEventArgs(new ClickGesture(button, modifiers, clicks: 2));
+                        var eventHandler = WindowGesture;
+                        if (eventHandler != null) {
+                            eventHandler.Invoke(this, eventArgs);
+                        }
+                        e.Handled = eventArgs.Triggered;
+                    }
+                }
+            }
+        }
+
         private void Window_PreviewTextInput(object sender, TextCompositionEventArgs e) {
             if (e != null) {
                 var text = e.Text;
-                var args = new CommanderInputEventArgs(text);
+                var args = new InputEventArgs(text);
                 var handler = WindowInput;
                 if (handler != null) {
                     handler.Invoke(this, args);
@@ -52,10 +61,11 @@ namespace Brows.Gui {
         }
 
         protected override void OnLoaded(EventArgs e) {
-            Window = Window.GetWindow(UserControl);
+            Window = Window.GetWindow(Element);
             Window.Closed += Window_Closed;
             Window.PreviewKeyDown += Window_PreviewKeyDown;
             Window.PreviewTextInput += Window_PreviewTextInput;
+            Window.PreviewMouseDoubleClick += Window_PreviewMouseDoubleClick;
             WindowHandle = new WindowInteropHelper(Window).Handle;
             base.OnLoaded(e);
         }
@@ -66,6 +76,7 @@ namespace Brows.Gui {
                 window.Closed -= Window_Closed;
                 window.PreviewKeyDown -= Window_PreviewKeyDown;
                 window.PreviewTextInput -= Window_PreviewTextInput;
+                window.PreviewMouseDoubleClick -= Window_PreviewMouseDoubleClick;
             }
             Window = null;
             WindowHandle = null;
@@ -73,13 +84,13 @@ namespace Brows.Gui {
         }
 
         public event EventHandler WindowClosed;
-        public event CommanderInputEventHandler WindowInput;
-        public event CommanderPressEventHandler WindowPress;
+        public event InputEventHandler WindowInput;
+        public event GestureEventHandler WindowGesture;
 
-        public new CommanderControl UserControl { get; }
+        public new CommanderControl Element { get; }
 
-        public CommanderController(CommanderControl userControl) : base(userControl) {
-            UserControl = userControl ?? throw new ArgumentNullException(nameof(userControl));
+        public CommanderController(CommanderControl element) : base(element) {
+            Element = element ?? throw new ArgumentNullException(nameof(element));
         }
 
         void ICommanderController.CloseWindow() {
@@ -94,7 +105,7 @@ namespace Brows.Gui {
         void ICommanderController.AddPanel(IPanel panel) {
             if (null == panel) throw new ArgumentNullException(nameof(panel));
 
-            var grid = UserControl.PanelGrid;
+            var grid = Element.PanelGrid;
             var control = new PanelControl();
             control.DataContext = panel;
             control.SetBinding(Grid.ColumnProperty, nameof(panel.Column));
@@ -117,7 +128,7 @@ namespace Brows.Gui {
         void ICommanderController.RemovePanel(IPanel panel) {
             if (null == panel) throw new ArgumentNullException(nameof(panel));
 
-            var grid = UserControl.PanelGrid;
+            var grid = Element.PanelGrid;
             var children = grid.Children;
             for (var i = 0; i < children.Count; i++) {
                 var child = children[i] as FrameworkElement;

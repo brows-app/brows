@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows"
+                    xmlns:brows="http://schemas.brows.app/xaml">
+    <DataTemplate x:Key="FileSystemEntry_Name">
+        <brows:EntryNameGrid Text="{Binding Item[Name]}" Icon="{Binding}">
+            <brows:EntryNameGrid.IconTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <brows:EntryIconControl DataContext="{Binding Item[Icon]}"/>
+                        <brows:EntryIconControl DataContext="{Binding Item[Overlay]}"/>
+                    </Grid>
+                </DataTemplate>
+            </brows:EntryNameGrid.IconTemplate>
+        </brows:EntryNameGrid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="FileSystemEntry_Thumbnail">
+        <brows:EntryThumbnailControl DataContext="{Binding Item[Thumbnail]}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PanelProvider_FileSystemProvider">
+        <local:FileSystemProviderControl/>
+    </DataTemplate>
+</ResourceDictionary>

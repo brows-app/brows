@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal class CommandSuggester {
+    internal sealed class CommandSuggester {
         public ICommandContext Context { get; }
         public IEnumerable<ICommand> Commands { get; }
 

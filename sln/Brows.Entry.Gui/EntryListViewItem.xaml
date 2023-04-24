@@ -10,7 +10,7 @@
             <Setter Property="FontWeight" Value="{DynamicResource Global_Monospace_FontWeight}"/>
             <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="IsSelected" Value="{Binding Selected}"/>
+            <Setter Property="IsSelected" Value="{Binding Select, Mode=OneWay}"/>
             <Setter Property="Margin" Value="0"/>
             <Setter Property="FocusVisualStyle">
                 <Setter.Value>
@@ -62,7 +62,4 @@
             </Setter>
         </Style>
     </ListViewItem.Style>
-    <ListViewItem.InputBindings>
-        <MouseBinding Gesture="LeftDoubleClick" Command="{Binding OpenCommand}"/>
-    </ListViewItem.InputBindings>
 </ListViewItem>

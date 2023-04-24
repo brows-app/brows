@@ -11,19 +11,9 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <local:PanelGrid Grid.Row="0" x:Name="PanelGrid"/>
-            <brows:OperationCollectionControl Grid.Row="1" DataContext="{Binding Operations}"/>
+            <brows:OperatorControl Grid.Row="1" DataContext="{Binding Operator}"/>
         </Grid>
         <Grid>
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Dialog.Manager.Current}" Value="{x:Null}">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
             <ContentControl DataContext="{Binding Palette}">
                 <ContentControl.Style>
                     <Style TargetType="ContentControl">
@@ -41,6 +31,5 @@
                 </ContentControl.Style>
             </ContentControl>
         </Grid>
-        <local:DialogControl DataContext="{Binding Dialog.Manager}"/>
     </Grid>
 </UserControl>

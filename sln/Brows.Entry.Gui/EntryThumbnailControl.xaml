@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="Brows.EntryThumbnailControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Brows">
+    <local:EntryThumbnailImage>
+        <local:EntryThumbnailImage.Style>
+            <Style TargetType="{x:Type local:EntryThumbnailImage}" BasedOn="{StaticResource EntryThumbnailImageStyle}">
+                <Setter Property="Height" Value="{Binding Definition.ImageHeight}"/>
+                <Setter Property="Width" Value="{Binding Definition.ImageWidth}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Ready}" Value="True">
+                        <Setter Property="Source" Value="{Binding Display}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </local:EntryThumbnailImage.Style>
+    </local:EntryThumbnailImage>
+</UserControl>

@@ -1,0 +1,30 @@
+FileSystemEntry_Attributes                      = Attributes
+FileSystemEntry_ChecksumMD5                     = MD5 checksum
+FileSystemEntry_ChecksumSHA1                    = SHA1 checksum
+FileSystemEntry_ChecksumSHA256                  = SHA256 checksum
+FileSystemEntry_ChecksumSHA512                  = SHA512 checksum
+FileSystemEntry_CreationTime                    = Date created
+FileSystemEntry_CreationTimeUtc                 = Date created (UTC)
+FileSystemEntry_DirectoryDirectoryCount         = Directory count
+FileSystemEntry_DirectoryFileCount              = File count
+FileSystemEntry_DirectorySize                   = Directory size
+FileSystemEntry_Extension                       = Ext
+FileSystemEntry_Kind                            = Type
+FileSystemEntry_LastAccessTime                  = Date accessed
+FileSystemEntry_LastAccessTimeUtc               = Date accessed (UTC)
+FileSystemEntry_LastWriteTime                   = Date modified
+FileSystemEntry_LastWriteTimeUtc                = Date modified (UTC)
+FileSystemEntry_Length                          = Size
+FileSystemEntry_LinkTarget                      = Link
+FileSystemEntry_Name                            = Name
+
+Command_Description_FileSystem_ClipboardCopy    = Copy the current selection to the clipboard
+Command_Description_FileSystem_ClipboardPaste   = Paste content from the clipboard to the current panel
+Command_Description_FileSystem_Copy             = Copy the current selection to another panel
+Command_Description_FileSystem_Delete           = Delete the selection from the current panel
+Command_Description_FileSystem_Move             = Move the current selection to another panel
+Command_Description_FileSystem_Preview          = Show a preview of the item
+
+Command_Group_FileSystemEntryData               = File System
+Command_Group_FileSystemInfoData                = File System
+Command_Group_FileSystemMetaData                = Property System

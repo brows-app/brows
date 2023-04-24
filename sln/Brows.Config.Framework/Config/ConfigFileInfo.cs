@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using FILE = System.IO.File;
 
 namespace Brows.Config {
-    using Threading.Tasks;
-
     internal class ConfigFileInfo {
         private static readonly ILog Log = Logging.For(typeof(ConfigFileInfo));
         private static readonly Dictionary<string, object> Locker = new();
@@ -19,12 +17,12 @@ namespace Brows.Config {
             Default = @default;
         }
 
-        private async Task<TConfig> Configure<TConfig>(CancellationToken cancellationToken) where TConfig : new() {
+        private async Task<TConfig> Configure<TConfig>(CancellationToken token) where TConfig : new() {
             var file = File;
             if (Locker.TryGetValue(file, out var locker) == false) {
                 Locker[file] = locker = new();
             }
-            return await Async.With(cancellationToken).Run(() => {
+            return await Task.Run(cancellationToken: token, function: () => {
                 lock (locker) {
                     file = FILE.Exists(file)
                         ? file

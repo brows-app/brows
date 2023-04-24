@@ -1,4 +1,4 @@
 ﻿namespace Brows.Resource {
-    internal class Resource : IComponentResourceExport {
+    internal class Resource : IExportResource {
     }
 }

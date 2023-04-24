@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj" />
-        <ProjectReference Include="..\Brows.Config.Framework\Brows.Config.Framework.csproj" />
+        <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
         <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
-        <ProjectReference Include="..\Brows.IO.Extensions\Brows.IO.Extensions.csproj" />
-        <ProjectReference Include="..\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj" />
-        <ProjectReference Include="..\Domore.Logs\Domore.Logs.csproj" />
+        <ProjectReference Include="..\Brows.Request.Framework\Brows.Request.Framework.csproj" />
+        <ProjectReference Include="..\Brows.Trigger.Framework\Brows.Trigger.Framework.csproj" />
+        <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
+        <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
     </ItemGroup>
 </Project>

@@ -1,0 +1,8 @@
+# example: 
+# {input} u=true
+
+# Unrecoverable flag
+# If true, skip the operating system's cache
+# of deleted items to permanently delete the
+# selection.
+U =

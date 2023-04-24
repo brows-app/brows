@@ -1,14 +1,18 @@
 <Window x:Class="Brows.CommanderWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:s="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:Brows">
     <Window.Style>
         <Style TargetType="Window">
+            <Style.Resources>
+                <s:String x:Key="Title">Brows</s:String>
+            </Style.Resources>
             <Setter Property="Background" Value="{DynamicResource Global_Default_Background_Brush}"/>
             <Setter Property="TextOptions.TextFormattingMode" Value="{DynamicResource Global_Default_TextFormattingMode}"/>
             <Setter Property="TextOptions.TextHintingMode" Value="{DynamicResource Global_Default_TextHintingMode}"/>
             <Setter Property="TextOptions.TextRenderingMode" Value="{DynamicResource Global_Default_TextRenderingMode}"/>
-            <Setter Property="Title" Value="{Binding Panels.Active.ID.Value}"/>
+            <Setter Property="Title" Value="{Binding Panels.Active.Provider.ID}"/>
             <Setter Property="Content">
                 <Setter.Value>
                     <local:CommanderControl/>
@@ -16,8 +20,11 @@
             </Setter>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Panels.Active}" Value="{x:Null}">
-                    <Setter Property="Title" Value="Brows"/>
+                    <Setter Property="Title" Value="{StaticResource Title}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding Panels.Active.Provider.ID}" Value="{x:Null}">
+                    <Setter Property="Title" Value="{StaticResource Title}"/>
+                </DataTrigger>                
             </Style.Triggers>
         </Style>
     </Window.Style>

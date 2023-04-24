@@ -1,7 +1,7 @@
 using System;
 
 namespace Brows {
-    internal class CommandLine : ICommandLine {
+    internal sealed class CommandLine : ICommandLine {
         private static readonly char[] Split = new[] { ' ' };
 
         private string TrimStart =>
@@ -31,30 +31,37 @@ namespace Brows {
             _Command = Parts.Length > 0 ? Parts[0] : "");
         private string _Command;
 
+        public string Conf { get; }
         public string Input { get; }
 
-        public CommandLine(string input) {
+        public CommandLine(string input, string conf) {
             Input = input ?? throw new ArgumentNullException(nameof(input));
+            Conf = conf;
         }
 
-        bool ICommandLine.HasTrigger(out string trigger) {
+        public bool HasTrigger(out string trigger) {
             trigger = Command;
             return Triggered;
         }
 
-        bool ICommandLine.HasInput(out string input) {
+        public bool HasInput(out string input) {
             input = Input;
             return Parts.Length > 0;
         }
 
-        bool ICommandLine.HasCommand(out string command) {
+        public bool HasCommand(out string command) {
             command = Command;
             return command.Length > 0;
         }
 
-        bool ICommandLine.HasParameter(out string parameter) {
+        public bool HasParameter(out string parameter) {
             parameter = Parameter;
             return parameter.Length > 0;
+        }
+
+        public bool HasConf(out string conf) {
+            conf = Conf;
+            return !string.IsNullOrWhiteSpace(conf);
         }
     }
 }

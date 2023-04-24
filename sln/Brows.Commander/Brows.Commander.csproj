@@ -2,8 +2,18 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Brows.Commands\Brows.Commands.csproj" />
+      <None Remove="Resource\Culture\_" />
+      <None Remove="Resource\Culture\_.s.Command_Conf_Theme" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="Resource\Culture\_" />
+      <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Theme" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\Brows.Config.Framework\Brows.Config.Framework.csproj" />
-        <ProjectReference Include="..\Brows.Panel\Brows.Panel.csproj" />
+        <ProjectReference Include="..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
+        <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Logs\Brows.Logs.csproj" />
+        <ProjectReference Include="..\domore\Domore.IPC\Domore.IPC.csproj" />
     </ItemGroup>
 </Project>

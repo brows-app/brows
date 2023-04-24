@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Domore.Notification" Version="2.2.0.12" />
-        <ProjectReference Include="..\Brows.Dialog.Contract\Brows.Dialog.Contract.csproj" />
-    </ItemGroup>
-</Project>

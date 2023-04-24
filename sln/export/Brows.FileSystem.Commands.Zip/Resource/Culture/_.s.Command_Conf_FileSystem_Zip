@@ -1,0 +1,25 @@
+﻿# example:
+# {input}
+# {input} compressed-archive.zip compression=SmallestSize
+
+# Optionally set the target path of extraction, or the
+# target file name of compression. If this parameter is
+# blank, a value will be inferred from the selection.
+Output = 
+
+# Force compression or extraction of the active selection.
+# If this parameter is blank, the action will be inferred
+# from the active selection by following these rules:
+#  1. If all of the items in the selection are files, and
+#     every file in the selection has the extension '.zip',
+#     then each file will be extracted to its own directory.
+#  2. If rule (1.) does not apply, then the selected items
+#     will be compressed to a single ZIP archive.
+Force = 
+
+# Set the compression level to use during compression.
+Compression = 
+
+# If true, files are automatically overwritten during
+# extraction.
+Overwrite = 

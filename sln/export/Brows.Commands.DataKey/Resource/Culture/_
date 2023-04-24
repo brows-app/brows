@@ -1,0 +1,3 @@
+﻿Command_Description_Hide            = Remove columns from the view
+Command_Description_Show            = Add columns to the view. End with a bang (!) to clear existing columns first.
+Command_Description_Sort            = Sort the items in this view. A bang (!) removes all sorting.

@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Brows.Threading.Tasks.AsyncEnumerable\Brows.Threading.Tasks.AsyncEnumerable.csproj" />
-    </ItemGroup>
-</Project>

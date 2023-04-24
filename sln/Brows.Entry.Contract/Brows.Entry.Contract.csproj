@@ -2,7 +2,7 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
-        <ProjectReference Include="..\Brows.Gui.Image\Brows.Gui.Image.csproj" />
+      <ProjectReference Include="..\Brows.Composition.Contract\Brows.Composition.Contract.csproj" />
+      <ProjectReference Include="..\Brows.Trigger.Contract\Brows.Trigger.Contract.csproj" />
     </ItemGroup>
 </Project>

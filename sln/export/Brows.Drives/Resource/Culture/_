@@ -1,0 +1,13 @@
+Drives                                  = Drives
+
+DriveEntry_AvailableFreeSpace           = Available
+DriveEntry_DriveFormat                  = Format
+DriveEntry_DriveType                    = Type
+DriveEntry_IsReady                      = Ready
+DriveEntry_Name                         = Name
+DriveEntry_RootDirectory                = Root
+DriveEntry_TotalFreeSpace               = Free space
+DriveEntry_TotalSize                    = Size
+DriveEntry_VolumeLabel                  = Label
+
+Command_Description_Drives              = Show the drives on this PC

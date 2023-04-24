@@ -1,0 +1,21 @@
+﻿Command_Description_AddPanel        = Add a new panel to the view
+Command_Description_Close           = Close this window
+Command_Description_Cycle           = Activate the next panel
+Command_Description_CycleBack       = Activate the previous panel
+Command_Description_Escape          = Escape from the current context
+Command_Description_Exit            = Shut down the application process
+Command_Description_History         = Open this previously opened location
+Command_Description_HistoryBack     = Navigate back in history
+Command_Description_HistoryForward  = Navigate forward in history
+Command_Description_Manual          = About this application
+Command_Description_Operations      = Deal with failed and pending operations
+Command_Description_Recycle         = Send the selection to the recycle bin or trash
+Command_Description_Refresh         = Refresh the active panel
+Command_Description_RefreshAll      = Refresh all panels
+Command_Description_RemovePanel     = Remove an existing panel from the view
+Command_Description_Theme           = Set the visual theme of the app
+Command_Description_Up              = Navigate up one level
+
+Command_Group_Command               = Commands
+Command_Group_CommandHistory        = Command History
+Command_Group_PanelHistory          = Panel History

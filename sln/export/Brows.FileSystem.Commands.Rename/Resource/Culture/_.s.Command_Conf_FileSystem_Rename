@@ -1,0 +1,10 @@
+﻿# example:
+# {input} <*>_backup<.>
+# {input} file_<%><.>
+
+# Rename the selected entries according to these rules:
+#   <*> will be replaced by the entry's name, minus it's extension.
+#   <.> will be replaced by the entry's extension, including the leading period (.).
+#   <%> will be replaced by the entry's index in the selection.
+#
+pattern =

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
+        <ProjectReference Include="..\..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
+        <ProjectReference Include="..\..\Brows.IO.Contract\Brows.IO.Contract.csproj" />
+        <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
+        <ProjectReference Include="..\..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />
+        <ProjectReference Include="..\..\domore\Domore.Win32.STAThreadPool\Domore.Win32.STAThreadPool.csproj" />
+        <ProjectReference Include="..\..\domore\Domore.Win32.Windows\Domore.Win32.Windows.csproj" />
+        <ProjectReference Include="..\..\domore\Domore.Win32\Domore.Win32.csproj" />
+    </ItemGroup>
+</Project>

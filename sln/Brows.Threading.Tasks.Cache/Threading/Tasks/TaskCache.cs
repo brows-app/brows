@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace Brows.Threading.Tasks {
     public class TaskCache<TResult> {
+        private readonly object Locker = new();
+
         private bool Cached;
         private Task<TResult> Task;
 
@@ -14,25 +16,40 @@ namespace Brows.Threading.Tasks {
             Factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
 
-        public async ValueTask<TResult> Ready(CancellationToken cancellationToken) {
-            var result = Result;
-            var cached = Cached;
-            if (cached == false) {
-                var task = Task;
-                if (task == null) {
-                    task = Task = Factory(cancellationToken);
+        public async ValueTask<TResult> Ready(CancellationToken token) {
+            if (Cached == false) {
+                if (Task == null) {
+                    lock (Locker) {
+                        if (Task == null) {
+                            Task = Factory(token);
+                        }
+                    }
                 }
                 try {
-                    result = Result = await task;
-                    cached = Cached = true;
+                    Result = await Task;
                 }
                 catch {
-                    Task = null;
-                    Cached = false;
+                    lock (Locker) {
+                        Task = null;
+                    }
                     throw;
                 }
             }
-            return result;
+            Cached = true;
+            return Result;
+        }
+
+        public async Task<TResult> Refreshed(CancellationToken token) {
+            Refresh();
+            return await Ready(token);
+        }
+
+        public void Refresh() {
+            lock (Locker) {
+                Task = null;
+                Cached = false;
+                Result = default;
+            }
         }
     }
 }

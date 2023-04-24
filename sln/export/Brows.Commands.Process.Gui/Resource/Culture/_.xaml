@@ -1,0 +1,35 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:framework="clr-namespace:Brows;assembly=Brows.Entry.Framework">
+    <DataTemplate x:Key="CommandContextHint_CommandProcessData">
+        <StackPanel>
+            <Control Template="{DynamicResource CommandContextDataGesture_Hint_Down_Up}"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Previous}"/>
+                <TextBlock Text=" or "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Next}"/>
+                <TextBlock Text=" to cycle through the process history."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Remove}"/>
+                <TextBlock Text=" to remove this process item AND KILL THE PROCESS IF IT IS RUNNING."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Press "/>
+                <brows:TriggerPressControl DataContext="{x:Static framework:CommandContextDataGesture.Clear}"/>
+                <TextBlock Text=" to remove all process items AND KILL ANY PROCESSES THAT ARE STILL RUNNING."/>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <Style TargetType="TextBlock" x:Key="Process_PID_Text" BasedOn="{StaticResource Process_Default_Text}">
+        <Setter Property="Text" Value="PID"/>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="Process_ExitCode_Text" BasedOn="{StaticResource Process_Default_Text}">
+        <Setter Property="Text" Value="Exit code"/>
+    </Style>
+</ResourceDictionary>

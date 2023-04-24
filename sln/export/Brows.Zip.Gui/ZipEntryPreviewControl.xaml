@@ -1,0 +1,7 @@
+﻿<UserControl x:Class="Brows.ZipEntryPreviewControl"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Brows">
+    <local:ZipStreamGuiControl DataContext="{Binding Provider.Observation.Current.Stream}"/>
+</UserControl>

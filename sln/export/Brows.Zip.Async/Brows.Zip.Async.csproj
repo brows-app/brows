@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
+      <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
+      <ProjectReference Include="..\..\Brows.Threading.Tasks.Cache\Brows.Threading.Tasks.Cache.csproj" />
+      <ProjectReference Include="..\..\domore\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
+      <ProjectReference Include="..\..\domore\Domore.FileSystem\Domore.FileSystem.csproj" />
+      <ProjectReference Include="..\..\domore\Domore.Logs\Domore.Logs.csproj" />
+    </ItemGroup>
+</Project>
