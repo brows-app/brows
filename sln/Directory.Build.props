@@ -12,7 +12,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/brows-app/brows</RepositoryUrl>
     <RepositoryBranch>main</RepositoryBranch>
-    <RepositoryCommit>e68b61af48e6a8cdc345c51506117601459ece90</RepositoryCommit>
+    <RepositoryCommit>5d3fc97d92e4633875882cb7785867985fed7875</RepositoryCommit>
     <RootNamespace>Brows</RootNamespace>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <DebugType>embedded</DebugType>
