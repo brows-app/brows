@@ -1,10 +1,9 @@
+using Brows.Exports;
 using Domore.IO;
 using System.IO;
 
 namespace Brows.Commands {
-    using Exports;
-
-    internal class CreateDirectory : FileSystemCommand<CreateDirectory.Parameter> {
+    internal sealed class CreateDirectory : FileSystemCommand<CreateDirectoryParameter> {
         protected sealed override bool Work(Context context) {
             if (context == null) return false;
             if (context.HasPanel(out var active) == false) return false;
@@ -32,11 +31,11 @@ namespace Brows.Commands {
             return context.Operate(async (progress, token) => {
                 var serviced = await service.Work(directory, name, progress, token);
                 if (serviced) {
-                    if (open) {
+                    if (open.HasValue) {
                         var path = Path.Join(directory.FullName, name);
                         var existing = await FileSystemTask.ExistingDirectory(path, token);
                         if (existing != null) {
-                            await active.Provide(existing.FullName, token);
+                            await context.Provide(existing.FullName, open.Value, token);
                         }
                     }
                     return true;
@@ -46,14 +45,5 @@ namespace Brows.Commands {
         }
 
         public ICreateDirectoryInfoDirectory CreateDirectoryInfoDirectory { get; set; }
-
-        public class Parameter {
-            public string Name {
-                get => _Name ?? (_Name = "");
-                set => _Name = value;
-            }
-            private string _Name;
-            public bool Open { get; set; }
-        }
     }
 }

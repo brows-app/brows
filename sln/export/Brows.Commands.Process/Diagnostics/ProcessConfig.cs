@@ -7,8 +7,8 @@
         private Process _Default;
 
         public class Process {
-            public string FileName { get; set; }
-            public string Arguments { get; set; }
+            public string FileName { get; set; } = "cmd.exe";
+            public string Arguments { get; set; } = "/k";
         }
     }
 }

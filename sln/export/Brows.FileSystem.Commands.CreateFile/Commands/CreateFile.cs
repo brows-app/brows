@@ -1,10 +1,9 @@
+using Brows.Exports;
 using Domore.IO;
 using System.IO;
 
 namespace Brows.Commands {
-    using Exports;
-
-    internal class CreateFile : FileSystemCommand<CreateFile.Parameter> {
+    internal class CreateFile : FileSystemCommand<CreateFileParameter> {
         protected sealed override bool Work(Context context) {
             if (context == null) return false;
             if (context.HasCommander(out var commander) == false) return false;
@@ -34,7 +33,7 @@ namespace Brows.Commands {
                     var serviced = await service.Work(directory, name, progress, token);
                     if (serviced) {
                         var open = parameter.Open;
-                        if (open) {
+                        if (open == true) {
                             var path = Path.Combine(directory.FullName, name);
                             var existing = await FileSystemTask.ExistingFile(path, token);
                             if (existing != null) {
@@ -54,14 +53,5 @@ namespace Brows.Commands {
 
         public IOpenFile OpenFile { get; set; }
         public ICreateDirectoryInfoFile CreateDirectoryInfoFile { get; set; }
-
-        public class Parameter {
-            public string Name {
-                get => _Name ?? (_Name = "");
-                set => _Name = value;
-            }
-            private string _Name;
-            public bool Open { get; set; }
-        }
     }
 }

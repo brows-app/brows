@@ -111,23 +111,26 @@ namespace Brows {
                         }
                     }
                     break;
-                case WatcherChangeTypes.Deleted:
+                default:
                     var name = e.Name;
                     if (name != null) {
                         var isThisDir = Directory.Name.Equals(name, CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
                         if (isThisDir) {
-                            var exists = await Task.Run(cancellationToken: Token, function: () => DIRECTORY.Exists(ID));
-                            if (exists == false) {
-                                var existing = await Task.Run(cancellationToken: Token, function: () => {
-                                    var directory = Directory;
-                                    while (directory != null && directory.Exists == false) {
-                                        directory = directory.Parent;
-                                    }
-                                    return directory?.FullName;
-                                });
-                                await Change(existing, Token);
+                            var exists = await FileSystemTask.ExistingDirectory(Directory.FullName, Token);
+                            if (exists != null) {
                                 return;
                             }
+                            var existing = await Task.Run(cancellationToken: Token, function: () => {
+                                var
+                                directory = Directory;
+                                directory.Refresh();
+                                while (directory != null && directory.Exists == false) {
+                                    directory = directory.Parent;
+                                }
+                                return directory?.FullName;
+                            });
+                            await Change(existing, Token);
+                            return;
                         }
                     }
                     break;
