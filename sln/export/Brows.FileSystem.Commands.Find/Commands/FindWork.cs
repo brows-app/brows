@@ -56,18 +56,36 @@ namespace Brows.Commands {
                             continue;
                         }
                     }
-                    var pItem = false;
-                    var tasks = findIn.Begin(info: item, token: token, found: async found => {
-                        if (pItem == false && progress != null) {
-                            pItem = true;
+                    var tasks = findIn.Tasks(item, token).ToList();
+                    if (tasks.Count > 0) {
+                        var progressed = false;
+                        async Task findTask() {
+                            for (; ; ) {
+                                if (token.IsCancellationRequested) {
+                                    token.ThrowIfCancellationRequested();
+                                }
+                                if (tasks.Count == 0) {
+                                    break;
+                                }
+                                var task = await Task.WhenAny(tasks);
+                                var result = await task;
+                                await writer.WriteAsync(result, token);
+                                if (progressed == false && progress != null) {
+                                    progressed = true;
+                                    progress.Add(1);
+                                    progress.Info.Data(item.Name);
+                                }
+                                tasks.Remove(task);
+                            }
+                        }
+                        findTasks.Add(findTask());
+                    }
+                    else {
+                        if (progress != null) {
                             progress.Add(1);
                             progress.Info.Data(item.Name);
                         }
-
-                        await writer.WriteAsync(found, token);
-                    });
-                    findTasks.AddRange(tasks);
-                    findTasks.RemoveAll(task => task.IsCompleted);
+                    }
                 }
                 if (findTasks.Count > 0) {
                     await Task.WhenAll(findTasks);
@@ -89,21 +107,16 @@ namespace Brows.Commands {
 
         private async Task Read(ChannelReader<FoundInInfo[]> reader, IOperationProgress progress, CancellationToken token) {
             if (reader is null) throw new ArgumentNullException(nameof(reader));
-            var reads = reader.ReadAllAsync(token);
-            var added = new List<Task>();
-            await foreach (var item in reads) {
+            var read = reader.ReadAllAsync(token);
+            await foreach (var item in read) {
                 if (token.IsCancellationRequested) {
                     token.ThrowIfCancellationRequested();
                 }
                 if (item != null) {
                     Result.MatchMatched++;
-                    added.Add(Result.Add(item, token));
-                    added.RemoveAll(add => add.IsCompleted);
+                    await Result.Add(item, token);
                 }
                 Result.MatchTried++;
-            }
-            if (added.Count > 0) {
-                await Task.WhenAll(added);
             }
         }
 

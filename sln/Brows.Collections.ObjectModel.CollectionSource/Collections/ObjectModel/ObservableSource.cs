@@ -11,7 +11,6 @@ namespace Brows.Collections.ObjectModel {
     public class ObservableSource<T> : Notifier {
         private static readonly PropertyChangedEventArgs CountEvent = new(nameof(Count));
         private static readonly PropertyChangedEventArgs OptionsEvent = new(nameof(Options));
-        private static readonly PropertyChangedEventArgs ObservableEvent = new(nameof(Observable));
         private static readonly PropertyChangedEventArgs SourceEvent = new(nameof(Source));
         private static readonly PropertyChangedEventArgs CollectionEvent = new(nameof(Collection));
 
@@ -46,7 +45,6 @@ namespace Brows.Collections.ObjectModel {
             }
         }
 
-
         public object Source =>
             Collection;
 
@@ -55,12 +53,6 @@ namespace Brows.Collections.ObjectModel {
             set => Change(ref _Options, value, OptionsEvent);
         }
         private ObservableSourceOptions _Options;
-
-        public ReadOnlyObservableCollection<T> Observable {
-            get => _Observable ?? (_Observable = new(Collection));
-            private set => Change(ref _Observable, value, ObservableEvent);
-        }
-        private ReadOnlyObservableCollection<T> _Observable;
 
         public int Count {
             get => _Count;
@@ -161,7 +153,6 @@ namespace Brows.Collections.ObjectModel {
                     }
                     if (Source.Collection.Count == 0 && kind == QueueWorkKind.Add) {
                         Source.Collection = new(Items);
-                        Source.Observable = new(Source.Collection);
                         Source.Count = Source.Collection.Count;
                         return;
                     }

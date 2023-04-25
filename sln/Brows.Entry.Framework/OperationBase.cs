@@ -338,6 +338,10 @@ namespace Brows {
                     Operation.Name = value;
                 }
 
+                public void Data(string value) {
+                    Operation.Data = value;
+                }
+
                 public void Data(string format, params object[] args) {
                     // TODO: Translate this.
                     Operation.Data = string.Format(format, args);

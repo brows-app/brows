@@ -13,25 +13,6 @@ namespace Brows.Commands {
     internal sealed class FindInInfo {
         private readonly IMatcher Matcher;
 
-        private IEnumerable<Task<FoundInInfo[]>> Tasks(FileSystemInfo info, CancellationToken token) {
-            var find = Parameter.In;
-            if (info is FileInfo file) {
-                if (find.HasFlag(FindIn.FileName)) {
-                    yield return FindInFileName(file, token);
-                }
-                if (find.HasFlag(FindIn.FileText)) {
-                    yield return FindInFileText(file, token);
-                }
-            }
-            else {
-                if (find.HasFlag(FindIn.DirectoryName)) {
-                    if (info is DirectoryInfo directory) {
-                        yield return FindInDirectoryName(directory, token);
-                    }
-                }
-            }
-        }
-
         private async Task<FoundInInfo[]> FindInFileText(FileInfo file, CancellationToken token) {
             if (file is null) throw new ArgumentNullException(nameof(file));
             var config = await Configure.File<FileSystemConfig>().Load(token);
@@ -88,34 +69,23 @@ namespace Brows.Commands {
             Matcher = Parameter.PatternMatcher();
         }
 
-        public IReadOnlyList<Task> Begin(FileSystemInfo info, Func<FoundInInfo[], Task> found, CancellationToken token) {
-            if (found is null) throw new ArgumentNullException(nameof(found));
-            var tasks = Tasks(info, token).ToList();
-            if (tasks.Count > 0) {
-                var running = tasks.ToList();
-                async void run() {
-                    try {
-                        for (; ; ) {
-                            if (running.Count == 0) {
-                                break;
-                            }
-                            var ran = await Task.WhenAny(running);
-                            var result = await ran;
-                            await found(result);
-                            running.Remove(ran);
-                        }
-                    }
-                    catch (Exception ex) {
-                        if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
-                        }
-                        else {
-                            throw;
-                        }
+        public IEnumerable<Task<FoundInInfo[]>> Tasks(FileSystemInfo info, CancellationToken token) {
+            var find = Parameter.In;
+            if (info is FileInfo file) {
+                if (find.HasFlag(FindIn.FileName)) {
+                    yield return FindInFileName(file, token);
+                }
+                if (find.HasFlag(FindIn.FileText)) {
+                    yield return FindInFileText(file, token);
+                }
+            }
+            else {
+                if (find.HasFlag(FindIn.DirectoryName)) {
+                    if (info is DirectoryInfo directory) {
+                        yield return FindInDirectoryName(directory, token);
                     }
                 }
-                run();
             }
-            return tasks;
         }
     }
 }
