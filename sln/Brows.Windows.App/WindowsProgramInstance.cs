@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Brows {
     internal sealed class WindowsProgramInstance {
@@ -10,9 +11,9 @@ namespace Brows {
         private void ThreadStart() {
             try {
                 Token.ThrowIfCancellationRequested();
-                //var
-                //splashScreen = new SplashScreen("splash.png");
-                //splashScreen.Show(true);
+                var
+                splashScreen = new SplashScreen(GetType().Assembly, "splash.png");
+                splashScreen.Show(true);
                 Token.ThrowIfCancellationRequested();
 
                 var app = new WindowsApplication(Context);

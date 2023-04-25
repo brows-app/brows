@@ -52,11 +52,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "brows", "brows\brows.csproj
 		{FF2904C6-FC59-44D7-8049-45AAFE421ACA} = {FF2904C6-FC59-44D7-8049-45AAFE421ACA}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "properties", "properties", "{0594FB3D-E245-4FC7-B0C3-FE1CDA3C2CFE}"
-	ProjectSection(SolutionItems) = preProject
-		Directory.Build.props = Directory.Build.props
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Commander", "Brows.Commander\Brows.Commander.csproj", "{FF2904C6-FC59-44D7-8049-45AAFE421ACA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Collections.ObjectModel.CollectionSource", "Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj", "{3AC80823-641B-4A34-934C-D36ECE4EDC6E}"
@@ -92,13 +87,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Gui.Contract", "Brows.Gui.Contract\Brows.Gui.Contract.csproj", "{4336A835-7509-440C-A4D6-DA3381C56F83}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "export", "export", "{67EC35CD-9381-4051-AAAE-ACE1B387DB0E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Drives", "export\Brows.Drives\Brows.Drives.csproj", "{BDA4BFE5-CE11-4403-8A19-94E8A1083846}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "properties", "properties", "{CCAFDA94-352A-4A8A-A363-290B14F5D3F5}"
 	ProjectSection(SolutionItems) = preProject
 		export\Directory.Build.props = export\Directory.Build.props
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Drives", "export\Brows.Drives\Brows.Drives.csproj", "{BDA4BFE5-CE11-4403-8A19-94E8A1083846}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Runtime.Win32", "export\Brows.Runtime.Win32\Brows.Runtime.Win32.csproj", "{816D7B88-FF33-4946-9611-9C372DE1C190}"
 EndProject
@@ -137,6 +130,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.FileSystem.Commands.Find.Gui", "export\Brows.FileSystem.Commands.Find.Gui\Brows.FileSystem.Commands.Find.Gui.csproj", "{D16CC54E-4933-40CB-92AC-ACBA3BB2AD1C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "domore", "domore", "{0B8550DC-35F0-455C-8571-E8E697E9625C}"
+	ProjectSection(SolutionItems) = preProject
+		domore\Directory.Build.props = domore\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domore.AsyncTextReading", "domore\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj", "{25F0D914-981A-49BE-9970-FC29F858FC67}"
 EndProject
@@ -159,11 +155,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domore.Win32.Windows.PreviewHandlerControl", "domore\Domore.Win32.Windows.PreviewHandlerControl\Domore.Win32.Windows.PreviewHandlerControl.csproj", "{821C87C4-BA8F-4F09-8DA5-2F1FC9FCEF97}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domore.Win32.Windows.PreviewTextControl", "domore\Domore.Win32.Windows.PreviewTextControl\Domore.Win32.Windows.PreviewTextControl.csproj", "{60652593-B7F4-4835-88F3-EE5FCA7D40CA}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "properties", "properties", "{F45AA255-31FD-4673-864F-83D70607AD43}"
-	ProjectSection(SolutionItems) = preProject
-		domore\Directory.Build.props = domore\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domore.FileSystem", "domore\Domore.FileSystem\Domore.FileSystem.csproj", "{405706A7-187C-4B94-8FC1-25BBA5A5788E}"
 EndProject
@@ -224,6 +215,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Scratchpad", "Brows.Scratchpad\Brows.Scratchpad.csproj", "{BE7911B6-5C09-4B37-A12E-C144D8DF212A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "internal", "internal", "{83F45F61-1A2E-454C-BB6F-F9111253D3C4}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Logs", "Brows.Logs\Brows.Logs.csproj", "{1F3E4D71-439D-460F-BF39-4DC2D00921B5}"
 EndProject
@@ -576,7 +570,6 @@ Global
 		{EEB8C8DC-1AF1-4726-9DCA-D33D704815E6} = {A50FDCE3-4081-4E45-AC1D-6C89C5D12C24}
 		{4336A835-7509-440C-A4D6-DA3381C56F83} = {A50FDCE3-4081-4E45-AC1D-6C89C5D12C24}
 		{BDA4BFE5-CE11-4403-8A19-94E8A1083846} = {22E8C0C0-CC22-4D70-AA75-ECA1ADFA9E77}
-		{CCAFDA94-352A-4A8A-A363-290B14F5D3F5} = {67EC35CD-9381-4051-AAAE-ACE1B387DB0E}
 		{816D7B88-FF33-4946-9611-9C372DE1C190} = {A5DFAF88-251D-44A7-8556-D1B85FBE9294}
 		{1171AF82-37CC-4EF0-89B3-0CEE968D629D} = {8A41031D-4C50-4B11-B214-4A71702D58CD}
 		{04DBA3AB-F78E-4634-A94F-E70E89500D8E} = {8A41031D-4C50-4B11-B214-4A71702D58CD}
@@ -606,7 +599,6 @@ Global
 		{D52624D1-9BF1-4B00-A59F-48C803EF4091} = {0B8550DC-35F0-455C-8571-E8E697E9625C}
 		{821C87C4-BA8F-4F09-8DA5-2F1FC9FCEF97} = {0B8550DC-35F0-455C-8571-E8E697E9625C}
 		{60652593-B7F4-4835-88F3-EE5FCA7D40CA} = {0B8550DC-35F0-455C-8571-E8E697E9625C}
-		{F45AA255-31FD-4673-864F-83D70607AD43} = {0B8550DC-35F0-455C-8571-E8E697E9625C}
 		{405706A7-187C-4B94-8FC1-25BBA5A5788E} = {0B8550DC-35F0-455C-8571-E8E697E9625C}
 		{3F673C5B-25A6-4614-91C9-66179A139516} = {A50FDCE3-4081-4E45-AC1D-6C89C5D12C24}
 		{666B05C3-46CE-44A7-A593-430B904D2718} = {A50FDCE3-4081-4E45-AC1D-6C89C5D12C24}
