@@ -87,9 +87,7 @@ namespace Brows.Commands {
                         }
                     }
                 }
-                if (findTasks.Count > 0) {
-                    await Task.WhenAll(findTasks);
-                }
+                await Task.WhenAll(findTasks);
             });
         }
 
@@ -114,7 +112,7 @@ namespace Brows.Commands {
                 }
                 if (item != null) {
                     Result.MatchMatched++;
-                    await Result.Add(item, token);
+                    Result.Add(item);
                 }
                 Result.MatchTried++;
             }
@@ -123,7 +121,7 @@ namespace Brows.Commands {
         private async Task Work(IOperationProgress progress, CancellationToken token) {
             var channel = Channel.CreateUnbounded<FoundInInfo[]>(new UnboundedChannelOptions {
                 SingleReader = true,
-                SingleWriter = false
+                SingleWriter = true
             });
             BeginWrite(channel.Writer, progress, token);
             await Read(channel.Reader, progress, token);
@@ -140,7 +138,6 @@ namespace Brows.Commands {
         }
 
         public async Task Done(IOperationProgress progress, CancellationToken token) {
-            using var begun = Result.Begin(Parameter.Observe);
             try {
                 await Work(progress, token);
             }

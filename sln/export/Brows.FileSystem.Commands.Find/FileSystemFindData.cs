@@ -3,17 +3,25 @@ using System.Collections.Generic;
 
 namespace Brows {
     internal sealed class FileSystemFindData : CommandContextData<FileSystemFindResult>, ICommandContextHint {
-        protected sealed override CommandContextData<FileSystemFindResult> Create(int index, IList<FileSystemFindResult> list) {
-            return new FileSystemFindData(Command, Context, index, list);
+        private bool LoadInput { get; }
+        private bool LoadConf { get; }
+
+        private FileSystemFindData(ICommand command, ICommandContext context, int index, bool loadInput, bool loadConf, IList<FileSystemFindResult> list) : base(command, index, list) {
+            LoadInput = loadInput;
+            LoadConf = loadConf;
+            Context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public sealed override string Input => Item?.Input;
-        public sealed override string Conf => Item?.Conf;
+        protected sealed override CommandContextData<FileSystemFindResult> Create(int index, IList<FileSystemFindResult> list) {
+            return new FileSystemFindData(Command, Context, index, true, true, list);
+        }
+
+        public sealed override string Input => LoadInput ? Item?.Input : null;
+        public sealed override string Conf => LoadConf ? Item?.Conf : null;
 
         public ICommandContext Context { get; }
 
-        public FileSystemFindData(ICommand command, ICommandContext context, int index, IList<FileSystemFindResult> list) : base(command, index, list) {
-            Context = context ?? throw new ArgumentNullException(nameof(context));
+        public FileSystemFindData(ICommand command, ICommandContext context, int index, IList<FileSystemFindResult> list) : this(command, context, index, false, false, list) {
         }
 
         public sealed override ICommandContextData Enter() {

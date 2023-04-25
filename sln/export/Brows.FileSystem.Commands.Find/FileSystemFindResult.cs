@@ -1,22 +1,19 @@
-﻿using Domore.Notification;
+﻿using Brows.Commands;
+using Brows.Gui;
+using Domore.Notification;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Brows {
-    using Collections.ObjectModel;
-    using Commands;
-    using Gui;
-
     internal sealed class FileSystemFindResult : Notifier, IControlled<IFileSystemFindResultController> {
-        private readonly ObservableSourceDisposable<FoundInInfo> Collection = new();
+        private readonly ObservableCollection<FoundInInfo> Collection = new();
 
         private void Controller_CurrentChanged(object sender, EventArgs e) {
             CurrentItem = Controller?.CurrentItem;
         }
 
-        public object Items =>
+        public object Source =>
             Collection;
 
         public IFileSystemFindResultController Controller {
@@ -84,13 +81,12 @@ namespace Brows {
             Parameter = parameter;
         }
 
-        public IDisposable Begin(ObservableSourceOptions options) {
-            Collection.Options = options;
-            return Collection;
-        }
-
-        public async Task Add(FoundInInfo[] item, CancellationToken token) {
-            await Collection.Add(item, token);
+        public void Add(FoundInInfo[] item) {
+            if (item != null && item.Length > 0) {
+                foreach (var i in item) {
+                    Collection.Add(i);
+                }
+            }
         }
     }
 }

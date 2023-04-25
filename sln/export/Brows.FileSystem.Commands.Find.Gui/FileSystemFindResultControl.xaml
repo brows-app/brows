@@ -29,7 +29,7 @@
                     <Setter Property="Margin" Value="5 0 0 0"/>
                 </Style>
             </Grid.Style>
-            <ListView x:Name="ListView" ItemsSource="{Binding Items.Source}">
+            <ListView x:Name="ListView" ItemsSource="{Binding Source}">
                 <ListView.Resources>
                     <DataTemplate DataType="{x:Type find:FoundInDirectoryName}">
                         <local:FoundInDirectoryNameGrid/>
