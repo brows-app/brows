@@ -1,4 +1,4 @@
 ﻿namespace Brows.Exports {
-    public interface ICopyProvidedIO : IWorkProvidedIO, IEntryProviderExport {
+    public interface ICopyProvidedIO : IWorkProvidedIO, IProviderExport {
     }
 }

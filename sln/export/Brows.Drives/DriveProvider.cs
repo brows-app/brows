@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal sealed class DriveProvider : EntryProvider<DriveEntry, DrivesConfig> {
+    internal sealed class DriveProvider : Provider<DriveEntry, DrivesConfig> {
         private async Task<IReadOnlyList<DriveEntry>> List(CancellationToken token) {
             var drives = await Task.Run(cancellationToken: token, function: DriveInfo.GetDrives);
             var entries = drives.Select(d => new DriveEntry(this, d)).ToList();

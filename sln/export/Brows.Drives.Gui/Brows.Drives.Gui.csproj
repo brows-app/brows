@@ -4,6 +4,6 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\Brows.Entry.Gui\Brows.Entry.Gui.csproj" />
+      <ProjectReference Include="..\..\Brows.Provider.Gui\Brows.Provider.Gui.csproj" />
     </ItemGroup>
 </Project>

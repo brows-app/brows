@@ -5,7 +5,7 @@ namespace Brows.Commands {
             if (context.HasPanel(out var active) == false) {
                 return false;
             }
-            if (active.HasProvider(out IEntryProvider provider) == false) {
+            if (active.HasProvider(out IProvider provider) == false) {
                 return false;
             }
             var parent = provider.Parent?.Trim() ?? "";

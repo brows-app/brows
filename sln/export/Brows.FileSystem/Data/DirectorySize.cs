@@ -8,6 +8,7 @@ namespace Brows.Data {
 
         public DirectorySize() {
             Width = 100;
+            Alignment = EntryDataAlignment.Right;
             Converter = EntryDataConverter.FileSystemSize;
         }
     }

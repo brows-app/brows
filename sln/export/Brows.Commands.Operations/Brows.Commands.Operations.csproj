@@ -2,8 +2,11 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\Brows.Collections.ObjectModel.CollectionSource\Brows.Collections.ObjectModel.CollectionSource.csproj" />
-        <ProjectReference Include="..\..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
+      <EmbeddedResource Include="Culture\_" />
+      <EmbeddedResource Include="Culture\_.s.Command_Conf_Operations" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
         <ProjectReference Include="..\..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
     </ItemGroup>
 </Project>

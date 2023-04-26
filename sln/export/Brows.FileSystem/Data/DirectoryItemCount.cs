@@ -22,6 +22,7 @@ namespace Brows.Data {
         public DirectoryItemCount(DirectoryItemCountKinds kinds) {
             Kinds = kinds;
             Width = 100;
+            Alignment = EntryDataAlignment.Right;
         }
 
         public DirectoryItemCount() : this(DirectoryItemCountKinds.Any) {

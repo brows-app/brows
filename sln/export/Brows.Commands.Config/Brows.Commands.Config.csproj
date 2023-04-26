@@ -6,6 +6,6 @@
       <EmbeddedResource Include="Resource\Culture\_.s.CommandConf_Config" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
+      <ProjectReference Include="..\..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
     </ItemGroup>
 </Project>

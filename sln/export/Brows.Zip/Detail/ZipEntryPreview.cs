@@ -1,4 +1,4 @@
 ﻿namespace Brows.Detail {
-    internal sealed class ZipEntryPreview : EntryProviderDetail {
+    internal sealed class ZipEntryPreview : ProviderDetail {
     }
 }

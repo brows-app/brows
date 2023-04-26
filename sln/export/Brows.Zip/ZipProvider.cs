@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Brows {
     using Exports;
 
-    internal sealed class ZipProvider : EntryProvider<ZipEntry, ZipConfig> {
+    internal sealed class ZipProvider : Provider<ZipEntry, ZipConfig> {
         private static readonly ILog Log = Logging.For(typeof(ZipProvider));
 
         private async Task ZipFileDeleted() {
@@ -80,8 +80,8 @@ namespace Brows {
             Factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
 
-        private sealed class ProvideIO : IProvideIO, IEntryProviderExport<ZipProvider> {
-            public async Task<bool> Work(ICollection<IProvidedIO> io, IEntryProvider target, IOperationProgress progress, CancellationToken token) {
+        private sealed class ProvideIO : IProvideIO, IProviderExport<ZipProvider> {
+            public async Task<bool> Work(ICollection<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (io is null) throw new ArgumentNullException(nameof(io));
                 if (target is not ZipProvider provider) {
                     return false;
@@ -103,8 +103,8 @@ namespace Brows {
             }
         }
 
-        private sealed class CopyFromProvidedIO : ICopyProvidedIO, IEntryProviderExport<ZipProvider> {
-            public async Task<bool> Work(IEnumerable<IProvidedIO> io, IEntryProvider target, IOperationProgress progress, CancellationToken token) {
+        private sealed class CopyFromProvidedIO : ICopyProvidedIO, IProviderExport<ZipProvider> {
+            public async Task<bool> Work(IEnumerable<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (io is null) throw new ArgumentNullException(nameof(io));
                 var files = io.Files();
                 if (files.Count > 0) {
@@ -119,7 +119,7 @@ namespace Brows {
         }
 
         private sealed class CopyFromFiles {
-            public async Task<bool> Work(IEnumerable<string> files, IEntryProvider target, IOperationProgress progress, CancellationToken token) {
+            public async Task<bool> Work(IEnumerable<string> files, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (target is not ZipProvider provider) {
                     return false;
                 }
@@ -188,7 +188,7 @@ namespace Brows {
         }
 
         private sealed class CopyFromStreams {
-            public async Task<bool> Work(IEnumerable<IEntryStreamSet> entryStreamSets, IEntryProvider target, IOperationProgress progress, CancellationToken token) {
+            public async Task<bool> Work(IEnumerable<IEntryStreamSet> entryStreamSets, IProvider target, IOperationProgress progress, CancellationToken token) {
                 var sets = entryStreamSets.Where(s => s is not null)?.ToList();
                 if (sets == null) return false;
                 if (sets.Count == 0) return false;

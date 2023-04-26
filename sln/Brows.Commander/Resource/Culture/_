@@ -9,7 +9,6 @@ Command_Description_HistoryBack     = Navigate back in history
 Command_Description_HistoryForward  = Navigate forward in history
 Command_Description_Manual          = About this application
 Command_Description_Operations      = Deal with failed and pending operations
-Command_Description_Recycle         = Send the selection to the recycle bin or trash
 Command_Description_Refresh         = Refresh the active panel
 Command_Description_RefreshAll      = Refresh all panels
 Command_Description_RemovePanel     = Remove an existing panel from the view

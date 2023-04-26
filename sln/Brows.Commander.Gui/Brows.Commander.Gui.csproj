@@ -5,7 +5,7 @@
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\Brows.Commander\Brows.Commander.csproj" />
-      <ProjectReference Include="..\Brows.Entry.Gui\Brows.Entry.Gui.csproj" />
+      <ProjectReference Include="..\Brows.Provider.Gui\Brows.Provider.Gui.csproj" />
       <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
       <ProjectReference Include="..\Brows.Trigger.Gui\Brows.Trigger.Gui.csproj" />
       <ProjectReference Include="..\Brows.Windows.AppComponent\Brows.Windows.AppComponent.csproj" />

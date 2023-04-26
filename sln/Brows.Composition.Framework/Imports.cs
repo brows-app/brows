@@ -1,10 +1,9 @@
-﻿using System.Threading;
+﻿using Brows.Composition;
+using Domore.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Composition;
-    using Threading.Tasks;
-
     public static class Imports {
         private static TaskCache<IImport> Cache =>
             _Cache ?? (

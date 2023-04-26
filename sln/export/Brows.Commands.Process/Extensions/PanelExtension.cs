@@ -7,7 +7,7 @@ namespace Brows.Extensions {
     internal static class PanelExtension {
         public static async Task<string> WorkingDirectory(this IPanel panel, CancellationToken cancellationToken) {
             if (null == panel) throw new ArgumentNullException(nameof(panel));
-            if (panel.HasProvider(out IEntryProvider provider) == false) {
+            if (panel.HasProvider(out IProvider provider) == false) {
                 return null;
             }
             var id = provider.ID;

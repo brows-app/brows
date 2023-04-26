@@ -5,7 +5,7 @@ namespace Brows.Commands {
             if (context.HasCommander(out var commander) == false) {
                 return false;
             }
-            var id = context.HasPanel(out var active) && active.HasProvider(out IEntryProvider provider)
+            var id = context.HasPanel(out var active) && active.HasProvider(out IProvider provider)
                 ? provider.ID
                 : "";
             return context.Operate(async (progress, token) => {

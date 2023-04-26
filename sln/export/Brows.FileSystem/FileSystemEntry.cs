@@ -1,4 +1,5 @@
 using Domore.Logs;
+using Domore.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,8 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Threading.Tasks;
-
     internal sealed class FileSystemEntry : Entry<FileSystemProvider> {
         private static readonly ILog Log = Logging.For(typeof(FileSystemEntry));
 
@@ -79,7 +78,7 @@ namespace Brows {
             }
             var refreshDelay = RefreshDelay;
             if (refreshDelay == null) {
-                refreshDelay = RefreshDelay = new FileSystemEntryRefreshDelay(this, delay, CancellationToken);
+                refreshDelay = RefreshDelay = new FileSystemEntryRefreshDelay(this, delay, Token);
                 refreshDelay.Completed.ContinueWith(_ => RefreshDelay = null);
             }
         }

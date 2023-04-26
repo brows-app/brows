@@ -9,6 +9,6 @@
         <ProjectReference Include="..\Brows.Request.Framework\Brows.Request.Framework.csproj" />
         <ProjectReference Include="..\Brows.Trigger.Framework\Brows.Trigger.Framework.csproj" />
         <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
-        <ProjectReference Include="..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
+        <ProjectReference Include="..\Brows.Provider.Contract\Brows.Provider.Contract.csproj" />
     </ItemGroup>
 </Project>

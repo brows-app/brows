@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal sealed class FileSystemProviderFactory : EntryProviderFactory<FileSystemProvider> {
+    internal sealed class FileSystemProviderFactory : ProviderFactory<FileSystemProvider> {
         private static readonly ILog Log = Logging.For(typeof(FileSystemProviderFactory));
 
         private static async Task<DirectoryInfo> LoadDirectory(string id, CancellationToken token) {

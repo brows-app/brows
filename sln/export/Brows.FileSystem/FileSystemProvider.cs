@@ -13,7 +13,7 @@ using DIRECTORY = System.IO.Directory;
 using PATH = System.IO.Path;
 
 namespace Brows {
-    internal sealed class FileSystemProvider : EntryProvider<FileSystemEntry, FileSystemConfig> {
+    internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemConfig> {
         private static readonly ILog Log = Logging.For(typeof(FileSystemProvider));
         private static readonly EnumerationOptions EnumerationOptions = new EnumerationOptions {
             AttributesToSkip = 0,
@@ -316,8 +316,8 @@ namespace Brows {
             return false;
         }
 
-        private sealed class ProvideIO : IProvideIO, IEntryProviderExport<FileSystemProvider> {
-            public async Task<bool> Work(ICollection<IProvidedIO> io, IEntryProvider target, IOperationProgress progress, CancellationToken token) {
+        private sealed class ProvideIO : IProvideIO, IProviderExport<FileSystemProvider> {
+            public async Task<bool> Work(ICollection<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (io is null) throw new ArgumentNullException(nameof(io));
                 if (target is not FileSystemProvider provider) {
                     return false;
@@ -336,8 +336,8 @@ namespace Brows {
             }
         }
 
-        private sealed class MoveProvidedIO : IMoveProvidedIO, IEntryProviderExport<FileSystemProvider> {
-            public async Task<bool> Work(IEnumerable<IProvidedIO> io, IEntryProvider target, IOperationProgress progress, CancellationToken token) {
+        private sealed class MoveProvidedIO : IMoveProvidedIO, IProviderExport<FileSystemProvider> {
+            public async Task<bool> Work(IEnumerable<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (io is null) throw new ArgumentNullException(nameof(io));
                 if (target is not FileSystemProvider provider) {
                     return false;
@@ -354,8 +354,8 @@ namespace Brows {
             }
         }
 
-        private sealed class CopyProvidedIO : ICopyProvidedIO, IEntryProviderExport<FileSystemProvider> {
-            public async Task<bool> Work(IEnumerable<IProvidedIO> io, IEntryProvider target, IOperationProgress progress, CancellationToken token) {
+        private sealed class CopyProvidedIO : ICopyProvidedIO, IProviderExport<FileSystemProvider> {
+            public async Task<bool> Work(IEnumerable<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (io is null) throw new ArgumentNullException(nameof(io));
                 if (target is not FileSystemProvider provider) {
                     return false;
@@ -399,8 +399,8 @@ namespace Brows {
             }
         }
 
-        private sealed class Bookmark : IBookmark, IEntryProviderExport<FileSystemProvider> {
-            public async Task<bool> Work(IReadOnlyList<KeyValuePair<string, string>> existing, IList<KeyValuePair<string, string>> added, IEntryProvider target, IOperationProgress progress, CancellationToken token) {
+        private sealed class Bookmark : IBookmark, IProviderExport<FileSystemProvider> {
+            public async Task<bool> Work(IReadOnlyList<KeyValuePair<string, string>> existing, IList<KeyValuePair<string, string>> added, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (target is not FileSystemProvider provider) {
                     return false;
                 }

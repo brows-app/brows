@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Brows {
     using Exports;
 
-    internal sealed class ZipProviderFactory : EntryProviderFactory<ZipProvider> {
+    internal sealed class ZipProviderFactory : ProviderFactory<ZipProvider> {
         protected sealed override async Task<ZipProvider> CreateFor(string id, IPanel panel, CancellationToken cancellationToken) {
             if (id == null || id == "") {
                 return null;

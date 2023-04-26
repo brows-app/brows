@@ -111,7 +111,7 @@ namespace Brows {
             Input.Clear();
         }
 
-        private void Start(IEntryProvider provider) {
+        private void Start(IProvider provider) {
             if (null == provider) throw new ArgumentNullException(nameof(provider));
             if (Log.Info()) {
                 Log.Info(nameof(Start) + " > " + provider?.GetType()?.Name);
@@ -158,11 +158,11 @@ namespace Brows {
         }
         private double _ControlHeight;
 
-        public IEntryProvider Provider {
+        public IProvider Provider {
             get => _Provider;
             private set => Change(ref _Provider, value, nameof(Provider));
         }
-        private IEntryProvider _Provider;
+        private IProvider _Provider;
 
         public int Column {
             get => _Column;
@@ -201,9 +201,9 @@ namespace Brows {
         private bool _Activated;
 
         public Commander Commander { get; }
-        public EntryProviderFactorySet Providers { get; }
+        public ProviderFactorySet Providers { get; }
 
-        public Panel(EntryProviderFactorySet providers, Commander commander) {
+        public Panel(ProviderFactorySet providers, Commander commander) {
             Providers = providers ?? throw new ArgumentNullException(nameof(providers));
             Commander = commander ?? throw new ArgumentNullException(nameof(commander));
         }
@@ -347,7 +347,7 @@ namespace Brows {
             return provider != null;
         }
 
-        bool IPanel.HasProviderService<TService>(out IEntryProvider provider, out TService service) {
+        bool IPanel.HasProviderService<TService>(out IProvider provider, out TService service) {
             provider = Provider;
             service = provider?.Import<TService>();
             return service != null;

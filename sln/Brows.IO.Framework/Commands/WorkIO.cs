@@ -3,7 +3,7 @@
 namespace Brows.Commands {
     using Exports;
 
-    public abstract class WorkIO<TService> : Command<WorkIOParameter> where TService : class, IWorkProvidedIO, IEntryProviderExport {
+    public abstract class WorkIO<TService> : Command<WorkIOParameter> where TService : class, IWorkProvidedIO, IProviderExport {
         protected sealed override bool Work(Context context) {
             if (context == null) return false;
             if (context.HasParameter(out var parameter) == false) return false;

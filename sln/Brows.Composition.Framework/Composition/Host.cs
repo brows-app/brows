@@ -1,4 +1,5 @@
 ﻿using Domore.Logs;
+using Domore.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
@@ -11,9 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Composition {
-    using Threading.Tasks;
-
-    internal class Host {
+    internal sealed class Host {
         private static readonly ILog Log = Logging.For(typeof(Host));
 
         private TaskCache<IReadOnlyList<Export>> LoadCache =>

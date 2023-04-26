@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands.DataKey {
     internal abstract class DataKeyCommand<T> : Command<T> where T : DataKeyCommandParameter, new() {
-        private async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, IEntryProvider provider, T parameter, [EnumeratorCancellation] CancellationToken token) {
+        private async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, IProvider provider, T parameter, [EnumeratorCancellation] CancellationToken token) {
             if (null == context) throw new ArgumentNullException(nameof(context));
             if (null == provider) throw new ArgumentNullException(nameof(provider));
-            var suggester = new DataKeyCommandSuggester<T>(provider.Data.Key, parameter, Parse);
+            var data = provider.Data;
+            var suggester = new DataKeyCommandSuggester<T>(data.Key, parameter, Parse);
             var suggestedKeys = suggester.Suggest();
             var suggestedCount = 0;
             await foreach (var suggestion in base.Suggest(context, token)) {
@@ -18,7 +19,10 @@ namespace Brows.Commands.DataKey {
                     continue;
                 }
                 foreach (var key in suggestedKeys) {
-                    var definition = provider.Data[key];
+                    var definition = data.Get(key);
+                    if (definition == null) {
+                        continue;
+                    }
                     var suggested = definition.SuggestKey(context);
                     if (suggested == false) {
                         continue;
@@ -36,7 +40,7 @@ namespace Brows.Commands.DataKey {
                     yield return Suggestion(
                         context: context,
                         description: "",
-                        group: provider.Data[key].Group,
+                        group: definition.Group,
                         help: help,
                         input: input,
                         relevance: suggestion.Relevance);
@@ -58,7 +62,7 @@ namespace Brows.Commands.DataKey {
             if (context == null) return false;
             if (context.HasPanel(out var active) == false) return false;
             if (context.HasParameter(out var parameter) == false) return false;
-            if (active.HasProvider(out IEntryProvider provider) == false) {
+            if (active.HasProvider(out IProvider provider) == false) {
                 return false;
             }
             foreach (var arg in parameter.Args) {
@@ -77,7 +81,7 @@ namespace Brows.Commands.DataKey {
             if (null == context) throw new ArgumentNullException(nameof(context));
             if (context.DidTrigger(this)) {
                 if (context.HasPanel(out var active)) {
-                    if (active.HasProvider(out IEntryProvider provider)) {
+                    if (active.HasProvider(out IProvider provider)) {
                         if (context.GetParameter(out var parameter)) {
                             return Suggest(context, provider, parameter, cancellationToken);
                         }

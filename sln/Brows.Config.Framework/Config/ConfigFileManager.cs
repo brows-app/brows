@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Domore.Threading.Tasks;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Config {
-    using Threading.Tasks;
-
     internal class ConfigFileManager {
         private ConfigFileManager() {
         }

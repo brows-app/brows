@@ -19,7 +19,7 @@ namespace Brows.Commands {
             if (context.HasPanel(out var active) == false) {
                 return false;
             }
-            if (active.HasProvider(out IEntryProvider provider) == false) {
+            if (active.HasProvider(out IProvider provider) == false) {
                 return false;
             }
             var service = provider.Import<IBookmark>();
@@ -50,7 +50,7 @@ namespace Brows.Commands {
                 return false;
             }
             var session = panels.AsEnumerable()
-                 .Select(panel => panel.HasProvider(out IEntryProvider provider) ? provider.ID : null)
+                 .Select(panel => panel.HasProvider(out IProvider provider) ? provider.ID : null)
                  .Where(id => id != null)
                  .ToList();
             var

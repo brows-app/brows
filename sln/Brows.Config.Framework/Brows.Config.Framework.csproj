@@ -6,7 +6,7 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Brows.Config.Contract\Brows.Config.Contract.csproj" />
-      <ProjectReference Include="..\Brows.Threading.Tasks.Cache\Brows.Threading.Tasks.Cache.csproj" />
+      <ProjectReference Include="..\domore\Domore.Async\Domore.Async.csproj" />
       <ProjectReference Include="..\domore\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
       <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
     </ItemGroup>

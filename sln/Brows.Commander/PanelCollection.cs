@@ -55,9 +55,9 @@ namespace Brows {
             List.Count;
 
         public Commander Commander { get; }
-        public EntryProviderFactorySet Providers { get; }
+        public ProviderFactorySet Providers { get; }
 
-        public PanelCollection(EntryProviderFactorySet providers, Commander commander) {
+        public PanelCollection(ProviderFactorySet providers, Commander commander) {
             Providers = providers;
             Commander = commander;
         }

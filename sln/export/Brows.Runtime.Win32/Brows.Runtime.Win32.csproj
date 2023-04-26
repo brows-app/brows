@@ -5,7 +5,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
-        <ProjectReference Include="..\..\Brows.Entry.Contract\Brows.Entry.Contract.csproj" />
+        <ProjectReference Include="..\..\Brows.Provider.Contract\Brows.Provider.Contract.csproj" />
         <ProjectReference Include="..\..\Brows.IO.Contract\Brows.IO.Contract.csproj" />
         <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
         <ProjectReference Include="..\..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />

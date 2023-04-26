@@ -28,10 +28,10 @@ namespace Brows {
             _Commands = new CommandCollection(Import.List<ICommand>()));
         private CommandCollection _Commands;
 
-        private EntryProviderFactorySet Providers =>
+        private ProviderFactorySet Providers =>
             _Providers ?? (
-            _Providers = new EntryProviderFactorySet(Import.List<IEntryProviderFactory>()));
-        private EntryProviderFactorySet _Providers;
+            _Providers = new ProviderFactorySet(Import.List<IProviderFactory>()));
+        private ProviderFactorySet _Providers;
 
         private void Commander_Closed(object sender, EventArgs e) {
             var

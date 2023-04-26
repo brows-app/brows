@@ -116,9 +116,9 @@ namespace Brows {
 
         public CommanderDomain Domain { get; }
         public CommandCollection Commands { get; }
-        public EntryProviderFactorySet Providers { get; }
+        public ProviderFactorySet Providers { get; }
 
-        public Commander(EntryProviderFactorySet providers, CommandCollection commands, CommanderDomain domain) {
+        public Commander(ProviderFactorySet providers, CommandCollection commands, CommanderDomain domain) {
             Commands = commands ?? throw new ArgumentNullException(nameof(commands));
             Domain = domain;
             Providers = providers;

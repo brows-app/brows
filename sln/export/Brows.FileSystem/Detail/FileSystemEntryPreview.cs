@@ -1,4 +1,4 @@
 ﻿namespace Brows.Detail {
-    internal sealed class FileSystemEntryPreview : EntryProviderDetail {
+    internal sealed class FileSystemEntryPreview : ProviderDetail {
     }
 }

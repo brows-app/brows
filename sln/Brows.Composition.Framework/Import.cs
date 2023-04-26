@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Brows.Composition;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 namespace Brows {
-    using Composition;
-
-    internal class Import : IImport {
+    internal sealed class Import : IImport {
         private readonly Dictionary<Type, Import> CacheOf = new();
         private readonly Dictionary<Type, Import> CacheFor = new();
         private readonly Dictionary<Type, object> CacheGet = new();

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Brows {
     using Exports;
 
-    internal sealed class DriveProviderFactory : EntryProviderFactory<DriveProvider> {
+    internal sealed class DriveProviderFactory : ProviderFactory<DriveProvider> {
         protected sealed override async Task<DriveProvider> CreateFor(string id, IPanel panel, CancellationToken cancellationToken) {
             if (panel is null) throw new ArgumentNullException(nameof(panel));
             if (id != Drives.ID) {

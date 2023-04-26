@@ -5,14 +5,14 @@
              xmlns:brows="http://schemas.brows.app/xaml"
              xmlns:local="clr-namespace:Brows"
              xmlns:detail="clr-namespace:Brows.Detail;assembly=Brows.FileSystem">
-    <brows:EntryProviderGrid Grid.Row="0">
-        <brows:EntryProviderGrid.Resources>
+    <brows:ProviderGrid Grid.Row="0">
+        <brows:ProviderGrid.Resources>
             <DataTemplate x:Key="{x:Type detail:FileSystemEntryPreview}">
                 <local:FileSystemEntryPreviewControl/>
             </DataTemplate>
-        </brows:EntryProviderGrid.Resources>
-        <brows:EntryProviderGrid.Style>
-            <Style TargetType="brows:EntryProviderGrid">
+        </brows:ProviderGrid.Resources>
+        <brows:ProviderGrid.Style>
+            <Style TargetType="brows:ProviderGrid">
                 <Setter Property="Icon" Value="{Binding}"/>
                 <Setter Property="IconTemplate">
                     <Setter.Value>
@@ -33,6 +33,6 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-        </brows:EntryProviderGrid.Style>
-    </brows:EntryProviderGrid>
+        </brows:ProviderGrid.Style>
+    </brows:ProviderGrid>
 </UserControl>

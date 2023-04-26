@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 
 namespace Brows {
-    internal class OperationData : CommandContextData<IOperation> {
-        protected override CommandContextData<IOperation> Create(int index, IList<IOperation> list) {
+    internal sealed class OperationData : CommandContextData<IOperation> {
+        protected sealed override CommandContextData<IOperation> Create(int index, IList<IOperation> list) {
             return new OperationData(Command, index, Collection);
         }
 
-        protected override void Removed(IOperation item) {
+        protected sealed override void Removed(IOperation item) {
             Collection.Remove(item);
         }
 
-        protected override void Cleared(IEnumerable<IOperation> items) {
+        protected sealed override void Cleared(IEnumerable<IOperation> items) {
             Collection.Clear();
         }
 

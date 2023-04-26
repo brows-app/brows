@@ -5,8 +5,6 @@ using Domore.Text;
 using System.Collections.Generic;
 
 namespace Brows.Commands {
-    using Collections.ObjectModel;
-
     internal sealed class FindParameter {
         [CliArgument]
         [CliRequired]
@@ -40,13 +38,6 @@ namespace Brows.Commands {
             set => _Decoder = value;
         }
         private DecodedTextOptions _Decoder;
-
-        [CliDisplay(false)]
-        public ObservableSourceOptions Observe {
-            get => _Observe ?? (_Observe = new());
-            set => _Observe = value;
-        }
-        private ObservableSourceOptions _Observe;
 
         public IMatcher PatternMatcher() {
             var match = MatchAlgorithm.Create(ignoreCase: Case == FindCaseSensitivity.None);

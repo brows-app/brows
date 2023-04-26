@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="Resource\Culture\_" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
+      <ProjectReference Include="..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
+      <ProjectReference Include="..\Brows.Trigger.Gui\Brows.Trigger.Gui.csproj" />
+    </ItemGroup>
+</Project>

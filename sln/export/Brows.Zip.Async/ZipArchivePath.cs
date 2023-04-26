@@ -1,5 +1,8 @@
-﻿using Domore.IO;
+﻿using Brows.IO.Compression;
+using Brows.Zip;
+using Domore.IO;
 using Domore.Logs;
+using Domore.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,10 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using IO.Compression;
-    using Threading.Tasks;
-    using Zip;
-
     public sealed class ZipArchivePath {
         private static readonly ILog Log = Logging.For(typeof(ZipArchivePath));
         private static readonly Dictionary<string, ZipArchivePath> Set = new();

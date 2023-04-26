@@ -15,7 +15,7 @@ namespace Brows {
                 }
             }
             if (b != ClickButton.None) {
-                s += Translation.ClickButtonTranslation[b];
+                s += $"{Gesture.Clicks}{Translation.ClickButtonTranslation[b]}";
             }
             else {
                 s = s.TrimEnd(d);

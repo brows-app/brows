@@ -2,6 +2,7 @@
 using Domore.Runtime.InteropServices;
 using Domore.Runtime.InteropServices.Extensions;
 using Domore.Threading;
+using Domore.Threading.Tasks;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Threading.Tasks;
-
     public static class Win32Overlay {
         private static readonly ILog Log = Logging.For(typeof(Win32Overlay));
 

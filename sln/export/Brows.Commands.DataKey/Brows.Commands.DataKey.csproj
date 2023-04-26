@@ -5,7 +5,7 @@
         <EmbeddedResource Include="Resource\Culture\_" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\Brows.Entry.Framework\Brows.Entry.Framework.csproj" />
+        <ProjectReference Include="..\..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
         <ProjectReference Include="..\..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
     </ItemGroup>
 </Project>
