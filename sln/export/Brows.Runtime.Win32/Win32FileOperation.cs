@@ -1,6 +1,7 @@
 ﻿using Domore.Logs;
 using Domore.Runtime.InteropServices;
 using Domore.Runtime.InteropServices.ComTypes;
+using Domore.Runtime.Win32;
 using Domore.Threading;
 using System;
 using System.Collections.Generic;
@@ -12,8 +13,6 @@ using System.Windows;
 using System.Windows.Interop;
 
 namespace Brows {
-    using Config;
-
     public sealed class Win32FileOperation {
         private static readonly ILog Log = Logging.For(typeof(Win32FileOperation));
 
@@ -33,11 +32,22 @@ namespace Brows {
         }
         private STAThreadPool _ThreadPool;
 
-        private Win32FileOperationConfig Config {
-            get => _Config ?? (_Config = new());
-            set => _Config = value;
+        public uint FlagsInit() {
+            var fof = FOF.NOCONFIRMMKDIR;
+            if (NoConfirmation) fof |= FOF.NOCONFIRMATION;
+            if (NoErrorUI) fof |= FOF.NOERRORUI;
+            if (Silent) fof |= FOF.SILENT;
+            if (AllowUndo) fof |= FOF.ALLOWUNDO;
+            if (RenameOnCollision) fof |= FOF.RENAMEONCOLLISION;
+
+            var fofx = FOFX.SHOWELEVATIONPROMPT;
+            if (EarlyFailure) fofx |= FOFX.EARLYFAILURE;
+            if (AddUndoRecord) fofx |= FOFX.ADDUNDORECORD;
+            if (RecycleOnDelete) fofx |= FOFX.RECYCLEONDELETE;
+            if (PreserveFileExtensions) fofx |= FOFX.PRESERVEFILEEXTENSIONS;
+
+            return (uint)fof | (uint)fofx;
         }
-        private Win32FileOperationConfig _Config;
 
         private bool Iterate<T>(IReadOnlyList<T> list, Action<T> act) {
             if (list == null) return false;
@@ -123,7 +133,7 @@ namespace Brows {
         private bool Work() {
             using (var fopw = new FileOperationWrapper()) {
                 FileOperation = fopw.FileOperation;
-                Flags = Config.Flags(this);
+                Flags = FlagsInit();
                 var performOperations =
                     Copy() |
                     Move() |
@@ -144,7 +154,7 @@ namespace Brows {
                 }
                 var progressSinkCookie = default(uint);
                 var progressSink = default(Win32ProgressSink);
-                var progressNative = !Config.Silent;
+                var progressNative = !Silent;
                 if (progressNative == false) {
                     progressSink = new Win32ProgressSink(OperationProgress, CancellationToken);
                     hr = FileOperation.Advise(progressSink, out progressSinkCookie);
@@ -200,9 +210,15 @@ namespace Brows {
         }
         private List<RenameFile> _RenameFiles;
 
-        public bool? RecycleOnDelete { get; set; }
-        public bool? PreserveFileExtensions { get; set; }
-        public bool? RenameOnCollision { get; set; }
+        public bool AddUndoRecord { get; set; }
+        public bool AllowUndo { get; set; }
+        public bool EarlyFailure { get; set; }
+        public bool NoConfirmation { get; set; }
+        public bool NoErrorUI { get; set; }
+        public bool PreserveFileExtensions { get; set; }
+        public bool RecycleOnDelete { get; set; } = true;
+        public bool RenameOnCollision { get; set; }
+        public bool Silent { get; set; }
 
         public string Directory { get; }
 
@@ -210,26 +226,31 @@ namespace Brows {
             Directory = directory;
         }
 
-        public async Task<bool> Operate(IOperationProgress operationProgress, CancellationToken cancellationToken) {
+        public async Task<bool> Operate(IOperationProgress progress, CancellationToken token) {
             var agent = new Win32FileOperation(Directory) {
-                CancellationToken = cancellationToken,
-                Config = await Configure.File<Win32FileOperationConfig>().Load(cancellationToken),
+                AddUndoRecord = AddUndoRecord,
+                AllowUndo = AllowUndo,
+                CancellationToken = token,
                 CopyFiles = _CopyFiles?.ToList(),
                 CreateFiles = _CreateFiles?.ToList(),
                 DeleteFiles = _DeleteFiles?.ToList(),
+                EarlyFailure = EarlyFailure,
                 MoveFiles = _MoveFiles?.ToList(),
-                RenameFiles = _RenameFiles?.ToList(),
+                NoConfirmation = NoConfirmation,
+                NoErrorUI = NoErrorUI,
+                OperationProgress = progress,
                 PreserveFileExtensions = PreserveFileExtensions,
                 RecycleOnDelete = RecycleOnDelete,
+                RenameFiles = _RenameFiles?.ToList(),
                 RenameOnCollision = RenameOnCollision,
-                OperationProgress = operationProgress,
+                Silent = Silent,
                 ThreadPool = ThreadPool
             };
             try {
                 return await ThreadPool.Work(
                     name: nameof(Win32FileOperation),
                     work: agent.Work,
-                    cancellationToken: cancellationToken);
+                    cancellationToken: token);
             }
             finally {
                 var directoryWrap = agent._DirectoryWrap;
@@ -239,24 +260,24 @@ namespace Brows {
             }
         }
 
-        public class CopyFile {
+        public sealed class CopyFile {
             public string Path { get; set; }
         }
 
-        public class MoveFile {
+        public sealed class MoveFile {
             public string Path { get; set; }
         }
 
-        public class DeleteFile {
+        public sealed class DeleteFile {
             public string Name { get; set; }
         }
 
-        public class CreateFile {
+        public sealed class CreateFile {
             public string Name { get; set; }
             public FileAttributes Attributes { get; set; }
         }
 
-        public class RenameFile {
+        public sealed class RenameFile {
             public string OldName { get; set; }
             public string NewName { get; set; }
         }

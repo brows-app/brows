@@ -1,8 +1,13 @@
 # example: 
 # {input} u=true
+# {input} mode=m
 
-# Unrecoverable flag
-# If true, skip the operating system's cache
-# of deleted items to permanently delete the
-# selection.
-U =
+# If true, skip the operating system's cache of deleted
+# items to permanently delete the selection.
+u =
+
+# Use this method to delete the selection.
+#   native:  Delete with the operating system's native UI.
+#   managed: Delete with a custom implementation. This mode
+#            implies the unrecoverable flag.
+mode =

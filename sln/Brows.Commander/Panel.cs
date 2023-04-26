@@ -123,6 +123,10 @@ namespace Brows {
             Provider.Begin();
         }
 
+        private void Observation_SortingEntries(object sender, EventArgs e) {
+            throw new NotImplementedException();
+        }
+
         private async Task<bool> TryStart(string id, CancellationToken cancellationToken) {
             if (Log.Info()) {
                 Log.Info(nameof(TryStart) + " > " + id);

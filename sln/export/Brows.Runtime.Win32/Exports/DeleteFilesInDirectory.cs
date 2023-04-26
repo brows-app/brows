@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Exports {
-    internal sealed class DeleteFileInDirectory : IDeleteFilesInDirectory {
+    internal sealed class DeleteFilesInDirectory : IDeleteFilesInDirectory {
         public async Task<bool> Work(IEnumerable<string> files, string directory, IDeleteFilesInDirectoryOptions options, IOperationProgress progress, CancellationToken token) {
             var op = new Win32FileOperation(directory) {
                 DeleteFiles = files?

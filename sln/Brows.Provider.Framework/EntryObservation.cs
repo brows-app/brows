@@ -60,7 +60,6 @@ namespace Brows {
         protected async Task Add(IEnumerable<IEntry> items, int count) {
             if (items == null) return;
             if (count == 0) return;
-            var added = default(IEnumerable<Task>);
             var chunkSize = Provider.Config.Observe.Add.Size;
             var chunkDelay = Provider.Config.Observe.Add.Delay;
             var chunks = items.Chunk(chunkSize < 1 ? count : chunkSize);
@@ -74,23 +73,19 @@ namespace Brows {
                         await Task.Delay(chunkDelay, Provider.Token);
                     }
                 }
+                var sorted = default(IEnumerable<Task>);
                 var sorting = DataView.Sorting;
                 if (sorting.Count > 0) {
-                    var sortingTasks = chunk
-                        .Select(async item => {
-                            await Task.WhenAll(sorting
-                                .Where(pair => pair.Value.HasValue)
-                                .Select(pair => item[pair.Key].Ready));
-                            return item;
-                        })
-                        .ToList();
+                    var sortingTasks = chunk.Select(async item => await item.Ready(sorting)).ToList();
                     var sortingComplete = sortingTasks.All(task => task.IsCompleted);
                     if (sortingComplete == false) {
-                        added = sortingTasks.Select(async task => Collection.Add(await task));
-                        await Task.WhenAll(added);
+                        sorted = sortingTasks.Select(async task => Collection.Add(await task));
                     }
                 }
-                if (added == null) {
+                if (sorted != null) {
+                    await Task.WhenAll(sorted);
+                }
+                else {
                     using (Controller?.Updating()) {
                         Collection.Add(chunk);
                     }

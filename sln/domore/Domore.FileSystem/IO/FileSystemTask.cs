@@ -59,5 +59,19 @@ namespace Domore.IO {
                 }
             });
         }
+
+        public static async Task Delete(FileSystemInfo fileSystemInfo, FileSystemProgress fileSystemProgress, CancellationToken cancellationToken) {
+            if (fileSystemInfo is DirectoryInfo directory) {
+                await new DirectoryDeleter(directory).Delete(fileSystemProgress, cancellationToken);
+                return;
+            }
+            if (fileSystemInfo is FileInfo file) {
+                fileSystemProgress?.SetCurrentInfo(file);
+                fileSystemProgress?.AddToTarget(1);
+                await FileDeleter.Delete(file, cancellationToken);
+                fileSystemProgress?.AddToProgress(1);
+                return;
+            }
+        }
     }
 }

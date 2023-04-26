@@ -26,8 +26,8 @@ namespace Brows.Exports {
                 CopyFiles = list
                     .Select(path => new Win32FileOperation.CopyFile { Path = path })
                     .ToList(),
-                PreserveFileExtensions = sameDir ? true : null,
-                RenameOnCollision = sameDir ? true : null
+                PreserveFileExtensions = sameDir,
+                RenameOnCollision = sameDir
             };
             return await op.Operate(progress, token);
         }
