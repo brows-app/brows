@@ -31,6 +31,11 @@ namespace Domore.IO {
         private async Task WriteFilesAndQueueDirectories(DirectoryInfo directoryInfo, EnumerationOptions enumerationOptions, Queue<DirectoryInfo> queue, CancellationToken cancellationToken) {
             if (null == directoryInfo) throw new ArgumentNullException(nameof(directoryInfo));
             if (null == queue) throw new ArgumentNullException(nameof(queue));
+            if (false == EnumerateReparsePoints) {
+                if (directoryInfo.Attributes.HasFlag(FileAttributes.ReparsePoint)) {
+                    return;
+                }
+            }
             var writer = Channel.Writer;
             await Task.Run(cancellationToken: cancellationToken, function: async () => {
                 var infos = directoryInfo.EnumerateFileSystemInfos(SearchPattern, enumerationOptions);
@@ -109,6 +114,8 @@ namespace Domore.IO {
 
         public long FileCount => Interlocked.Read(ref _FileCount);
         private long _FileCount;
+
+        public bool EnumerateReparsePoints { get; set; }
 
         public IAsyncEnumerator<FileSystemInfo> GetAsyncEnumerator(CancellationToken cancellationToken) {
             if (Locked) throw new LockedException();

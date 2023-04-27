@@ -1,0 +1,13 @@
+# example:
+# open h
+
+# Specify where to open items that can be provided by the app.
+# Options:
+#   here:   Open in this panel.
+#   panel:  Add a panel to this window, and open in that panel.
+#   window: Create a new window, add a panel to it, and open in that panel.
+where = here
+
+# Use this program to open the item. Leave blank to use the
+# default program for the item.
+with = 

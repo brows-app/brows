@@ -1,4 +1,5 @@
-﻿using Domore.Logs;
+﻿using Brows.Exports;
+using Domore.Logs;
 using Domore.Notification;
 using System;
 using System.Diagnostics;
@@ -55,8 +56,10 @@ namespace Brows.Diagnostics {
 
         public string Input { get; }
         public string WorkingDirectory { get; }
+        public IFixProcessError Fix { get; }
 
-        public ProcessWrapper(string input, string workingDirectory) {
+        public ProcessWrapper(string input, string workingDirectory, IFixProcessError fix) {
+            Fix = fix;
             Input = input;
             WorkingDirectory = workingDirectory;
         }
@@ -112,8 +115,24 @@ namespace Brows.Diagnostics {
             using (var process = Process = new Process()) {
                 process.StartInfo = startInfo;
                 try {
-                    process.Start();
-                    Running = true;
+                    try {
+                        process.Start();
+                        Running = true;
+                    }
+                    catch (Exception ex) {
+                        var fix = Fix;
+                        if (fix == null) {
+                            throw;
+                        }
+                        var fixd = await fix.Work(process.StartInfo, ex, token);
+                        if (fixd == false) {
+                            throw;
+                        }
+                    }
+                    if (Running == false) {
+                        process.Start();
+                        Running = true;
+                    }
                     ProcessID = process.Id;
                     using (var processStream = new ProcessStream(process)) {
                         Stream = processStream;

@@ -12,5 +12,6 @@
         <ProjectReference Include="..\..\domore\Domore.Win32.STAThreadPool\Domore.Win32.STAThreadPool.csproj" />
         <ProjectReference Include="..\..\domore\Domore.Win32.Windows\Domore.Win32.Windows.csproj" />
         <ProjectReference Include="..\..\domore\Domore.Win32\Domore.Win32.csproj" />
+        <ProjectReference Include="..\Brows.Commands.Process\Brows.Commands.Process.csproj" />
     </ItemGroup>
 </Project>

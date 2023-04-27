@@ -1,3 +1,6 @@
+using Brows.Config;
+using Brows.Diagnostics;
+using Brows.Exports;
 using Domore.Notification;
 using System;
 using System.Collections.Generic;
@@ -6,10 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Config;
-    using Diagnostics;
-
-    internal class CommandProcess : Notifier {
+    internal sealed class CommandProcess : Notifier {
         private IConfig<ProcessConfig> Config =>
             _Config ?? (
             _Config = Configure.File<ProcessConfig>());
@@ -36,6 +36,7 @@ namespace Brows {
             }
         }
 
+        public IFixProcessError Fix { get; set; }
         public IList<ProcessWrapper> List { get; } = new List<ProcessWrapper>();
 
         public async Task Start(string input, string workingDirectory, CancellationToken token) {
@@ -44,7 +45,7 @@ namespace Brows {
                 await Start(workingDirectory, token);
             }
             else {
-                var process = new ProcessWrapper(i, workingDirectory);
+                var process = new ProcessWrapper(i, workingDirectory, Fix);
                 List.Insert(0, process);
                 await process.Start(token);
             }

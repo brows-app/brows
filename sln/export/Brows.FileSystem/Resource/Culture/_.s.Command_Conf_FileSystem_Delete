@@ -4,10 +4,11 @@
 
 # If true, skip the operating system's cache of deleted
 # items to permanently delete the selection.
-u =
+u = false
 
 # Use this method to delete the selection.
 #   native:  Delete with the operating system's native UI.
-#   managed: Delete with a custom implementation. This mode
+#   managed: Delete with a custom implementation that may
+#            be faster in certain situations. This mode
 #            implies the unrecoverable flag.
-mode =
+mode = native

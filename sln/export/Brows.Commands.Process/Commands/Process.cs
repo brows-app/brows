@@ -1,16 +1,16 @@
+using Brows.Exports;
+using Brows.Extensions;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Brows.Commands {
-    using Extensions;
-
     internal sealed class Process : Command {
         private readonly CommandProcessHistory History = new CommandProcessHistory();
 
         private CommandProcess CommandProcess =>
             _CommandProcess ?? (
-            _CommandProcess = new CommandProcess());
+            _CommandProcess = new CommandProcess { Fix = Fix });
         private CommandProcess _CommandProcess;
 
         private async IAsyncEnumerable<ICommandSuggestion> SuggestHistory(ICommandContext context, [EnumeratorCancellation] CancellationToken cancellationToken) {
@@ -87,5 +87,7 @@ namespace Brows.Commands {
                 return true;
             });
         }
+
+        public IFixProcessError Fix { get; set; }
     }
 }

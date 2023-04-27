@@ -15,12 +15,6 @@ using PATH = System.IO.Path;
 namespace Brows {
     internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemConfig> {
         private static readonly ILog Log = Logging.For(typeof(FileSystemProvider));
-        private static readonly EnumerationOptions EnumerationOptions = new EnumerationOptions {
-            AttributesToSkip = 0,
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = false,
-            ReturnSpecialDirectories = false
-        };
 
         private readonly StringComparer SetComparer;
         private readonly Dictionary<string, FileSystemEntry> IDSet;
@@ -243,7 +237,7 @@ namespace Brows {
                 ? FileSystemEventTasks.Add(Parent, ParentEventTask)
                 : null;
             var delay = Math.Max(0, Config.ProvideDelay);
-            var reader = FileSystemReader.Read(Directory, "*", EnumerationOptions, info => new FileSystemEntry(this, info), token);
+            var reader = FileSystemReader.Read(Directory, info => new FileSystemEntry(this, info), token);
             await reader.Wait(delay, token);
             await Provide(reader.Existing());
             await foreach (var item in reader.Remaining(token)) {
@@ -256,7 +250,7 @@ namespace Brows {
                 Log.Info(Log.Join(nameof(Refresh), ID));
             }
             var ids = new Dictionary<string, FileSystemEntry>(IDSet, SetComparer);
-            var read = FileSystemReader.Read(Directory, "*", EnumerationOptions, info => info, token);
+            var read = FileSystemReader.Read(Directory, info => info, token);
             await foreach (var info in read.Remaining(token)) {
                 var id = info.FullName;
                 if (ids.TryGetValue(id, out var entry)) {

@@ -12,31 +12,28 @@ namespace Brows.Commands {
             if (context.HasPanel(out var active) == false) return false;
             if (context.GetParameter(out var parameter) == false) return false;
             if (active.HasFileSystemDirectory(out var directory) == false) return false;
-            if (active.HasSelection(out var entries) == false) {
-                return false;
-            }
+            if (active.HasFileSystemSelection(out var selection) == false) return false;
             return context.Operate(async (progress, token) => {
                 switch (parameter.Mode) {
                     case null:
                     case Mode.Native:
-                        goto default;
-                    case Mode.Managed:
-                        await Task.WhenAll(entries
-                            .OfType<FileSystemEntry>()
-                            .Select(e => FileSystemTask.Delete(e.Info, new FileSystemOperationProgress(progress), token)));
-                        return true;
                     default:
-                        var service = DeleteFilesInDirectory;
+                        var service = NativeService;
                         if (service == null) {
                             return false;
                         }
-                        var names = entries.Select(entry => entry.Name).ToList();
+                        var names = selection.Select(info => info.Name).ToList();
                         return await service.Work(names, directory.FullName, parameter, progress, token);
+                    case Mode.Managed:
+                        var prog = new FileSystemOperationProgress(progress);
+                        var tasks = selection.Select(async info => await FileSystemTask.Delete(info, prog, token)).ToList();
+                        await Task.WhenAll(tasks);
+                        return tasks.Count > 0;
                 }
             });
         }
 
-        public IDeleteFilesInDirectory DeleteFilesInDirectory { get; set; }
+        public IDeleteFilesInDirectory NativeService { get; set; }
 
         public enum Mode {
             [Conf("n", "native")]

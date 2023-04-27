@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domore.Runtime.Win32;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,12 +13,20 @@ namespace Brows.Exports {
             if (set == null) {
                 return false;
             }
-            var result = await Win32Overlay.Load(fileSystemInfo.FullName, token);
-            if (result == null) {
-                return false;
+            bool ret(object obj) {
+                set(obj);
+                return true;
             }
-            set(result);
-            return true;
+            var result = await Win32Overlay.Load(fileSystemInfo.FullName, token);
+            if (result != null) {
+                return ret(result);
+            }
+            if (fileSystemInfo is DirectoryInfo directory) {
+                if (directory.Attributes.HasFlag(FileAttributes.ReparsePoint)) {
+                    return ret(await Win32Icon.Load(SHSTOCKICONID.LINK, token));
+                }
+            }
+            return false;
         }
     }
 }

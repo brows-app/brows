@@ -9,6 +9,12 @@ using System.Threading.Tasks;
 namespace Brows {
     internal abstract class FileSystemReader {
         private static readonly ILog Log = Logging.For(typeof(FileSystemReader));
+        private static readonly EnumerationOptions EnumerationOptions = new EnumerationOptions {
+            AttributesToSkip = 0,
+            IgnoreInaccessible = true,
+            RecurseSubdirectories = false,
+            ReturnSpecialDirectories = false
+        };
 
         private CancellationTokenSource WaitSource;
 
@@ -42,7 +48,7 @@ namespace Brows {
             WaitSource = null;
         }
 
-        public static FileSystemReader<T> Read<T>(DirectoryInfo directory, string searchPattern, EnumerationOptions enumerationOptions, Func<FileSystemInfo, T> transform, CancellationToken token) {
+        public static FileSystemReader<T> Read<T>(DirectoryInfo directory, Func<FileSystemInfo, T> transform, CancellationToken token) {
             if (directory is null) throw new ArgumentNullException(nameof(directory));
             if (transform is null) throw new ArgumentNullException(nameof(transform));
             var channel = Channel.CreateUnbounded<T>(new UnboundedChannelOptions {
@@ -53,13 +59,14 @@ namespace Brows {
             Task.Run(cancellationToken: token, function: async () => {
                 var error = default(Exception);
                 try {
-                    foreach (var info in directory.EnumerateFileSystemInfos(searchPattern, enumerationOptions)) {
+                    foreach (var info in directory.EnumerateFileSystemInfos("*", EnumerationOptions)) {
                         if (token.IsCancellationRequested) {
                             token.ThrowIfCancellationRequested();
                         }
                         var ignore =
-                            info.Attributes.HasFlag(FileAttributes.Directory) &&
-                            info.Attributes.HasFlag(FileAttributes.ReparsePoint);
+                            info.Attributes.HasFlag(FileAttributes.Hidden) &&
+                            info.Attributes.HasFlag(FileAttributes.System) &&
+                            info.Attributes.HasFlag(FileAttributes.Directory);
                         if (ignore) {
                             continue;
                         }

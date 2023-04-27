@@ -55,7 +55,6 @@ namespace Domore.IO {
                 await FileDeleter.Delete(file, cancellationToken);
                 progress?.AddToProgress(1);
             }
-
             await foreach (var item in enumerable.WithCancellation(cancellationToken)) {
                 if (cancellationToken.IsCancellationRequested) {
                     cancellationToken.ThrowIfCancellationRequested();

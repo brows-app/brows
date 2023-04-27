@@ -50,6 +50,9 @@ namespace Domore.IO {
             collision = collision ?? FileSystemCollisionPrevention.Default;
             return await Task.Run(cancellationToken: cancellationToken, function: () => {
                 for (; ; ) {
+                    if (cancellationToken.IsCancellationRequested) {
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
                     var fil = new FileInfo(path);
                     var dir = new DirectoryInfo(path);
                     if (dir.Exists == false && fil.Exists == false) {
@@ -72,6 +75,17 @@ namespace Domore.IO {
                 fileSystemProgress?.AddToProgress(1);
                 return;
             }
+        }
+
+        public static async Task<DirectoryInfo> CreateDirectory(string path, CancellationToken cancellationToken) {
+            return await Task.Run(cancellationToken: cancellationToken, function: () => {
+                Directory.CreateDirectory(path);
+                var directory = new DirectoryInfo(path);
+                if (directory.Exists == false) {
+                    throw new IOException();
+                }
+                return directory;
+            });
         }
     }
 }
