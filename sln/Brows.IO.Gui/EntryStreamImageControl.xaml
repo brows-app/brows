@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Brows">
-    <Image 
-        x:Name="Image" 
-        x:FieldModifier="private"/>
+    <Image x:Name="Image" x:FieldModifier="private"
+           Loaded="Image_Loaded"
+           Unloaded="Image_Unloaded"/>
 </local:EntryStreamGuiControl>

@@ -11,3 +11,4 @@ DriveEntry_TotalSize                    = Size
 DriveEntry_VolumeLabel                  = Label
 
 Command_Description_Drives              = Show the drives on this PC
+Command_Description_Drives_Open         = Open the root of the drive

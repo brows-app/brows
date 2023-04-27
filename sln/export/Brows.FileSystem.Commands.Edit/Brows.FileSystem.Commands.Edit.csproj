@@ -1,13 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <None Remove="Resource\Culture\_" />
+        <EmbeddedResource Include="Resource\Culture\_" />
+        <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Edit" />
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Include="Resource\Culture\_" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
+        <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
     </ItemGroup>
 </Project>

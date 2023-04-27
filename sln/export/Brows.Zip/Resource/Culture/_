@@ -9,4 +9,5 @@ Command_Description_Zip_ClipboardCopy   = Copys items from the archive to the cl
 Command_Description_Zip_ClipboardPaste  = Add items from clipboard to archive
 Command_Description_Zip_Copy            = Extract selection
 Command_Description_Zip_Delete          = Delete the selection from the current archive
+Command_Description_Zip_Open            = Open entries in this archive
 Command_Description_Zip_Preview         = Show a preview of the item

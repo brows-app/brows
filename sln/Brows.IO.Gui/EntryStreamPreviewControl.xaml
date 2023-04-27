@@ -5,6 +5,7 @@
     xmlns:local="clr-namespace:Brows"
     xmlns:domore="http://schemas.enetty.com/xaml">
     <domore:PreviewHandlerControl x:Name="PreviewHandlerControl" x:FieldModifier="private"
+        Loaded="PreviewHandlerControl_Loaded"
         PreviewHandlerCLSIDChanged="PreviewHandlerControl_PreviewHandlerCLSIDChanged"
         PreviewHandlerLoadingChanged="PreviewHandlerControl_PreviewHandlerLoadingChanged"
         PreviewHandlerSuccessChanged="PreviewHandlerControl_PreviewHandlerSuccessChanged"/>

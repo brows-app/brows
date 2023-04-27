@@ -6,6 +6,10 @@ using System.Windows;
 
 namespace Brows {
     partial class EntryStreamTextControl {
+        private void PreviewTextControl_Loaded(object sender, RoutedEventArgs e) {
+            ChangeEntryStreamGui();
+        }
+
         private void PreviewTextControl_PreviewTextLoadingChanged(object sender, RoutedEventArgs e) {
             var control = sender as PreviewTextControl;
             if (control != null) {
@@ -20,12 +24,16 @@ namespace Brows {
             }
         }
 
-        protected override void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
+        private void ChangeEntryStreamGui() {
             PreviewTextControl.PreviewTextOptions = EntryStreamGui?.Options?.DecodedTextOptions;
             PreviewTextControl.PreviewTextSourceLengthMax = EntryStreamGui?.Options?.TextSourceLengthMax;
             PreviewTextControl.PreviewTextSource = EntryStreamGui == null
                 ? null :
                 new StreamText(EntryStreamGui.Source);
+        }
+
+        protected sealed override void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
+            ChangeEntryStreamGui();
             base.OnEntryStreamGuiChanged(e);
         }
 
@@ -33,7 +41,7 @@ namespace Brows {
             InitializeComponent();
         }
 
-        private class StreamText : IStreamText {
+        private sealed class StreamText : IStreamText {
             public bool StreamValid => Source.StreamValid;
             public long StreamLength => Source.StreamLength;
 

@@ -13,23 +13,24 @@ namespace Brows {
         private CancellationTokenSource TokenSource;
         private IEntryStreamGui ConsumingSource;
 
-        private async Task<bool> ConsumeSource(IEntryStreamGui gui, CancellationToken token) {
+        private async Task<bool> ConsumeSource(CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(nameof(ConsumeSource));
             }
-            if (gui?.Source?.StreamValid != true) {
+            var stream = EntryStreamGui;
+            if (stream?.Source?.StreamValid != true) {
                 Image.Source = null;
                 return false;
             }
-            var lengthMax = gui.Options?.ImageSourceLengthMax;
-            if (lengthMax.HasValue && lengthMax.Value < gui.Source.StreamLength) {
+            var lengthMax = stream.Options?.ImageSourceLengthMax;
+            if (lengthMax.HasValue && lengthMax.Value < stream.Source.StreamLength) {
                 Image.Source = null;
                 return false;
             }
-            var imageSource = ConsumingSource = gui;
+            var imageSource = ConsumingSource = stream;
             var image = default(ImageSource);
             try {
-                image = await gui.Source.Image(token);
+                image = await stream.Source.Image(token);
                 return true;
             }
             catch (Exception ex) {
@@ -52,35 +53,49 @@ namespace Brows {
             }
         }
 
-        private void This_Unloaded(object sender, RoutedEventArgs e) {
+        private async void Image_Loaded(object sender, RoutedEventArgs e) {
             if (Log.Info()) {
-                Log.Info(nameof(This_Unloaded));
+                Log.Info(nameof(Image_Loaded));
+            }
+            await ChangeEntryStreamGui();
+
+        }
+
+        private void Image_Unloaded(object sender, RoutedEventArgs e) {
+            if (Log.Info()) {
+                Log.Info(nameof(Image_Unloaded));
             }
             try { TokenSource?.Cancel(); }
             catch { }
         }
 
-        protected override async void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
+        private async Task ChangeEntryStreamGui() {
             if (Log.Info()) {
-                Log.Info(nameof(OnEntryStreamGuiChanged));
+                Log.Info(nameof(ChangeEntryStreamGui));
             }
             try { TokenSource?.Cancel(); }
             catch { }
             using (var tokenSource = TokenSource = new()) {
                 var token = tokenSource.Token;
-                var source = e.NewValue as IEntryStreamGui;
-                source?.State?.Image?.Change(loading: true, success: false);
+                var stream = EntryStreamGui;
+                stream?.State?.Image?.Change(loading: true, success: false);
 
-                var consumed = await ConsumeSource(source, token);
+                var consumed = await ConsumeSource(token);
                 TokenSource = null;
 
-                source?.State?.Image?.Change(loading: false, success: consumed);
+                stream?.State?.Image?.Change(loading: false, success: consumed);
             }
+        }
+
+        protected sealed override async void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
+            if (Log.Info()) {
+                Log.Info(nameof(OnEntryStreamGuiChanged));
+            }
+            await ChangeEntryStreamGui();
             base.OnEntryStreamGuiChanged(e);
         }
 
         public EntryStreamImageControl() {
-            Unloaded += This_Unloaded;
             InitializeComponent();
         }
     }

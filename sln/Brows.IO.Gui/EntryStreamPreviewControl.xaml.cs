@@ -3,6 +3,10 @@ using System.Windows;
 
 namespace Brows {
     partial class EntryStreamPreviewControl {
+        private void PreviewHandlerControl_Loaded(object sender, RoutedEventArgs e) {
+            ChangeEntryStreamGui();
+        }
+
         private void PreviewHandlerControl_PreviewHandlerLoadingChanged(object sender, RoutedEventArgs e) {
             var control = sender as PreviewHandlerControl;
             if (control != null) {
@@ -31,8 +35,12 @@ namespace Brows {
             }
         }
 
-        protected override void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
+        private void ChangeEntryStreamGui() {
             PreviewHandlerControl.PreviewHandlerSource = EntryStreamGui?.Source?.SourceFile;
+        }
+
+        protected sealed override void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
+            ChangeEntryStreamGui();
             base.OnEntryStreamGuiChanged(e);
         }
 

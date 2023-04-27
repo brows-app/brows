@@ -3,7 +3,17 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:brows="http://schemas.brows.app/xaml">
-    <Grid DataContext="{Binding}" Visibility="{Binding Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}">
+    <Grid DataContext="{Binding}">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Visible"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Grid>
             <brows:EntryStreamTextControl>
                 <brows:EntryStreamTextControl.Style>
