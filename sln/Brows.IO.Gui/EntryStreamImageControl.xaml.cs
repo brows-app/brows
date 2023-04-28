@@ -87,6 +87,8 @@ namespace Brows {
             }
         }
 
+        protected override string EntryStreamViewName => "Image";
+
         protected sealed override async void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
             if (Log.Info()) {
                 Log.Info(nameof(OnEntryStreamGuiChanged));

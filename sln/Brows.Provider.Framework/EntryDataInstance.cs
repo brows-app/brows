@@ -8,13 +8,15 @@ namespace Brows {
 
         public IEntryData this[string key] {
             get {
-                if (Set.TryGetValue(key, out var value) == false) {
-                    Set[key] = value = new EntryData(
-                        entry: Entry,
-                        token: Token,
-                        definition: Definition.Get(key) ?? EntryDataDefinition.Empty);
+                lock (Set) {
+                    if (Set.TryGetValue(key, out var value) == false) {
+                        Set[key] = value = new EntryData(
+                            entry: Entry,
+                            token: Token,
+                            definition: Definition.Get(key) ?? EntryDataDefinition.Empty);
+                    }
+                    return value;
                 }
-                return value;
             }
         }
 
@@ -29,8 +31,10 @@ namespace Brows {
         }
 
         public void Refresh() {
-            foreach (var value in Set.Values) {
-                value.Refresh();
+            lock (Set) {
+                foreach (var value in Set.Values) {
+                    value.Refresh();
+                }
             }
         }
     }

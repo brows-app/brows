@@ -36,7 +36,7 @@ namespace Brows {
             }
         }
 
-        public IFixProcessError Fix { get; set; }
+        public IFixProcessStartInfoError Fix { get; set; }
         public IList<ProcessWrapper> List { get; } = new List<ProcessWrapper>();
 
         public async Task Start(string input, string workingDirectory, CancellationToken token) {

@@ -2,7 +2,7 @@
 using System.ComponentModel;
 
 namespace Brows {
-    internal class EntryStreamGuiView : Notifier, IEntryStreamGuiView {
+    internal sealed class EntryStreamGuiView : Notifier, IEntryStreamGuiView {
         private static readonly PropertyChangedEventArgs ChangedEvent = new(nameof(Changed));
         private static readonly PropertyChangedEventArgs SuccessEvent = new(nameof(Success));
         private static readonly PropertyChangedEventArgs LoadingEvent = new(nameof(Loading));
@@ -15,6 +15,7 @@ namespace Brows {
             set {
                 if (Change(ref _Success, value, SuccessEvent, ReadyEvent)) {
                     Changed = true;
+                    State.Changed();
                 }
             }
         }
@@ -25,6 +26,7 @@ namespace Brows {
             set {
                 if (Change(ref _Loading, value, LoadingEvent, ReadyEvent)) {
                     Changed = true;
+                    State.Changed();
                 }
             }
         }
@@ -39,6 +41,12 @@ namespace Brows {
             private set => Change(ref _Changed, value, ChangedEvent);
         }
         private bool _Changed;
+
+        public EntryStreamGuiState State { get; }
+
+        public EntryStreamGuiView(EntryStreamGuiState state) {
+            State = state;
+        }
 
         void IEntryStreamGuiView.Change(bool? loading, bool? success) {
             if (success == true) {

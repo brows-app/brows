@@ -25,12 +25,14 @@ namespace Brows {
         }
 
         private void ChangeEntryStreamGui() {
-            PreviewTextControl.PreviewTextOptions = EntryStreamGui?.Options?.DecodedTextOptions;
+            PreviewTextControl.PreviewTextOptions = EntryStreamGui?.Options?.TextDecoderOptions;
             PreviewTextControl.PreviewTextSourceLengthMax = EntryStreamGui?.Options?.TextSourceLengthMax;
             PreviewTextControl.PreviewTextSource = EntryStreamGui == null
                 ? null :
                 new StreamText(EntryStreamGui.Source);
         }
+
+        protected override string EntryStreamViewName => "Text";
 
         protected sealed override void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
             ChangeEntryStreamGui();

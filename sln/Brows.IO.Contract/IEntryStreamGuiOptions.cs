@@ -6,7 +6,7 @@ namespace Brows {
     public interface IEntryStreamGuiOptions {
         long? TextSourceLengthMax { get; }
         long? ImageSourceLengthMax { get; }
-        DecodedTextOptions DecodedTextOptions { get; }
+        DecodedTextOptions TextDecoderOptions { get; }
         IReadOnlyDictionary<string, Guid> PreviewCLSID { get; }
     }
 }

@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PATH = System.IO.Path;
 
 namespace Brows {
     public sealed class ZipEntryInfo {
@@ -29,6 +30,13 @@ namespace Brows {
         internal static ZipEntryInfo Path(ZipArchivePath archive, ZipEntryName name) {
             return new ZipEntryInfo(archive, name, ZipEntryKind.Path);
         }
+
+        public string Extension =>
+            _Extension ?? (
+            _Extension = Kind == ZipEntryKind.Path
+                ? ""
+                : PATH.GetExtension(Name.Normalized));
+        private string _Extension;
 
         public ZipEntryName Name { get; }
         public ZipEntryKind Kind { get; }

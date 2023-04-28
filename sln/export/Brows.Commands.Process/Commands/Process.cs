@@ -88,6 +88,6 @@ namespace Brows.Commands {
             });
         }
 
-        public IFixProcessError Fix { get; set; }
+        public IFixProcessStartInfoError Fix { get; set; }
     }
 }

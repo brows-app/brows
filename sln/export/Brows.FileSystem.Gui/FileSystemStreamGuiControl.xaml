@@ -2,80 +2,78 @@
              x:ClassModifier="internal"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:brows="http://schemas.brows.app/xaml">
-    <Grid DataContext="{Binding}">
-        <Grid.Style>
-            <Style TargetType="Grid">
-                <Setter Property="Visibility" Value="Visible"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Grid.Style>
-        <Grid>
-            <brows:EntryStreamTextControl>
-                <brows:EntryStreamTextControl.Style>
-                    <Style TargetType="brows:EntryStreamTextControl">
-                        <Setter Property="EntryStreamGui" Value="{Binding}"/>
-                        <Setter Property="Visibility" Value="Hidden"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding State.Text.Ready}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </brows:EntryStreamTextControl.Style>
-            </brows:EntryStreamTextControl>
-            <brows:EntryStreamPreviewControl>
-                <brows:EntryStreamPreviewControl.Style>
-                    <Style TargetType="brows:EntryStreamPreviewControl">
-                        <Setter Property="EntryStreamGui" Value="{Binding}"/>
-                        <Setter Property="Visibility" Value="Hidden"/>
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding State.Text.Ready}" Value="False"/>
-                                    <Condition Binding="{Binding State.Preview.Ready}" Value="True"/>
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </brows:EntryStreamPreviewControl.Style>
-            </brows:EntryStreamPreviewControl>
-            <Grid>
-                <Grid.Style>
-                    <Style TargetType="Grid">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding State.Text.Changed}" Value="True"/>
-                                    <Condition Binding="{Binding State.Text.Success}" Value="False"/>
-                                    <Condition Binding="{Binding State.Text.Loading}" Value="False"/>
-                                    <Condition Binding="{Binding State.Preview.Changed}" Value="True"/>
-                                    <Condition Binding="{Binding State.Preview.Success}" Value="False"/>
-                                    <Condition Binding="{Binding State.Preview.Loading}" Value="False"/>
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-                <Image DataContext="{Binding Image}">
-                    <Image.Style>
-                        <Style TargetType="Image">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Ready}" Value="True">
-                                    <Setter Property="Source" Value="{Binding Display}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Image.Style>
-                </Image>
-            </Grid>
-        </Grid>
-    </Grid>
+             xmlns:brows="http://schemas.brows.app/xaml"
+             xmlns:local="clr-namespace:Brows">
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Style.Resources>
+                <ControlTemplate x:Key="TextControl">
+                    <brows:EntryStreamTextControl EntryStreamGui="{Binding}"/>
+                </ControlTemplate>
+                <ControlTemplate x:Key="ImageControl">
+                    <local:FileSystemStreamGuiImage/>
+                </ControlTemplate>
+                <ControlTemplate x:Key="PreviewControl">
+                    <brows:EntryStreamPreviewControl EntryStreamGui="{Binding}"/>
+                </ControlTemplate>
+            </Style.Resources>
+            <Setter Property="Template" Value="{x:Null}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ForceText}" Value="True">
+                    <Setter Property="Template" Value="{StaticResource TextControl}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ForceImage}" Value="True">
+                    <Setter Property="Template" Value="{StaticResource ImageControl}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ForcePreview}" Value="True">
+                    <Setter Property="Template" Value="{StaticResource PreviewControl}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Force}" Value="False">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Grid>
+                                    <Control Template="{StaticResource TextControl}"/>
+                                    <Control>
+                                        <Control.Style>
+                                            <Style TargetType="Control">
+                                                <Setter Property="Template" Value="{x:Null}"/>
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding State.Text.Changed}" Value="True"/>
+                                                            <Condition Binding="{Binding State.Text.Loading}" Value="False"/>
+                                                            <Condition Binding="{Binding State.Text.Success}" Value="False"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Template" Value="{StaticResource PreviewControl}"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Control.Style>
+                                    </Control>
+                                    <Control>
+                                        <Control.Style>
+                                            <Style TargetType="Control">
+                                                <Setter Property="Template" Value="{x:Null}"/>
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding State.Preview.Changed}" Value="True"/>
+                                                            <Condition Binding="{Binding State.Preview.Loading}" Value="False"/>
+                                                            <Condition Binding="{Binding State.Preview.Success}" Value="False"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Template" Value="{StaticResource ImageControl}"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Control.Style>
+                                    </Control>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
 </UserControl>

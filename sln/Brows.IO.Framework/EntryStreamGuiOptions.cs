@@ -36,20 +36,43 @@ namespace Brows {
         }
         private PreviewOptions _Preview;
 
-        public class ImageOptions {
-            public long? SourceLengthMax { get; set; } = 5120000;
+        public sealed class ExtensionSet : HashSet<string> {
+            public ExtensionSet(params string[] collection) : base(collection, StringComparer.OrdinalIgnoreCase) {
+            }
         }
 
-        public class TextOptions : DecodedTextOptions {
-            public long? SourceLengthMax { get; set; } = 100000;
+        public sealed class ImageOptions {
+            public long? SourceLengthMax { get; set; } = 10000000;
+
+            public ExtensionSet Extensions {
+                get => _Extensions ?? (_Extensions = new(".bmp", ".jpg", ".jpeg", ".gif", ".heif", ".heic", ".png"));
+                set => _Extensions = value;
+            }
+            private ExtensionSet _Extensions;
         }
 
-        public class PreviewOptions {
+        public sealed class TextOptions : DecodedTextOptions {
+            public long? SourceLengthMax { get; set; } = 1000000;
+
+            public ExtensionSet Extensions {
+                get => _Extensions ?? (_Extensions = new(".txt"));
+                set => _Extensions = value;
+            }
+            private ExtensionSet _Extensions;
+        }
+
+        public sealed class PreviewOptions {
             public Dictionary<string, Guid> CLSID {
                 get => _CLSID ?? (_CLSID = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase));
                 set => _CLSID = value;
             }
             private Dictionary<string, Guid> _CLSID;
+
+            public ExtensionSet Extensions {
+                get => _Extensions ?? (_Extensions = new(".pdf"));
+                set => _Extensions = value;
+            }
+            private ExtensionSet _Extensions;
         }
 
         long? IEntryStreamGuiOptions.ImageSourceLengthMax =>
@@ -61,7 +84,7 @@ namespace Brows {
         long? IEntryStreamGuiOptions.TextSourceLengthMax =>
             Text.SourceLengthMax;
 
-        DecodedTextOptions IEntryStreamGuiOptions.DecodedTextOptions =>
+        DecodedTextOptions IEntryStreamGuiOptions.TextDecoderOptions =>
             Text;
     }
 }

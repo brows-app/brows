@@ -56,9 +56,9 @@ namespace Brows.Diagnostics {
 
         public string Input { get; }
         public string WorkingDirectory { get; }
-        public IFixProcessError Fix { get; }
+        public IFixProcessStartInfoError Fix { get; }
 
-        public ProcessWrapper(string input, string workingDirectory, IFixProcessError fix) {
+        public ProcessWrapper(string input, string workingDirectory, IFixProcessStartInfoError fix) {
             Fix = fix;
             Input = input;
             WorkingDirectory = workingDirectory;
