@@ -1,8 +1,8 @@
-**Brows** is the multi-panel file browser for those that like to keep their hands on their keyboards.
+**Brows** is a file manager for power users.
 
 ***Control+N*** opens a new panel.
 
-***Tab*** cycles through the panels.
+***Tab*** cycles through panels.
 
 ***Control+L*** launches the command palette. From there, type commands or paths to navigate the file system.
 
