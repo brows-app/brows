@@ -7,6 +7,7 @@ namespace Brows {
         event EventHandler CurrentChanged;
         event EventHandler SelectedChanged;
         event EventHandler ObservedChanged;
+        event EventHandler ControllerChanged;
         bool ManualInteraction { get; }
         IEntryDataView DataView { get; }
         IReadOnlySet<IEntry> Selected { get; }

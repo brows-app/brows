@@ -134,6 +134,7 @@ namespace Brows {
         public event EventHandler CurrentChanged;
         public event EventHandler SelectedChanged;
         public event EventHandler ObservedChanged;
+        public event EventHandler ControllerChanged;
 
         public EntryDataView DataView =>
             _DataView ?? (
@@ -225,6 +226,7 @@ namespace Brows {
                         newValue.CurrentEntryChanged += Controller_CurrentEntryChanged;
                     }
                     Controller = DataView.Controller = newValue;
+                    ControllerChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

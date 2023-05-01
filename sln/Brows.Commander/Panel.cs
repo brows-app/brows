@@ -14,23 +14,9 @@ namespace Brows {
         private readonly PanelInput Input = new PanelInput();
         private readonly PanelHistory History = new PanelHistory();
 
-        private void EntryObservation_SortingChanged(object sender, EventArgs e) {
+        private void CurrentHistoricEntry() {
             var entries = Provider?.Observation;
-            if (entries != null && entries == sender) {
-                State = PanelState.For(this);
-            }
-        }
-
-        private void EntryObservation_SelectedChanged(object sender, EventArgs e) {
-            var entries = Provider?.Observation;
-            if (entries != null && entries == sender) {
-                State = PanelState.For(this);
-            }
-        }
-
-        private void EntryObservation_ObservedChanged(object sender, EventArgs e) {
-            var entries = Provider?.Observation;
-            if (entries != null && entries == sender) {
+            if (entries != null) {
                 if (entries.ManualInteraction == false) {
                     var currentHistory = History.Current;
                     if (currentHistory != null) {
@@ -45,8 +31,28 @@ namespace Brows {
                         }
                     }
                 }
-                State = PanelState.For(this);
             }
+        }
+
+        private void UpdatePanelState() {
+            State = PanelState.For(this);
+        }
+
+        private void EntryObservation_SortingChanged(object sender, EventArgs e) {
+            UpdatePanelState();
+        }
+
+        private void EntryObservation_SelectedChanged(object sender, EventArgs e) {
+            UpdatePanelState();
+        }
+
+        private void EntryObservation_ControllerChanged(object sender, EventArgs e) {
+            CurrentHistoricEntry();
+        }
+
+        private void EntryObservation_ObservedChanged(object sender, EventArgs e) {
+            CurrentHistoricEntry();
+            UpdatePanelState();
         }
 
         private void EntryObservation_CurrentChanged(object sender, EventArgs e) {
@@ -111,6 +117,7 @@ namespace Brows {
                     provider.Observation.SortingChanged -= EntryObservation_SortingChanged;
                     provider.Observation.ObservedChanged -= EntryObservation_ObservedChanged;
                     provider.Observation.SelectedChanged -= EntryObservation_SelectedChanged;
+                    provider.Observation.ControllerChanged -= EntryObservation_ControllerChanged;
                     provider.End();
                 }
             }
@@ -128,6 +135,7 @@ namespace Brows {
             provider.Observation.SortingChanged += EntryObservation_SortingChanged;
             provider.Observation.ObservedChanged += EntryObservation_ObservedChanged;
             provider.Observation.SelectedChanged += EntryObservation_SelectedChanged;
+            provider.Observation.ControllerChanged += EntryObservation_ControllerChanged;
             Provider = provider;
             Provider.Begin();
         }
