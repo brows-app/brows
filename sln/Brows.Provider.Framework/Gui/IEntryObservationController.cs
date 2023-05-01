@@ -1,7 +1,7 @@
 using System;
 
 namespace Brows.Gui {
-    public interface IEntryObservationController {
+    internal interface IEntryObservationController {
         event EventHandler ManualInteraction;
         event EventHandler NothingSelected;
         event EventHandler DraggingSelected;
@@ -16,6 +16,6 @@ namespace Brows.Gui {
         bool HasData(string key);
         bool RemoveData(string key);
         void ClearData();
-        IDisposable Updating();
+        bool SizeToFit(string key);
     }
 }

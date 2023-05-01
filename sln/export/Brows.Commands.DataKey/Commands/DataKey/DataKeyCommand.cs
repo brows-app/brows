@@ -58,6 +58,21 @@ namespace Brows.Commands.DataKey {
             return input;
         }
 
+        protected bool Validate(IEntryDataKeySet set, IReadOnlyList<string> args) {
+            if (null == set) throw new ArgumentNullException(nameof(set));
+            if (null == args) throw new ArgumentNullException(nameof(args));
+            foreach (var arg in args) {
+                var alias = Parse(arg);
+                if (alias != null) {
+                    var lookup = set.Lookup(alias);
+                    if (lookup == null) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         protected bool Workable(Context context) {
             if (context == null) return false;
             if (context.HasPanel(out var active) == false) return false;
@@ -65,16 +80,7 @@ namespace Brows.Commands.DataKey {
             if (active.HasProvider(out IProvider provider) == false) {
                 return false;
             }
-            foreach (var arg in parameter.Args) {
-                var alias = Parse(arg);
-                if (alias != null) {
-                    var lookup = provider.Data.Key.Lookup(alias);
-                    if (lookup == null) {
-                        return false;
-                    }
-                }
-            }
-            return true;
+            return Validate(provider.Data.Key, parameter.Args);
         }
 
         protected override IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, CancellationToken cancellationToken) {

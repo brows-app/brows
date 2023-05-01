@@ -32,25 +32,25 @@ namespace Brows.Data {
 
         private class ChecksumMD5 : FileChecksumData {
             public ChecksumMD5() : base("MD5") {
-                Width = 250;
+                Width = 225;
             }
         }
 
         private class ChecksumSHA1 : FileChecksumData {
             public ChecksumSHA1() : base("SHA1") {
-                Width = 250;
+                Width = 275;
             }
         }
 
         private class ChecksumSHA256 : FileChecksumData {
             public ChecksumSHA256() : base("SHA256") {
-                Width = 250;
+                Width = 450;
             }
         }
 
         private class ChecksumSHA512 : FileChecksumData {
             public ChecksumSHA512() : base("SHA512") {
-                Width = 500;
+                Width = 900;
             }
         }
     }

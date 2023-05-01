@@ -13,6 +13,8 @@ namespace Brows {
         private static readonly PropertyChangedEventArgs ObservedEvent = new(nameof(Observed));
         private static readonly PropertyChangedEventArgs SelectedEvent = new(nameof(Selected));
 
+        private readonly List<IEntry> SortingList = new();
+
         private void Controller_CurrentEntryChanged(object sender, EventArgs e) {
             CurrentChanged?.Invoke(this, e);
             NotifyPropertyChanged(CurrentEvent);
@@ -79,16 +81,21 @@ namespace Brows {
                     var sortingTasks = chunk.Select(async item => await item.Ready(sorting)).ToList();
                     var sortingComplete = sortingTasks.All(task => task.IsCompleted);
                     if (sortingComplete == false) {
-                        sorted = sortingTasks.Select(async task => Collection.Add(await task));
+                        sorted = sortingTasks.Select(async task => {
+                            var item = await task;
+                            Collection.Add(item);
+                            SortingList.Remove(item);
+                            SortingChanged?.Invoke(this, EventArgs.Empty);
+                        });
+                        SortingList.AddRange(chunk);
+                        SortingChanged?.Invoke(this, EventArgs.Empty);
                     }
                 }
                 if (sorted != null) {
                     await Task.WhenAll(sorted);
                 }
                 else {
-                    using (Controller?.Updating()) {
-                        Collection.Add(chunk);
-                    }
+                    Collection.Add(chunk);
                 }
                 ObservedChanged?.Invoke(this, EventArgs.Empty);
             }
@@ -102,12 +109,10 @@ namespace Brows {
             var chunkDelay = Provider.Config.Observe.Remove.Delay;
             var chunks = items.Chunk(chunkSize < 1 ? count : chunkSize);
             foreach (var chunk in chunks) {
-                using (Controller?.Updating()) {
-                    foreach (var item in chunk) {
-                        var itemRemoved = Collection.Remove(item);
-                        if (itemRemoved) {
-                            refocus = true;
-                        }
+                foreach (var item in chunk) {
+                    var itemRemoved = Collection.Remove(item);
+                    if (itemRemoved) {
+                        refocus = true;
                     }
                 }
                 if (chunkDelay > 0) {
@@ -125,6 +130,7 @@ namespace Brows {
             }
         }
 
+        public event EventHandler SortingChanged;
         public event EventHandler CurrentChanged;
         public event EventHandler SelectedChanged;
         public event EventHandler ObservedChanged;
@@ -155,6 +161,9 @@ namespace Brows {
 
         public object Current =>
             Controller?.CurrentEntry();
+
+        public IReadOnlyList<IEntry> Sorting =>
+            SortingList;
 
         public IReadOnlySet<IEntry> Selected =>
             Collection.Selection;

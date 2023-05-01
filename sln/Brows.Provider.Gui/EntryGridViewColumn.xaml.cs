@@ -1,6 +1,9 @@
 ﻿namespace Brows {
     partial class EntryGridViewColumn {
-        public EntryGridViewColumn() {
+        public string DataKey { get; }
+
+        public EntryGridViewColumn(string dataKey) {
+            DataKey = dataKey;
             InitializeComponent();
         }
     }

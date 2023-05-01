@@ -4,7 +4,6 @@
 # remove the .default extension.
 #
 
-cmd[AddPanel]                       .press[CTRL+N]              = *
 cmd[Bookmark]                       .input                      = bookmark|bm
 cmd[Bookmark]                       .press[CTRL+B]              = *
 cmd[Bookmark]                       .press[CTRL+D]              = * add=true
@@ -21,6 +20,7 @@ cmd[Delete]                         .press[DEL]                 = *
 cmd[Drives]                         .input                      = drives
 cmd[Escape]                         .press[ESC]                 = *
 cmd[Exit]                           .input                      = exit
+cmd[Fit]                            .input                      = fit
 cmd[Hide]                           .input                      = hide
 cmd[HistoryBack]                    .press[Back|ALT+LEFT]       = *
 cmd[HistoryForward]                 .press[ALT+RIGHT]           = *
@@ -33,17 +33,19 @@ cmd[Open]                           .press[ENTER+CTRL+SHIFT]    = * w
 cmd[Open]                           .click[2L]                  = *
 cmd[Operations]                     .input                      = !
 cmd[Palette]                        .press[CTRL+L]              = *
+cmd[PanelAdd]                       .input                      = panel-add|pa
+cmd[PanelAdd]                       .press[CTRL+N]              = * from=activepanel
+cmd[PanelRemove]                    .input                      = panel-remove|pr
+cmd[PanelRemove]                    .press[CTRL+W]              = *
+cmd[PanelRemove]                    .press[CTRL+SHIFT+W]        = * all=true
 cmd[Preview]                        .input                      = preview
 cmd[Preview]                        .press[ALT+P]               = *
 cmd[Process]                        .input                      = >
 cmd[Process]                        .press[SHIFT+.]             = *
 cmd[Refresh]                        .press[CTRL+R]              = *
 cmd[RefreshAll]                     .press[CTRL+SHIFT+R]        = *
-cmd[RemovePanel]                    .input                      = remove-panel|remp
-cmd[RemovePanel]                    .press[CTRL+W]              = *
 cmd[Reset]                          .press[ALT+CTRL+R]          = *
 cmd[ResetAll]                       .press[ALT+CTRL+SHIFT+R]    = *
-cmd[Save]                           .press[CTRL+S]              = *
 cmd[Select]                         .input                      = select|sel
 cmd[Show]                           .input                      = show
 cmd[Sort]                           .input                      = sort

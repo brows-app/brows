@@ -8,5 +8,6 @@
         string[] Sort(IEntrySorting sorting);
         string[] Add(params string[] names);
         string[] Remove(params string[] names);
+        string[] Fit(params string[] names);
     }
 }

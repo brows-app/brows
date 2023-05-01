@@ -1,25 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <PropertyGroup>
-    <Authors>Ken Yourek</Authors>
-    <Copyright>Copyright © Ken Yourek 2023</Copyright>
-    <VersionPrefix>0.20.0</VersionPrefix>
-    <VersionSuffix>alpha.19</VersionSuffix>
-    <AssemblyVersion>0.20.0.19</AssemblyVersion>
-    <InformationalVersion>0.20.0-alpha.19</InformationalVersion>
-    <FileVersion>0.20.0.19</FileVersion>
-    <PackageVersion>0.20.0-alpha.19</PackageVersion>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/brows-app/brows</RepositoryUrl>
-    <RepositoryBranch>main</RepositoryBranch>
-    <RepositoryCommit>61098e35e098e8e232396fef8e3c50aa50091137</RepositoryCommit>
-    <RootNamespace>Brows</RootNamespace>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <DebugType>embedded</DebugType>
-    <IntermediateOutputPath>obj</IntermediateOutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    <IsPackable>false</IsPackable>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Authors>Ken Yourek</Authors>
+        <Copyright>Copyright © Ken Yourek 2023</Copyright>
+        <VersionPrefix>0.1.0</VersionPrefix>
+        <VersionSuffix>alpha.2</VersionSuffix>
+        <AssemblyVersion>0.1.0.0</AssemblyVersion>
+        <InformationalVersion>0.1.0-alpha.0</InformationalVersion>
+        <FileVersion>0.1.0.0</FileVersion>
+        <PackageVersion>0.1.0-alpha.0</PackageVersion>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>D:\Users\Ken\Dropbox\files\projects\brows</RepositoryUrl>
+        <RepositoryBranch>master</RepositoryBranch>
+        <RepositoryCommit>e2f6e6bf9aee5eea536f92d3aa8fb013a7364ae6</RepositoryCommit>
+        <RootNamespace>Brows</RootNamespace>
+        <TargetFrameworks>net6.0</TargetFrameworks>
+        <DebugType>embedded</DebugType>
+        <IntermediateOutputPath>obj</IntermediateOutputPath>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <IsPackable>false</IsPackable>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
 </Project>

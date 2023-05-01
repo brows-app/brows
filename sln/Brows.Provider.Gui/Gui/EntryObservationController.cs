@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Brows.Gui {
-    internal class EntryObservationController : Controller<IEntryObservationController>, IEntryObservationController {
+    internal sealed class EntryObservationController : Controller<IEntryObservationController>, IEntryObservationController {
         private static readonly ILog Log = Logging.For(typeof(EntryObservationController));
 
         private IComparer CustomSort;
@@ -242,8 +242,18 @@ namespace Brows.Gui {
             return ListView.IsKeyboardFocusWithin;
         }
 
-        IDisposable IEntryObservationController.Updating() {
-            return null; // ListCollectionView?.DeferRefresh();
+        bool IEntryObservationController.SizeToFit(string key) {
+            var result = false;
+            foreach (var column in Element.ListView.GridView.Columns) {
+                if (column is EntryGridViewColumn c) {
+                    if (c.DataKey == key) {
+                        c.Width = c.ActualWidth;
+                        c.Width = double.NaN;
+                        result = true;
+                    }
+                }
+            }
+            return result;
         }
     }
 }

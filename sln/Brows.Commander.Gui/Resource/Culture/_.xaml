@@ -31,4 +31,15 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+    <Style TargetType="TextBlock" BasedOn="{StaticResource PanelStateTextBlockStyle}" x:Key="PanelStateItemsSortingCountTextBlockStyle">
+        <Setter Property="Text" Value="{Binding ItemsSortingCount, StringFormat='{}{0} items sorting  |  '}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ItemsSortingCount}" Value="0">
+                <Setter Property="Text" Value=""/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ItemsSortingCount}" Value="1">
+                <Setter Property="Text" Value="1 item sorting  |  "/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>    
 </ResourceDictionary>

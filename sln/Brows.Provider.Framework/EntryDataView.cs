@@ -85,6 +85,27 @@ namespace Brows {
             return names;
         }
 
+        public string[] Fit(params string[] names) {
+            if (names == null || names.Length == 0) {
+                names = Keys.ToArray();
+            }
+            for (var i = 0; i < names.Length; i++) {
+                var n = names[i];
+                var k = Provider.Data.Definition.Key.Lookup(n);
+                if (k != null) {
+                    var c = Controller;
+                    if (c != null) {
+                        var fit = c.SizeToFit(k);
+                        if (fit == false) {
+                            k = null;
+                        }
+                    }
+                }
+                names[i] = k;
+            }
+            return names;
+        }
+
         public bool Has(string name) {
             var key = Provider.Data.Definition.Key.Lookup(name);
             if (key != null) {

@@ -69,7 +69,9 @@ namespace Brows {
                     : FileSystemEntryKind.Unknown;
             ID = Info.FullName;
             Name = Info.Name;
-            Extension = Info.Extension;
+            Extension = Kind == FileSystemEntryKind.File
+                ? Info.Extension
+                : "";
         }
 
         public void RefreshAfter(int delay) {

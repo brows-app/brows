@@ -37,9 +37,9 @@ namespace Brows.Gui {
             if (dataTemplate == null) {
                 dataTemplate = EntryGridViewColumnCellTemplate.Get(Agent);
             }
-            var column = new EntryGridViewColumn {
+            var column = new EntryGridViewColumn(Key) {
                 CellTemplate = dataTemplate,
-                Width = Agent?.Width ?? double.NaN
+                Width = Agent.Width
             };
             if (column.Header == null) {
                 column.Header = new EntryGridViewColumnHeader(Agent.ResourceKey) {

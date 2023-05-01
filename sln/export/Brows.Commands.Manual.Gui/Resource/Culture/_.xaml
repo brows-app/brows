@@ -3,7 +3,7 @@
     <CompositeCollection x:Key="Manual_TextCollection">
         <TextBlock>
             <Run Text="Brows" FontWeight="Bold"/>
-            <Run Text="is a multi-panel file-system browser for developers and power users."/>
+            <Run Text="is a file manager for power users."/>
         </TextBlock>
         <TextBlock>
             <Run Text="Control+N" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
@@ -11,7 +11,7 @@
         </TextBlock>
         <TextBlock>
             <Run Text="Tab" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
-            <Run Text="cycles through the panels."/>
+            <Run Text="cycles through panels."/>
         </TextBlock>
         <TextBlock>
             <Run Text="Control+L" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
@@ -34,7 +34,6 @@
             THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </TextBlock>
     </CompositeCollection>
-
     <DataTemplate x:Key="CommandContextHint_CommanderManualData">
         <Control Template="{DynamicResource CommandContextDataGesture_Hint_Down_Up}"/>
     </DataTemplate>

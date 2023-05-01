@@ -15,8 +15,10 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" Style="{DynamicResource PanelStateItemsCountTextBlockStyle}"/>
         <TextBlock Grid.Column="1" Style="{DynamicResource PanelStateItemsSelectedCountTextBlockStyle}"/>
+        <TextBlock Grid.Column="2" Style="{DynamicResource PanelStateItemsSortingCountTextBlockStyle}"/>
     </Grid>
 </UserControl>

@@ -8,6 +8,7 @@ namespace Brows {
         bool HasView(out IEntryDataView view);
         bool HasSelection(out IReadOnlySet<IEntry> entries);
         bool HasSelection<TEntry>(out IReadOnlySet<TEntry> entries) where TEntry : class, IEntry;
+        bool HasEntry(out IEntry current);
         bool HasEntries(out IReadOnlyList<IEntry> entries);
         bool HasEntries<TEntry>(out IReadOnlyList<TEntry> entries) where TEntry : class, IEntry;
         bool HasProvider<TProvider>(out TProvider provider) where TProvider : class, IProvider;

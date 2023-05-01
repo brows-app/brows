@@ -14,6 +14,13 @@ namespace Brows {
         private readonly PanelInput Input = new PanelInput();
         private readonly PanelHistory History = new PanelHistory();
 
+        private void EntryObservation_SortingChanged(object sender, EventArgs e) {
+            var entries = Provider?.Observation;
+            if (entries != null && entries == sender) {
+                State = PanelState.For(this);
+            }
+        }
+
         private void EntryObservation_SelectedChanged(object sender, EventArgs e) {
             var entries = Provider?.Observation;
             if (entries != null && entries == sender) {
@@ -101,6 +108,7 @@ namespace Brows {
             if (provider != null) {
                 using (provider) {
                     provider.Observation.CurrentChanged -= EntryObservation_CurrentChanged;
+                    provider.Observation.SortingChanged -= EntryObservation_SortingChanged;
                     provider.Observation.ObservedChanged -= EntryObservation_ObservedChanged;
                     provider.Observation.SelectedChanged -= EntryObservation_SelectedChanged;
                     provider.End();
@@ -117,14 +125,11 @@ namespace Brows {
                 Log.Info(nameof(Start) + " > " + provider?.GetType()?.Name);
             }
             provider.Observation.CurrentChanged += EntryObservation_CurrentChanged;
+            provider.Observation.SortingChanged += EntryObservation_SortingChanged;
             provider.Observation.ObservedChanged += EntryObservation_ObservedChanged;
             provider.Observation.SelectedChanged += EntryObservation_SelectedChanged;
             Provider = provider;
             Provider.Begin();
-        }
-
-        private void Observation_SortingEntries(object sender, EventArgs e) {
-            throw new NotImplementedException();
         }
 
         private async Task<bool> TryStart(string id, CancellationToken cancellationToken) {
@@ -329,6 +334,11 @@ namespace Brows {
             }
             entries = selection.OfType<TEntry>().ToHashSet();
             return entries.Count > 0;
+        }
+
+        bool IPanel.HasEntry(out IEntry current) {
+            current = Provider?.Observation?.Current();
+            return current != null;
         }
 
         bool IPanel.HasEntries(out IReadOnlyList<IEntry> entries) {
