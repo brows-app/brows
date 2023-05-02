@@ -14,24 +14,12 @@ namespace Brows {
         private readonly PanelInput Input = new PanelInput();
         private readonly PanelHistory History = new PanelHistory();
 
-        private void CurrentHistoricEntry() {
-            var entries = Provider?.Observation;
-            if (entries != null) {
-                if (entries.ManualInteraction == false) {
-                    var currentHistory = History.Current;
-                    if (currentHistory != null) {
-                        var historicEntry = entries.Observed.FirstOrDefault(e => e.ID == currentHistory.CurrentEntryID);
-                        if (historicEntry != null) {
-                            var changed = entries.Current(historicEntry);
-                            if (changed) {
-                                if (Active) {
-                                    Activate();
-                                }
-                            }
-                        }
-                    }
+        private void LoadCurrentHistory() {
+            History.CurrentLoadOpportunity(Provider, loaded: () => {
+                if (Active) {
+                    Activate();
                 }
-            }
+            });
         }
 
         private void UpdatePanelState() {
@@ -47,11 +35,11 @@ namespace Brows {
         }
 
         private void EntryObservation_ControllerChanged(object sender, EventArgs e) {
-            CurrentHistoricEntry();
+            LoadCurrentHistory();
         }
 
         private void EntryObservation_ObservedChanged(object sender, EventArgs e) {
-            CurrentHistoricEntry();
+            LoadCurrentHistory();
             UpdatePanelState();
         }
 

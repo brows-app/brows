@@ -49,6 +49,7 @@ namespace Brows {
             return new FileSystemProvider(
                 factory: this,
                 caseSensitive: caseSensitive,
+                initialCapacity: 25,
                 directory: info.FullName == caseCorrect ? info : new DirectoryInfo(caseCorrect));
         }
 

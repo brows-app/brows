@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows.Gui {
     internal interface IEntryObservationController {
@@ -7,8 +9,6 @@ namespace Brows.Gui {
         event EventHandler DraggingSelected;
         event EventHandler CurrentEntryChanged;
         object DraggingSource { get; }
-        bool CurrentEntry(IEntry item);
-        IEntry CurrentEntry();
         void Sort(IEntrySorting sorting);
         bool Focus();
         bool Focused();
@@ -17,5 +17,8 @@ namespace Brows.Gui {
         bool RemoveData(string key);
         void ClearData();
         bool SizeToFit(string key);
+        Task<bool> CurrentEntry(IEntry item, CancellationToken token);
+        bool CurrentEntry(IEntry item);
+        IEntry CurrentEntry();
     }
 }

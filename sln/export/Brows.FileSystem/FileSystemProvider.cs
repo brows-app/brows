@@ -16,9 +16,7 @@ namespace Brows {
     internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemConfig> {
         private static readonly ILog Log = Logging.For(typeof(FileSystemProvider));
 
-        private readonly StringComparer SetComparer;
-        private readonly Dictionary<string, FileSystemEntry> IDSet;
-        private readonly Dictionary<string, FileSystemEntry> NameSet;
+        private readonly StringComparer CaseComparer;
         private readonly Dictionary<string, List<FileSystemEntry>> ExtensionSet;
 
         private FileSystemEventTask ThisEvent;
@@ -41,7 +39,8 @@ namespace Brows {
             }
             switch (e.ChangeType) {
                 case WatcherChangeTypes.Changed:
-                    if (NameSet.TryGetValue(e.Name, out var changedEntry)) {
+                    var changedEntry = Lookup(name: e.Name);
+                    if (changedEntry != null) {
                         changedEntry.RefreshAfter(delay: Config.FileSystemEvent.RefreshDelay);
                     }
                     break;
@@ -49,9 +48,10 @@ namespace Brows {
                     if (Log.Info()) {
                         Log.Info(nameof(WatcherChangeTypes.Created) + " > " + e.FullPath);
                     }
-                    var idCreated = e.FullPath;
-                    if (IDSet.TryGetValue(idCreated, out var createdEntry) == false) {
-                        var createdInfo = await FileSystemTask.Existing(idCreated, Token);
+                    var createdID = e.FullPath;
+                    var createdEntry = Lookup(id: createdID);
+                    if (createdEntry == null) {
+                        var createdInfo = await FileSystemTask.Existing(createdID, Token);
                         if (createdInfo != null) {
                             await Provide(new FileSystemEntry(this, createdInfo));
                         }
@@ -61,7 +61,8 @@ namespace Brows {
                     if (Log.Info()) {
                         Log.Info(nameof(WatcherChangeTypes.Deleted) + " > " + e.FullPath);
                     }
-                    if (NameSet.TryGetValue(e.Name, out var deletedEntry)) {
+                    var deletedEntry = Lookup(name: e.Name);
+                    if (deletedEntry != null) {
                         await Revoke(deletedEntry);
                     }
                     break;
@@ -71,12 +72,14 @@ namespace Brows {
                     }
                     var r = e as RenamedEventArgs;
                     if (r != null) {
-                        if (NameSet.TryGetValue(r.OldName, out var oldEntry)) {
+                        var oldEntry = Lookup(name: r.OldName);
+                        if (oldEntry != null) {
                             await Revoke(oldEntry);
                         }
-                        var idNew = e.FullPath;
-                        if (IDSet.TryGetValue(idNew, out var newEntry) == false) {
-                            var newInfo = await FileSystemTask.Existing(idNew, Token);
+                        var newID = e.FullPath;
+                        var newEntry = Lookup(id: newID);
+                        if (newEntry == null) {
+                            var newInfo = await FileSystemTask.Existing(newID, Token);
                             if (newInfo != null) {
                                 await Provide(new FileSystemEntry(this, newInfo));
                             }
@@ -187,8 +190,6 @@ namespace Brows {
                     }
                     extension.Add(entry);
                 }
-                IDSet[entry.ID] = entry;
-                NameSet[entry.Name] = entry;
             }
         }
 
@@ -197,8 +198,6 @@ namespace Brows {
                 if (ExtensionSet.TryGetValue(entry.Extension, out var extension)) {
                     extension.Remove(entry);
                 }
-                IDSet.Remove(entry.ID);
-                NameSet.Remove(entry.Name);
             }
         }
 
@@ -249,7 +248,7 @@ namespace Brows {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(Refresh), ID));
             }
-            var ids = new Dictionary<string, FileSystemEntry>(IDSet, SetComparer);
+            var ids = Provided.ToDictionary(entry => entry.ID, CaseComparer);
             var read = FileSystemReader.Read(Directory, info => info, token);
             await foreach (var info in read.Remaining(token)) {
                 var id = info.FullName;
@@ -285,15 +284,13 @@ namespace Brows {
         public DirectoryInfo Directory { get; }
         public FileSystemProviderFactory Factory { get; }
 
-        public FileSystemProvider(FileSystemProviderFactory factory, DirectoryInfo directory, bool caseSensitive) : base(directory?.FullName) {
+        public FileSystemProvider(FileSystemProviderFactory factory, DirectoryInfo directory, bool caseSensitive, int initialCapacity) : base(directory?.FullName, initialCapacity, caseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase, caseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase) {
             Factory = factory ?? throw new ArgumentNullException(nameof(factory));
             Directory = directory ?? throw new ArgumentNullException(nameof(directory));
             CaseSensitive = caseSensitive;
-            SetComparer = CaseSensitive
+            CaseComparer = CaseSensitive
                 ? StringComparer.Ordinal
                 : StringComparer.OrdinalIgnoreCase;
-            IDSet = new(SetComparer);
-            NameSet = new(SetComparer);
             ExtensionSet = new(StringComparer.OrdinalIgnoreCase);
         }
 

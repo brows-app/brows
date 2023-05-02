@@ -3,10 +3,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Brows.Gui {
     internal sealed class EntryObservationController : Controller<IEntryObservationController>, IEntryObservationController {
@@ -29,6 +32,50 @@ namespace Brows.Gui {
         private GridView GridView => Element.ListView.GridView;
         private ListCollectionView ListCollectionView =>
             (ListCollectionView)CollectionViewSource.GetDefaultView(ListView.ItemsSource);
+
+        private bool SetCurrentEntry(IEntry item, CancellationToken token) {
+            if (Log.Info()) {
+                Log.Info(Log.Join(nameof(SetCurrentEntry), item?.ID));
+            }
+            if (item == null) {
+                return false;
+            }
+            ListView.ScrollIntoView(item);
+            if (token.IsCancellationRequested) {
+                token.ThrowIfCancellationRequested();
+            }
+            if (Log.Debug()) {
+                Log.Debug(Log.Join(nameof(ListView.ScrollIntoView), item.ID));
+            }
+            var moved = ListView.Items.MoveCurrentTo(item);
+            if (Log.Debug()) {
+                Log.Debug(Log.Join(nameof(ListView.Items.MoveCurrentTo), moved, item.ID));
+            }
+            if (moved == false) {
+                return false;
+            }
+            if (token.IsCancellationRequested) {
+                token.ThrowIfCancellationRequested();
+            }
+            var control = ListView.ItemContainerGenerator.ContainerFromItem(item) as ListViewItem;
+            if (Log.Debug()) {
+                Log.Debug(Log.Join(nameof(ListView.ItemContainerGenerator.ContainerFromItem), control, item.ID));
+            }
+            if (control == null) {
+                return false;
+            }
+            if (token.IsCancellationRequested) {
+                token.ThrowIfCancellationRequested();
+            }
+            var focus = control.Focus();
+            if (Log.Debug()) {
+                Log.Debug(Log.Join(nameof(control.Focus), focus, item.ID));
+            }
+            if (focus == false) {
+                return false;
+            }
+            return true;
+        }
 
         private List<EntryGridViewColumnProxy> GridColumnList(string key) {
             if (GridColumns.TryGetValue(key, out var list) == false) {
@@ -105,32 +152,38 @@ namespace Brows.Gui {
 
         public EntryObservationController(EntryObservationControl element) : base(element) {
             Element = element ?? throw new ArgumentNullException(nameof(element));
-            Element.ListView.Items.CurrentChanged += Items_CurrentChanged;
             Element.ListView.ItemsSourceChanged += ListView_ItemsSourceChanged;
             Element.ListView.MouseMove += ListView_MouseMove;
             Element.ListView.MouseUp += ListView_MouseUp;
             Element.ListView.PreviewKeyDown += ListView_PreviewKeyDown;
             Element.ListView.PreviewMouseDown += ListView_PreviewMouseDown;
             Element.ListView.SelectionChanged += ListView_SelectionChanged;
+            Element.ListView.Items.CurrentChanged += Items_CurrentChanged;
         }
 
         object IEntryObservationController.DraggingSource =>
             ListView;
 
+        async Task<bool> IEntryObservationController.CurrentEntry(IEntry item, CancellationToken token) {
+            if (token.IsCancellationRequested) {
+                token.ThrowIfCancellationRequested();
+            }
+            var result = false;
+            await ListView.Dispatcher.BeginInvoke(priority: DispatcherPriority.Render, args: null, method: () => {
+                try {
+                    result = SetCurrentEntry(item, token);
+                }
+                catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
+                }
+            });
+            if (token.IsCancellationRequested) {
+                token.ThrowIfCancellationRequested();
+            }
+            return result;
+        }
+
         bool IEntryObservationController.CurrentEntry(IEntry item) {
-            if (item == null) {
-                return false;
-            }
-            ListView.ScrollIntoView(item);
-            var moved = ListView.Items.MoveCurrentTo(item);
-            if (moved == false) {
-                return false;
-            }
-            var control = ListView.ItemContainerGenerator.ContainerFromItem(item) as ListViewItem;
-            if (control == null) {
-                return false;
-            }
-            return control.Focus();
+            return SetCurrentEntry(item, CancellationToken.None);
         }
 
         IEntry IEntryObservationController.CurrentEntry() {

@@ -8,7 +8,7 @@ namespace Brows.Data {
     internal static class FileSystemInfoData {
         public sealed class Attributes : Definition<FileAttributes?> {
             public Attributes() : base(i => i.Attributes) {
-                Width = 75;
+                Width = 100;
             }
         }
 
@@ -56,7 +56,7 @@ namespace Brows.Data {
 
         public sealed class Length : Definition<long?> {
             public Length() : base(i => i is FileInfo file ? file.Length : null) {
-                Width = 75;
+                Width = 100;
                 Converter = EntryDataConverter.FileSystemSize;
                 Alignment = EntryDataAlignment.Right;
             }

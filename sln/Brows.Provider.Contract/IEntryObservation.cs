@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     public interface IEntryObservation {
@@ -10,14 +12,14 @@ namespace Brows {
         event EventHandler ControllerChanged;
         bool ManualInteraction { get; }
         IEntryDataView DataView { get; }
+        IEntry LookupID(string value);
+        IEntry LookupName(string value);
         IReadOnlySet<IEntry> Selected { get; }
         IReadOnlyList<IEntry> Sorting { get; }
         IReadOnlyList<IEntry> Observed { get; }
-        IEntry Current();
-        bool Current(IEntry value);
         bool Focus();
-    }
-
-    public interface IEntryObservation<TEntry> : IEntryObservation {
+        bool Current(IEntry entry);
+        Task<bool> Current(IEntry entry, CancellationToken token);
+        IEntry Current();
     }
 }

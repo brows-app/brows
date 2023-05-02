@@ -220,7 +220,7 @@ namespace Brows {
                 EntryObservation = entryObservation ?? throw new ArgumentNullException(nameof(entryObservation));
             }
 
-            private Of(string id) : this(id, new EntryObservation<TEntry>()) {
+            private Of(string id, int initialCapacity, IEqualityComparer<string> compareID, IEqualityComparer<string> compareName) : this(id, new EntryObservation<TEntry>(initialCapacity, compareID, compareName)) {
             }
 
             protected IReadOnlyList<TEntry> Provided =>
@@ -249,9 +249,6 @@ namespace Brows {
 
             protected async Task Revoke(IReadOnlyCollection<TEntry> entries) {
                 if (entries == null) throw new ArgumentNullException(nameof(entries));
-                if (entries == EntryObservation.Items) {
-                    entries = entries.ToList();
-                }
                 if (entries.Count > 0) {
                     Removing(entries);
                     await EntryObservation.Remove(entries);
@@ -260,6 +257,25 @@ namespace Brows {
 
             protected async Task Revoke(TEntry entry) {
                 await Revoke(new[] { entry });
+            }
+
+            protected TEntry Lookup(string id = null, string name = null) {
+                if (id != null) {
+                    var entry = EntryObservation.LookupID(id);
+                    if (entry != null) {
+                        if (name == null || (name == entry.Name)) {
+                            return entry;
+                        }
+                    }
+                    return null;
+                }
+                if (name != null) {
+                    var entry = EntryObservation.LookupName(name);
+                    if (entry != null) {
+                        return entry;
+                    }
+                }
+                return null;
             }
 
             public abstract class With<TConfig> : Of<TEntry> where TConfig : EntryConfig, new() {
@@ -272,14 +288,17 @@ namespace Brows {
 
                 protected new TConfig Config { get; private set; }
 
-                protected With(string id) : base(id) {
+                protected With(string id, int initialCapacity, IEqualityComparer<string> compareID, IEqualityComparer<string> compareName) : base(id, initialCapacity, compareID, compareName) {
                 }
             }
         }
     }
 
     public abstract class Provider<TEntry, TConfig> : Provider.Of<TEntry>.With<TConfig> where TEntry : Entry where TConfig : EntryConfig, new() {
-        public Provider(string id) : base(id) {
+        public Provider(string id, int initialCapacity, IEqualityComparer<string> compareID, IEqualityComparer<string> compareName) : base(id, initialCapacity, compareID, compareName) {
+        }
+
+        public Provider(string id) : this(id, 0, null, null) {
         }
     }
 }

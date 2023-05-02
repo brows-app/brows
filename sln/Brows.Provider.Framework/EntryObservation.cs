@@ -47,6 +47,9 @@ namespace Brows {
             }
         }
 
+        internal abstract IEntry InternalLookupID(string value);
+        internal abstract IEntry InternalLookupName(string value);
+
         protected EntryObservationSource Collection {
             get {
                 if (_Collection == null) {
@@ -239,33 +242,102 @@ namespace Brows {
         bool IEntryObservation.Current(IEntry entry) {
             return Controller?.CurrentEntry(entry) ?? false;
         }
+
+        async Task<bool> IEntryObservation.Current(IEntry entry, CancellationToken token) {
+            var controller = Controller;
+            if (controller == null) {
+                return false;
+            }
+            return await controller.CurrentEntry(entry, token);
+        }
+
+        IEntry IEntryObservation.LookupID(string value) {
+            return InternalLookupID(value);
+        }
+
+        IEntry IEntryObservation.LookupName(string value) {
+            return InternalLookupID(value);
+        }
     }
 
-    internal sealed class EntryObservation<TEntry> : EntryObservation, IEntryObservation<TEntry> where TEntry : IEntry {
-        private readonly List<TEntry> List = new();
+    internal sealed class EntryObservation<TEntry> : EntryObservation where TEntry : IEntry {
+        private readonly List<TEntry> List;
+        private readonly Dictionary<string, TEntry> SetID;
+        private readonly Dictionary<string, TEntry> SetName;
+
+        internal sealed override IEntry InternalLookupID(string value) {
+            return LookupID(value);
+        }
+
+        internal sealed override IEntry InternalLookupName(string value) {
+            return LookupName(value);
+        }
+
+        public int InitialCapacity { get; }
+        public IEqualityComparer<string> CompareID { get; }
+        public IEqualityComparer<string> CompareName { get; }
 
         public IReadOnlyList<TEntry> Items =>
             List;
 
+        public EntryObservation(int initialCapacity, IEqualityComparer<string> compareID, IEqualityComparer<string> compareName) {
+            List = new(InitialCapacity = initialCapacity);
+            SetID = new(InitialCapacity, CompareID = compareID);
+            SetName = new(InitialCapacity, CompareName = compareName);
+        }
+
         public sealed override void End() {
             base.End();
             List.Clear();
+            SetID.Clear();
+            SetName.Clear();
         }
 
         public async Task Add(IReadOnlyCollection<TEntry> items) {
             if (items == null) return;
             if (items.Count == 0) return;
-            List.AddRange(items.Where(item => item is not null));
+            foreach (var item in items) {
+                if (item is not null) {
+                    List.Add(item);
+                    SetID[item.ID] = item;
+                    SetName[item.Name] = item;
+                }
+            }
             await Add(items.Cast<IEntry>(), items.Count);
         }
 
         public async Task Remove(IReadOnlyCollection<TEntry> items) {
             if (items == null) return;
             if (items.Count == 0) return;
-            foreach (var item in items) {
-                List.Remove(item);
+            if (items == List) {
+                List.Clear();
+                SetID.Clear();
+                SetName.Clear();
+            }
+            else {
+                foreach (var item in items) {
+                    if (item is not null) {
+                        List.Remove(item);
+                        SetID.Remove(item.ID);
+                        SetName.Remove(item.Name);
+                    }
+                }
             }
             await Remove(items.Cast<IEntry>(), items.Count);
+        }
+
+        public TEntry LookupID(string value) {
+            if (SetID.TryGetValue(value, out var item)) {
+                return item;
+            }
+            return default;
+        }
+
+        public TEntry LookupName(string value) {
+            if (SetName.TryGetValue(value, out var item)) {
+                return item;
+            }
+            return default;
         }
     }
 }
