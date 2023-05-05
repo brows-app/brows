@@ -310,6 +310,7 @@ namespace Brows {
             if (items == null) return;
             if (items.Count == 0) return;
             if (items == List) {
+                items = new List<TEntry>(items);
                 List.Clear();
                 SetID.Clear();
                 SetName.Clear();
