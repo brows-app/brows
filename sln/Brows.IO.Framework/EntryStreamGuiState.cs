@@ -7,21 +7,26 @@ namespace Brows {
 
         public EntryStreamGuiView Text =>
             _Text ?? (
-            _Text = new EntryStreamGuiView(this));
+            _Text = new(this));
         private EntryStreamGuiView _Text;
 
         public EntryStreamGuiView Image =>
             _Image ?? (
-            _Image = new EntryStreamGuiView(this));
+            _Image = new(this));
         private EntryStreamGuiView _Image;
 
         public EntryStreamGuiView Preview =>
             _Preview ?? (
-            _Preview = new EntryStreamGuiView(this));
+            _Preview = new(this));
         private EntryStreamGuiView _Preview;
 
+        public EntryStreamGuiView Media =>
+            _Media ?? (
+            _Media = new(this));
+        private EntryStreamGuiView _Media;
+
         public bool Force =>
-            ForceText || ForceImage || ForcePreview;
+            ForceText || ForceImage || ForceMedia || ForcePreview;
 
         public bool ForceText {
             get => _ForceText;
@@ -42,6 +47,16 @@ namespace Brows {
             }
         }
         private bool _ForceImage;
+
+        public bool ForceMedia {
+            get => _ForceMedia;
+            set {
+                if (Change(ref _ForceMedia, value, nameof(ForceMedia), nameof(Force))) {
+                    Changed();
+                }
+            }
+        }
+        private bool _ForceMedia;
 
         public bool ForcePreview {
             get => _ForcePreview;
@@ -64,6 +79,10 @@ namespace Brows {
                 Gui.View = nameof(Text);
                 return;
             }
+            if (Media.Success) {
+                Gui.View = nameof(Media);
+                return;
+            }
             if (Preview.Success) {
                 Gui.View = nameof(Preview);
                 return;
@@ -80,15 +99,19 @@ namespace Brows {
                 Gui.View = nameof(Unavailable);
                 return;
             }
+            if (ForceMedia && Media.Changed && Media.Loading == false) {
+                Gui.View = nameof(Unavailable);
+                return;
+            }
             if (ForcePreview && Preview.Changed && Preview.Loading == false) {
                 Gui.View = nameof(Unavailable);
                 return;
             }
-            if (Text.Loading || Image.Loading || Preview.Loading) {
+            if (Text.Loading || Image.Loading || Media.Loading || Preview.Loading) {
                 Gui.View = nameof(Loading);
                 return;
             }
-            if (Text.Changed || Image.Changed || Preview.Changed) {
+            if (Text.Changed || Image.Changed || Media.Changed || Preview.Changed) {
                 Gui.View = nameof(Unavailable);
                 return;
             }
@@ -97,6 +120,7 @@ namespace Brows {
 
         IEntryStreamGuiView IEntryStreamGuiState.Text => Text;
         IEntryStreamGuiView IEntryStreamGuiState.Image => Image;
+        IEntryStreamGuiView IEntryStreamGuiState.Media => Media;
         IEntryStreamGuiView IEntryStreamGuiState.Preview => Preview;
     }
 }

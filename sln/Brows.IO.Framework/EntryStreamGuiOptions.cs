@@ -30,6 +30,12 @@ namespace Brows {
         }
         private ImageOptions _Image;
 
+        public MediaOptions Media {
+            get => _Media ?? (_Media = new());
+            set => _Media = value;
+        }
+        private MediaOptions _Media;
+
         public PreviewOptions Preview {
             get => _Preview ?? (_Preview = new());
             set => _Preview = value;
@@ -70,6 +76,14 @@ namespace Brows {
 
             public ExtensionSet Extensions {
                 get => _Extensions ?? (_Extensions = new(".pdf"));
+                set => _Extensions = value;
+            }
+            private ExtensionSet _Extensions;
+        }
+
+        public sealed class MediaOptions {
+            public ExtensionSet Extensions {
+                get => _Extensions ?? (_Extensions = new(".3gp", ".avi", ".mov", ".mp4", ".mkv"));
                 set => _Extensions = value;
             }
             private ExtensionSet _Extensions;

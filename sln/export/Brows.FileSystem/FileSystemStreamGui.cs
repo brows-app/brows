@@ -27,6 +27,10 @@ namespace Brows {
             Entry.Kind == FileSystemEntryKind.File &&
             Entry.Provider.Config.Stream.Preview.Extensions.Contains(Entry.Extension);
 
+        public sealed override bool ForceMedia =>
+            Entry.Kind == FileSystemEntryKind.File &&
+            Entry.Provider.Config.Stream.Media.Extensions.Contains(Entry.Extension);
+
         public FileSystemStreamGui(FileSystemEntry entry) {
             Entry = entry ?? throw new ArgumentNullException(nameof(entry));
         }

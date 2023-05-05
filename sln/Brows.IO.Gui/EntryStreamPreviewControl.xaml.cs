@@ -39,7 +39,7 @@ namespace Brows {
             PreviewHandlerControl.PreviewHandlerSource = EntryStreamGui?.Source?.SourceFile;
         }
 
-        protected override string EntryStreamViewName => "Preview";
+        protected sealed override string EntryStreamViewName => "Preview";
 
         protected sealed override void OnEntryStreamGuiChanged(DependencyPropertyChangedEventArgs e) {
             ChangeEntryStreamGui();

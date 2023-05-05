@@ -1,0 +1,9 @@
+﻿<local:EntryStreamGuiControl 
+    x:Class="Brows.EntryStreamMediaControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Brows">
+    <Grid>
+        <MediaElement x:Name="MediaElement" x:FieldModifier="private" LoadedBehavior="Play" IsMuted="True"/>
+    </Grid>
+</local:EntryStreamGuiControl>
