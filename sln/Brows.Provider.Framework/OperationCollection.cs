@@ -1,12 +1,12 @@
 using Domore.Notification;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Brows {
     internal sealed class OperationCollection : Notifier, IOperationCollection {
-        private readonly ObservableCollection<IOperation> List = new();
+        private readonly ObservableCollection<Operation> Collection = new();
 
         private int Relevance {
             get => _Relevance;
@@ -19,7 +19,7 @@ namespace Brows {
         private int _Relevance;
 
         private void Item_RelevantChanged(object sender, EventArgs e) {
-            var item = sender as IOperation;
+            var item = sender as Operation;
             if (item != null) {
                 if (item.Relevant) {
                     Relevance++;
@@ -31,40 +31,43 @@ namespace Brows {
         }
 
         public bool Relevant => Relevance > 0;
-        public object Source => List;
-        public int Count => List.Count;
+        public object Source => Collection;
+        public int Count => Collection.Count;
 
-        public void Add(IOperation item) {
-            if (null == item) throw new ArgumentNullException(nameof(item));
+        public void Add(Operation item) {
+            if (item is null) throw new ArgumentNullException(nameof(item));
             if (item.Relevant) {
                 Relevance++;
             }
             item.RelevantChanged += Item_RelevantChanged;
-            List.Add(item);
+            Collection.Add(item);
         }
 
-        public bool Remove(IOperation item) {
-            if (null == item) throw new ArgumentNullException(nameof(item));
-            if (item.Relevant) {
-                Relevance--;
+        public bool Remove(Operation item) {
+            if (item == null) return false;
+            if (item.Complete == false) return false;
+            var removed = Collection.Remove(item);
+            if (removed) {
+                if (item.Relevant) {
+                    Relevance--;
+                }
             }
             item.RelevantChanged -= Item_RelevantChanged;
-            return List.Remove(item);
+            return removed;
         }
 
-        public void Clear() {
-            var items = new List<IOperation>(List);
-            foreach (var item in items) {
-                Remove(item);
-            }
+        public IEnumerator<IOperation> GetEnumerator() {
+            return Collection.GetEnumerator();
         }
 
-        IEnumerator<IOperation> IEnumerable<IOperation>.GetEnumerator() {
-            return ((IEnumerable<IOperation>)List).GetEnumerator();
+        public IEnumerable<IOperation> AsEnumerable() {
+            return Collection.AsEnumerable();
         }
 
-        IEnumerator IEnumerable.GetEnumerator() {
-            return ((IEnumerable)List).GetEnumerator();
+        bool IOperationCollection.Remove(IOperation item) {
+            return item is Operation operation
+                ? Remove(operation)
+                : false;
         }
     }
 }

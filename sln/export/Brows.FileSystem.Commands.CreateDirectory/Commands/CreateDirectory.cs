@@ -9,7 +9,7 @@ namespace Brows.Commands {
             if (context.HasPanel(out var active) == false) return false;
             if (context.HasCommander(out var commander) == false) return false;
             if (context.HasGesture(out _)) {
-                var trigger = InputTrigger();
+                var trigger = InputTrigger;
                 var directoryName = "'New folder'";
                 return context.Operate(async (progress, token) => {
                     return await commander.ShowPalette($"{trigger} {directoryName}", trigger.Length + 1, directoryName.Length, token);

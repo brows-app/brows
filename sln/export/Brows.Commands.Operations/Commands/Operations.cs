@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Brows.Commands {
-    internal sealed class Operations : Command<Operations.Parameter> {
+    internal sealed class Operations : Command<OperationsParameter> {
         protected sealed override async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
             if (context == null) yield break;
             if (context.DidTrigger(this)) {
@@ -20,20 +20,26 @@ namespace Brows.Commands {
         }
 
         protected sealed override bool Work(Context context) {
-            if (context == null) return false;
-            if (context.HasCommander(out var commander) == false) {
-                return false;
+            if (null == context) return false;
+            if (false == context.HasCommander(out var commander)) return false;
+            if (false == context.HasParameter(out var parameter)) {
+                return context.HasGesture(out _) == false
+                    ? false
+                    : context.Operate(async (progess, token) => {
+                        return await commander.ShowPalette($"{InputTrigger} ", token);
+                    });
             }
-            if (commander.HasOperations(out var collection) == false) {
-                return false;
+            if (false == commander.HasOperations(out var collection)) return false;
+            var clearErrors = parameter.ClearErrors == true;
+            if (clearErrors) {
+                var errors = collection.AsEnumerable().Where(operation => operation.CompleteWithError);
+                var list = errors.ToList();
+                foreach (var item in list) {
+                    collection.Remove(item);
+                }
+                return true;
             }
-            collection.Where(operation => operation.Complete).ToList().ForEach(operation => {
-                collection.Remove(operation);
-            });
-            return true;
-        }
-
-        public sealed class Parameter {
+            return false;
         }
     }
 }

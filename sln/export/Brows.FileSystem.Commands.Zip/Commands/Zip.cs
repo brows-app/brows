@@ -41,7 +41,7 @@ namespace Brows.Commands {
                 return await Task.Run(cancellationToken: token, function: () => {
                     var entries = input.Entries(progress, token).ToList();
                     if (progress != null) {
-                        progress.Target.Add(entries.Count);
+                        progress.Change(addTarget: entries.Count);
                     }
                     using (var zip = ZipFile.Open(output, ZipArchiveMode.Create)) {
                         foreach (var entry in entries) {
@@ -49,7 +49,7 @@ namespace Brows.Commands {
                                 Log.Info(nameof(ZipFileExtensions.CreateEntryFromFile) + " > " + entry.EntryName);
                             }
                             if (progress != null) {
-                                progress.Info.Data(entry.EntryName);
+                                progress.Change(data: entry.EntryName);
                             }
                             if (level.HasValue) {
                                 zip.CreateEntryFromFile(entry.FilePath, entry.EntryName, level.Value);
@@ -58,7 +58,7 @@ namespace Brows.Commands {
                                 zip.CreateEntryFromFile(entry.FilePath, entry.EntryName);
                             }
                             if (progress != null) {
-                                progress.Add(1);
+                                progress.Change(1);
                             }
                         }
                     }

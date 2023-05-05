@@ -273,6 +273,15 @@ namespace Brows {
         public new FileSystemConfig Config =>
             base.Config;
 
+        public new IReadOnlyList<FileSystemEntry> Provided =>
+            base.Provided;
+
+        public new IEnumerable<FileSystemEntry> Selected =>
+            base.Selected;
+
+        public new IEntrySorting Sorting =>
+            base.Sorting;
+
         public new IEnumerable<string> ObservedKeys =>
             base.ObservedKeys;
 

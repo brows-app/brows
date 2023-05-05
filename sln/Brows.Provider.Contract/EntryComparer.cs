@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace Brows {
-    public class EntryComparer : IComparer<IEntry>, IComparer {
+    public sealed class EntryComparer : IComparer<IEntry>, IComparer {
         private static int Compare(IEntryData x, IEntryData y) {
             return x?.Compare(y) ?? 0;
         }

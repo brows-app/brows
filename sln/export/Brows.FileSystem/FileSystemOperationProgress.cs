@@ -11,15 +11,15 @@ namespace Brows {
         }
 
         public sealed override void AddToTarget(long value) {
-            Agent.Target.Add(value);
+            Agent.Change(addTarget: value);
         }
 
         public sealed override void AddToProgress(long value) {
-            Agent.Add(value);
+            Agent.Change(addProgress: value);
         }
 
         public sealed override void SetCurrentInfo(FileSystemInfo value) {
-            Agent.Info.Data(value?.Name);
+            Agent.Change(data: value?.Name);
         }
     }
 }

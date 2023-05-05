@@ -57,7 +57,7 @@
                 Visibility="{Binding Error, Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Collapsed, FallbackValue=Visible}"/>
             <TextBlock 
                 Grid.Column="5"
-                Text="{Binding Error.Message}"
+                Text="{Binding ErrorMessage}"
                 Visibility="{Binding Error, Converter={x:Static brows:ValueConverter.NullFallback}, ConverterParameter=Visible, FallbackValue=Collapsed}"/>
             <ContentControl Grid.Column="6">
                 <ContentControl.Style>

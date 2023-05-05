@@ -29,7 +29,7 @@ namespace Brows.Commands {
             if (context.HasGesture(out _)) {
                 if (context.HasCommander(out var commander)) {
                     return context.Operate(async (progress, token) => {
-                        return await commander.ShowPalette($"{InputTrigger()} ", token);
+                        return await commander.ShowPalette($"{InputTrigger} ", token);
                     });
                 }
             }

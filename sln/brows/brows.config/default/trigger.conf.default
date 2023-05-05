@@ -32,6 +32,8 @@ cmd[Open]                           .press[ENTER+CTRL]          = * p
 cmd[Open]                           .press[ENTER+CTRL+SHIFT]    = * w
 cmd[Open]                           .click[2L]                  = *
 cmd[Operations]                     .input                      = !
+cmd[Operations]                     .press[1+SHIFT]             = *
+cmd[Operations]                     .press[1+SHIFT+CTRL]        = * clearerrors=true
 cmd[Palette]                        .press[CTRL+L]              = *
 cmd[PanelAdd]                       .input                      = panel-add|pa
 cmd[PanelAdd]                       .press[CTRL+N]              = * from=activepanel
@@ -60,6 +62,7 @@ cmd[FileSystem_CreateFile]          .press[ALT+CTRL+SHIFT+N]    = *
 cmd[FileSystem_Delete]              .input                      = delete
 cmd[FileSystem_Delete]              .press[DEL]                 = *
 cmd[FileSystem_Delete]              .press[SHIFT+DEL]           = * unrecoverable=true
+cmd[FileSystem_DrawImage]           .input                      = draw-image|draw
 cmd[FileSystem_Edit]                .input                      = edit
 cmd[FileSystem_Edit]                .press[CTRL+E]              = *
 cmd[FileSystem_Find]                .input                      = find

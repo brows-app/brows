@@ -8,7 +8,7 @@ namespace Brows.Commands {
             if (context == null) return false;
             if (context.HasCommander(out var commander) == false) return false;
             if (context.HasGesture(out _)) {
-                var trigger = InputTrigger();
+                var trigger = InputTrigger;
                 var fileName = "'New file'";
                 return context.Operate(async (progress, token) => {
                     return await commander.ShowPalette($"{trigger} {fileName}", trigger.Length + 1, fileName.Length, token);

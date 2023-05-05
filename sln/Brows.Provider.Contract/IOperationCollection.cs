@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 
 namespace Brows {
-    public interface IOperationCollection : IEnumerable<IOperation> {
+    public interface IOperationCollection {
         int Count { get; }
-        void Add(IOperation item);
         bool Remove(IOperation item);
-        void Clear();
+        IEnumerator<IOperation> GetEnumerator();
+        IEnumerable<IOperation> AsEnumerable();
     }
 }

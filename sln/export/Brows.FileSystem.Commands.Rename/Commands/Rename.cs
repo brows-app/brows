@@ -29,7 +29,7 @@ namespace Brows.Commands {
                     extension = exts[0];
                 }
             }
-            var trigger = InputTrigger();
+            var trigger = InputTrigger;
             var input = $"{trigger} \"{pattern}\"";
             var inputStart = trigger.Length + 2;
             var inputLength = pattern.Length - extension.Length;
@@ -43,9 +43,10 @@ namespace Brows.Commands {
             if (context.HasGesture(out _)) {
                 return Prompt(context);
             }
-            if (context.HasParameter(out var parameter) == false) return false;
-            if (context.HasPanel(out var active) == false) return false;
-            if (active.HasFileSystemDirectory(out var directory) == false) {
+            if (false == context.HasParameter(out var parameter)) return false;
+            if (false == context.HasPanel(out var active)) return false;
+            if (false == active.HasFileSystemRename(out var rename)) return false;
+            if (false == active.HasFileSystemDirectory(out var directory)) {
                 return false;
             }
             var service = Service;
@@ -56,16 +57,16 @@ namespace Brows.Commands {
             if (pattern == "") {
                 return false;
             }
-            var dict = Renamer.Rename(context, pattern);
-            if (dict == null) {
+            var dict = rename.Selection(pattern);
+            if (dict == null || dict.Count == 0) {
                 return false;
             }
             return context.Operate(async (progress, token) => {
-                return await service.Work(directory, dict, progress, token);
+                return await service.Work(directory.FullName, dict.ToDictionary(pair => pair.Key.Name, pair => pair.Value), progress, token);
             });
         }
 
-        public IRenameDirectoryInfoFileSystemInfos Service { get; set; }
+        public IRenameDirectoryEntries Service { get; set; }
 
         public sealed class Parameter {
             [CliArgument]

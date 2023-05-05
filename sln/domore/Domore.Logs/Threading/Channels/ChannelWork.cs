@@ -26,13 +26,14 @@ namespace Domore.Threading.Channels {
             if (CancellationTokenSource == null) {
                 lock (Locker) {
                     if (CancellationTokenSource == null) {
-                        CancellationTokenSource = new CancellationTokenSource();
+                        var source = new CancellationTokenSource();
                         var channel = Channel.CreateUnbounded<T>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
-                        var channelReader = new ChannelWorkReader<T>(channel.Reader, CancellationTokenSource.Token) { Action = Action };
-                        var channelWriter = new ChannelWorkWriter<T>(channel.Writer, CancellationTokenSource.Token);
+                        var channelReader = new ChannelWorkReader<T>(channel.Reader, source.Token) { Action = Action };
+                        var channelWriter = new ChannelWorkWriter<T>(channel.Writer, source.Token);
                         var channelThread = new Thread(channelReader.Read) { IsBackground = true, Name = Name };
                         channelThread.Start();
                         Writer = channelWriter;
+                        CancellationTokenSource = source;
                     }
                 }
             }

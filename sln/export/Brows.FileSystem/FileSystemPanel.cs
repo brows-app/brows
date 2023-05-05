@@ -74,5 +74,15 @@ namespace Brows {
             streamSet = new FileSystemStreamSet(collection);
             return true;
         }
+
+        public static bool HasFileSystemRename(this IPanel panel, out FileSystemRename rename) {
+            if (panel is null) throw new ArgumentNullException(nameof(panel));
+            if (panel.HasProvider(out FileSystemProvider provider) == false) {
+                rename = null;
+                return false;
+            }
+            rename = new FileSystemRename(provider);
+            return true;
+        }
     }
 }

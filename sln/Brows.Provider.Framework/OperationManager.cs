@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Brows {
-    public class OperationManager : IOperationManager {
+    internal sealed class OperationManager {
         private void Remove(Operation operation) {
             if (null == operation) throw new ArgumentNullException(nameof(operation));
             operation.Removed -= Operation_Removed;
@@ -21,7 +21,7 @@ namespace Brows {
                 if (operation.Relevant == false) {
                     Remove(operation);
                 }
-                if (operation.CompletedWithError == false) {
+                if (operation.CompleteWithError == false) {
                     if (RemoveCompletedOperations) {
                         Remove(operation);
                     }
@@ -29,25 +29,26 @@ namespace Brows {
             }
         }
 
-        private Operation Operation(string name) {
+        private Operation Operation(string name, OperationDelegate task) {
             var
-            operation = new Operation(name);
+            operation = new Operation(name, task);
             operation.Completed += Operation_Completed;
             operation.Removed += Operation_Removed;
-            Operations.Add(operation);
             return operation;
         }
 
         public bool RemoveCompletedOperations { get; set; } = true;
 
-        public IOperationCollection Operations { get; }
+        public OperationCollection Operations { get; }
 
-        public OperationManager(IOperationCollection operations) {
+        public OperationManager(OperationCollection operations) {
             Operations = operations ?? throw new ArgumentNullException(nameof(operations));
         }
 
-        public IOperable Operable(string name) {
-            return Operation(name);
+        public void Operate(string name, OperationDelegate task) {
+            var
+            operation = Operation(name, task);
+            Operations.Add(operation);
         }
     }
 }

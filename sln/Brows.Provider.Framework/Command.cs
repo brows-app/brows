@@ -51,12 +51,13 @@ namespace Brows {
         }
         private string _Name;
 
-        protected static readonly Task<bool> Worked = Task.FromResult(true);
-
         protected CommandSuggestionRelevance SuggestionRelevance =>
             _SuggestionRelevance ?? (
             _SuggestionRelevance = new CommandSuggestionRelevance());
         private CommandSuggestionRelevance _SuggestionRelevance;
+
+        protected string InputTrigger =>
+            Trigger?.Input?.String;
 
         protected virtual Type Provider =>
             null;
@@ -122,10 +123,6 @@ namespace Brows {
                 }
             }
             await Task.CompletedTask;
-        }
-
-        protected string InputTrigger() {
-            return Trigger?.Input?.String;
         }
 
         public virtual string HelpLine => CommandTranslation.Help(Name);

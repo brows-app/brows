@@ -1,10 +1,6 @@
 namespace Brows {
     public interface IOperationProgress {
-        IOperationProgressInfo Info { get; }
-        IOperationProgressTarget Target { get; }
-        long Get();
-        void Add(long value);
-        void Set(long value);
-        IOperable Child(string name);
+        void Change(long? addProgress = null, long? setProgress = null, long? addTarget = null, long? setTarget = null, string name = null, string data = null);
+        void Child(string name, OperationDelegate task);
     }
 }

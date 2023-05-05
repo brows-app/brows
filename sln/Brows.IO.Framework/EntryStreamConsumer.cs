@@ -17,7 +17,7 @@ namespace Brows {
                 return;
             }
             if (progress != null) {
-                progress.Target?.Add(sources.Count);
+                progress.Change(addTarget: sources.Count);
             }
             foreach (var source in sources) {
                 if (token.IsCancellationRequested) {
@@ -28,7 +28,7 @@ namespace Brows {
                 var streamValid = source.StreamValid;
                 if (streamValid) {
                     if (progress != null) {
-                        progress.Info?.Data(source.EntryName);
+                        progress.Change(data: source.EntryName);
                     }
                     await using
                     var stream = source.Stream();
@@ -42,7 +42,7 @@ namespace Brows {
                     }
                 }
                 if (progress != null) {
-                    progress.Add(1);
+                    progress.Change(1);
                 }
             }
         }

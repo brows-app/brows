@@ -23,20 +23,20 @@ namespace Brows.Commands {
                             token.ThrowIfCancellationRequested();
                         }
                         if (progress != null) {
-                            progress.Info.Data(f.Name);
+                            progress.Change(data: f.Name);
                         }
                         yield return f;
                         break;
                     case DirectoryInfo d:
                         if (progress != null) {
-                            progress.Info.Data(d.Name);
+                            progress.Change(data: d.Name);
                         }
                         foreach (var file in d.EnumerateFiles("*", SearchOption.AllDirectories)) {
                             if (token.IsCancellationRequested) {
                                 token.ThrowIfCancellationRequested();
                             }
                             if (progress != null) {
-                                progress.Info.Data(file.Name);
+                                progress.Change(data: file.Name);
                             }
                             yield return file;
                         }

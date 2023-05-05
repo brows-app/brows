@@ -217,7 +217,7 @@ namespace Brows {
                 return;
             }
             if (progress != null) {
-                progress.Target.Set(extract.Count);
+                progress.Change(setTarget: extract.Count);
             }
             using (await Locker.Lock(cancellationToken)) {
                 await Task.Run(cancellationToken: cancellationToken, action: () => {
@@ -227,7 +227,7 @@ namespace Brows {
                                 cancellationToken.ThrowIfCancellationRequested();
                             }
                             if (progress != null) {
-                                progress.Info.Data(name);
+                                progress.Change(data: name);
                             }
                             var entry = archive.Zip.GetEntry(name);
                             if (entry != null) {
@@ -239,7 +239,7 @@ namespace Brows {
                                     overwrite: info.ExtractOverwrites);
                             }
                             if (progress != null) {
-                                progress.Add(1);
+                                progress.Change(1);
                             }
                         }
                     }
@@ -259,7 +259,7 @@ namespace Brows {
                 return;
             }
             if (progress != null) {
-                progress.Target.Add(stream.Count + create.Count + delete.Count);
+                progress.Change(addTarget: stream.Count + create.Count + delete.Count);
             }
             using (await Locker.Lock(token)) {
                 await Task.Run(cancellationToken: token, action: () => {
@@ -269,14 +269,14 @@ namespace Brows {
                                 token.ThrowIfCancellationRequested();
                             }
                             if (progress != null) {
-                                progress.Info.Data(name);
+                                progress.Change(data: name);
                             }
                             if (Log.Info()) {
                                 Log.Info(nameof(delete) + " > " + name);
                             }
                             archive.Zip.Delete(name);
                             if (progress != null) {
-                                progress.Add(1);
+                                progress.Change(1);
                             }
                         }
                         foreach (var entry in create) {
@@ -284,7 +284,7 @@ namespace Brows {
                                 token.ThrowIfCancellationRequested();
                             }
                             if (progress != null) {
-                                progress.Info.Data(entry.Key);
+                                progress.Change(data: entry.Key);
                             }
                             if (Log.Info()) {
                                 Log.Info(nameof(ZipFileExtensions.CreateEntryFromFile) + " > " + entry.Key + " > " + entry.Value);
@@ -294,7 +294,7 @@ namespace Brows {
                                 entryName: entry.Key,
                                 sourceFileName: entry.Value);
                             if (progress != null) {
-                                progress.Add(1);
+                                progress.Change(1);
                             }
                         }
                     }

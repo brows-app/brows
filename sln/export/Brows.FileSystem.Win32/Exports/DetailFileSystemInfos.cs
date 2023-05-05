@@ -11,7 +11,7 @@ namespace Brows.Exports {
                 var list = fileSystemInfos.Where(info => info != null).ToList();
                 if (list.Count > 0) {
                     if (progress != null) {
-                        progress.Target.Set(list.Count);
+                        progress.Change(setTarget: list.Count);
                     }
                     await Task.Run(cancellationToken: token, action: () => {
                         foreach (var item in list) {
@@ -19,11 +19,11 @@ namespace Brows.Exports {
                                 token.ThrowIfCancellationRequested();
                             }
                             if (progress != null) {
-                                progress.Info.Data(item.Name);
+                                progress.Change(data: item.Name);
                             }
                             Win32File.Properties(item.FullName);
                             if (progress != null) {
-                                progress.Add(1);
+                                progress.Change(1);
                             }
                         }
                     });

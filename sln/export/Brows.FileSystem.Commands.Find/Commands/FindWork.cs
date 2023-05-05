@@ -43,7 +43,7 @@ namespace Brows.Commands {
                 };
                 enumerable.Ready += (s, e) => {
                     if (progress != null) {
-                        progress.Target.Set(enumerable.FileCount + enumerable.DirectoryCount);
+                        progress.Change(setTarget: enumerable.FileCount + enumerable.DirectoryCount);
                     }
                 };
                 await foreach (var item in enumerable.WithCancellation(token)) {
@@ -72,8 +72,8 @@ namespace Brows.Commands {
                                 await writer.WriteAsync(result, token);
                                 if (progressed == false && progress != null) {
                                     progressed = true;
-                                    progress.Add(1);
-                                    progress.Info.Data(item.Name);
+                                    progress.Change(1);
+                                    progress.Change(addProgress: 1, data: item.Name);
                                 }
                                 tasks.Remove(task);
                             }
@@ -82,8 +82,7 @@ namespace Brows.Commands {
                     }
                     else {
                         if (progress != null) {
-                            progress.Add(1);
-                            progress.Info.Data(item.Name);
+                            progress.Change(addProgress: 1, data: item.Name);
                         }
                     }
                 }

@@ -45,7 +45,7 @@ namespace Brows {
             public long? SourceLengthMax { get; set; } = 10000000;
 
             public ExtensionSet Extensions {
-                get => _Extensions ?? (_Extensions = new(".bmp", ".jpg", ".jpeg", ".gif", ".heif", ".heic", ".png"));
+                get => _Extensions ?? (_Extensions = new(".bmp", ".jpg", ".jpeg", ".gif", ".heif", ".heic", ".png", ".tif", ".tiff"));
                 set => _Extensions = value;
             }
             private ExtensionSet _Extensions;

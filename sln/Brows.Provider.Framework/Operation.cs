@@ -1,13 +1,9 @@
 using System;
 
 namespace Brows {
-    internal class Operation : OperationBase {
+    internal sealed class Operation : OperationBase {
         private void Remove() {
-            OnRemoved(EventArgs.Empty);
-        }
-
-        protected virtual void OnRemoved(EventArgs e) {
-            Removed?.Invoke(this, e);
+            Removed?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler Removed;
@@ -27,7 +23,7 @@ namespace Brows {
             dependencies: new[] {
                 nameof(Progressing) });
 
-        public Operation(string name) : base(name) {
+        public Operation(string name, OperationDelegate task) : base(name, null, task) {
         }
     }
 }

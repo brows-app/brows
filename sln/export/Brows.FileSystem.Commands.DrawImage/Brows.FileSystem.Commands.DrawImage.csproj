@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="Resource\Culture\_" />
+      <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_DrawImage" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\..\domore\Domore.Win32.STAThreadPool\Domore.Win32.STAThreadPool.csproj" />
+      <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
+    </ItemGroup>
+</Project>

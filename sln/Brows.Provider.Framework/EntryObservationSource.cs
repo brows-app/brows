@@ -2,33 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 
 namespace Brows {
     internal sealed class EntryObservationSource : Notifier {
         private readonly HashSet<IEntry> Select = new();
-
-        private ObservableCollection<IEntry> Collection {
-            get {
-                if (_Collection == null) {
-                    _Collection = new();
-                    _Collection.CollectionChanged += Collection_CollectionChanged;
-                }
-                return _Collection;
-            }
-        }
-        private ObservableCollection<IEntry> _Collection;
+        private readonly ObservableCollection<IEntry> Collection = new();
 
         private void SelectChanged() {
             SelectionChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void CollectionChanged() {
-            ObservationChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void Collection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
-            CollectionChanged();
         }
 
         private void Entry_Selected(object sender, EntrySelectedEventArgs e) {
@@ -103,7 +84,6 @@ namespace Brows {
         public void End() {
             SelectionChanged = null;
             ObservationChanged = null;
-            Collection.CollectionChanged -= Collection_CollectionChanged;
         }
     }
 }

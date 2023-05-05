@@ -129,7 +129,7 @@ namespace Brows {
                     return false;
                 }
                 if (progress != null) {
-                    progress.Target.Add(list.Count);
+                    progress.Change(addTarget: list.Count);
                 }
                 var zipFiles = await Task.Run(cancellationToken: token, function: () => {
                     var fileIsDir = list.Count == 1;
@@ -138,8 +138,8 @@ namespace Brows {
                             token.ThrowIfCancellationRequested();
                         }
                         if (progress != null) {
-                            progress.Info.Data(Path.GetFileName(item));
-                            progress.Add(1);
+                            progress.Change(data: Path.GetFileName(item));
+                            progress.Change(1);
                         }
                         var infos = Array.Empty<FileInfo>().AsEnumerable();
                         var f = new FileInfo(item);
@@ -158,7 +158,7 @@ namespace Brows {
                                 token.ThrowIfCancellationRequested();
                             }
                             if (progress != null) {
-                                progress.Info.Data(f.Name);
+                                progress.Change(data: f.Name);
                             }
                             return f;
                         });

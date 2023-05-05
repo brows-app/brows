@@ -65,8 +65,7 @@ namespace Brows {
                         }
                         var ignore =
                             info.Attributes.HasFlag(FileAttributes.Hidden) &&
-                            info.Attributes.HasFlag(FileAttributes.System) &&
-                            info.Attributes.HasFlag(FileAttributes.Directory);
+                            info.Attributes.HasFlag(FileAttributes.System);
                         if (ignore) {
                             continue;
                         }

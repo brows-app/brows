@@ -65,7 +65,7 @@ namespace Brows.Commands {
         private async Task<bool> View(Context context, CancellationToken cancellationToken) {
             if (context == null) return false;
             if (context.HasCommander(out var commander)) {
-                return await commander.ShowPalette($"{InputTrigger()} ", cancellationToken);
+                return await commander.ShowPalette($"{InputTrigger} ", cancellationToken);
             }
             return false;
         }

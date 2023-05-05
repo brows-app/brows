@@ -15,7 +15,8 @@ namespace Brows {
 
         protected sealed override IEnumerable<KeyValuePair<string, EntrySortDirection>> DefaultSortInit() {
             return new[] {
-                KeyValuePair.Create(nameof(FileSystemEntryData.Kind), EntrySortDirection.Ascending)
+                KeyValuePair.Create(nameof(FileSystemEntryData.Kind), EntrySortDirection.Ascending),
+                KeyValuePair.Create(nameof(FileSystemEntryData.Name), EntrySortDirection.Ascending)
             };
         }
 

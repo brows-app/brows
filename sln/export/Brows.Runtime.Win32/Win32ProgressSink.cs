@@ -16,8 +16,7 @@ namespace Brows {
             if (CancellationToken.IsCancellationRequested) {
                 return (HRESULT)winerror.ERROR_CANCELLED;
             }
-            Progress?.Target?.Set(iWorkTotal);
-            Progress?.Set(iWorkSoFar);
+            Progress?.Change(setProgress: iWorkSoFar, setTarget: iWorkTotal);
             return base.UpdateProgress(iWorkTotal, iWorkSoFar);
         }
     }

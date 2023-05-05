@@ -2,7 +2,7 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Domore.Conf" Version="7.3.4.68" />
+        <PackageReference Include="Domore.Conf" Version="7.4.0.69" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />

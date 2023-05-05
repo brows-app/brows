@@ -6,16 +6,17 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TASK = System.Threading.Tasks.Task;
 
 namespace Brows {
-    internal class OperationBase : Notifier, IOperation, IOperable {
+    internal class OperationBase : Notifier, IOperation {
         private static readonly ILog Log = Logging.For(typeof(OperationBase));
         private static readonly PropertyChangedEventArgs NameEvent = new(nameof(Name));
         private static readonly PropertyChangedEventArgs DataEvent = new(nameof(Data));
         private static readonly PropertyChangedEventArgs ProgressingEvent = new(nameof(Progressing));
         private static readonly PropertyChangedEventArgs CancelingEvent = new(nameof(Canceling));
         private static readonly PropertyChangedEventArgs CompleteEvent = new(nameof(Complete));
-        private static readonly PropertyChangedEventArgs CompletedWithErrorEvent = new(nameof(CompletedWithError));
+        private static readonly PropertyChangedEventArgs CompleteWithErrorEvent = new(nameof(CompleteWithError));
         private static readonly PropertyChangedEventArgs RelevantEvent = new(nameof(Relevant));
         private static readonly PropertyChangedEventArgs ProgressPercentEvent = new(nameof(ProgressPercent));
         private static readonly PropertyChangedEventArgs ErrorMessageEvent = new(nameof(ErrorMessage));
@@ -34,11 +35,11 @@ namespace Brows {
         private readonly object ProgressLocker = new();
         private readonly object RelevantLocker = new();
 
-        private OperationBase Child(string name) {
+        private OperationBase Child(string name, OperationDelegate task) {
             if (Log.Info()) {
                 Log.Info(nameof(Child) + " > " + name);
             }
-            var child = new OperationBase(name, this);
+            var child = new OperationBase(name, this, task);
             ChildCollection.Add(child);
             return child;
         }
@@ -59,15 +60,9 @@ namespace Brows {
                 }
             }
             try {
-                await Task.Delay(1000, token);
+                await TASK.Delay(1000, token);
             }
-            catch (Exception ex) {
-                if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
-                    return;
-                }
-                else {
-                    throw;
-                }
+            catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
             }
             if (Progressing) {
                 Relevant = true;
@@ -87,69 +82,123 @@ namespace Brows {
             MakeRelevant();
         }
 
-        private double CalcProgressPercent() {
-            return Target == 0
-                ? 0
-                : (double)Progress / Target * 100;
-        }
-
-        private void SetTarget(long value) {
-            if (Log.Debug()) {
-                Log.Debug(nameof(SetTarget) + " > " + value);
-            }
+        private void ChangeProgress(long? setProgress = null, long? addProgress = null, long? setTarget = null, long? addTarget = null) {
+            var changed = false;
+            var changedTarget = false;
+            var changedProgress = false;
             lock (ProgressLocker) {
-                if (Parent != null) {
-                    Parent.SetTarget(Parent.Target + (value - Target));
+                if (setProgress.HasValue) {
+                    var
+                    value = setProgress.Value;
+                    changed = true;
+                    changedProgress = true;
+                    if (Parent != null) {
+                        Parent.ChangeProgress(setProgress: Parent.Progress + (value - Progress));
+                    }
+                    Progress = value;
                 }
-                Target = value;
-                ProgressPercent = CalcProgressPercent();
+                if (addProgress.HasValue) {
+                    var
+                    value = addProgress.Value;
+                    changed = true;
+                    changedProgress = true;
+                    if (Parent != null) {
+                        Parent.ChangeProgress(addProgress: value);
+                    }
+                    Progress += value;
+                }
+                if (setTarget.HasValue) {
+                    var
+                    value = setTarget.Value;
+                    changed = true;
+                    changedTarget = true;
+                    if (Parent != null) {
+                        Parent.ChangeProgress(setTarget: Parent.Target + (value - Target));
+                    }
+                    Target = value;
+                }
+                if (addTarget.HasValue) {
+                    var
+                    value = addTarget.Value;
+                    changed = true;
+                    changedTarget = true;
+                    if (Parent != null) {
+                        Parent.ChangeProgress(addTarget: value);
+                    }
+                    Target += value;
+                }
+                if (changed) {
+                    ProgressPercent = Target == 0
+                        ? 0
+                        : (double)Progress / Target * 100;
+                }
             }
-            NotifyTargetChanged();
+            if (changedTarget) {
+                NotifyTargetChanged();
+            }
+            if (changedProgress) {
+                NotifyProgressChanged();
+            }
         }
 
-        private void AddTarget(long value) {
-            if (Log.Debug()) {
-                Log.Debug(nameof(AddTarget) + " > " + value);
+        private async Task Operate() {
+            if (Log.Info()) {
+                Log.Info(nameof(Operate));
             }
-            lock (ProgressLocker) {
-                if (Parent != null) {
-                    Parent.AddTarget(value);
+            var tokenSource = default(CancellationTokenSource);
+            lock (TokenLocker) {
+                tokenSource = TokenSource = new();
+            }
+            using (tokenSource) {
+                Progressing = true;
+                Stopwatch = Stopwatch.StartNew();
+                var token = tokenSource.Token;
+                var progress = new ProgressWrapper(this);
+                try {
+                    await Task(progress, token);
+                    await TASK.WhenAll(ChildCollection.Select(child => child.Completion));
                 }
-                Target += value;
-                ProgressPercent = CalcProgressPercent();
+                catch (Exception ex) {
+                    if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
+                        if (Log.Info()) {
+                            Log.Info(canceled.GetType());
+                        }
+                    }
+                    else {
+                        if (Log.Warn()) {
+                            Log.Warn(ex);
+                        }
+                        Error = ex;
+                    }
+                }
+                Stopwatch.Stop();
+                Progressing = false;
+                lock (TokenLocker) {
+                    TokenSource = null;
+                }
             }
-            NotifyTargetChanged();
+            if (Error != null) {
+                CompleteWithError = true;
+            }
+            if (ChildCollection.Any(child => child.CompleteWithError)) {
+                CompleteWithError = true;
+            }
+            if (CompleteWithError) {
+                Relevant = true;
+            }
+            else {
+                lock (ProgressLocker) {
+                    if (Target == 0) {
+                        ProgressPercent = 100;
+                        NotifyPropertyChanged(ProgressPercentEvent);
+                    }
+                }
+            }
+            Complete = true;
+            Completed?.Invoke(this, EventArgs.Empty);
         }
 
-        private void SetProgress(long value) {
-            if (Log.Debug()) {
-                Log.Debug(nameof(SetProgress) + " > " + value);
-            }
-            lock (ProgressLocker) {
-                if (Parent != null) {
-                    Parent.SetProgress(Parent.Progress + (value - Progress));
-                }
-                Progress = value;
-                ProgressPercent = CalcProgressPercent();
-            }
-            NotifyProgressChanged();
-        }
-
-        private void AddProgress(long value) {
-            if (Log.Debug()) {
-                Log.Debug(nameof(AddProgress) + " > " + value);
-            }
-            lock (ProgressLocker) {
-                if (Parent != null) {
-                    Parent.AddProgress(value);
-                }
-                Progress += value;
-                ProgressPercent = CalcProgressPercent();
-            }
-            NotifyProgressChanged();
-        }
-
-        protected virtual void Cancel() {
+        protected void Cancel() {
             if (Log.Info()) {
                 Log.Info(nameof(Cancel) + " > " + Name);
             }
@@ -207,8 +256,9 @@ namespace Brows {
         }
         private Exception _Error;
 
-        public string ErrorMessage =>
-            _Error?.Message;
+        public string ErrorMessage => Error == null
+            ? (null)
+            : (Translation.Global.Value($"Operation_Error_{Error?.GetType()?.Name}") ?? Error?.Message);
 
         public bool Progressing {
             get => _Progressing;
@@ -225,11 +275,11 @@ namespace Brows {
             _DepthString = string.Create(Depth, default(object), (span, _) => span.Fill('>')));
         private string _DepthString;
 
-        public bool CompletedWithError {
-            get => _CompletedWithError;
-            private set => Change(ref _CompletedWithError, value, CompletedWithErrorEvent);
+        public bool CompleteWithError {
+            get => _CompleteWithError;
+            private set => Change(ref _CompleteWithError, value, CompleteWithErrorEvent);
         }
-        private bool _CompletedWithError;
+        private bool _CompleteWithError;
 
         public bool Complete {
             get => _Complete;
@@ -237,143 +287,37 @@ namespace Brows {
         }
         private bool _Complete;
 
+        public Task Completion { get; }
         public OperationBase Parent { get; }
+        public OperationDelegate Task { get; }
 
-        public OperationBase(string name, OperationBase parent = null) {
+        public OperationBase(string name, OperationBase parent, OperationDelegate task) {
+            Task = task ?? throw new ArgumentNullException(nameof(task));
             Name = name;
             Parent = parent;
             Depth = Parent == null ? 0 : (Parent.Depth + 1);
+            Completion = Operate();
         }
 
-        public async void Operate(Func<IOperationProgress, CancellationToken, Task> task) {
-            if (null == task) throw new ArgumentNullException(nameof(task));
-            if (Log.Info()) {
-                Log.Info(nameof(Operate));
-            }
-            var tokenSource = default(CancellationTokenSource);
-            lock (TokenLocker) {
-                tokenSource = TokenSource = new();
-            }
-            using (tokenSource) {
-                Progressing = true;
-                Stopwatch = Stopwatch.StartNew();
-                var token = tokenSource.Token;
-                var progress = new ProgressWrapper(this);
-                try {
-                    await task(progress, token);
-                }
-                catch (Exception ex) {
-                    if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
-                        if (Log.Info()) {
-                            Log.Info(canceled.GetType());
-                        }
-                    }
-                    else {
-                        if (Log.Warn()) {
-                            Log.Warn(ex);
-                        }
-                        Error = ex;
-                    }
-                }
-                Stopwatch.Stop();
-                Progressing = false;
-                lock (TokenLocker) {
-                    TokenSource = null;
-                }
-            }
-            if (Error != null) {
-                CompletedWithError = true;
-            }
-            if (ChildCollection.Any(child => child.CompletedWithError)) {
-                CompletedWithError = true;
-            }
-            if (CompletedWithError) {
-                Relevant = true;
-            }
-            else {
-                lock (ProgressLocker) {
-                    if (Target == 0) {
-                        ProgressPercent = 100;
-                        NotifyPropertyChanged(ProgressPercentEvent);
-                    }
-                }
-            }
-            Complete = true;
-            Completed?.Invoke(this, EventArgs.Empty);
-        }
-
-        private class ProgressWrapper : IOperationProgress {
-            public IOperationProgressInfo Info =>
-                _Info ?? (
-                _Info = new InfoWrapper(Operation));
-            private IOperationProgressInfo _Info;
-
-            public IOperationProgressTarget Target =>
-                _Target ?? (
-                _Target = new TargetWrapper(Operation));
-            private IOperationProgressTarget _Target;
-
+        private sealed class ProgressWrapper : IOperationProgress {
             public OperationBase Operation { get; }
 
             public ProgressWrapper(OperationBase operation) {
                 Operation = operation ?? throw new ArgumentNullException(nameof(operation));
             }
 
-            public long Get() {
-                return Operation.Progress;
+            public void Change(long? addProgress, long? setProgress, long? addTarget, long? setTarget, string name, string data) {
+                if (name != null) {
+                    Operation.Name = name;
+                }
+                if (data != null) {
+                    Operation.Data = data;
+                }
+                Operation.ChangeProgress(addProgress: addProgress, setProgress: setProgress, addTarget: addTarget, setTarget: setTarget);
             }
 
-            public void Add(long value) {
-                Operation.AddProgress(value);
-            }
-
-            public void Set(long value) {
-                Operation.SetProgress(value);
-            }
-
-            public IOperable Child(string name) {
-                return Operation.Child(name);
-            }
-
-            private class InfoWrapper : IOperationProgressInfo {
-                public OperationBase Operation { get; }
-
-                public InfoWrapper(OperationBase operation) {
-                    Operation = operation ?? throw new ArgumentNullException(nameof(operation));
-                }
-
-                public void Name(string value) {
-                    Operation.Name = value;
-                }
-
-                public void Data(string value) {
-                    Operation.Data = value;
-                }
-
-                public void Data(string format, params object[] args) {
-                    // TODO: Translate this.
-                    Operation.Data = string.Format(format, args);
-                }
-            }
-
-            private class TargetWrapper : IOperationProgressTarget {
-                public OperationBase Operation { get; }
-
-                public TargetWrapper(OperationBase operation) {
-                    Operation = operation ?? throw new ArgumentNullException(nameof(operation));
-                }
-
-                public long Get() {
-                    return Operation.Target;
-                }
-
-                public void Add(long value) {
-                    Operation.AddTarget(value);
-                }
-
-                public void Set(long value) {
-                    Operation.SetTarget(value);
-                }
+            public void Child(string name, OperationDelegate task) {
+                Operation.Child(name, task);
             }
         }
     }

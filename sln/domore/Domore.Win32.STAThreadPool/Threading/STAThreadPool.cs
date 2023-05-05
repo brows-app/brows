@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Domore.Threading {
     using Logs;
 
-    public class STAThreadPool {
+    public sealed class STAThreadPool {
         private static readonly ILog Log = Logging.For(typeof(STAThreadPool));
 
         private long WorkerID;

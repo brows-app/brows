@@ -229,6 +229,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Windows.AppComponent"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domore.Async", "domore\Domore.Async\Domore.Async.csproj", "{15003A88-0344-40A9-9526-FBEF940CF174}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.FileSystem.Commands.DrawImage", "export\Brows.FileSystem.Commands.DrawImage\Brows.FileSystem.Commands.DrawImage.csproj", "{DE066D74-A522-4DC0-AB7C-5BF3CD23B4D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -539,6 +541,10 @@ Global
 		{15003A88-0344-40A9-9526-FBEF940CF174}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15003A88-0344-40A9-9526-FBEF940CF174}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15003A88-0344-40A9-9526-FBEF940CF174}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE066D74-A522-4DC0-AB7C-5BF3CD23B4D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE066D74-A522-4DC0-AB7C-5BF3CD23B4D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE066D74-A522-4DC0-AB7C-5BF3CD23B4D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE066D74-A522-4DC0-AB7C-5BF3CD23B4D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -626,6 +632,7 @@ Global
 		{28D3E2A0-2DAE-4E00-A1C2-B9AB76E81A3C} = {83F45F61-1A2E-454C-BB6F-F9111253D3C4}
 		{845483F3-FDC8-466E-85F1-821CB249B494} = {83F45F61-1A2E-454C-BB6F-F9111253D3C4}
 		{15003A88-0344-40A9-9526-FBEF940CF174} = {0B8550DC-35F0-455C-8571-E8E697E9625C}
+		{DE066D74-A522-4DC0-AB7C-5BF3CD23B4D7} = {8A41031D-4C50-4B11-B214-4A71702D58CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACCE6DE0-243F-4142-A633-809E34F44F64}

@@ -229,6 +229,9 @@ namespace Brows {
             protected IEnumerable<TEntry> Selected =>
                 EntryObservation.Selected.Cast<TEntry>();
 
+            protected IEntrySorting Sorting =>
+                EntryObservation.DataView.Sorting;
+
             protected virtual void Adding(IReadOnlyCollection<TEntry> entries) {
             }
 

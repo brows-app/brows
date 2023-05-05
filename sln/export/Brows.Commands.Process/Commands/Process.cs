@@ -24,7 +24,7 @@ namespace Brows.Commands {
                 if (context.HasLine(out var line)) {
                     if (line.HasParameter(out var parameter)) {
                         var history = History.Get(cancellationToken);
-                        var inputTrigger = InputTrigger();
+                        var inputTrigger = InputTrigger;
                         await foreach (var item in history) {
                             var relevance = SuggestionRelevance.From(item, parameter);
                             if (relevance.HasValue) {
@@ -56,7 +56,7 @@ namespace Brows.Commands {
             if (context.HasCommander(out var commander) == false) {
                 return false;
             }
-            var inputTrigger = InputTrigger();
+            var inputTrigger = InputTrigger;
             var contextgesture = default(IGesture);
             if (context.HasGesture(out var gesture)) {
                 contextgesture = gesture;
