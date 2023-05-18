@@ -1,7 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Brows.Commands {
     internal sealed class Delete : ZipCommand<Delete.Parameter> {
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry)
+        };
+
         protected sealed override bool Work(Context context) {
             if (context == null) return false;
             if (context.HasPanel(out var active) == false) {

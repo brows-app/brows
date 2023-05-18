@@ -1,13 +1,14 @@
 using Domore.Logs;
 using Domore.Notification;
 using System;
+using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal sealed class EntryData : Notifier, IEntryData {
+    internal sealed class EntryData : Notifier, IEntryData, ICommandSourceObject {
         private static readonly ILog Log = Logging.For(typeof(EntryData));
         private static readonly PropertyChangedEventArgs AccessingEvent = new(nameof(Accessing));
         private static readonly PropertyChangedEventArgs AccessingFlagEvent = new(nameof(AccessingFlag));
@@ -37,7 +38,7 @@ namespace Brows {
                 return await Definition.GetValue(
                     entry: Entry,
                     progress: value => Value = value,
-                    cancellationToken: token);
+                    token: token);
             }
             catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
                 if (Log.Info()) {
@@ -172,5 +173,11 @@ namespace Brows {
                 return 0;
             }
         }
+
+        object ICommandSourceObject.Instance =>
+            Entry;
+
+        IEnumerable ICommandSourceObject.Collection =>
+            (Entry as ICommandSourceObject)?.Collection;
     }
 }

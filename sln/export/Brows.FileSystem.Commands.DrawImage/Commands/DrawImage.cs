@@ -1,8 +1,14 @@
 ﻿using Domore.Threading;
+using System;
+using System.Collections.Generic;
 
 namespace Brows.Commands {
     internal sealed class DrawImage : FileSystemCommand<DrawImageParameter> {
         private readonly STAThreadPool ThreadPool = new(nameof(DrawImage)) { WorkerCountMin = 0 };
+
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry)
+        };
 
         protected sealed override bool Work(Context context) {
             if (null == context) return false;

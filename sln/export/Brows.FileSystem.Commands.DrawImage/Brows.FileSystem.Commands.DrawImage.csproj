@@ -8,6 +8,7 @@
       <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_DrawImage" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />
       <ProjectReference Include="..\..\domore\Domore.Win32.STAThreadPool\Domore.Win32.STAThreadPool.csproj" />
       <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
     </ItemGroup>

@@ -3,25 +3,29 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Data {
+    using Brows;
     using Exports;
+    using System.Collections;
+    using System.Globalization;
+    using System.Linq;
 
-    internal class FileSystemMetaData : EntryDataDefinition<FileSystemEntry, string> {
+    internal sealed class FileSystemMetaData : EntryDataDefinition<FileSystemEntry, FileSystemMetaData.MetadataValue> {
         public sealed override string Name =>
             Definition.Name;
 
         public sealed override string Group =>
             nameof(FileSystemMetaData);
 
-        protected sealed override async Task<string> GetValue(FileSystemEntry entry, Action<string> progress, CancellationToken token) {
+        protected sealed override async Task<FileSystemMetaData.MetadataValue> GetValue(FileSystemEntry entry, Action<FileSystemMetaData.MetadataValue> progress, CancellationToken token) {
             if (entry != null) {
-                var value = default(string);
+                var value = default(IMetadataValue);
                 var ready = await entry.MetadataCache.Ready(token);
                 if (ready.TryGetValue(Key, out value)) {
-                    return value;
+                    return new MetadataValue(value);
                 }
                 var refresh = await entry.MetadataCache.Refreshed(token);
                 if (refresh.TryGetValue(Key, out value)) {
-                    return value;
+                    return new MetadataValue(value);
                 }
             }
             return null;
@@ -39,18 +43,47 @@ namespace Brows.Data {
 
         public FileSystemMetaData(IMetadataDefinition definition) : base(definition?.Key) {
             Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+            Converter = new MetadataValue.Converter();
             Width = 100;
         }
 
-        public sealed override bool SuggestKey(ICommandContext context) {
-            if (context == null) return false;
-            if (context.HasPanel(out var active) == false) {
-                return false;
+        public sealed override async Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+            if (null == context) return false;
+            if (false == context.HasPanel(out var active)) return false;
+            if (false == context.HasPalette(out var palette)) return false;
+            if (false == active.HasProvider(out FileSystemProvider provider)) return false;
+            var entries = provider.Provided.ToList();
+            foreach (var entry in entries) {
+                var file = await provider.Factory.Metadata.Load(entry.Info.FullName, palette, token);
+                if (file.Keys.Contains(Definition.Key)) {
+                    return true;
+                }
             }
-            if (active.HasProvider(out FileSystemProvider provider) == false) {
-                return false;
+            return false;
+        }
+
+        public sealed class MetadataValue : IComparable {
+            public IMetadataValue Agent { get; }
+
+            public MetadataValue(IMetadataValue agent) {
+                Agent = agent ?? throw new ArgumentNullException(nameof(agent));
             }
-            return provider.SuggestKey(Key);
+
+            public sealed class Converter : EntryDataConverter {
+                public sealed override string Convert(object value, object parameter, CultureInfo culture) {
+                    var v = value as MetadataValue;
+                    if (v != null) {
+                        return v.Agent.Display;
+                    }
+                    return null;
+                }
+            }
+
+            int IComparable.CompareTo(object obj) {
+                return obj is MetadataValue other
+                    ? Comparer.Default.Compare(Agent.Object, other.Agent.Object)
+                    : Comparer.Default.Compare(this, obj);
+            }
         }
     }
 }

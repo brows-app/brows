@@ -1,3 +1,4 @@
+using Brows.FileSystem;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -5,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal sealed class DriveProvider : Provider<DriveEntry, DrivesConfig> {
+    internal sealed class DriveProvider : Provider<DriveEntry, DrivesConfig>, IFileSystemNavigationProvider {
         private async Task<IReadOnlyList<DriveEntry>> List(CancellationToken token) {
             var drives = await Task.Run(cancellationToken: token, function: DriveInfo.GetDrives);
             var entries = drives.Select(d => new DriveEntry(this, d)).ToList();
@@ -25,9 +26,11 @@ namespace Brows {
             Translation.Global.Value(ID);
 
         public object Icon { get; }
+        public DriveProviderFactory Factory { get; }
 
-        public DriveProvider(string id, object icon) : base(id) {
+        public DriveProvider(DriveProviderFactory factory, string id, object icon) : base(id) {
             Icon = icon;
+            Factory = factory;
         }
     }
 }

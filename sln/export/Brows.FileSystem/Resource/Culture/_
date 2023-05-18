@@ -24,7 +24,7 @@ Command_Description_FileSystem_Copy             = Copy the current selection to 
 Command_Description_FileSystem_Delete           = Delete the selection from the current panel
 Command_Description_FileSystem_Move             = Move the current selection to another panel
 Command_Description_FileSystem_Open             = Open files and directories
-Command_Description_FileSystem_Preview          = Show a preview of the item
+Command_Description_FileSystem_View             = Show or hide widgets
 
 Command_Group_FileSystemEntryData               = File System
 Command_Group_FileSystemInfoData                = File System

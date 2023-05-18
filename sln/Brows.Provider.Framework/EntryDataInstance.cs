@@ -12,7 +12,7 @@ namespace Brows {
                     if (Set.TryGetValue(key, out var value) == false) {
                         Set[key] = value = new EntryData(
                             entry: Entry,
-                            token: Token,
+                            token: Entry.Token,
                             definition: Definition.Get(key) ?? EntryDataDefinition.Empty);
                     }
                     return value;
@@ -22,12 +22,10 @@ namespace Brows {
 
         public Entry Entry { get; }
         public EntryDataDefinitionSet Definition { get; }
-        public CancellationToken Token { get; }
 
         public EntryDataInstance(Entry entry, EntryDataDefinitionSet definition, CancellationToken token) {
+            Entry = entry ?? throw new ArgumentNullException(nameof(entry));
             Definition = definition ?? throw new ArgumentNullException(nameof(definition));
-            Entry = entry;
-            Token = token;
         }
 
         public void Refresh() {

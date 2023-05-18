@@ -1,8 +1,15 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    internal class NativeBrowse : FileSystemCommand<NativeBrowse.Parameter> {
+    internal sealed class NativeBrowse : FileSystemCommand<NativeBrowseParameter> {
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry),
+            typeof(IEntryObservation)
+        };
+
         protected sealed override bool Work(Context context) {
             if (context == null) return false;
             if (context.HasPanel(out var active) == false) return false;
@@ -18,9 +25,6 @@ namespace Brows.Commands {
                     }
                 });
             });
-        }
-
-        public sealed class Parameter {
         }
     }
 }

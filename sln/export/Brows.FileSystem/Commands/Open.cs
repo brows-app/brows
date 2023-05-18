@@ -1,17 +1,26 @@
 ﻿using Brows.Exports;
+using Brows.FileSystem;
 using Domore.Conf.Cli;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
     internal sealed class Open : FileSystemCommand<Open.Parameter> {
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(FileSystemEntry),
+            typeof(FileSystemTreeNode)
+        };
+
         protected sealed override bool Work(Context context) {
             if (null == context) return false;
             if (false == context.HasPanel(out var active)) return false;
-            if (false == context.GetParameter(out var parameter)) return false;
-            if (false == active.HasFileSystemSelection(out var selection)) {
+            if (false == context.HasSource(out IFileSystemInfo _, out var items)) return false;
+            if (false == context.GetParameter(out var parameter)) {
                 return false;
             }
             var with = parameter.With;
@@ -51,7 +60,8 @@ namespace Brows.Commands {
                     return false;
                 }
                 var worked = false;
-                foreach (var info in selection) {
+                var infos = items.Select(item => item?.Info).Where(info => info != null);
+                foreach (var info in infos) {
                     worked |= await open(info, token);
                 }
                 return worked;

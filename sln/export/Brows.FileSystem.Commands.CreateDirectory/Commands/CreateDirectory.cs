@@ -1,24 +1,29 @@
 using Brows.Exports;
 using Domore.IO;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Brows.Commands {
     internal sealed class CreateDirectory : FileSystemCommand<CreateDirectoryParameter> {
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry),
+            typeof(IEntryObservation)
+        };
+
         protected sealed override bool Work(Context context) {
-            if (context == null) return false;
-            if (context.HasPanel(out var active) == false) return false;
-            if (context.HasCommander(out var commander) == false) return false;
-            if (context.HasGesture(out _)) {
+            if (null == context) return false;
+            if (false == context.HasPanel(out var active)) return false;
+            if (false == context.HasCommander(out var commander)) return false;
+            if (false == context.HasParameter(out var parameter)) {
+                if (false == context.HasGesture(out _)) {
+                    return false;
+                }
                 var trigger = InputTrigger;
                 var directoryName = "'New folder'";
-                return context.Operate(async (progress, token) => {
-                    return await commander.ShowPalette($"{trigger} {directoryName}", trigger.Length + 1, directoryName.Length, token);
-                });
+                return context.ShowPalette($"{trigger} {directoryName}", trigger.Length + 2, directoryName.Length - 2);
             }
-            if (context.HasParameter(out var parameter) == false) return false;
-            if (active.HasFileSystemDirectory(out var directory) == false) {
-                return false;
-            }
+            if (false == context.HasSourceFileSystemDirectory(out var directory)) return false;
             var service = CreateDirectoryInfoDirectory;
             if (service == null) {
                 return false;

@@ -4,6 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Brows">
     <Grid>
-        <MediaElement x:Name="MediaElement" x:FieldModifier="private" LoadedBehavior="Play" IsMuted="True"/>
+        <Viewbox Stretch="Uniform">
+            <MediaElement x:Name="MediaElement" x:FieldModifier="private"
+                UnloadedBehavior="Manual"
+                LoadedBehavior="Manual"
+                IsMuted="True" 
+                MediaOpened="MediaElement_MediaOpened"                          
+                MediaFailed="MediaElement_MediaFailed"
+                MediaEnded="MediaElement_MediaEnded"/>
+        </Viewbox>
     </Grid>
 </local:EntryStreamGuiControl>

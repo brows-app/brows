@@ -89,7 +89,11 @@ namespace Brows.Commands {
 
         public BitmapFrame Output =>
             _Output ?? (
-            _Output = BitmapFrame.Create(TransformedBitmap, Source.Thumbnail, Source.Metadata as BitmapMetadata, Source.ColorContexts));
+            _Output = BitmapFrame.Create(
+                source: TransformedBitmap,
+                thumbnail: Source.Thumbnail,
+                metadata: Parameter.CopyMetadata == true ? (Source.Metadata as BitmapMetadata) : null,
+                colorContexts: Source.ColorContexts));
         private BitmapFrame _Output;
 
         public BitmapFrame Source { get; }

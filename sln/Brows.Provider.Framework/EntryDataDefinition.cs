@@ -56,14 +56,14 @@ namespace Brows {
 
         public string Key { get; }
 
-        public abstract Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken cancellationToken);
+        public abstract Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken token);
         public abstract int CompareValue(IEntry x, IEntry y);
 
         public virtual void RefreshValue(IEntry entry) {
         }
 
-        public virtual bool SuggestKey(ICommandContext context) {
-            return true;
+        public virtual Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+            return Task.FromResult(true);
         }
     }
 

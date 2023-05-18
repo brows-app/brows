@@ -2,6 +2,14 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:s="clr-namespace:System;assembly=mscorlib"
                     xmlns:local="clr-namespace:Brows">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Provider.Gui;component/Resource/Style/EntryDataTextBlockStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Provider.Gui;component/Resource/Style/ProviderTreeIconImageStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Provider.Gui;component/Resource/Style/ProviderTreeNodeLabelStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Provider.Gui;component/Resource/Style/ProviderTreeViewItemStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Provider.Gui;component/Resource/Style/ProviderTreeViewStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Provider.Gui;component/Resource/Style/ProviderGridSplitterStyle.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
     <SolidColorBrush x:Key="OperationButton_Default_Background" Color="Transparent"/>
     <SolidColorBrush x:Key="OperationButton_Default_BorderBrush" Color="Transparent"/>
     <SolidColorBrush x:Key="OperationButton_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".9"/>
@@ -27,7 +35,7 @@
     <FontFamily x:Key="OperationControl_Default_FontFamily">Consolas</FontFamily>
     <s:Double x:Key="OperationControl_Default_FontSize">12</s:Double>
     <FontWeight x:Key="OperationControl_Default_FontWeight">Normal</FontWeight>
-    
+
     <Style TargetType="{x:Type Image}" x:Key="EntryIconImageStyle">
         <Setter Property="Height" Value="16"/>
         <Setter Property="Width" Value="16"/>
@@ -38,26 +46,4 @@
         <Setter Property="Margin" Value="2,0,4,0"/>
     </Style>
     <Style TargetType="{x:Type local:EntryThumbnailImage}" BasedOn="{StaticResource EntryThumbnailImageStyle}"/>
-
-    <Style TargetType="{x:Type TextBlock}" x:Key="EntryDataTextBlockStyle">
-        <Setter Property="Background" Value="{DynamicResource Global_Transparent_Background_Brush}"/>
-        <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
-        <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
-        <Setter Property="FontSize" Value="{DynamicResource Global_Monospace_FontSize}"/>
-        <Setter Property="FontWeight" Value="{DynamicResource Global_Monospace_FontWeight}"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style TargetType="{x:Type local:EntryDataTextBlock}" BasedOn="{StaticResource EntryDataTextBlockStyle}"/>
-
-    <Style TargetType="{x:Type local:ProviderRowSplitter}" x:Key="ProviderRowSplitterStyle">
-        <Setter Property="Background" Value="{DynamicResource Global_Default_Border_Brush}"/>
-        <Setter Property="Focusable" Value="False"/>
-        <Setter Property="Height" Value="5"/>
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        <Setter Property="ResizeBehavior" Value="PreviousAndNext"/>
-        <Setter Property="ResizeDirection" Value="Rows"/>
-        <Setter Property="ShowsPreview" Value="True"/>
-        <Setter Property="VerticalAlignment" Value="Top"/>
-    </Style>
-    <Style TargetType="{x:Type local:ProviderRowSplitter}" BasedOn="{StaticResource ProviderRowSplitterStyle}"/>
 </ResourceDictionary>

@@ -3,6 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:s="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:Brows">
+    <Window.Resources>
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource CommanderScrollBarStyle}"/>
+        <Style TargetType="ScrollViewer" BasedOn="{StaticResource CommanderScrollViewerStyle}"/>
+    </Window.Resources>
     <Window.Style>
         <Style TargetType="Window">
             <Style.Resources>

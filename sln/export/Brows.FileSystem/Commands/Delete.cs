@@ -2,17 +2,24 @@
 using Domore.Conf;
 using Domore.Conf.Cli;
 using Domore.IO;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
     internal sealed class Delete : FileSystemCommand<Delete.Parameter> {
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(FileSystemEntry),
+            typeof(FileSystemTreeNode)
+        };
+
         protected sealed override bool Work(Context context) {
-            if (context == null) return false;
-            if (context.HasPanel(out var active) == false) return false;
-            if (context.GetParameter(out var parameter) == false) return false;
-            if (active.HasFileSystemDirectory(out var directory) == false) return false;
-            if (active.HasFileSystemSelection(out var selection) == false) return false;
+            if (null == context) return false;
+            if (false == context.HasPanel(out var active)) return false;
+            if (false == context.GetParameter(out var parameter)) return false;
+            if (false == context.HasSourceFileSystemInfo(out _, out var list)) return false;
             return context.Operate(async (progress, token) => {
                 switch (parameter.Mode) {
                     case null:
@@ -22,11 +29,15 @@ namespace Brows.Commands {
                         if (service == null) {
                             return false;
                         }
-                        var names = selection.Select(info => info.Name).ToList();
-                        return await service.Work(names, directory.FullName, parameter, progress, token);
+                        var groups = list.GroupBy(info => Path.GetDirectoryName(info.FullName));
+                        foreach (var group in groups) {
+                            var names = group.Select(info => info.Name).ToList();
+                            await service.Work(names, group.Key, parameter, progress, token);
+                        }
+                        return true;
                     case Mode.Managed:
                         var prog = new FileSystemOperationProgress(progress);
-                        var tasks = selection.Select(async info => await FileSystemTask.Delete(info, prog, token)).ToList();
+                        var tasks = list.Select(async info => await FileSystemTask.Delete(info, prog, token)).ToList();
                         await Task.WhenAll(tasks);
                         return tasks.Count > 0;
                 }

@@ -23,7 +23,7 @@ namespace Brows {
                 await AddPanel(item, CancellationToken.None);
             }
             if (First) {
-                await ShowPalette("? ", 0, 2, CancellationToken.None);
+                await ShowPalette(null, "? ", 0, 2, CancellationToken.None);
             }
         }
 
@@ -39,11 +39,11 @@ namespace Brows {
 
         private void Controller_WindowGesture(object sender, GestureEventArgs e) {
             if (e != null) {
-                e.Triggered = Input(e.Gesture);
+                e.Triggered = Input(e.Gesture, e.Source);
             }
         }
 
-        private bool Input(IGesture gesture) {
+        private bool Input(IGesture gesture, object source) {
             if (Palette != null) {
                 return false;
             }
@@ -61,7 +61,7 @@ namespace Brows {
                 foreach (var command in commands) {
                     var shortcut = command.Trigger.Gesture[gesture].Shortcut;
                     var cmdLine = new CommandLine(shortcut, null);
-                    var context = new CommandContext(this, cmdLine, gesture);
+                    var context = new CommandContext(this, new CommandSource(source), cmdLine, gesture);
                     var work = command.TriggeredWork(context);
                     if (work) {
                         return true;
@@ -126,24 +126,27 @@ namespace Brows {
 
         public async Task<bool> AddPanel(string id, CancellationToken token) {
             if (Log.Info()) {
-                Log.Info(nameof(AddPanel) + " > " + id);
+                Log.Info(Log.Join(nameof(AddPanel), id));
             }
             var panel = await PanelCollection.Add(id, token);
             if (panel == null) {
                 return false;
             }
-            Controller?.AddPanel(panel);
             return true;
         }
 
         public async Task<bool> RemovePanel(IPanel panel, CancellationToken token) {
             if (Log.Info()) {
-                Log.Info(nameof(RemovePanel) + " > " + panel);
+                Log.Info(Log.Join(nameof(RemovePanel), panel));
             }
-            PanelCollection.Remove(panel);
-            Controller?.RemovePanel(panel);
-            await Task.CompletedTask;
-            return true;
+            return await PanelCollection.Remove(panel);
+        }
+
+        public async Task<bool> ShiftPanel(IPanel panel, int column, CancellationToken token) {
+            if (Log.Info()) {
+                Log.Info(Log.Join(nameof(ShiftPanel), panel));
+            }
+            return await PanelCollection.Shift(panel, column);
         }
 
         public async Task<bool> ClearPanels(CancellationToken token) {
@@ -158,16 +161,12 @@ namespace Brows {
             return removed;
         }
 
-        public Task<bool> ShowPalette(string input, CancellationToken token) {
-            return ShowPalette(input, 0, 0, token);
-        }
-
-        public async Task<bool> ShowPalette(string input, int selectedStart, int selectedLength, CancellationToken token) {
+        public async Task<bool> ShowPalette(CommandSource source, string input, int selectedStart, int selectedLength, CancellationToken token) {
             if (Palette != null) {
                 await Task.CompletedTask;
                 return false;
             }
-            var palette = new CommandPalette(this);
+            var palette = new CommandPalette(this, source);
             void palette_Escaping(object sender, EventArgs e) {
                 palette.Escaping -= palette_Escaping;
                 Palette = null;

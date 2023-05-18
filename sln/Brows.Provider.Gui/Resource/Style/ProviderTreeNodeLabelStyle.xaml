@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows">
+    <SolidColorBrush x:Key="ProviderTreeNodeLabel_Default_Background" 
+                     Color="{Binding Color, Source={StaticResource Global_Transparent_Background_Brush}}" 
+                     Opacity="{Binding Opacity, Source={StaticResource Global_Transparent_Background_Brush}}"/>
+    <SolidColorBrush x:Key="ProviderTreeNodeLabel_Default_Foreground" 
+                     Color="{Binding Color, Source={StaticResource Global_Default_Foreground_Brush}}" 
+                     Opacity="{Binding Opacity, Source={StaticResource Global_Default_Foreground_Brush}}"/>
+    <Style TargetType="Label" x:Key="ProviderTreeNodeLabelStyle">
+        <Setter Property="Background" Value="{DynamicResource ProviderTreeNodeLabel_Default_Background}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ProviderTreeNodeLabel_Default_Foreground}"/>
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <local:ProviderTreeIconImage Grid.Column="0" Source="{Binding Icon}"/>
+                        <ContentPresenter Grid.Column="1" Content="{Binding Name}" />
+                    </Grid>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="local:ProviderTreeNodeLabel" BasedOn="{StaticResource ProviderTreeNodeLabelStyle}"/>
+</ResourceDictionary>

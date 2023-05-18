@@ -1,11 +1,16 @@
 ﻿using Brows.Config;
 using Brows.Exports;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Brows.Commands {
-    internal sealed class Edit : FileSystemCommand<Edit.Parameter> {
+    internal sealed class Edit : FileSystemCommand<EditParameter> {
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry)
+        };
+
         protected sealed override bool Work(Context context) {
             if (context == null) return false;
             if (context.HasPanel(out var active) == false) return false;
@@ -62,8 +67,5 @@ namespace Brows.Commands {
 
         public ILocateProgram LocateProgram { get; set; }
         public IOpenFileWith OpenFileWith { get; set; }
-
-        public class Parameter {
-        }
     }
 }

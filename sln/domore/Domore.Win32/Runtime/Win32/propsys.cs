@@ -39,5 +39,20 @@ namespace Domore.Runtime.Win32 {
             [In] PROPDESC_ENUMFILTER filterOn,
             [In] ref Guid riid,
             [Out, MarshalAs(UnmanagedType.Interface, IidParameterIndex = 1)] out IPropertyDescriptionList ppv);
+
+        [DllImport("propsys.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        public static extern HRESULT PSCoerceToCanonicalValue(
+          [In] ref PROPERTYKEY key,
+          [In, Out] ref PROPVARIANT ppropvar);
+
+        [DllImport("propsys.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        public static extern HRESULT PropVariantToVariant(
+            [In] ref PROPVARIANT pPropVar,
+            [Out] IntPtr pVar);
+
+        [DllImport("propsys.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        public static extern HRESULT VariantToPropVariant(
+            [In] IntPtr pVar,
+            [Out] out PROPVARIANT pPropVar);
     }
 }

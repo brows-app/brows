@@ -12,6 +12,16 @@ namespace Brows {
     public abstract class Command : ICommand {
         private readonly CommandHistory History = new();
 
+        private bool Valid(ICommandContext context) {
+            if (Provided(context) == false) {
+                return false;
+            }
+            if (Sourced(context) == false) {
+                return false;
+            }
+            return true;
+        }
+
         private bool Provided(ICommandContext context) {
             var provider = Provider;
             if (provider == null) {
@@ -21,11 +31,29 @@ namespace Brows {
             if (context.HasPanel(out var active) == false) {
                 return false;
             }
-            if (active.HasProvider(out IProvider activeProvider) == false) {
+            if (active.HasProvider(out Provider activeProvider) == false) {
                 return false;
             }
             var activeProviderType = activeProvider.GetType();
             if (activeProviderType != provider) {
+                return false;
+            }
+            return true;
+        }
+
+        private bool Sourced(ICommandContext context) {
+            var source = Source;
+            if (source == null) {
+                return true;
+            }
+            if (context == null) return false;
+            if (context.HasSource(out object item, out var items) == false) {
+                return false;
+            }
+            if (source.Any(type => type.IsAssignableFrom(item.GetType())) == false) {
+                return false;
+            }
+            if (source.Any(type => items.All(item => type.IsAssignableFrom(item.GetType()))) == false) {
                 return false;
             }
             return true;
@@ -60,6 +88,9 @@ namespace Brows {
             Trigger?.Input?.String;
 
         protected virtual Type Provider =>
+            null;
+
+        protected virtual IEnumerable<Type> Source =>
             null;
 
         protected ICommandSuggestion Suggestion(ICommandContext context, string input, string help = null, string group = null, int? relevance = null, string description = null, string press = null, string alias = null, bool? history = null) {
@@ -131,7 +162,7 @@ namespace Brows {
         public ICommandTrigger Trigger { get; private set; }
 
         bool ICommand.TriggeredWork(ICommandContext context) {
-            if (Provided(context) == false) {
+            if (Valid(context) == false) {
                 return false;
             }
             var worked = TriggeredWork(context);
@@ -146,14 +177,14 @@ namespace Brows {
         }
 
         bool ICommand.ArbitraryWork(ICommandContext context) {
-            if (Provided(context) == false) {
+            if (Valid(context) == false) {
                 return false;
             }
             return ArbitraryWork(context);
         }
 
         IAsyncEnumerable<ICommandSuggestion> ICommand.Suggest(ICommandContext context, CancellationToken token) {
-            if (Provided(context) == false) {
+            if (Valid(context) == false) {
                 return CommandSuggestions.Empty();
             }
             return Suggest(context, token);
@@ -291,6 +322,10 @@ namespace Brows {
                 return Agent.HasFlag(out flag);
             }
 
+            public bool HasPalette(out ICommandPalette palette) {
+                return Agent.HasPalette(out palette);
+            }
+
             public bool HasCommander(out ICommander commander) {
                 return Agent.HasCommander(out commander);
             }
@@ -345,6 +380,22 @@ namespace Brows {
 
             public void SetHint(ICommandContextHint hint) {
                 Agent.SetHint(hint);
+            }
+
+            public bool HasSource<T>(out T item, out IReadOnlyList<T> items) {
+                return Agent.HasSource(out item, out items);
+            }
+
+            public bool HasSource(out ICommandSource source) {
+                return Agent.HasSource(out source);
+            }
+
+            public bool ShowPalette(string input) {
+                return Agent.ShowPalette(input);
+            }
+
+            public bool ShowPalette(string input, int selectedStart, int selectedLength) {
+                return Agent.ShowPalette(input, selectedStart, selectedLength);
             }
         }
     }

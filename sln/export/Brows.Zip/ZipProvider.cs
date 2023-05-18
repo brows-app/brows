@@ -81,7 +81,7 @@ namespace Brows {
         }
 
         private sealed class ProvideIO : IProvideIO, IProviderExport<ZipProvider> {
-            public async Task<bool> Work(ICollection<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
+            public async Task<bool> Work(ICollection<IProvidedIO> io, ICommandSource source, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (io is null) throw new ArgumentNullException(nameof(io));
                 if (target is not ZipProvider provider) {
                     return false;

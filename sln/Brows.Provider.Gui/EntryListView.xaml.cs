@@ -9,7 +9,7 @@ namespace Brows {
             base.OnItemsSourceChanged(oldValue, newValue);
         }
 
-        protected override DependencyObject GetContainerForItemOverride() {
+        protected sealed override DependencyObject GetContainerForItemOverride() {
             return new EntryListViewItem {
                 ParentListView = this
             };

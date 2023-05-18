@@ -1,11 +1,12 @@
 using Domore.Logs;
 using Domore.Notification;
 using System;
+using System.Collections;
 using System.ComponentModel;
 using System.Threading;
 
 namespace Brows {
-    public abstract class Entry : Notifier, IEntry {
+    public abstract class Entry : Notifier, IEntry, ICommandSourceObject {
         private static readonly ILog Log = Logging.For(typeof(Entry));
         private static readonly PropertyChangedEventArgs SelectEventArgs = new(nameof(Select));
 
@@ -17,10 +18,10 @@ namespace Brows {
             _DataInstance = new EntryDataInstance(this, Provider.Data.Definition, Provider.Token));
         private EntryDataInstance _DataInstance;
 
-        protected CancellationToken Token =>
+        protected internal CancellationToken Token =>
             Provider.Token;
 
-        protected Provider Provider { get; }
+        protected internal Provider Provider { get; }
 
         protected Entry(Provider provider) {
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
@@ -68,6 +69,12 @@ namespace Brows {
             add => RefreshedEvent += value;
             remove => RefreshedEvent -= value;
         }
+
+        object ICommandSourceObject.Instance =>
+            this;
+
+        IEnumerable ICommandSourceObject.Collection =>
+            Provider.Selection;
     }
 
     public abstract class Entry<TProvider> : Entry where TProvider : Provider {

@@ -1,25 +1,30 @@
-﻿using System;
+﻿using Brows.Exports;
+using Brows.FileSystem;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Exports;
-
-    internal sealed class DriveProviderFactory : ProviderFactory<DriveProvider> {
-        protected sealed override async Task<DriveProvider> CreateFor(string id, IPanel panel, CancellationToken cancellationToken) {
+    internal sealed class DriveProviderFactory : ProviderFactory<DriveProvider>, IFileSystemNavigationService {
+        protected sealed override async Task<DriveProvider> CreateFor(string id, IPanel panel, CancellationToken token) {
             if (panel is null) throw new ArgumentNullException(nameof(panel));
             if (id != Drives.ID) {
                 return null;
             }
             var drives = new Drives();
             var icon = default(object);
-            var iconService = IconDrives;
-            if (iconService != null) {
-                icon = await iconService.Icon(drives, cancellationToken);
+            var task = DrivesIcon?.Work(drives, set: result => icon = result, token);
+            if (task != null) {
+                var work = await task;
+                if (work == false) {
+                    icon = null;
+                }
             }
-            return new DriveProvider(Drives.ID, icon);
+            return new DriveProvider(this, Drives.ID, icon);
         }
 
-        public IIconDrives IconDrives { get; set; }
+        public IDriveIcon DriveIcon { get; set; }
+        public IDrivesIcon DrivesIcon { get; set; }
+        public IFileSystemIcon FileSystemIcon { get; set; }
     }
 }

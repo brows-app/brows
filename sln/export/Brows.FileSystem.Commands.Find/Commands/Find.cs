@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Brows.Commands {
@@ -7,6 +8,11 @@ namespace Brows.Commands {
             _FindCommand ?? (
             _FindCommand = new FileSystemFindCommand());
         private FileSystemFindCommand _FindCommand;
+
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry),
+            typeof(IEntryObservation)
+        };
 
         protected sealed override IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, CancellationToken token) {
             if (context != null) {
@@ -28,9 +34,7 @@ namespace Brows.Commands {
             if (context == null) return false;
             if (context.HasGesture(out _)) {
                 if (context.HasCommander(out var commander)) {
-                    return context.Operate(async (progress, token) => {
-                        return await commander.ShowPalette($"{InputTrigger} ", token);
-                    });
+                    return context.ShowPalette($"{InputTrigger} ");
                 }
             }
             if (context.HasInput(out var input) == false) return false;

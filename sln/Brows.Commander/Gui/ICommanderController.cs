@@ -8,7 +8,5 @@ namespace Brows.Gui {
         event GestureEventHandler WindowGesture;
         void CloseWindow();
         object NativeWindow();
-        void AddPanel(IPanel panel);
-        void RemovePanel(IPanel panel);
     }
 }

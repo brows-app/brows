@@ -1,6 +1,7 @@
 ﻿using Domore.IO;
 using Domore.Logs;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -105,6 +106,10 @@ namespace Brows.Commands {
             }
             return worked;
         }
+
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry)
+        };
 
         protected sealed override bool Work(Context context) {
             if (context == null) return false;

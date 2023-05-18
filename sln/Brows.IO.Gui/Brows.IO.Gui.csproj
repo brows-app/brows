@@ -10,6 +10,7 @@
       <ProjectReference Include="..\Brows.IO.Contract\Brows.IO.Contract.csproj" />
       <ProjectReference Include="..\Brows.Translation.Framework\Brows.Translation.Framework.csproj" />
       <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
+      <ProjectReference Include="..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />
       <ProjectReference Include="..\domore\Domore.Win32.Windows.PreviewHandlerControl\Domore.Win32.Windows.PreviewHandlerControl.csproj" />
       <ProjectReference Include="..\domore\Domore.Win32.Windows.PreviewTextControl\Domore.Win32.Windows.PreviewTextControl.csproj" />
     </ItemGroup>

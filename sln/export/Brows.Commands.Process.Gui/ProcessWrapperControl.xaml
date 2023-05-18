@@ -23,7 +23,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto" MinWidth="{x:Static SystemParameters.VerticalScrollBarWidth}"/>
+                <ColumnDefinition Width="Auto" MinWidth="{DynamicResource Commander_ScrollBar_VerticalScrollBarWidth}"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Style="{DynamicResource Process_PID_Text}"/>
             <TextBlock Grid.Column="1" Text="{Binding ProcessID}"/>

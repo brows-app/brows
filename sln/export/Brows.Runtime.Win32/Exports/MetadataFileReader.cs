@@ -9,7 +9,7 @@ namespace Brows.Exports {
     internal sealed class MetadataFileReader : IMetadataFileReader {
         private readonly STAThreadPool ThreadPool = Win32ThreadPool.Common;
 
-        public async Task<bool> Work(string file, IDictionary<IMetadataDefinition, string> values, IOperationProgress progress, CancellationToken token) {
+        public async Task<bool> Work(string file, IDictionary<IMetadataDefinition, IMetadataValue> values, IOperationProgress progress, CancellationToken token) {
             var keys = values?.Keys;
             if (keys == null) {
                 return false;
@@ -30,7 +30,10 @@ namespace Brows.Exports {
             });
             foreach (var key in metadata) {
                 if (dict.TryGetValue(key.PropertyDescription, out var value)) {
-                    values[key] = value.Display;
+                    values[key] = new MetadataValue {
+                        Display = value.Display,
+                        Object = value.Object
+                    };
                 }
             }
             return true;

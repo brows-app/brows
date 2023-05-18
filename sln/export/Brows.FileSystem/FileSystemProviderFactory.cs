@@ -1,13 +1,13 @@
 ﻿using Brows.Data;
 using Brows.Exports;
+using Brows.FileSystem;
 using Domore.Logs;
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal sealed class FileSystemProviderFactory : ProviderFactory<FileSystemProvider> {
+    internal sealed class FileSystemProviderFactory : ProviderFactory<FileSystemProvider>, IFileSystemNavigationService {
         private static readonly ILog Log = Logging.For(typeof(FileSystemProviderFactory));
 
         private static async Task<DirectoryInfo> LoadDirectory(string id, CancellationToken token) {
@@ -25,7 +25,6 @@ namespace Brows {
         }
 
         protected sealed override async Task<FileSystemProvider> CreateFor(string id, IPanel panel, CancellationToken token) {
-            if (null == panel) throw new ArgumentNullException(nameof(panel));
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(CreateFor), id));
             }
@@ -63,5 +62,7 @@ namespace Brows {
         public IDropDirectoryInfoData DropDirectoryInfoData { get; set; }
         public IMetadataFileReader MetadataFileReader { get; set; }
         public IMetadataSystemReader MetadataSystemReader { get; set; }
+        public IFileSystemIcon FileSystemIcon { get; set; }
+        public IDriveIcon DriveIcon { get; set; }
     }
 }

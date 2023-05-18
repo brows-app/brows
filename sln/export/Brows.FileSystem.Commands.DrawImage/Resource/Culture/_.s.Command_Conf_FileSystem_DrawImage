@@ -23,3 +23,11 @@ Rotate =
 
 # Set the quality of the jpeg encoder as an integer.
 JpegQuality = 
+
+# Copy metadata to the output.
+# Valid when input and output formats are the same.
+CopyMetadata = true
+
+# Transfer metadata to the output
+# Valid when input and output formats are different.
+TransferMetadata = System.Photo.*;System.GPS.*;System.ApplicationName;System.Author;System.Comment;System.Company;System.Copyright;System.ItemAuthors;System.Keywords;System.Rating;System.RatingText;System.SimpleRating;System.Title

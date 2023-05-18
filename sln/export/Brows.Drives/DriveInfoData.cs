@@ -70,18 +70,22 @@ namespace Brows {
                 if (entry == null) {
                     return null;
                 }
-                var service = IconDriveInfo;
-                if (service == null) {
+                var icon = default(object);
+                var task = Service?.Work(entry.Info, set: result => icon = result, token);
+                if (task == null) {
                     return null;
                 }
-                var icon = await service.Icon(entry.Info, token);
+                var work = await task;
+                if (work == false) {
+                    return null;
+                }
                 return icon;
             }
 
-            public IIconDriveInfo IconDriveInfo { get; set; }
+            public IDriveIcon Service { get; set; }
 
-            public sealed override bool SuggestKey(ICommandContext context) {
-                return false;
+            public sealed override Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+                return Task.FromResult(false);
             }
         }
 

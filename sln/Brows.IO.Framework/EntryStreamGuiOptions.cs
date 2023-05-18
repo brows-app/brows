@@ -87,6 +87,14 @@ namespace Brows {
                 set => _Extensions = value;
             }
             private ExtensionSet _Extensions;
+
+            public bool LoopAudio { get; set; } = true;
+            public bool LoopVideo { get; set; } = true;
+            public bool AutoplayAudio { get; set; } = false;
+            public bool AutoplayVideo { get; set; } = true;
+            public double SpeedRatio { get; set; } = 1;
+            public double Volume { get; set; } = 0.5;
+            public bool Muted { get; set; } = true;
         }
 
         long? IEntryStreamGuiOptions.ImageSourceLengthMax =>
@@ -100,5 +108,13 @@ namespace Brows {
 
         DecodedTextOptions IEntryStreamGuiOptions.TextDecoderOptions =>
             Text;
+
+        bool IEntryStreamGuiOptions.LoopAudio => Media.LoopAudio;
+        bool IEntryStreamGuiOptions.LoopVideo => Media.LoopVideo;
+        bool IEntryStreamGuiOptions.AutoplayAudio => Media.AutoplayAudio;
+        bool IEntryStreamGuiOptions.AutoplayVideo => Media.AutoplayVideo;
+        bool IEntryStreamGuiOptions.MediaMuted => Media.Muted;
+        double IEntryStreamGuiOptions.MediaVolume => Media.Volume;
+        double IEntryStreamGuiOptions.MediaSpeedRatio => Media.SpeedRatio;
     }
 }

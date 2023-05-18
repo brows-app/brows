@@ -12,6 +12,7 @@ namespace Brows {
         bool HasData(out ICommandContextData data);
         void SetFlag(ICommandContextFlag flag);
         bool HasFlag(out ICommandContextFlag flag);
+        bool HasPalette(out ICommandPalette palette);
         bool HasCommander(out ICommander commander);
         bool HasDomain(out ICommanderDomain domain);
         bool HasInput(out string value);
@@ -24,6 +25,10 @@ namespace Brows {
         bool MayTrigger(ICommand command);
         bool DidTrigger(ICommand command);
         bool DidTrigger(out IReadOnlySet<ICommand> commands);
+        bool HasSource(out ICommandSource source);
+        bool HasSource<T>(out T item, out IReadOnlyList<T> items);
+        bool ShowPalette(string input);
+        bool ShowPalette(string input, int selectedStart, int selectedLength);
         bool Operate(Func<IOperationProgress, CancellationToken, Task<bool>> task);
     }
 }

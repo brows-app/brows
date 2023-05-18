@@ -1,5 +1,6 @@
 using Brows.Export;
 using Brows.Exports;
+using Brows.FileSystem;
 using Domore.IO;
 using Domore.Logs;
 using System;
@@ -13,11 +14,10 @@ using DIRECTORY = System.IO.Directory;
 using PATH = System.IO.Path;
 
 namespace Brows {
-    internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemConfig> {
+    internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemConfig>, IFileSystemNavigationProvider {
         private static readonly ILog Log = Logging.For(typeof(FileSystemProvider));
 
         private readonly StringComparer CaseComparer;
-        private readonly Dictionary<string, List<FileSystemEntry>> ExtensionSet;
 
         private FileSystemEventTask ThisEvent;
         private FileSystemEventTask ParentEvent;
@@ -181,26 +181,6 @@ namespace Brows {
         protected sealed override IReadOnlyCollection<IEntryDataDefinition> DataDefinition =>
             Factory.Metadata.DataDefinition;
 
-        protected sealed override void Adding(IReadOnlyCollection<FileSystemEntry> entries) {
-            foreach (var entry in entries) {
-                if (entry.Info is FileInfo file) {
-                    _ = Factory.Metadata.Ready(file.FullName, Token);
-                    if (ExtensionSet.TryGetValue(entry.Extension, out var extension) == false) {
-                        ExtensionSet[entry.Extension] = extension = new();
-                    }
-                    extension.Add(entry);
-                }
-            }
-        }
-
-        protected sealed override void Removing(IReadOnlyCollection<FileSystemEntry> entries) {
-            foreach (var entry in entries) {
-                if (ExtensionSet.TryGetValue(entry.Extension, out var extension)) {
-                    extension.Remove(entry);
-                }
-            }
-        }
-
         protected sealed override void DragSelected(object source) {
             var service = Factory.DragSourceFileSystemInfos;
             if (service != null) {
@@ -300,39 +280,31 @@ namespace Brows {
             CaseComparer = CaseSensitive
                 ? StringComparer.Ordinal
                 : StringComparer.OrdinalIgnoreCase;
-            ExtensionSet = new(StringComparer.OrdinalIgnoreCase);
-        }
-
-        public bool SuggestKey(string key) {
-            foreach (var extension in ExtensionSet) {
-                if (extension.Value.Count > 0) {
-                    if (Factory.Metadata.File.TryGetValue(extension.Key, out var set)) {
-                        if (set.Contains(key)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
         }
 
         private sealed class ProvideIO : IProvideIO, IProviderExport<FileSystemProvider> {
-            public async Task<bool> Work(ICollection<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
+            public async Task<bool> Work(ICollection<IProvidedIO> io, ICommandSource source, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (io is null) throw new ArgumentNullException(nameof(io));
+                if (source is null) return false;
                 if (target is not FileSystemProvider provider) {
                     return false;
                 }
-                var selection = provider.Selected.OfType<FileSystemEntry>().ToList();
-                if (selection.Count == 0) {
-                    return false;
+                var added = false;
+                var entries = source.Items?.OfType<FileSystemEntry>()?.ToList();
+                if (entries?.Count > 0) {
+                    var streams = entries.Select(e => new FileSystemStreamSource(e));
+                    var streamSet = new FileSystemStreamSet(streams);
+                    io.Add(new ProvidedIO { StreamSets = new[] { streamSet } });
+                    added = true;
                 }
-                var streams = selection.Select(e => new FileSystemStreamSource(e));
-                var streamSet = new FileSystemStreamSet(streams);
-                io.Add(new ProvidedIO {
-                    StreamSets = new[] { streamSet }
-                });
-                await Task.CompletedTask;
-                return true;
+                var treeNodes = source.Items?.OfType<FileSystemTreeNode>()?.ToList();
+                if (treeNodes?.Count > 0) {
+                    var streams = treeNodes.Select(n => n.StreamSource);
+                    var streamSet = new FileSystemTreeNode.StreamSet(streams);
+                    io.Add(new ProvidedIO { StreamSets = new[] { streamSet } });
+                    added = true;
+                }
+                return await Task.FromResult(added);
             }
         }
 
@@ -343,14 +315,14 @@ namespace Brows {
                     return false;
                 }
                 var files = io.Files();
-                if (files.Count > 0) {
-                    var service = provider.Factory.MoveFilesToDirectory;
-                    if (service == null) {
-                        return false;
-                    }
-                    return await service.Work(files, provider.Directory.FullName, progress, token);
+                if (files.Count == 0) {
+                    return false;
                 }
-                return false;
+                var task = provider.Factory.MoveFilesToDirectory?.Work(files, provider.Directory.FullName, progress, token);
+                if (task == null) {
+                    return false;
+                }
+                return await task;
             }
         }
 

@@ -1,5 +1,12 @@
+using System;
+using System.Collections.Generic;
+
 namespace Brows.Commands {
     internal sealed class Select : Command<SelectParameter> {
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry)
+        };
+
         protected sealed override bool Work(Context context) {
             if (null == context) return false;
             if (false == context.HasPanel(out var active)) return false;

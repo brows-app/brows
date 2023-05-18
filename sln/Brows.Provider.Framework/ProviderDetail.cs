@@ -1,21 +1,23 @@
-﻿using System;
+﻿namespace Brows {
+    public abstract class ProviderDetail : IProviderFocus {
+        protected abstract ProviderDetail Clone(Provider provider);
 
-namespace Brows {
-    public abstract class ProviderDetail {
-        protected internal virtual ProviderDetail For(Provider provider) {
-            if (provider == null) {
-                return null;
-            }
-            if (provider.GetType() != Provider?.GetType()) {
-                return null;
-            }
-            var type = GetType();
-            var inst = Activator.CreateInstance(type);
-            var detail = (ProviderDetail)inst;
-            detail.Provider = provider;
-            return detail;
+        protected ProviderDetail(Provider provider) {
+            Provider = provider;
         }
 
-        public Provider Provider { get; set; }
+        internal ProviderDetail For(Provider provider) {
+            return Clone(provider);
+        }
+
+        public Provider Provider { get; }
+
+        bool IProviderFocus.Set() {
+            return false;
+        }
+
+        bool IProviderFocus.Get() {
+            return false;
+        }
     }
 }

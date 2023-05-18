@@ -103,11 +103,13 @@ namespace Brows {
         private ICommandContextHint _SuggestionHint;
 
         public Commander Commander { get; }
+        public CommandSource Source { get; }
         public CommandPaletteInput Input { get; }
 
-        public CommandPalette(Commander commander) {
+        public CommandPalette(Commander commander, CommandSource source) {
             Commander = commander;
-            Input = new(Commander);
+            Source = source;
+            Input = new CommandPaletteInput(Commander, Source);
             Input.Escaping += Input_Escaping;
             Input.Suggesting += Input_Suggesting;
         }

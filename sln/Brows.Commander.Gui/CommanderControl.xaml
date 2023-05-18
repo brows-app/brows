@@ -10,7 +10,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <local:PanelGrid Grid.Row="0" x:Name="PanelGrid"/>
+            <local:PanelCollectionControl Grid.Row="0" DataContext="{Binding Panels}"/>
             <brows:OperatorControl Grid.Row="1" DataContext="{Binding Operator}"/>
         </Grid>
         <Grid>

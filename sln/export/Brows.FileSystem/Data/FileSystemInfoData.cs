@@ -74,17 +74,17 @@ namespace Brows.Data {
                     return null;
                 }
                 var icon = default(object);
-                var task = Service?.Work(entry.Info, set: result => icon = result, token);
+                var task = Service?.Work(entry.Info, hint: null, set: result => icon = result, token);
                 if (task != null) {
                     await task;
                 }
                 return icon;
             }
 
-            public IIconFileSystemInfo Service { get; set; }
+            public IFileSystemIcon Service { get; set; }
 
-            public sealed override bool SuggestKey(ICommandContext context) {
-                return false;
+            public sealed override Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+                return Task.FromResult(false);
             }
         }
 
@@ -107,8 +107,8 @@ namespace Brows.Data {
 
             public IOverlayFileSystemInfo Service { get; set; }
 
-            public sealed override bool SuggestKey(ICommandContext context) {
-                return false;
+            public sealed override Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+                return Task.FromResult(false);
             }
         }
 
@@ -147,15 +147,15 @@ namespace Brows.Data {
                 return obj;
             }
 
-            public IImageFileSystemInfo Service { get; set; }
+            public IFileSystemImage Service { get; set; }
 
             public Image() {
                 ImageWidth = 1280;
                 ImageHeight = 960;
             }
 
-            public sealed override bool SuggestKey(ICommandContext context) {
-                return false;
+            public sealed override Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+                return Task.FromResult(false);
             }
         }
 

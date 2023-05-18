@@ -10,20 +10,20 @@ namespace Brows.Commands.DataKey {
         private async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, IProvider provider, T parameter, [EnumeratorCancellation] CancellationToken token) {
             if (null == context) throw new ArgumentNullException(nameof(context));
             if (null == provider) throw new ArgumentNullException(nameof(provider));
-            var data = provider.Data;
-            var suggester = new DataKeyCommandSuggester<T>(data.Key, parameter, Parse);
-            var suggestedKeys = suggester.Suggest();
-            var suggestedCount = 0;
             await foreach (var suggestion in base.Suggest(context, token)) {
                 if (suggestion.History) {
                     continue;
                 }
+                var data = provider.Data;
+                var suggester = new DataKeyCommandSuggester<T>(data.Key, parameter, Parse);
+                var suggestedKeys = suggester.Suggest();
+                var suggestedCount = 0;
                 foreach (var key in suggestedKeys) {
                     var definition = data.Get(key);
                     if (definition == null) {
                         continue;
                     }
-                    var suggested = definition.SuggestKey(context);
+                    var suggested = await definition.SuggestKey(context, token);
                     if (suggested == false) {
                         continue;
                     }

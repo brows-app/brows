@@ -2,6 +2,7 @@
 using Domore.Conf.Cli;
 using Domore.IO;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,6 +10,10 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands {
     internal sealed class Open : ZipCommand<Open.Parameter> {
+        protected sealed override IEnumerable<Type> Source { get; } = new[] {
+            typeof(IEntry)
+        };
+
         protected sealed override bool Work(Context context) {
             if (context == null) return false;
             if (context.HasPanel(out var active) == false) return false;

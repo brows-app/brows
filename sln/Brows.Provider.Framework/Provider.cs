@@ -2,6 +2,7 @@ using Brows.Config;
 using Domore.Logs;
 using Domore.Notification;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -24,6 +25,20 @@ namespace Brows {
             EntryObservation.Provider = this;
         }
 
+        private async Task Begin(CancellationToken token, bool begun) {
+            if (begun) {
+                Navigation?.Provided(this);
+            }
+            await Task.CompletedTask;
+        }
+
+        private void End(bool ended) {
+            if (ended == false) {
+                Navigation?.Provided(null);
+                EntryObservation.End();
+            }
+        }
+
         internal IPanel Panel { get; set; }
         internal IImport Import { get; set; }
 
@@ -38,22 +53,23 @@ namespace Brows {
             _Data = ProviderData.Get(Import, EntryType, DataDefinition));
         private ProviderData _Data;
 
+        internal IEnumerable Selection =>
+            EntryObservation.Selected;
+
         internal virtual async Task Init(CancellationToken token) {
             if (Panel.HasProvider(out Provider previous)) {
-                var thisType = GetType();
-                var previousType = previous.GetType();
-                if (previousType == thisType) {
-                    var detail = previous.Detail as ProviderDetail;
-                    if (detail != null) {
-                        Detail = detail.For(this);
+                var navigation = previous.Navigation;
+                if (navigation != null) {
+                    Navigation = navigation.For(this);
+                }
+                var detail = previous.Detail;
+                if (detail != null) {
+                    foreach (var key in detail.Keys) {
+                        Detail[key] = detail[key]?.For(this);
                     }
                 }
             }
             await Task.CompletedTask;
-        }
-
-        internal void End(bool @private) {
-            EntryObservation.End();
         }
 
         protected virtual IReadOnlyCollection<IEntryDataDefinition> DataDefinition =>
@@ -104,11 +120,16 @@ namespace Brows {
         public string ID { get; }
         public virtual string Parent { get; }
 
-        public virtual object Detail {
-            get => _Detail;
-            set => Change(ref _Detail, value, nameof(Detail));
+        public ProviderDetailSet Detail =>
+            _Detail ?? (
+            _Detail = new());
+        private ProviderDetailSet _Detail;
+
+        public ProviderNavigation Navigation {
+            get => _Navigation;
+            set => Change(ref _Navigation, value, nameof(Navigation));
         }
-        private object _Detail;
+        private ProviderNavigation _Navigation;
 
         public object Observation =>
             EntryObservation;
@@ -158,7 +179,9 @@ namespace Brows {
             }
             var token = Token;
             try {
+                await Begin(token, begun: false);
                 await Begin(token);
+                await Begin(token, begun: true);
             }
             catch (Exception ex) {
                 if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
@@ -187,8 +210,9 @@ namespace Brows {
             }
             Panel = null;
             Import = null;
-            End(@private: true);
+            End(ended: false);
             End();
+            End(ended: true);
         }
 
         async void IProvider.Refresh() {

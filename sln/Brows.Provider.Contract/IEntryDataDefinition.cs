@@ -12,9 +12,9 @@ namespace Brows {
         IEntryDataConverter Converter { get; }
         object ConverterParameter { get; }
         IExportResourceKey ResourceKey { get; }
-        Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken cancellationToken);
+        Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken token);
         int CompareValue(IEntry x, IEntry y);
         void RefreshValue(IEntry entry);
-        bool SuggestKey(ICommandContext context);
+        Task<bool> SuggestKey(ICommandContext context, CancellationToken token);
     }
 }

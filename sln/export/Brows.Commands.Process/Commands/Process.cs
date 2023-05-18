@@ -57,9 +57,8 @@ namespace Brows.Commands {
                 return false;
             }
             var inputTrigger = InputTrigger;
-            var contextgesture = default(IGesture);
             if (context.HasGesture(out var gesture)) {
-                contextgesture = gesture;
+                return context.ShowPalette(inputTrigger + " ");
             }
             var contextParam = default(string);
             if (context.HasLine(out var line) && line.HasParameter(out var param)) {
@@ -73,9 +72,6 @@ namespace Brows.Commands {
                 });
             }
             return context.Operate(async (progress, token) => {
-                if (contextgesture != null) {
-                    return await commander.ShowPalette(inputTrigger + " ", token);
-                }
                 var process = CommandProcess;
                 var workingDirectory = await context.WorkingDirectory(token);
                 if (contextParam != null) {

@@ -1,3 +1,5 @@
+using Brows.Exports;
+using Brows.FileSystem;
 using Domore.Logs;
 using Domore.Threading.Tasks;
 using System;
@@ -8,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal sealed class FileSystemEntry : Entry<FileSystemProvider> {
+    internal sealed class FileSystemEntry : Entry<FileSystemProvider>, IFileSystemInfo {
         private static readonly ILog Log = Logging.For(typeof(FileSystemEntry));
 
         private FileSystemEntryRefreshDelay RefreshDelay;
@@ -20,21 +22,22 @@ namespace Brows {
             });
         }
 
-        private async Task<IReadOnlyDictionary<string, string>> MetadataWork(CancellationToken token) {
+        private async Task<IReadOnlyDictionary<string, IMetadataValue>> MetadataWork(CancellationToken token) {
             var service = Provider.Factory.MetadataFileReader;
             if (service != null) {
                 if (Info is FileInfo file) {
                     var keys = Provider.ObservedKeys;
                     var dict = keys
+                        .Distinct()
                         .Where(key => Provider.Factory.Metadata.System.ContainsKey(key))
                         .ToDictionary(
                             key => Provider.Factory.Metadata.System[key].Definition,
-                            key => "");
+                            key => default(IMetadataValue));
                     await service.Work(file.FullName, dict, null, token);
                     return dict.ToDictionary(item => item.Key.Key, item => item.Value);
                 }
             }
-            return new Dictionary<string, string>(capacity: 0);
+            return new Dictionary<string, IMetadataValue>(capacity: 0);
         }
 
         public object Stream =>
@@ -45,10 +48,10 @@ namespace Brows {
             _FileSystemCache = new(async token => await FileSystemWork(token)));
         private TaskCache<FileSystemInfo> _FileSystemCache;
 
-        public TaskCache<IReadOnlyDictionary<string, string>> MetadataCache =>
+        public TaskCache<IReadOnlyDictionary<string, IMetadataValue>> MetadataCache =>
             _MetadataCache ?? (
             _MetadataCache = new(async token => await MetadataWork(token)));
-        private TaskCache<IReadOnlyDictionary<string, string>> _MetadataCache;
+        private TaskCache<IReadOnlyDictionary<string, IMetadataValue>> _MetadataCache;
 
         public string Extension { get; }
         public sealed override string ID { get; }

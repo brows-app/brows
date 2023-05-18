@@ -1,4 +1,5 @@
 ﻿using Domore.Logs;
+using Domore.Runtime.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -84,6 +85,46 @@ namespace Brows.Commands {
             using (var stream = new FileInfo(Output).OpenWrite()) {
                 encoder.Save(stream);
             }
+        }
+
+        public void Transfer() {
+            if (DecoderCodec.ContainerFormat == EncoderCodec.ContainerFormat) {
+                return;
+            }
+            var list = Parameter.TransferMetadata.Select(name => new PropertyWildcard(name)).ToList();
+            if (list.Count == 0) {
+                return;
+            }
+            PropertySystem.TransferPropertyValues(
+                sourceFileName: File.FullName,
+                destinationFileName: Output,
+                ignoreProperty: property => {
+                    if (Log.Debug()) {
+                        Log.Debug(Log.Join(File.Name, property.Key?.CanonicalName, property.Value));
+                    }
+                    var name = property.Key?.CanonicalName;
+                    if (name == null) {
+                        return true;
+                    }
+                    var include = list.Any(item => item.Matches(name));
+                    var ignore = include == false;
+                    if (ignore == false) {
+                        ignore = string.IsNullOrWhiteSpace(property.Value?.ToString());
+                    }
+                    return ignore;
+                },
+                ignoreError: (property, error) => {
+                    if (Log.Info()) {
+                        Log.Info(Log.Join(property.Key?.CanonicalName, property.Value, error, Output));
+                    }
+                    switch (error) {
+                        case HRESULT.STG_E_ACCESSDENIED:
+                        case HRESULT.WINCODEC_ERR_PROPERTYNOTSUPPORTED:
+                            return true;
+                        default:
+                            return false;
+                    }
+                });
         }
 
         private sealed class DrawImageUnknownBitmapEncoderException : Exception {

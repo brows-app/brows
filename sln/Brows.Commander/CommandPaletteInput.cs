@@ -8,7 +8,7 @@ namespace Brows {
     using Gui;
     using System.Collections.Generic;
 
-    internal sealed class CommandPaletteInput : Notifier, IControlled<ICommandPaletteInputController> {
+    internal sealed class CommandPaletteInput : Notifier, ICommandPalette, IControlled<ICommandPaletteInputController> {
         private int DelayState;
         private bool TextSuggestions = true;
         private CancellationTokenSource SuggestionTokenSource;
@@ -49,6 +49,9 @@ namespace Brows {
                     Controller?.SelectText(selectedStart, selectedLength);
                 }
             }
+        }
+
+        private void Controller_Unloaded(object sender, EventArgs e) {
         }
 
         private void Controller_Gesture(object sender, GestureEventArgs e) {
@@ -266,10 +269,12 @@ namespace Brows {
         private int _SelectedLengthOnLoad;
 
         public Commander Commander { get; }
+        public CommandSource Source { get; }
         public CommandPaletteConf Conf { get; }
 
-        public CommandPaletteInput(Commander commander) {
+        public CommandPaletteInput(Commander commander, CommandSource source) {
             Commander = commander;
+            Source = source;
             SuggestionCollection = new();
             SuggestionCollection.CurrentSuggestionChanged += SuggestionCollection_CurrentSuggestionChanged;
             Conf = new();
@@ -279,20 +284,20 @@ namespace Brows {
         }
 
         public CommandContext Context {
-            get => _Context ?? (_Context = new CommandContext(
-                Commander,
-                new CommandLine(Text, Conf.Text)));
+            get =>
+                _Context ?? (
+                _Context = new CommandContext(Commander, Source, new CommandLine(Text, Conf.Text), this));
             private set =>
                 Change(ref _Context, value, nameof(Context));
         }
         private CommandContext _Context;
 
         public CommandContext ContextSuggestion {
-            get => _ContextSuggestion ?? (_ContextSuggestion = TextSuggestion == null
-                ? null
-                : new CommandContext(
-                    Commander,
-                    new CommandLine(TextSuggestion, Conf.Text)));
+            get =>
+                _ContextSuggestion ?? (
+                _ContextSuggestion = TextSuggestion == null
+                    ? null
+                    : new CommandContext(Commander, Source, new CommandLine(TextSuggestion, Conf.Text), this));
             private set =>
                 Change(ref _ContextSuggestion, value, nameof(ContextSuggestion));
         }
@@ -324,10 +329,12 @@ namespace Brows {
                 if (oldValue != newValue) {
                     if (oldValue != null) {
                         oldValue.Loaded -= Controller_Loaded;
+                        oldValue.Unloaded -= Controller_Unloaded;
                         oldValue.Gesture -= Controller_Gesture;
                     }
                     if (newValue != null) {
                         newValue.Loaded += Controller_Loaded;
+                        newValue.Unloaded += Controller_Unloaded;
                         newValue.Gesture += Controller_Gesture;
                     }
                     Controller = newValue;

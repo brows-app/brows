@@ -1,10 +1,9 @@
-﻿using System.Threading;
+﻿using Domore.IO;
+using Domore.Text;
+using System.Threading;
 using System.Windows;
 
 namespace Domore.Windows.Controls {
-    using IO;
-    using Text;
-
     partial class PreviewTextControl {
         private PreviewTextWorker Worker;
         private CancellationTokenSource Cancellation;

@@ -27,8 +27,8 @@ namespace Brows.Data {
                 Width = 250;
             }
 
-            public sealed override bool SuggestKey(ICommandContext context) {
-                return false;
+            public sealed override Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+                return Task.FromResult(false);
             }
         }
 

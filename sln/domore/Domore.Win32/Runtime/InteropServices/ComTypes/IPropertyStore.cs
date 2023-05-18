@@ -17,7 +17,7 @@ namespace Domore.Runtime.InteropServices.ComTypes {
         HRESULT GetValue([In] ref PROPERTYKEY key, [In, Out] ref PROPVARIANT pv);
 
         [PreserveSig]
-        HRESULT SetValue([In] ref PROPERTYKEY key, [In] ref object propvar);
+        HRESULT SetValue([In] ref PROPERTYKEY key, [In] ref PROPVARIANT propvar);
 
         [PreserveSig]
         HRESULT Commit();

@@ -25,9 +25,7 @@ namespace Brows.Commands {
             if (false == context.HasParameter(out var parameter)) {
                 return context.HasGesture(out _) == false
                     ? false
-                    : context.Operate(async (progess, token) => {
-                        return await commander.ShowPalette($"{InputTrigger} ", token);
-                    });
+                    : context.ShowPalette($"{InputTrigger} ");
             }
             if (false == commander.HasOperations(out var collection)) return false;
             var clearErrors = parameter.ClearErrors == true;

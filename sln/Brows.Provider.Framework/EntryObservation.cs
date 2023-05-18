@@ -1,6 +1,7 @@
 ﻿using Brows.Gui;
 using Domore.Notification;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal abstract class EntryObservation : Notifier, IEntryObservation, IControlled<IEntryObservationController> {
+    internal abstract class EntryObservation : Notifier, IEntryObservation, IProviderFocus, ICommandSourceObject, IControlled<IEntryObservationController> {
         private static readonly PropertyChangedEventArgs CurrentEvent = new(nameof(Current));
         private static readonly PropertyChangedEventArgs ObservedEvent = new(nameof(Observed));
         private static readonly PropertyChangedEventArgs SelectedEvent = new(nameof(Selected));
@@ -208,6 +209,14 @@ namespace Brows {
             await DataView.Init(token);
         }
 
+        bool IProviderFocus.Set() {
+            return Controller?.Focus() ?? false;
+        }
+
+        bool IProviderFocus.Get() {
+            return Controller?.Focused() ?? false;
+        }
+
         IEntryDataView IEntryObservation.DataView =>
             DataView;
 
@@ -258,6 +267,12 @@ namespace Brows {
         IEntry IEntryObservation.LookupName(string value) {
             return InternalLookupID(value);
         }
+
+        object ICommandSourceObject.Instance =>
+            this;
+
+        IEnumerable ICommandSourceObject.Collection =>
+            new[] { this };
     }
 
     internal sealed class EntryObservation<TEntry> : EntryObservation where TEntry : IEntry {

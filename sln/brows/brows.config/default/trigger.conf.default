@@ -21,6 +21,8 @@ cmd[Drives]                         .input                      = drives
 cmd[Escape]                         .press[ESC]                 = *
 cmd[Exit]                           .input                      = exit
 cmd[Fit]                            .input                      = fit
+cmd[Focus]                          .input                      = focus
+cmd[Focus]                          .press[ALT+1]               = * navigation
 cmd[Hide]                           .input                      = hide
 cmd[HistoryBack]                    .press[Back|ALT+LEFT]       = *
 cmd[HistoryForward]                 .press[ALT+RIGHT]           = *
@@ -37,11 +39,15 @@ cmd[Operations]                     .press[1+SHIFT+CTRL]        = * clearerrors=
 cmd[Palette]                        .press[CTRL+L]              = *
 cmd[PanelAdd]                       .input                      = panel-add|pa
 cmd[PanelAdd]                       .press[CTRL+N]              = * from=activepanel
+cmd[PanelShift]                     .input                      = panel-shift|ps
+cmd[PanelShift]                     .press[CTRL+SHIFT+ALT+LEFT] = * left
+cmd[PanelShift]                     .press[CTRL+SHIFT+ALT+RIGHT]= * right
 cmd[PanelRemove]                    .input                      = panel-remove|pr
 cmd[PanelRemove]                    .press[CTRL+W]              = *
 cmd[PanelRemove]                    .press[CTRL+SHIFT+W]        = * all=true
-cmd[Preview]                        .input                      = preview
-cmd[Preview]                        .press[ALT+P]               = *
+cmd[View]                           .input                      = view
+cmd[View]                           .press[ALT+N]               = * toggle=navigation
+cmd[View]                           .press[ALT+P]               = * toggle=preview
 cmd[Process]                        .input                      = >
 cmd[Process]                        .press[SHIFT+.]             = *
 cmd[Refresh]                        .press[CTRL+R]              = *

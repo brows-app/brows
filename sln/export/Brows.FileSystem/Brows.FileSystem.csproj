@@ -4,7 +4,7 @@
     <ItemGroup>
       <EmbeddedResource Include="Resource\Culture\_" />
       <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Open" />
-      <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Preview" />
+      <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_View" />
       <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Delete" />
       <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Move" />
       <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Copy" />
@@ -19,5 +19,6 @@
         <ProjectReference Include="..\..\domore\Domore.FileSystem\Domore.FileSystem.csproj" />
         <ProjectReference Include="..\Brows.Commands.Bookmark\Brows.Commands.Bookmark.csproj" />
         <ProjectReference Include="..\Brows.Drives\Brows.Drives.csproj" />
+        <ProjectReference Include="..\Brows.FileSystem.Navigation\Brows.FileSystem.Navigation.csproj" />
     </ItemGroup>
 </Project>

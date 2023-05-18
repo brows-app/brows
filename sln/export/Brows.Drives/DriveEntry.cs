@@ -1,3 +1,4 @@
+using Brows.FileSystem;
 using Domore.Logs;
 using System;
 using System.IO;
@@ -5,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal sealed class DriveEntry : Entry<DriveProvider> {
+    internal sealed class DriveEntry : Entry<DriveProvider>, IFileSystemInfo {
         private static readonly ILog Log = Logging.For(typeof(DriveEntry));
 
         private bool Refreshing;
@@ -40,5 +41,9 @@ namespace Brows {
             }
             await RefreshComplete;
         }
+
+        FileSystemInfo IFileSystemInfo.Info => Info.IsReady
+            ? Info.RootDirectory
+            : null;
     }
 }

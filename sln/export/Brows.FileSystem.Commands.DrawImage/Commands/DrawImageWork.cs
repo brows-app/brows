@@ -34,12 +34,8 @@ namespace Brows.Commands {
                     token.ThrowIfCancellationRequested();
                 }
                 progress.Child(info.Name, async (progress, token) => {
-                    if (progress != null) {
-                        progress.Change(addTarget: 1);
-                    }
-                    if (token.IsCancellationRequested) {
-                        token.ThrowIfCancellationRequested();
-                    }
+                    token.ThrowIfCancellationRequested();
+                    progress.Change(addTarget: 2);
                     if (info is FileInfo file) {
                         var name = Path.Combine(file.DirectoryName, Name[file]);
                         var outp = Parameter.Overwrite == true
@@ -50,6 +46,8 @@ namespace Brows.Commands {
                             draw = new DrawImageFile(file, Parameter, outp);
                             progress.Change(data: $"{draw.DecoderCodec.FriendlyName} > {draw.EncoderCodec.FriendlyName}");
                             draw.Save();
+                            progress.Change(1);
+                            draw.Transfer();
                             progress.Change(1);
                         });
                     }

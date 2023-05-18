@@ -7,8 +7,9 @@ namespace Domore.Runtime.InteropServices {
     public sealed class PropertyStoreWrapper : ComObjectWrapper<IPropertyStore> {
         protected sealed override IPropertyStore Factory() {
             var iid = IID.Managed.IPropertyStore;
+            var flags = ReadOnly ? GETPROPERTYSTOREFLAGS.DEFAULT : GETPROPERTYSTOREFLAGS.READWRITE;
             var
-            hr = shell32.SHGetPropertyStoreFromParsingName(Name, IntPtr.Zero, GETPROPERTYSTOREFLAGS.DEFAULT, ref iid, out var ppv);
+            hr = shell32.SHGetPropertyStoreFromParsingName(Name, IntPtr.Zero, flags, ref iid, out var ppv);
             hr.ThrowOnError();
             return ppv;
         }
@@ -17,9 +18,11 @@ namespace Domore.Runtime.InteropServices {
             => ComObject();
 
         public string Name { get; }
+        public bool ReadOnly { get; }
 
-        public PropertyStoreWrapper(string name) {
+        public PropertyStoreWrapper(string name, bool readOnly) {
             Name = name;
+            ReadOnly = readOnly;
         }
     }
 }

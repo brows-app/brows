@@ -16,7 +16,7 @@ namespace Brows.Exports {
                 var list = new List<MetadataDefinition>();
                 var items = string.IsNullOrWhiteSpace(file)
                     ? PropertySystem.EnumeratePropertyDescriptions()
-                    : PropertySystem.EnumeratePropertyDescriptions(file);
+                    : PropertySystem.EnumeratePropertyDescriptions(file, throwOnError: false);
                 foreach (var item in items) {
                     token.ThrowIfCancellationRequested();
                     list.Add(new MetadataDefinition(item));

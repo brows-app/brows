@@ -23,8 +23,8 @@ namespace Brows {
                 return Task.FromResult(entry.Info.Kind);
             }
 
-            public override bool SuggestKey(ICommandContext context) {
-                return false;
+            public sealed override Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+                return Task.FromResult(false);
             }
         }
 
@@ -39,8 +39,8 @@ namespace Brows {
 
             public IIconZipEntryInfo IconZipEntryInfo { get; set; }
 
-            public sealed override bool SuggestKey(ICommandContext context) {
-                return false;
+            public sealed override Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
+                return Task.FromResult(false);
             }
         }
 

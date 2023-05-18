@@ -1,6 +1,7 @@
 using Domore.Notification;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,6 +16,14 @@ namespace Brows {
                 : "");
         private string _Input;
 
+        private CommandContext(Commander commander, CommandSource source, CommandLine line, ICommandPalette palette, IGesture gesture) {
+            Commander = commander ?? throw new ArgumentNullException(nameof(commander));
+            Line = line;
+            Source = source;
+            Gesture = gesture;
+            Palette = palette;
+        }
+
         public IReadOnlySet<ICommand> TriggeringCommands =>
             _TriggeringCommands ?? (
             _TriggeringCommands =
@@ -27,7 +36,9 @@ namespace Brows {
 
         public Commander Commander { get; }
         public CommandLine Line { get; }
+        public CommandSource Source { get; }
         public IGesture Gesture { get; }
+        public ICommandPalette Palette { get; }
 
         public ICommandContextFlag Flag {
             get => _Flag;
@@ -35,10 +46,10 @@ namespace Brows {
         }
         private ICommandContextFlag _Flag;
 
-        public CommandContext(Commander commander, CommandLine line, IGesture gesture = null) {
-            Commander = commander ?? throw new ArgumentNullException(nameof(commander));
-            Line = line;
-            Gesture = gesture;
+        public CommandContext(Commander commander, CommandSource source, CommandLine line, ICommandPalette palette) : this(commander, source, line, palette, gesture: null) {
+        }
+
+        public CommandContext(Commander commander, CommandSource source, CommandLine line, IGesture gesture) : this(commander, source, line, palette: null, gesture) {
         }
 
         public bool DidTrigger(out IReadOnlySet<ICommand> commands) {
@@ -93,6 +104,11 @@ namespace Brows {
             return flag != null;
         }
 
+        public bool HasPalette(out ICommandPalette palette) {
+            palette = Palette;
+            return palette != null;
+        }
+
         public bool HasCommander(out ICommander commander) {
             commander = Commander;
             return commander != null;
@@ -111,6 +127,22 @@ namespace Brows {
         public bool HasInput(out string value) {
             value = Input;
             return value != "";
+        }
+
+        public bool HasSource(out ICommandSource source) {
+            source = Source;
+            return source != null;
+        }
+
+        public bool HasSource<T>(out T item, out IReadOnlyList<T> items) {
+            if (Source?.Item is not T t) {
+                item = default;
+                items = default;
+                return false;
+            }
+            item = t;
+            items = Source?.Items?.OfType<T>()?.ToList();
+            return items?.Count > 0;
         }
 
         public bool HasPanel(out IPanel active) {
@@ -207,6 +239,16 @@ namespace Brows {
                 }
             });
             return true;
+        }
+
+        public bool ShowPalette(string input) {
+            return ShowPalette(input, 0, 0);
+        }
+
+        public bool ShowPalette(string input, int selectedStart, int selectedLength) {
+            return Operate(async (progress, token) => {
+                return await Commander.ShowPalette(Source, input, selectedStart, selectedLength, token);
+            });
         }
     }
 }
