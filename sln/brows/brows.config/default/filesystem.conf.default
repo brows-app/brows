@@ -16,3 +16,21 @@
 # to edit image files, the configuration below may be used.
 #
 #Editor[.jpg|.jpeg|.png] = paintdotnet.exe
+
+#
+# Specify the CLSID of the preview handler used for a particular extension.
+# For example, to preview PDF files with the handler shipped with Microsoft Edge
+# (instead of the handler shipped with Adobe Acrobat, if installed), set the following.
+#
+#Stream.Preview.CLSID[.pdf] = 3A84F9C2-6164-485C-A7D9-4B27F8AC009E
+
+#
+# Configure how video and/or audio media is previewed.
+#
+Stream.Media.SpeedRatio     = 1
+Stream.Media.Volume         = 1
+Stream.Media.Muted          = true
+Stream.Media.AutoplayAudio  = false
+Stream.Media.AutoplayVideo  = true
+Stream.Media.LoopAudio      = true
+Stream.Media.LoopVideo      = true  

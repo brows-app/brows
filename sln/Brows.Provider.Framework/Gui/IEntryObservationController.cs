@@ -20,5 +20,7 @@ namespace Brows.Gui {
         Task<bool> CurrentEntry(IEntry item, CancellationToken token);
         bool CurrentEntry(IEntry item);
         IEntry CurrentEntry();
+        int CurrentPosition();
+        bool CurrentPosition(int value);
     }
 }

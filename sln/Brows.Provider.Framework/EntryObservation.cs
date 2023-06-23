@@ -108,7 +108,9 @@ namespace Brows {
         protected async Task Remove(IEnumerable<IEntry> items, int count) {
             if (items == null) return;
             if (count == 0) return;
-            var refocus = false;
+            var current = Controller?.CurrentEntry();
+            var currentRemoved = false;
+            var currentPosition = Controller?.CurrentPosition();
             var chunkSize = Provider.Config.Observe.Remove.Size;
             var chunkDelay = Provider.Config.Observe.Remove.Delay;
             var chunks = items.Chunk(chunkSize < 1 ? count : chunkSize);
@@ -116,7 +118,10 @@ namespace Brows {
                 foreach (var item in chunk) {
                     var itemRemoved = Collection.Remove(item);
                     if (itemRemoved) {
-                        refocus = true;
+                        var currentIsItem = current == item;
+                        if (currentIsItem) {
+                            currentRemoved = true;
+                        }
                     }
                 }
                 if (chunkDelay > 0) {
@@ -124,11 +129,16 @@ namespace Brows {
                 }
                 ObservedChanged?.Invoke(this, EventArgs.Empty);
             }
-            if (refocus) {
-                var controller = Controller;
-                if (controller != null) {
-                    if (controller.Focused()) {
-                        controller.Focus();
+            if (currentRemoved) {
+                if (currentPosition.HasValue) {
+                    var controller = Controller;
+                    if (controller != null) {
+                        for (var cp = currentPosition.Value; cp >= 0; cp--) {
+                            var breakNow = controller.CurrentPosition(cp);
+                            if (breakNow) {
+                                break;
+                            }
+                        }
                     }
                 }
             }

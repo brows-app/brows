@@ -73,6 +73,7 @@ cmd[FileSystem_Edit]                .input                      = edit
 cmd[FileSystem_Edit]                .press[CTRL+E]              = *
 cmd[FileSystem_Find]                .input                      = find
 cmd[FileSystem_Find]                .press[CTRL+F]              = *
+cmd[FileSystem_Metadata]            .input                      = metadata
 cmd[FileSystem_NativeBrowse]        .input                      = explorer
 cmd[FileSystem_NativeBrowse]        .press[ALT+F10]             = *
 cmd[FileSystem_NativeDetail]        .input                      = detail

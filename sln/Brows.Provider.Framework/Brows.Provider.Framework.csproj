@@ -2,7 +2,7 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Domore.Conf.Cli" Version="7.4.0.69" />
+      <PackageReference Include="Domore.Conf.Cli" Version="7.5.0.70" />
       <PackageReference Include="Domore.Notification" Version="2.2.0.12" />
     </ItemGroup>
     <ItemGroup>

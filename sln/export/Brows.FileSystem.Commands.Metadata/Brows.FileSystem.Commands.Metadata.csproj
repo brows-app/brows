@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+    </PropertyGroup>
+    <ItemGroup>
+      <None Remove="Resource\Culture\_" />
+      <None Remove="Resource\Culture\_.s.Command_Conf_FileSystem_Metadata" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="Resource\Culture\_" />
+      <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Metadata" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />
+      <ProjectReference Include="..\..\domore\Domore.Win32.STAThreadPool\Domore.Win32.STAThreadPool.csproj" />
+      <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
+    </ItemGroup>
+</Project>

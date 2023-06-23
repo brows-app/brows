@@ -2,7 +2,7 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Domore.Conf" Version="7.4.0.69" />
+      <PackageReference Include="Domore.Conf" Version="7.5.0.70" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Brows.Config.Contract\Brows.Config.Contract.csproj" />
