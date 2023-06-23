@@ -3,16 +3,16 @@
   <PropertyGroup>
     <Authors>Ken Yourek</Authors>
     <Copyright>Copyright © Ken Yourek 2023</Copyright>
-    <VersionPrefix>0.28.0</VersionPrefix>
-    <VersionSuffix>alpha.27</VersionSuffix>
-    <AssemblyVersion>0.28.0.27</AssemblyVersion>
-    <InformationalVersion>0.28.0-alpha.27</InformationalVersion>
-    <FileVersion>0.28.0.27</FileVersion>
-    <PackageVersion>0.28.0-alpha.27</PackageVersion>
+    <VersionPrefix>0.29.0</VersionPrefix>
+    <VersionSuffix>alpha.28</VersionSuffix>
+    <AssemblyVersion>0.29.0.28</AssemblyVersion>
+    <InformationalVersion>0.29.0-alpha.28</InformationalVersion>
+    <FileVersion>0.29.0.28</FileVersion>
+    <PackageVersion>0.29.0-alpha.28</PackageVersion>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/brows-app/brows</RepositoryUrl>
     <RepositoryBranch>main</RepositoryBranch>
-    <RepositoryCommit>47ac3645a167bea7d51a3eede194297d33b444a9</RepositoryCommit>
+    <RepositoryCommit>11ff62edeb0b4f387f3da32cb220fc33dff6e36a</RepositoryCommit>
     <RootNamespace>Brows</RootNamespace>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <DebugType>embedded</DebugType>
