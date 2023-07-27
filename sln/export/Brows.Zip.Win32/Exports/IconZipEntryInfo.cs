@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Brows.Exports {
     internal sealed class IconZipEntryInfo : IIconZipEntryInfo {
-        public async Task<object> Icon(ZipEntryInfo zipEntryInfo, CancellationToken cancellationToken) {
+        public async Task<object> Icon(ZipEntryInfo zipEntryInfo, CancellationToken token) {
             if (null == zipEntryInfo) throw new ArgumentNullException(nameof(zipEntryInfo));
             switch (zipEntryInfo.Kind) {
                 case ZipEntryKind.File:
-                    return await Win32Icon.Load(Path.GetExtension(zipEntryInfo.Name.Original), cancellationToken);
+                    return await Win32Icon.Load(Path.GetExtension(zipEntryInfo.Name.Original), token);
                 case ZipEntryKind.Path:
-                    return await Win32Icon.Load(SHSTOCKICONID.FOLDER, cancellationToken);
+                    return await Win32Icon.Load(SHSTOCKICONID.FOLDER, token);
                 default:
                     return null;
             }

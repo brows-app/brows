@@ -57,6 +57,7 @@ cmd[ResetAll]                       .press[ALT+CTRL+SHIFT+R]    = *
 cmd[Select]                         .input                      = select|sel
 cmd[Show]                           .input                      = show
 cmd[Sort]                           .input                      = sort
+cmd[SSH]                            .input                      = ssh
 cmd[Theme]                          .input                      = theme
 cmd[Up]                             .input                      = up
 cmd[Up]                             .press[ALT+UP]              = *

@@ -54,9 +54,6 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
     </ItemGroup>
-    <ItemGroup>
-      <None Remove="brows.config\filesystem.conf" />
-    </ItemGroup>
     <Target Name="GetTargetPath" Returns="@(Brows_SetupOutputPath)">
         <ItemGroup Condition="'$(OutputType)' == 'Library'">
             <Brows_SetupOutputPath Include="$(MSBuildProjectDirectory)\$(OutputPath)\$(Brows_SetupTargetFramework)\$(AssemblyName).dll" />

@@ -24,9 +24,9 @@ namespace Brows.Commands {
                             press: "",
                             description: "");
                     }
-                    await Task.Yield();
                 }
             }
+            await Task.CompletedTask;
         }
     }
 }

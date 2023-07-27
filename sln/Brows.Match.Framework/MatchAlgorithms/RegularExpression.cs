@@ -36,8 +36,8 @@ namespace Brows.MatchAlgorithms {
                 if (matcher.Matches(s)) {
                     yield return item;
                 }
-                await Task.Yield();
             }
+            await Task.CompletedTask;
         }
     }
 }
