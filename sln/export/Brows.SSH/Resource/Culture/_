@@ -1,0 +1,28 @@
+SSHEntry_Attributes                      = Attributes
+SSHEntry_ChecksumMD5                     = MD5 checksum
+SSHEntry_ChecksumSHA1                    = SHA1 checksum
+SSHEntry_ChecksumSHA256                  = SHA256 checksum
+SSHEntry_ChecksumSHA512                  = SHA512 checksum
+SSHEntry_CreationTime                    = Date created
+SSHEntry_CreationTimeUtc                 = Date created (UTC)
+SSHEntry_Extension                       = Ext
+SSHEntry_Kind                            = Type
+SSHEntry_LastAccessTime                  = Date accessed
+SSHEntry_LastAccessTimeUtc               = Date accessed (UTC)
+SSHEntry_LastWriteTime                   = Date modified
+SSHEntry_LastWriteTimeUtc                = Date modified (UTC)
+SSHEntry_Length                          = Size
+SSHEntry_LinkTarget                      = Link
+SSHEntry_Name                            = Name
+SSHEntry_OwnedByUser                     = Owner
+SSHEntry_OwnedByGroup                    = Group
+SSHEntry_Permissions                     = Permissions
+
+Command_Description_SSH_ClipboardCopy    = Copy the current selection to the clipboard
+Command_Description_SSH_ClipboardPaste   = Paste content from the clipboard to the current panel
+Command_Description_SSH_Copy             = Copy the current selection to another panel
+Command_Description_SSH_Delete           = Delete the selection from the current panel
+Command_Description_SSH_Move             = Move the current selection to another panel
+Command_Description_SSH_Open             = Open files and directories
+
+Command_Group_SSHEntryData               = SSH
