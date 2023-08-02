@@ -4,8 +4,7 @@
           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
           xmlns:local="clr-namespace:Brows"
           VirtualizingStackPanel.IsVirtualizing="True"
-          VirtualizingStackPanel.VirtualizationMode="Recycling"
-          MaxHeight="1000">
+          VirtualizingStackPanel.VirtualizationMode="Recycling">
     <ListView.Style>
         <Style TargetType="ListView">
             <Setter Property="Background" Value="Transparent"/>
