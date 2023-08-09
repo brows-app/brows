@@ -186,8 +186,10 @@ namespace Brows {
                 var oldValue = Controller;
                 if (oldValue != newValue) {
                     if (oldValue != null) {
+                        oldValue.RemovePanels(List);
                     }
                     if (newValue != null) {
+                        newValue.AddPanels(List);
                     }
                     Controller = newValue;
                 }

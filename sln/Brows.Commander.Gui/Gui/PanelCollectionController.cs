@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,14 +27,18 @@ namespace Brows.Gui {
             var splitter = grid.ColumnDefinitions.Count > 1 ? new PanelGridSplitter() : null;
             if (splitter != null) {
                 splitter.SetValue(Grid.ColumnProperty, panel.Column);
-
-                //splitter.DataContext = panel;
-                //splitter.SetBinding(Grid.ColumnProperty, nameof(panel.Column));
                 control.Padding = new Thickness(splitter.Width, 0, 0, 0);
                 grid.Children.Add(splitter);
             }
             foreach (var columnDefinition in grid.ColumnDefinitions) {
                 columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            }
+        }
+
+        void IPanelCollectionController.AddPanels(IEnumerable<IPanel> panels) {
+            if (null == panels) throw new ArgumentNullException(nameof(panels));
+            foreach (var panel in panels) {
+                ((IPanelCollectionController)this).AddPanel(panel);
             }
         }
 
@@ -54,39 +59,6 @@ namespace Brows.Gui {
                         removed = true;
                     }
                 }
-
-                //var splitter = child as PanelGridSplitter;
-                //if (splitter != null) {
-                //    var col = splitter.GetValue(Grid.ColumnProperty);
-                //    var column = Convert.ToInt32(col);
-
-
-                //}
-
-
-                //if (child != null) {
-                //    var c = child.GetValue(Grid.ColumnProperty);
-                //    var orphaned = col.Equals(c);
-                //    if (orphaned) {
-                //        children.RemoveAt(i--);
-                //        BindingOperations.ClearBinding(child, Grid.ColumnProperty);
-                //        child.DataContext = null;
-                //    }
-                //    else {
-                //        if (c != null && c.Equals(0)) {
-                //            var splitter = child as PanelGridSplitter;
-                //            if (splitter != null) {
-                //                splitter.DataContext = null;
-                //                BindingOperations.ClearBinding(splitter, Grid.ColumnProperty);
-                //                children.RemoveAt(i--);
-                //            }
-                //            var control = child as PanelControl;
-                //            if (control != null) {
-                //                control.Padding = new Thickness(0);
-                //            }
-                //        }
-                //    }
-                //}
             }
             if (removed) {
                 var firstPanel = children.OfType<PanelControl>().FirstOrDefault(control => (control.DataContext as IPanel)?.Column == 0);
@@ -105,6 +77,13 @@ namespace Brows.Gui {
                 foreach (var columnDefinition in grid.ColumnDefinitions) {
                     columnDefinition.Width = new GridLength(1, GridUnitType.Star);
                 }
+            }
+        }
+
+        void IPanelCollectionController.RemovePanels(IEnumerable<IPanel> panels) {
+            if (null == panels) throw new ArgumentNullException(nameof(panels));
+            foreach (var panel in panels) {
+                ((IPanelCollectionController)this).RemovePanel(panel);
             }
         }
     }
