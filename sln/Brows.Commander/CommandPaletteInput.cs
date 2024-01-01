@@ -1,13 +1,12 @@
-﻿using Domore.Notification;
+﻿using Brows.Gui;
+using Domore.Notification;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Gui;
-    using System.Collections.Generic;
-
     internal sealed class CommandPaletteInput : Notifier, ICommandPalette, IControlled<ICommandPaletteInputController> {
         private int DelayState;
         private bool TextSuggestions = true;

@@ -26,3 +26,6 @@ Command_Description_SSH_Move             = Move the current selection to another
 Command_Description_SSH_Open             = Open files and directories
 
 Command_Group_SSHEntryData               = SSH
+
+SSHConnectionEntry_Kind                  = _
+SSHConnection_Prompt_Password            = Enter a password for {0}:

@@ -4,6 +4,7 @@ using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -180,6 +181,12 @@ namespace Brows {
             private set => Change(ref _State, value, nameof(State));
         }
         private PanelState _State;
+
+        public PanelSecret Secret {
+            get => _Secret;
+            private set => Change(ref _Secret, value, nameof(Secret));
+        }
+        private PanelSecret _Secret;
 
         public PanelHistoryShared SharedHistory {
             get => _SharedHistory ?? (_SharedHistory = new());
@@ -361,6 +368,20 @@ namespace Brows {
             provider = Provider;
             service = provider?.Import<TService>();
             return service != null;
+        }
+
+        async Task<SecureString> IPanel.GetSecret(string promptFormat, IEnumerable<string> promptArgs, CancellationToken token) {
+            var secret = Secret = new PanelSecret {
+                PromptArgs = promptArgs,
+                PromptFormat = promptFormat
+            };
+            try {
+                secret.Focus();
+                return await secret.Submitted(token);
+            }
+            finally {
+                Secret = null;
+            }
         }
 
         IPanelController IControlled<IPanelController>.Controller {

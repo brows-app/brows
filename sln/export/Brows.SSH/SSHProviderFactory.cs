@@ -1,4 +1,6 @@
-﻿using Brows.Exports;
+﻿using Brows.SSHConnection;
+using Brows.Exports;
+using Brows.SSH;
 using Domore.Logs;
 using Domore.Threading.Tasks;
 using System;
@@ -7,8 +9,11 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    internal sealed class SSHProviderFactory : ProviderFactory<SSHProvider> {
+    internal sealed class SSHProviderFactory : ProviderFactory<Provider> {
         private static readonly ILog Log = Logging.For(typeof(SSHProviderFactory));
+        private static readonly SSHNative Native = new SSHNative();
+
+        private readonly SSHClientCache ClientCache = new();
 
         private TaskCache<object> IconCache =>
             _IconCache ?? (
@@ -26,37 +31,48 @@ namespace Brows {
             }));
         private TaskCache<object> _IconCache;
 
-        protected sealed override async Task<SSHProvider> CreateFor(string id, IPanel panel, CancellationToken token) {
+        protected sealed override async Task<Provider> CreateFor(string id, IPanel panel, CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(CreateFor), id));
             }
             if (id == null) {
                 return null;
             }
-            var part = id.Split(new[] { '>' }, count: 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (part.Length < 1) {
+            if (id.StartsWith("ssh", StringComparison.OrdinalIgnoreCase) == false) {
                 return null;
             }
-            var created = Uri.TryCreate(part[0], UriKind.Absolute, out var uri);
-            if (created == false) {
+            var uriCreated = Uri.TryCreate(id, UriKind.Absolute, out var uri);
+            if (uriCreated == false) {
                 return null;
             }
             var scheme = uri.Scheme;
             if (scheme != "ssh") {
                 return null;
             }
-            var path = part.Length > 1 ? part[1] : "/";
+            var path = uri.AbsolutePath;
             if (Path.IsPathRooted(path) == false) {
                 return null;
             }
-            return new SSHProvider(
-                factory: this,
-                uri: uri,
-                path: path,
-                icon: await IconCache.Ready(token),
-                password: null);
+            var nativeLoaded = await Native.Loaded(token);
+            if (nativeLoaded == false) {
+                return null;
+            }
+            var icon = await IconCache.Ready(token);
+            var client = await Client(uri, token);
+            var connected = client.Connected;
+            if (connected) {
+                var authenticated = await client.Authenticated(token);
+                if (authenticated) {
+                    return new SSHProvider(this, uri, icon);
+                }
+            }
+            return new SSHConnectionProvider(this, uri, icon);
         }
 
         public ISSHProviderIcon ProviderIcon { get; set; }
+
+        public async Task<SSHClient> Client(Uri uri, CancellationToken token) {
+            return await ClientCache.GetOrAdd(uri, token);
+        }
     }
 }

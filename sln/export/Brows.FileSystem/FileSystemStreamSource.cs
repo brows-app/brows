@@ -27,7 +27,7 @@ namespace Brows {
         public FileSystemStreamSource(FileSystemEntry entry) : base(entry) {
         }
 
-        public override string ToString() {
+        public sealed override string ToString() {
             return $"{Entry.Info}";
         }
     }

@@ -1,69 +1,87 @@
-using Brows.SSH;
-using Domore.Logs;
+﻿using Brows.Exports;
+using Brows.SCP;
 using System;
-using System.Security;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using PATH = System.IO.Path;
 
 namespace Brows {
-    internal sealed class SSHProvider : Provider<SSHEntry, SSHConfig> {
-        private static readonly ILog Log = Logging.For(typeof(SSHProvider));
-
-        private SSHClient Client =>
-            _Client ?? (
-            _Client = SSHClient.Create(Uri, Password));
-        private SSHClient _Client;
-
-        protected sealed override void Dispose(bool disposing) {
-            if (disposing) {
-            }
-            base.Dispose(disposing);
-        }
-
+    internal sealed class SSHProvider : SSHProviderBase<SSHEntry, SSHConfig> {
         protected sealed override async Task Begin(CancellationToken token) {
-            if (Log.Info()) {
-                Log.Info(Log.Join(nameof(Begin), ID));
-            }
-            var list = Client.List(Path, token);
+            var client = await Client.Ready(token);
+            var list = client.List(Uri, token);
             await foreach (var info in list) {
                 await Provide(new SSHEntry(this, info));
             }
         }
 
-        protected sealed override async Task Refresh(CancellationToken token) {
-            if (Log.Info()) {
-                Log.Info(Log.Join(nameof(Refresh), ID));
-            }
+        public SSHProvider(SSHProviderFactory factory, Uri uri, object icon) : base(factory, uri, icon) {
         }
 
-        public bool CaseSensitive { get; }
-
-        public sealed override string Parent {
-            get {
-                if (_Parent == null) {
-                    var path = PATH.GetDirectoryName(Path)?.Replace('\\', '/');
-                    if (path != null) {
-                        _Parent = $"{Uri} {path}";
-                    }
+        private sealed class ProvideIO : IProvideIO, IProviderExport<SSHProvider> {
+            public async Task<bool> Work(ICollection<IProvidedIO> io, ICommandSource source, IProvider target, IOperationProgress progress, CancellationToken token) {
+                if (io is null) throw new ArgumentNullException(nameof(io));
+                if (source is null) return false;
+                if (target is not SSHProvider provider) {
+                    return false;
                 }
-                return _Parent;
+                var added = false;
+                var entries = source.Items?.OfType<SSHEntry>()?.ToList();
+                if (entries?.Count > 0) {
+                    var client = await provider.Client.Ready(token);
+                    var streams = new List<SCPStreamSource>();
+                    foreach (var entry in entries) {
+                        if (entry?.Info?.Kind == SSHEntryKind.File) {
+                            streams.Add(new SCPStreamSource(entry, client));
+                        }
+                        if (entry?.Info?.Kind == SSHEntryKind.Directory) {
+                            await foreach (var info in client.ListFilesRecursively(entry.Uri, token)) {
+                                streams.Add(new SCPStreamSource(new SSHEntry(provider, info), client));
+                            }
+                        }
+                    }
+                    io.Add(new ProvidedIO { StreamSets = new[] { new SCPStreamSet(streams) } });
+                    added = true;
+                }
+                //var treeNodes = source.Items?.OfType<FileSystemTreeNode>()?.ToList();
+                //if (treeNodes?.Count > 0) {
+                //    var streams = treeNodes.Select(n => n.StreamSource);
+                //    var streamSet = new FileSystemTreeNode.StreamSet(streams);
+                //    io.Add(new ProvidedIO { StreamSets = new[] { streamSet } });
+                //    added = true;
+                //}
+                return await Task.FromResult(added);
             }
         }
-        private string _Parent;
 
-        public object Icon { get; }
-        public string Path { get; }
-        public Uri Uri { get; }
-        public SecureString Password { get; }
-        public SSHProviderFactory Factory { get; }
-
-        public SSHProvider(SSHProviderFactory factory, Uri uri, SecureString password, string path, object icon) : base($"{uri?.ToString()?.TrimEnd('/')}>{path}") {
-            Factory = factory;
-            Uri = uri;
-            Path = path;
-            Icon = icon;
-            Password = password;
+        private sealed class CopyProvidedIO : ICopyProvidedIO, IProviderExport<SSHProvider> {
+            public async Task<bool> Work(IEnumerable<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
+                if (io is null) throw new ArgumentNullException(nameof(io));
+                if (target is not SSHProvider provider) {
+                    return false;
+                }
+                var streams = io.StreamSets();
+                if (streams.Count > 0) {
+                    await Task.WhenAll(streams.Select(set => Task.Run(cancellationToken: token, function: async () => {
+                        await set.Consume(progress: progress, token: token, consuming: async (source, stream, progress, token) => {
+                            var relativePath = source.RelativePath?.Trim()?.Trim(PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar) ?? "";
+                            if (relativePath != "") {
+                                var path = string.Join('/', provider.Uri.LocalPath.TrimEnd('/'), relativePath);
+                                var config = provider.Config;
+                                var client = await provider.Client.Ready(token);
+                                using var scpSend = await client.SCPSend(path, config.Scp.Mode, source.StreamLength, token);
+                                using var scpSendStream = scpSend.Stream();
+                                await stream.CopyToAsync(scpSendStream);
+                            }
+                        });
+                    })));
+                    return true;
+                }
+                return false;
+            }
         }
     }
 }

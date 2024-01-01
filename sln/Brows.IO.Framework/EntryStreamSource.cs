@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     public abstract class EntryStreamSource : IEntryStreamSource {
@@ -25,8 +27,8 @@ namespace Brows {
         }
 
         protected abstract Stream Stream();
-        protected virtual IEntryStreamReady StreamReady() {
-            return new EntryStreamReady();
+        protected virtual Task<IEntryStreamReady> StreamReady(CancellationToken token) {
+            return Task.FromResult<IEntryStreamReady>(new EntryStreamReady());
         }
 
         public string EntryID => Entry.ID;
@@ -42,8 +44,8 @@ namespace Brows {
             return Stream(@private: true);
         }
 
-        IEntryStreamReady IEntryStreamSource.StreamReady() {
-            return StreamReady();
+        Task<IEntryStreamReady> IEntryStreamSource.StreamReady(CancellationToken token) {
+            return StreamReady(token);
         }
     }
 

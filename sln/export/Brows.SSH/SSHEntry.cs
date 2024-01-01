@@ -1,22 +1,32 @@
 using Brows.SSH;
-using Domore.Logs;
 using System;
 
 namespace Brows {
     internal sealed class SSHEntry : Entry<SSHProvider> {
-        private static readonly ILog Log = Logging.For(typeof(SSHEntry));
+        private Uri GetUri() {           
+            var
+            uri = new UriBuilder(Provider.Uri);
+            uri.Path = Info.Path;
+            return uri.Uri;
+        }
 
-        public sealed override string ID { get; }
-        public sealed override string Name { get; }
+        public Uri Uri =>
+            _Uri ?? (
+            _Uri = GetUri());
+        private Uri _Uri;
 
-        public SSHEntryInfo Info { get; }
+        public sealed override string ID => _ID ?? (_ID = Uri.ToString());
+        private string _ID;
+
+        public sealed override string Name => _Name ?? (_Name = Info.Name);
+        private string _Name;
+
+        public SSHFileInfo Info { get; }
         public new SSHProvider Provider =>
             base.Provider;
 
-        public SSHEntry(SSHProvider provider, SSHEntryInfo info) : base(provider) {
+        public SSHEntry(SSHProvider provider, SSHFileInfo info) : base(provider) {
             Info = info ?? throw new ArgumentNullException(nameof(info));
-            Name = Info.Name;
-            ID = string.Join('/', Provider.ID.TrimEnd('/'), Info.Name);
         }
     }
 }

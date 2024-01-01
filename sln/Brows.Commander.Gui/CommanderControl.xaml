@@ -5,14 +5,30 @@
              xmlns:brows="http://schemas.brows.app/xaml"
              xmlns:local="clr-namespace:Brows">
     <Grid>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <local:PanelCollectionControl Grid.Row="0" DataContext="{Binding Panels}"/>
-            <brows:OperatorControl Grid.Row="1" DataContext="{Binding Operator}"/>
-        </Grid>
+        <Border>
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <BlurEffect Radius="5"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DialogFocused}" Value="False">
+                            <Setter Property="Effect" Value="{x:Null}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <local:PanelCollectionControl Grid.Row="0" DataContext="{Binding Panels}"/>
+                <brows:OperatorControl Grid.Row="1" DataContext="{Binding Operator}"/>
+            </Grid>
+        </Border>
         <Grid>
             <ContentControl DataContext="{Binding Palette}">
                 <ContentControl.Style>

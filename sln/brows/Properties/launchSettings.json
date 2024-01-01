@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "brows": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

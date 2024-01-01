@@ -26,7 +26,7 @@ namespace Brows.Config {
             public TConfig Loaded =>
                 Cache.Result;
 
-            public ValueTask<TConfig> Load(CancellationToken token) {
+            public Task<TConfig> Load(CancellationToken token) {
                 return Cache.Ready(token);
             }
         }

@@ -156,8 +156,8 @@ namespace Brows {
                 Node = node ?? throw new ArgumentNullException(nameof(node));
             }
 
-            public IEntryStreamReady StreamReady() {
-                return new EntryStreamReady();
+            public Task<IEntryStreamReady> StreamReady(CancellationToken token) {
+                return Task.FromResult<IEntryStreamReady>(new EntryStreamReady());
             }
 
             public Stream Stream() {

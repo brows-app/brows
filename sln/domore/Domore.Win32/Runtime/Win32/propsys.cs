@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Domore.Runtime.InteropServices.ComTypes;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Domore.Runtime.Win32 {
-    using InteropServices.ComTypes;
-
     public static class propsys {
         [DllImport("propsys.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
         public static extern HRESULT PSGetPropertyDescriptionByName(

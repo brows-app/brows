@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <NoWarn>CS8981</NoWarn>
     </PropertyGroup>
 </Project>

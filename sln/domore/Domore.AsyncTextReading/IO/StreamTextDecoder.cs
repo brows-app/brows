@@ -9,6 +9,7 @@ namespace Domore.IO {
 
     internal class StreamTextDecoder {
         public DecodedTextDelegate Decoded { get; set; }
+        public DecodedTextDelegate Completed { get; set; }
         public BufferPool<char> TextBuffer { get; set; }
         public BufferPool<byte> StreamBuffer { get; set; }
         public IReadOnlyList<string> Encoding { get; set; }
@@ -30,11 +31,16 @@ namespace Domore.IO {
                 if (decode.IsCompleted) {
                     break;
                 }
-                segment1 = segment1 ?? segment;
+                segment1 ??= segment;
                 sequence.Update(segment1, segment);
             }
             sequence.Complete();
-            return await decode;
+            var result = await decode;
+            var completed = Completed?.Invoke(result, cancellationToken);
+            if (completed != null) {
+                await completed;
+            }
+            return result;
         }
     }
 }

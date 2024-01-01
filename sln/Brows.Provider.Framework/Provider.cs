@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -115,6 +116,14 @@ namespace Brows {
         protected virtual Task Refresh(CancellationToken token) => Task.CompletedTask;
         protected virtual Task Begin(CancellationToken token) => Task.CompletedTask;
         protected virtual void End() {
+        }
+
+        protected async Task<SecureString> GetSecret(string promptFormat, IEnumerable<string> promptArgs, CancellationToken token) {
+            var panel = Panel;
+            if (panel == null) {
+                return null;
+            }
+            return await panel.GetSecret(promptFormat, promptArgs, token);
         }
 
         public string ID { get; }

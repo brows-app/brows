@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <TargetFrameworks>net8.0-windows</TargetFrameworks>
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
@@ -11,6 +11,5 @@
         <ProjectReference Include="..\Brows.Logs\Brows.Logs.csproj" />
         <ProjectReference Include="..\Brows.Program.Framework\Brows.Program.Framework.csproj" />
         <ProjectReference Include="..\domore\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
-        <ProjectReference Include="..\domore\Domore.Logs.Conf\Domore.Logs.Conf.csproj" />
     </ItemGroup>
 </Project>

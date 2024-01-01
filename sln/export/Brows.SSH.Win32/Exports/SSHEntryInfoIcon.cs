@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Exports {
     internal sealed class SSHEntryInfoIcon : ISSHEntryInfoIcon {
-        public async Task<bool> Work(SSHEntryInfo sshEntryInfo, Action<object> set, CancellationToken token) {
+        public async Task<bool> Work(SSHFileInfo sshEntryInfo, Action<object> set, CancellationToken token) {
             if (null == sshEntryInfo) return false;
             if (null == set) return false;
             switch (sshEntryInfo.Kind) {

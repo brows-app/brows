@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <TargetFrameworks>net8.0-windows</TargetFrameworks>
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
@@ -9,7 +9,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Brows.IO.Contract\Brows.IO.Contract.csproj" />
       <ProjectReference Include="..\Brows.Translation.Framework\Brows.Translation.Framework.csproj" />
-      <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
       <ProjectReference Include="..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />
       <ProjectReference Include="..\domore\Domore.Win32.Windows.PreviewHandlerControl\Domore.Win32.Windows.PreviewHandlerControl.csproj" />
       <ProjectReference Include="..\domore\Domore.Win32.Windows.PreviewTextControl\Domore.Win32.Windows.PreviewTextControl.csproj" />

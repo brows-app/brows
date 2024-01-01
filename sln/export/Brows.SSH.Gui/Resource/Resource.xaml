@@ -6,7 +6,15 @@
         <brows:EntryNameGrid Text="{Binding Item[Name]}" Icon="{Binding Item[Icon]}"/>
     </DataTemplate>
 
+    <DataTemplate x:Key="SSHConnectionEntry_Kind">
+        <ContentControl Style="{DynamicResource SSHConnectionEntry_Kind_Style}"/>
+    </DataTemplate>
+    
     <DataTemplate x:Key="PanelProvider_SSHProvider">
+        <local:SSHProviderControl/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PanelProvider_SSHConnectionProvider">
         <local:SSHProviderControl/>
     </DataTemplate>
 </ResourceDictionary>

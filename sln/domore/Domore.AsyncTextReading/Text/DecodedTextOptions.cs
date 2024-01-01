@@ -29,8 +29,9 @@ namespace Domore.Text {
             return pool;
         }
 
-        internal StreamTextDecoder ForStream(DecodedTextDelegate decoded) {
+        internal StreamTextDecoder ForStream(DecodedTextDelegate decoded, DecodedTextDelegate completed) {
             return new StreamTextDecoder {
+                Completed = completed,
                 Decoded = decoded,
                 Encoding = Encoding.Count > 0
                     ? Encoding
@@ -42,9 +43,9 @@ namespace Domore.Text {
         }
 
         internal StreamTextDecoder ForStream(DecodedTextBuilder builder) {
-            return ForStream(decoded: builder == null ? null : async (d, t) => {
-                await builder.Decode(d, t);
-            });
+            return ForStream(
+                decoded: builder == null ? null : builder.Decode,
+                completed: builder == null ? null : builder.Complete);
         }
 
         public BufferOptions StreamBuffer {

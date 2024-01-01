@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     public interface IEntryStreamSource {
@@ -8,7 +10,7 @@ namespace Brows {
         string SourceFile { get; }
         long StreamLength { get; }
         bool StreamValid { get; }
-        IEntryStreamReady StreamReady();
         Stream Stream();
+        Task<IEntryStreamReady> StreamReady(CancellationToken token);
     }
 }

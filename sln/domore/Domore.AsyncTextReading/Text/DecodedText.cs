@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Text;
 
 namespace Domore.Text {
-    public class DecodedText {
+    public sealed class DecodedText {
         internal ReadOnlySequence<char> Sequence =>
             Decoder.TextSequence;
 

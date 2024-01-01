@@ -46,7 +46,7 @@ namespace Brows {
                     break;
                 case WatcherChangeTypes.Created:
                     if (Log.Info()) {
-                        Log.Info(nameof(WatcherChangeTypes.Created) + " > " + e.FullPath);
+                        Log.Info(Log.Join(nameof(WatcherChangeTypes.Created), e.FullPath));
                     }
                     var createdID = e.FullPath;
                     var createdEntry = Lookup(id: createdID);
@@ -59,7 +59,7 @@ namespace Brows {
                     break;
                 case WatcherChangeTypes.Deleted:
                     if (Log.Info()) {
-                        Log.Info(nameof(WatcherChangeTypes.Deleted) + " > " + e.FullPath);
+                        Log.Info(Log.Join(nameof(WatcherChangeTypes.Deleted), e.FullPath));
                     }
                     var deletedEntry = Lookup(name: e.Name);
                     if (deletedEntry != null) {
@@ -68,7 +68,7 @@ namespace Brows {
                     break;
                 case WatcherChangeTypes.Renamed:
                     if (Log.Info()) {
-                        Log.Info(nameof(WatcherChangeTypes.Renamed) + " > " + e.FullPath);
+                        Log.Info(Log.Join(nameof(WatcherChangeTypes.Renamed), e.FullPath));
                     }
                     var r = e as RenamedEventArgs;
                     if (r != null) {

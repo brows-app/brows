@@ -2,12 +2,12 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
-        <PackageReference Include="System.ComponentModel.Composition.Registration" Version="6.0.0" />
+        <PackageReference Include="Domore.Async.TaskCaching" Version="8.0.0.87" />
+        <PackageReference Include="Domore.Logs" Version="8.0.0.87" />
+        <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
+        <PackageReference Include="System.ComponentModel.Composition.Registration" Version="8.0.0" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Brows.Composition.Contract\Brows.Composition.Contract.csproj" />
-      <ProjectReference Include="..\domore\Domore.Async\Domore.Async.csproj" />
-      <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
     </ItemGroup>
 </Project>

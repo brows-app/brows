@@ -2,16 +2,20 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <None Remove="Resource\Culture\_" />
-      <None Remove="Resource\Culture\_.alias" />
+        <None Remove="Resource\Culture\_" />
+        <None Remove="Resource\Culture\_.alias" />
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Include="Resource\Culture\_" />
-      <EmbeddedResource Include="Resource\Culture\_.alias" />
+        <EmbeddedResource Include="Resource\Culture\_" />
+        <EmbeddedResource Include="Resource\Culture\_.alias" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
         <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
         <ProjectReference Include="..\..\Brows.Logs\Brows.Logs.csproj" />
+        <ProjectReference Include="..\..\domore\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj" />
+        <ProjectReference Include="..\..\domore\Domore.FileSystem\Domore.FileSystem.csproj" />
+        <ProjectReference Include="..\Brows.SSH.Commands.SSH\Brows.SSH.Commands.SSH.csproj" />
+        <ProjectReference Include="..\Brows.SSH.Native\Brows.SSH.Native.csproj" />
     </ItemGroup>
 </Project>

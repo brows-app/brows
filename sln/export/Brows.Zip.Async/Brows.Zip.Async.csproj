@@ -6,6 +6,5 @@
       <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
       <ProjectReference Include="..\..\domore\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
       <ProjectReference Include="..\..\domore\Domore.FileSystem\Domore.FileSystem.csproj" />
-      <ProjectReference Include="..\..\domore\Domore.Logs\Domore.Logs.csproj" />
     </ItemGroup>
 </Project>

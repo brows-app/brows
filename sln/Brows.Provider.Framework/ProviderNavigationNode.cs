@@ -18,10 +18,10 @@ namespace Brows {
         private bool AddingChildren;
         private readonly ObservableCollection<ProviderNavigationNode> ChildCollection = new();
 
-        private TaskCache<object> IconCache =>
+        private TaskCache<object>.WithRefresh IconCache =>
             _IconCache ?? (
             _IconCache = new(GetIcon));
-        private TaskCache<object> _IconCache;
+        private TaskCache<object>.WithRefresh _IconCache;
 
         private void Controller_Loaded(object sender, EventArgs e) {
             if (AddedChildren) {

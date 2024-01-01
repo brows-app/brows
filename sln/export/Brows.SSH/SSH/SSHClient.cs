@@ -1,121 +1,171 @@
 ﻿using Brows.SSH.Clients;
+using Brows.SSH.Native;
 using Domore.Logs;
+using Domore.Notification;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
-using System.Security;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Brows.SSH {
-    internal abstract class SSHClient {
+    internal abstract class SSHClient : Notifier, IAsyncDisposable {
         private static readonly ILog Log = Logging.For(typeof(SSHClient));
 
-        private string UriString =>
-            _UriString ?? (
-            _UriString = Uri.ToString().TrimEnd('/'));
-        private string _UriString;
+        private int ProviderCount;
+        private SSHClientSession Session;
 
         protected async IAsyncEnumerable<SSHClientOutput> SSH(string command, [EnumeratorCancellation] CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(SSH), command));
             }
-            var ch = Channel.CreateUnbounded<SSHClientOutput>();
-            var writer = ch.Writer;
-            var reader = ch.Reader;
-            await Task.Run(cancellationToken: token, function: async () => {
-                var error = default(Exception);
-                try {
-                    using (var process = new Process()) {
-                        process.StartInfo.CreateNoWindow = true;
-                        process.StartInfo.UseShellExecute = false;
-                        process.StartInfo.FileName = "ssh";
-                        process.StartInfo.Arguments = $"-t {UriString} \"{command}\"";
-                        process.StartInfo.RedirectStandardError = true;
-                        process.StartInfo.RedirectStandardOutput = true;
+            var stdOutBuilder = new SSHServerResponseLineBuilder();
+            var stdErrBuilder = new SSHServerResponseLineBuilder();
+            var clientCommand = new SSHClientCommand {
+                Command = command,
+                StdErrBuilder = stdErrBuilder,
+                StdOutBuilder = stdOutBuilder
+            };
+            await Session.Execute(clientCommand, token);
 
-                        process.ErrorDataReceived += (s, e) => { writer.TryWrite(new SSHClientOutput(e?.Data, SSHClientOutputKind.Error)); };
-                        process.OutputDataReceived += (s, e) => { writer.TryWrite(new SSHClientOutput(e?.Data, SSHClientOutputKind.Output)); };
-                        process.Start();
-                        process.BeginErrorReadLine();
-                        process.BeginOutputReadLine();
-                        await process.WaitForExitAsync(token);
+            await using var stdout = stdOutBuilder.Lines(token).GetAsyncEnumerator(token);
+            await using var stderr = stdErrBuilder.Lines(token).GetAsyncEnumerator(token);
+
+            var moveOut = stdout.MoveNextAsync().AsTask();
+            var moveErr = stderr.MoveNextAsync().AsTask();
+
+            for (; ; ) {
+                var moveComplete =
+                    moveOut != null && moveErr != null ? await Task.WhenAny(moveOut, moveErr) :
+                    moveOut != null ? moveOut :
+                    moveErr != null ? moveErr :
+                    null;
+                if (moveComplete == null) {
+                    break;
+                }
+                if (moveComplete == moveOut) {
+                    var moved = await moveOut;
+                    if (moved) {
+                        if (Log.Info()) {
+                            Log.Info(Log.Join(nameof(stdout), stdout.Current));
+                        }
+                        yield return new SSHClientOutput(stdout.Current, SSHClientOutputKind.StdOut);
+                        moveOut = stdout.MoveNextAsync().AsTask();
+                    }
+                    else {
+                        moveOut = null;
                     }
                 }
-                catch (Exception ex) {
-                    error = ex;
-                }
-                writer.Complete(error);
-            });
-            await foreach (var item in reader.ReadAllAsync(token)) {
-                switch (item.Kind) {
-                    case SSHClientOutputKind.Error:
-                        if (Log.Warn()) {
-                            Log.Warn(item.Content);
-                        }
-                        break;
-                    case SSHClientOutputKind.Output:
+                if (moveComplete == moveErr) {
+                    var moved = await moveErr;
+                    if (moved) {
                         if (Log.Info()) {
-                            Log.Info(item.Content);
+                            Log.Info(Log.Join(nameof(stderr), stderr.Current));
                         }
-                        break;
+                        yield return new SSHClientOutput(stderr.Current, SSHClientOutputKind.StdErr);
+                        moveErr = stderr.MoveNextAsync().AsTask();
+                    }
+                    else {
+                        moveErr = null;
+                    }
                 }
-                yield return item;
             }
         }
 
-        protected async Task SCP(IEnumerable<SSHEntryInfo> remote, DirectoryInfo local, CancellationToken token) {
-            if (null == remote) throw new ArgumentNullException(nameof(remote));
-            var remoteDirs = remote.Where(i => i.Kind == SSHEntryKind.Directory).ToList();
-            var remoteDirsTask = Task.WhenAll(remoteDirs.Select(remoteDir => Task.Run(cancellationToken: token, function: async () => {
+        public event EventHandler Disposing;
 
-            })));
+        public SSHKnownHost KnownHost =>
+            Session.KnownHost;
 
-            var remoteFiles = remote.Except(remoteDirs).ToList();
+        public SSHFingerprint HostFingerprint =>
+            Session.HostFingerprint;
 
+        public Uri Uri =>
+            Session.Uri;
 
-            var outputChan = Channel.CreateUnbounded<char>();
-            await Task.Run(cancellationToken: token, function: async () => {
-                using (var process = new Process()) {
-                    process.StartInfo.CreateNoWindow = true;
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.FileName = "scp";
-                    process.StartInfo.Arguments = $"";
-                    process.StartInfo.RedirectStandardError = true;
-                    process.StartInfo.RedirectStandardOutput = true;
-                    process.Start();
+        public int Port =>
+            Session.Port;
 
-                    var exited = process.WaitForExitAsync(token);
+        public string HostName =>
+            Session.HostName;
 
+        public IPAddress HostAddress =>
+            Session.HostAddress;
 
-                    var readBuffer = new Memory<char>(new char[1024]);
-                    var read = await process.StandardOutput.ReadAsync(readBuffer, token);
-                    if (read < 0) {
+        public bool Connected =>
+            Session.Connected;
 
-                    }
+        public abstract IAsyncEnumerable<SSHFileInfo> List(string path, CancellationToken token);
 
-
-                    await process.WaitForExitAsync(token);
-                }
-            });
+        public async IAsyncEnumerable<SSHFileInfo> List(Uri uri, [EnumeratorCancellation] CancellationToken token) {
+            if (null == uri) throw new ArgumentNullException(nameof(uri));
+            var path = Uri.UnescapeDataString(uri.AbsolutePath);
+            var list = List(path, token);
+            await foreach (var info in list) {
+                yield return info;
+            }
         }
 
-        public Uri Uri { get; private set; }
-        public SecureString Password { get; private set; }
+        public async IAsyncEnumerable<SSHFileInfo> ListFilesRecursively(Uri uri, [EnumeratorCancellation] CancellationToken token) {
+            var list = List(uri, token);
+            await foreach (var item in list) {
+                switch (item.Kind) {
+                    case SSHEntryKind.File:
+                        yield return item;
+                        break;
+                    case SSHEntryKind.Directory:
+                        var
+                        urib = new UriBuilder(uri);
+                        urib.Path = item.Path;
+                        await foreach (var i in ListFilesRecursively(urib.Uri, token)) {
+                            yield return i;
+                        }
+                        break;
+                }
+            }
+        }
 
-        public abstract IAsyncEnumerable<SSHEntryInfo> List(string path, CancellationToken token);
-
-        public static SSHClient Create(Uri uri, SecureString password) {
-            if (null == uri) throw new ArgumentNullException(nameof(uri));
-            var
-            client = new PosixSSHClient();
-            client.Uri = uri;
-            client.Password = password;
+        public static SSHClient Create(Uri uri) {
+            var client = new PosixSSHClient();
+            var session = new SSHClientSession(uri);
+            client.Session = session;
             return client;
+        }
+
+        public int Providing() {
+            return ++ProviderCount;
+        }
+
+        public int Released() {
+            return --ProviderCount;
+        }
+
+        public async Task<ScpRecv> SCPRecv(string path, CancellationToken token) {
+            return await Session.SCPRecv(path, token);
+        }
+
+        public async Task<ScpSend> SCPSend(string path, int mode, long size, CancellationToken token) {
+            return await Session.SCPSend(path, mode, size, token);
+        }
+
+        public async Task Authenticate(SSHAuth auth, CancellationToken token) {
+            await Session.Authenticate(auth, token);
+        }
+
+        public async Task<bool> Authenticated(CancellationToken token) {
+            return await Session.Authenticated(token);
+        }
+
+        public async Task<object> Connection(CancellationToken token) {
+            return await Session.Connection(token);
+        }
+
+        async ValueTask IAsyncDisposable.DisposeAsync() {
+            Disposing?.Invoke(this, EventArgs.Empty);
+            await using (Session) {
+                Session = null;
+            }
         }
     }
 }

@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LOG = Domore.Logs.Log;
 
 namespace Brows {
     internal sealed class ProgramMain {
@@ -26,12 +25,6 @@ namespace Brows {
         private ProgramMain(ProgramConsole console, ProgramCommand command) {
             Console = console ?? throw new ArgumentNullException(nameof(console));
             Command = command ?? throw new ArgumentNullException(nameof(command));
-        }
-
-        private async Task<ProgramConfig> Config(IProgram program, CancellationToken cancellationToken) {
-            var file = Configure.File<ProgramConfig>();
-            var conf = await file.Load(cancellationToken);
-            return conf;
         }
 
         private bool ProgramNameValid(string s) {
@@ -59,21 +52,21 @@ namespace Brows {
                     return 0;
                 }
             }
-            var config = await Config(program, token);
-            if (config.Console) {
-                Console.Show();
-            }
             return await program.Run(context, token);
         }
 
         private static async Task<int> Main(string[] args) {
-            LOG.Conf.Configure(path: Path.Combine(
-                await ConfigPath.FileReady(CancellationToken.None),
-                "log.conf"));
-            var command = new ProgramCommand(Environment.CommandLine, args);
-            var console = new ProgramConsole();
-            var program = new ProgramMain(console, command);
-            using (console) {
+            using (var programConsole = new ProgramConsole()) {
+                var ct = CancellationToken.None;
+                var command = new ProgramCommand(Environment.CommandLine, args);
+                var program = new ProgramMain(programConsole, command);
+                var programConfig = await Configure.File<ProgramConfig>().Load(ct);
+                if (programConfig.Console) {
+                    programConsole.Show();
+                }
+                var logConfigPath = await ConfigPath.FileReady(ct);
+                var logConfigFile = Path.Combine(logConfigPath, "log.conf");
+                Log.Conf.Configure(logConfigFile);
                 try {
                     return await program.Run(CancellationToken.None);
                 }

@@ -2,12 +2,11 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Domore.Conf" Version="7.5.0.70" />
+      <PackageReference Include="Domore.Async.TaskCaching" Version="8.0.0.87" />
+      <PackageReference Include="Domore.Conf" Version="8.0.0.87" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Brows.Config.Contract\Brows.Config.Contract.csproj" />
-      <ProjectReference Include="..\domore\Domore.Async\Domore.Async.csproj" />
       <ProjectReference Include="..\domore\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
-      <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
     </ItemGroup>
 </Project>

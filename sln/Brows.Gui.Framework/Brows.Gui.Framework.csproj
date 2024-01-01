@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net6.0-windows</TargetFrameworks>
+        <TargetFrameworks>net8.0-windows</TargetFrameworks>
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
@@ -8,7 +8,6 @@
         <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
         <ProjectReference Include="..\Brows.Request.Framework\Brows.Request.Framework.csproj" />
         <ProjectReference Include="..\Brows.Trigger.Framework\Brows.Trigger.Framework.csproj" />
-        <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
         <ProjectReference Include="..\Brows.Provider.Contract\Brows.Provider.Contract.csproj" />
     </ItemGroup>
 </Project>

@@ -43,15 +43,15 @@ namespace Brows {
         public object Stream =>
             new FileSystemStreamGui(this);
 
-        public TaskCache<FileSystemInfo> FileSystemCache =>
+        public TaskCache<FileSystemInfo>.WithRefresh FileSystemCache =>
             _FileSystemCache ?? (
-            _FileSystemCache = new(async token => await FileSystemWork(token)));
-        private TaskCache<FileSystemInfo> _FileSystemCache;
+            _FileSystemCache = new(FileSystemWork));
+        private TaskCache<FileSystemInfo>.WithRefresh _FileSystemCache;
 
-        public TaskCache<IReadOnlyDictionary<string, IMetadataValue>> MetadataCache =>
+        public TaskCache<IReadOnlyDictionary<string, IMetadataValue>>.WithRefresh MetadataCache =>
             _MetadataCache ?? (
-            _MetadataCache = new(async token => await MetadataWork(token)));
-        private TaskCache<IReadOnlyDictionary<string, IMetadataValue>> _MetadataCache;
+            _MetadataCache = new(MetadataWork));
+        private TaskCache<IReadOnlyDictionary<string, IMetadataValue>>.WithRefresh _MetadataCache;
 
         public string Extension { get; }
         public sealed override string ID { get; }

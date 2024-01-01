@@ -16,7 +16,7 @@ namespace Brows {
             }));
         private static TaskCache<IImport> _Cache;
 
-        public static ValueTask<IImport> Ready(CancellationToken token) {
+        public static Task<IImport> Ready(CancellationToken token) {
             return Cache.Ready(token);
         }
     }

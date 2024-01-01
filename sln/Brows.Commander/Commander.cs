@@ -28,12 +28,13 @@ namespace Brows {
         }
 
         private void Controller_WindowClosed(object sender, EventArgs e) {
+            PanelCollection.Clear();
             Closed?.Invoke(this, e);
         }
 
         private void Controller_WindowInput(object sender, InputEventArgs e) {
             if (e != null) {
-                e.Triggered = Input(e.Text);
+                e.Triggered = Input(e.Text, e.Source);
             }
         }
 
@@ -45,6 +46,9 @@ namespace Brows {
 
         private bool Input(IGesture gesture, object source) {
             if (Palette != null) {
+                return false;
+            }
+            if (source is IControllingGesture) {
                 return false;
             }
             var panel = PanelCollection.Active;
@@ -71,8 +75,11 @@ namespace Brows {
             return false;
         }
 
-        private bool Input(string text) {
+        private bool Input(string text, object source) {
             if (Palette != null) {
+                return false;
+            }
+            if (source is IControllingText) {
                 return false;
             }
             if (Log.Info()) {
@@ -105,6 +112,12 @@ namespace Brows {
             private set => Change(ref _Palette, value, nameof(Palette));
         }
         private CommandPalette _Palette;
+
+        public bool DialogFocused {
+            get => _DialogFocused;
+            private set => Change(ref _DialogFocused, value, nameof(DialogFocused));
+        }
+        private bool _DialogFocused;
 
         public Operator Operator =>
             _Operator ?? (

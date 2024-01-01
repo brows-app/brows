@@ -2,6 +2,8 @@
 using Domore.Windows.Controls;
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Brows {
@@ -53,8 +55,8 @@ namespace Brows {
                 Source = source ?? throw new ArgumentNullException(nameof(source));
             }
 
-            public IDisposable StreamReady() {
-                return Source.StreamReady();
+            public async Task<IDisposable> StreamReady(CancellationToken token) {
+                return await Source.StreamReady(token);
             }
 
             Stream IStreamText.StreamText() {

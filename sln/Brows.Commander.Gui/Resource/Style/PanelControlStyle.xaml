@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="Panel_Active_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity="0.1"/>
+    <SolidColorBrush x:Key="Panel_Default_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity="0.2"/>
+    <Style x:Key="PanelControlStyle" TargetType="Control">
+        <Setter Property="Background" Value="{DynamicResource Panel_Default_Background}"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="KeyboardNavigation.ControlTabNavigation" Value="None"/>
+        <Setter Property="KeyboardNavigation.DirectionalNavigation" Value="None"/>
+        <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
+    </Style>
+</ResourceDictionary>

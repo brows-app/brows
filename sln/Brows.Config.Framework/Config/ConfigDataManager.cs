@@ -54,7 +54,7 @@ namespace Brows.Config {
             public Of(string id) : base(id) {
             }
 
-            public ValueTask<TData> Load(CancellationToken token) {
+            public Task<TData> Load(CancellationToken token) {
                 return Cache.Ready(token);
             }
         }

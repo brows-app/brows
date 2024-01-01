@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class FileStreamSource : IEntryStreamSource {
@@ -17,7 +19,8 @@ namespace Brows {
         string IEntryStreamSource.RelativePath => Info.Name;
         long IEntryStreamSource.StreamLength => Info.Length;
         bool IEntryStreamSource.StreamValid => Info.Exists;
-        IEntryStreamReady IEntryStreamSource.StreamReady() => new EntryStreamReady();
         Stream IEntryStreamSource.Stream() => Info.OpenRead();
+        Task<IEntryStreamReady> IEntryStreamSource.StreamReady(CancellationToken token) =>
+            Task.FromResult<IEntryStreamReady>(new EntryStreamReady());
     }
 }

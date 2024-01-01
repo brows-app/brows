@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Domore.IO {
     internal abstract class StreamTextSource : IStreamText {
@@ -8,8 +10,8 @@ namespace Domore.IO {
         public virtual bool StreamValid =>
             true;
 
-        public virtual IDisposable StreamReady() {
-            return null;
+        public virtual Task<IDisposable> StreamReady(CancellationToken cancellationToken) {
+            return Task.FromResult(default(IDisposable));
         }
 
         public abstract Stream StreamText();

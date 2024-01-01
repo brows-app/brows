@@ -367,8 +367,8 @@ namespace Brows {
                 EntryInfo = entryInfo ?? throw new ArgumentNullException(nameof(entryInfo));
             }
 
-            protected sealed override IEntryStreamReady StreamReady() {
-                return new Disposable(this);
+            protected sealed override Task<IEntryStreamReady> StreamReady(CancellationToken token) {
+                return Task.FromResult<IEntryStreamReady>(new Disposable(this));
             }
 
             protected sealed override Stream Stream() {

@@ -2,6 +2,6 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <ProjectReference Include="..\Domore.Logs\Domore.Logs.csproj" />
+      <PackageReference Include="Domore.Logs" Version="8.0.0.87" />
     </ItemGroup>
 </Project>

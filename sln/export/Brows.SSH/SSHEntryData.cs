@@ -14,7 +14,6 @@ namespace Brows {
             }
         }
 
-
         public sealed class Extension : Definition<string> {
             public Extension() : base(e => e.Extension) {
                 Width = 50;
@@ -131,9 +130,9 @@ namespace Brows {
         }
 
         public abstract class Definition<T> : SSHEntryData<T> {
-            protected Func<SSHEntryInfo, T> Func { get; }
+            protected Func<SSHFileInfo, T> Func { get; }
 
-            protected Definition(Func<SSHEntryInfo, T> func) {
+            protected Definition(Func<SSHFileInfo, T> func) {
                 Func = func ?? throw new ArgumentNullException(nameof(func));
             }
 

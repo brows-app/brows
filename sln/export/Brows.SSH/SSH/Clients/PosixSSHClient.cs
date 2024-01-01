@@ -9,13 +9,15 @@ using PATH = System.IO.Path;
 
 namespace Brows.SSH.Clients {
     internal sealed class PosixSSHClient : SSHClient {
-        public sealed override async IAsyncEnumerable<SSHEntryInfo> List(string path, [EnumeratorCancellation] CancellationToken token) {
+        public sealed override async IAsyncEnumerable<SSHFileInfo> List(string path, [EnumeratorCancellation] CancellationToken token) {
+            if (null == path) throw new ArgumentNullException(nameof(path));
             var newL = EntryInfo.NewLin;
             var frmt = EntryInfo.Format;
-            var outp = SSH(@$"cd ""{path}"" && stat --printf='{frmt}{newL}*{newL}' $(ls -a)", token);
+            var escp = path.Replace("'", @"'\''");
+            var outp = SSH(@$"bash -O dotglob -c 'cd ""{escp}"" && stat * --printf=""{frmt}{newL}*{newL}""'", token);
             var bldr = default(StringBuilder);
             await foreach (var line in outp) {
-                if (line.Kind == SSHClientOutputKind.Output) {
+                if (line.Kind == SSHClientOutputKind.StdOut) {
                     var content = line.Content?.Trim();
                     if (content == "*") {
                         var conf = bldr?.ToString();
@@ -34,7 +36,7 @@ namespace Brows.SSH.Clients {
             }
         }
 
-        private sealed class EntryInfo : SSHEntryInfo {
+        private sealed class EntryInfo : SSHFileInfo {
             public const string NewLin = "\\n";
             public const string Format =
                 "n1=%n" + NewLin +

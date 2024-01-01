@@ -195,7 +195,11 @@ namespace Brows.Gui {
         }
 
         bool IEntryObservationController.CurrentPosition(int value) {
-            return ListView.Items.MoveCurrentToPosition(value);
+            var items = ListView.Items;
+            if (items.Count > value) {
+                return items.MoveCurrentToPosition(value);
+            }
+            return false;
         }
 
         bool IEntryObservationController.Focus() {

@@ -13,8 +13,8 @@ namespace Brows {
 
         public Task RefreshComplete { get; set; } = Task.CompletedTask;
 
-        public sealed override string ID => Info.Name;
-        public sealed override string Name => Info.Name;
+        public sealed override string ID { get; }
+        public sealed override string Name { get; }
         public new DriveProvider Provider => base.Provider;
 
         public DriveInfo Info { get; }
@@ -23,6 +23,7 @@ namespace Brows {
         public DriveEntry(DriveProvider provider, DriveInfo info) : base(provider) {
             Info = info ?? throw new ArgumentNullException(nameof(info));
             Kind = Info.DriveType;
+            Name = ID = Info.Name;
         }
 
         public async Task Refresh(CancellationToken token) {

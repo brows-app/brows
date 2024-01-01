@@ -3,35 +3,45 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Brows">
     <UserControl.Style>
-        <Style TargetType="UserControl">
-            <Setter Property="Background">
-                <Setter.Value>
-                    <SolidColorBrush Color="{DynamicResource Global_Default_Foreground}" Opacity="0.2"/>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="KeyboardNavigation.ControlTabNavigation" Value="None"/>
-            <Setter Property="KeyboardNavigation.DirectionalNavigation" Value="None"/>
-            <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
+        <Style TargetType="Control" BasedOn="{StaticResource PanelControlStyle}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Active}" Value="True">
-                    <Setter Property="Background">
-                        <Setter.Value>
-                            <SolidColorBrush Color="{DynamicResource Global_Default_Foreground}" Opacity="0.1"/>
-                        </Setter.Value>
-                    </Setter>
+                    <Setter Property="Background" Value="{DynamicResource Panel_Active_Background}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
     </UserControl.Style>
     <Grid>
         <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Secret}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <local:PanelProviderControl Grid.Row="0" DataContext="{Binding Provider}"/>
             <local:PanelStateControl Grid.Row="1" DataContext="{Binding State}"/>
+        </Grid>
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Secret}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <local:PanelSecretControl DataContext="{Binding Secret}"/>
         </Grid>
     </Grid>
 </UserControl>

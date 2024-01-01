@@ -24,7 +24,7 @@ namespace Brows {
                     token.ThrowIfCancellationRequested();
                 }
                 using
-                var streamReady = source.StreamReady();
+                var streamReady = await source.StreamReady(token);
                 var streamValid = source.StreamValid;
                 if (streamValid) {
                     if (progress != null) {

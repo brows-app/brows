@@ -17,7 +17,7 @@ namespace Brows.Gui {
                 var handled = e.Trigger(a => WindowGesture?.Invoke(this, a));
                 if (handled == false) {
                     if (e.Key == Key.Space) {
-                        var input = new InputEventArgs(" ");
+                        var input = new InputEventArgs(" ", (e.OriginalSource as FrameworkElement)?.DataContext);
                         var handler = WindowInput;
                         if (handler != null) {
                             handler.Invoke(this, input);
@@ -39,7 +39,7 @@ namespace Brows.Gui {
         private void Window_PreviewTextInput(object sender, TextCompositionEventArgs e) {
             if (e != null) {
                 var text = e.Text;
-                var args = new InputEventArgs(text);
+                var args = new InputEventArgs(text, (e.OriginalSource as FrameworkElement)?.DataContext);
                 var handler = WindowInput;
                 if (handler != null) {
                     handler.Invoke(this, args);

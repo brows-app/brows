@@ -41,7 +41,7 @@ namespace Domore.Net.Sockets {
                     using (var reader = new StreamReader(stream, Encoding)) {
                         for (; ; ) {
                             if (cancellationToken.IsCancellationRequested) {
-                                break;
+                                cancellationToken.ThrowIfCancellationRequested();
                             }
                             yield return await reader.ReadLineAsync();
                         }

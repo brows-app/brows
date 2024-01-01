@@ -12,7 +12,7 @@ namespace Brows.Extensions {
         public static async Task<BitmapImage> Image(this IEntryStreamSource entryStreamSource, CancellationToken cancellationToken) {
             if (entryStreamSource is null) throw new ArgumentNullException(nameof(entryStreamSource));
             var entryStreamMemory = await Task.Run(cancellationToken: cancellationToken, function: async () => {
-                using (entryStreamSource.StreamReady()) {
+                using (await entryStreamSource.StreamReady(cancellationToken)) {
                     await using (var stream = entryStreamSource.Stream()) {
                         var memory = new MemoryStream();
                         await stream.CopyToAsync(memory, cancellationToken);

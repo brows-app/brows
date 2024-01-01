@@ -34,7 +34,7 @@ namespace Domore.Net.Sockets {
                 var exit = false;
                 for (; ; ) {
                     if (cancellationToken.IsCancellationRequested) {
-                        break;
+                        cancellationToken.ThrowIfCancellationRequested();
                     }
                     if (exit) {
                         break;
@@ -44,6 +44,9 @@ namespace Domore.Net.Sockets {
                         var next = false;
                         try {
                             next = await read.MoveNextAsync();
+                        }
+                        catch (OperationCanceledException canceled) when (canceled.CancellationToken == cancellationToken) {
+                            throw;
                         }
                         catch (Exception ex) {
                             var e = Factory.OnError(ex);

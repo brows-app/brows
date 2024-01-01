@@ -3,3 +3,5 @@
 # To customize the application's configuration, copy this file to its directory's parent and
 # remove the .default extension.
 #
+
+SCP.Mode = 0777

@@ -116,6 +116,16 @@ namespace Brows {
             return await Task.FromResult(true);
         }
 
+        public void Clear() {
+            foreach (var item in List) {
+                var closed = Closed(item);
+                if (closed) {
+                    Controller?.RemovePanel(item);
+                }
+            }
+            List.Clear();
+        }
+
         public async Task<bool> Shift(IPanel item, int column) {
             if (item.Column == column) {
                 return false;

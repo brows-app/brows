@@ -3,6 +3,9 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Brows.Commander.Gui;component/Resource/Style/CommanderScrollBarStyle.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/Brows.Commander.Gui;component/Resource/Style/CommanderScrollViewerStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Commander.Gui;component/Resource/Style/PanelControlStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Commander.Gui;component/Resource/Style/PanelSecretControlStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Brows.Commander.Gui;component/Resource/Style/PanelSecretPasswordBoxStyle.xaml"/>
     </ResourceDictionary.MergedDictionaries>    
     
     <Style x:Key="CommandContextData_KeyboardKey">

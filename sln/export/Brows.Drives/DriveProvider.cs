@@ -8,18 +8,20 @@ using System.Threading.Tasks;
 namespace Brows {
     internal sealed class DriveProvider : Provider<DriveEntry, DrivesConfig>, IFileSystemNavigationProvider {
         private async Task<IReadOnlyList<DriveEntry>> List(CancellationToken token) {
-            var drives = await Task.Run(cancellationToken: token, function: DriveInfo.GetDrives);
-            var entries = drives.Select(d => new DriveEntry(this, d)).ToList();
-            return entries;
+            return await Task.Run(cancellationToken: token, function: () => {
+                var drives = DriveInfo.GetDrives();
+                var entries = drives.Select(d => new DriveEntry(this, d)).ToList();
+                return entries;
+            });
         }
 
-        protected sealed override async Task Begin(CancellationToken cancellationToken) {
-            await Provide(await List(cancellationToken));
+        protected sealed override async Task Begin(CancellationToken token) {
+            await Provide(await List(token));
         }
 
-        protected sealed override async Task Refresh(CancellationToken cancellationToken) {
+        protected sealed override async Task Refresh(CancellationToken token) {
             await Revoke(Provided);
-            await Provide(await List(cancellationToken));
+            await Provide(await List(token));
         }
 
         public string Name =>

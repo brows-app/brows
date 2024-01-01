@@ -1,13 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\domore\Domore.Logs\Domore.Logs.csproj" />
-  </ItemGroup>
-
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Domore.Logs" Version="8.0.0.87" />
+    </ItemGroup>
 </Project>

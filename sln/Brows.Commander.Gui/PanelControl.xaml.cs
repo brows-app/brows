@@ -1,6 +1,6 @@
-namespace Brows {
-    using Gui;
+using Brows.Gui;
 
+namespace Brows {
     partial class PanelControl {
         public PanelControl() {
             InitializeComponent();
