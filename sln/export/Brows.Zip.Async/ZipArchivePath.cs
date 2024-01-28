@@ -311,9 +311,11 @@ namespace Brows {
                                     .Replace(Path.DirectorySeparatorChar, '/')
                                     .Replace(Path.AltDirectorySeparatorChar, '/');
                                 archive.Zip.Delete(name);
-                                var entry = archive.Zip.CreateEntry(name);
-                                await using var opened = entry.Open();
-                                await stream.CopyToAsync(opened, token);
+                                if (stream != null) {
+                                    var entry = archive.Zip.CreateEntry(name);
+                                    await using var opened = entry.Open();
+                                    await stream.CopyToAsync(opened, token);
+                                }
                             }
                         }
                     });
@@ -372,17 +374,17 @@ namespace Brows {
             }
 
             protected sealed override Stream Stream() {
-                Locked = EntryInfo.Archive.Locker.Lock();
-                Archive = Archive.Open(EntryInfo.Archive, ZipArchiveMode.Read, CancellationToken.None);
-                var entry = Archive.Zip.GetEntry(EntryInfo.Name.Original);
-                if (entry == null) {
-                    throw new EntryNotFoundException();
+                if (EntryInfo.Kind == ZipEntryKind.File) {
+                    Locked = EntryInfo.Archive.Locker.Lock();
+                    Archive = Archive.Open(EntryInfo.Archive, ZipArchiveMode.Read, CancellationToken.None);
+                    var entry = Archive.Zip.GetEntry(EntryInfo.Name.Original);
+                    if (entry == null) {
+                        throw new EntryNotFoundException();
+                    }
+                    return entry.Open();
                 }
-                return entry.Open();
+                return null;
             }
-
-            public sealed override bool StreamValid =>
-                EntryInfo.Kind == ZipEntryKind.File;
 
             public sealed override long StreamLength =>
                 EntryInfo.SizeOriginal ?? 0;

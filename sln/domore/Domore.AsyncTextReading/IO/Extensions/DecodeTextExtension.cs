@@ -9,11 +9,17 @@ namespace Domore.IO.Extensions {
         private static async Task<DecodedText> DecodeText(IStreamText source, DecodedTextOptions options, Func<DecodedTextOptions, StreamTextDecoder> decoder, CancellationToken cancellationToken) {
             if (null == decoder) throw new ArgumentNullException(nameof(decoder));
             if (null == source) throw new ArgumentNullException(nameof(source));
-            var opt = options ?? new();
-            var dec = decoder(opt);
-            var rdy = source.StreamReady(cancellationToken);
-            using (rdy == null ? default : await rdy) {
+            var streamReady = source.StreamReady(cancellationToken);
+            if (streamReady == null) {
+                return null;
+            }
+            using (await streamReady) {
                 await using (var stream = source.StreamText()) {
+                    if (stream == null) {
+                        return null;
+                    }
+                    var opt = options ?? new();
+                    var dec = decoder(opt);
                     return await dec.Decode(stream, cancellationToken);
                 }
             }

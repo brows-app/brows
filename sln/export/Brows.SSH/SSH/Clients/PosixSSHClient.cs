@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using PATH = System.IO.Path;
 
 namespace Brows.SSH.Clients {
@@ -33,6 +34,26 @@ namespace Brows.SSH.Clients {
                     bldr ??= new StringBuilder();
                     bldr.AppendLine(content);
                 }
+            }
+        }
+
+        public sealed override async Task CreateDirectory(string path, CancellationToken token) {
+            var outp = SSH($"mkdir -p {path}", token);
+            await foreach (var @out in outp) {
+            }
+        }
+
+        public sealed override async Task Delete(SSHFileInfo item, CancellationToken token) {
+            ArgumentNullException.ThrowIfNull(item);
+            var cmd =
+                item.Kind == SSHEntryKind.File ? $"rm -f {item.Path}" :
+                item.Kind == SSHEntryKind.Directory ? $"rm -rf {item.Path}" :
+                null;
+            if (cmd == null) {
+                return;
+            }
+            var outp = SSH(cmd, token);
+            await foreach (var @out in outp) {
             }
         }
 

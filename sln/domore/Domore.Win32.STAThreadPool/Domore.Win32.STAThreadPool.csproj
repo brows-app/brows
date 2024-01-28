@@ -4,6 +4,6 @@
         <UseWindowsForms>true</UseWindowsForms>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Domore.Logs" Version="8.0.0.87" />
+      <PackageReference Include="Domore.Logs" Version="8.0.2.92" />
     </ItemGroup>
 </Project>

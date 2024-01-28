@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Domore.Buffers;
+using Domore.Text;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.IO {
-    using Buffers;
-    using Text;
-
-    internal class StreamTextDecoder {
+    internal sealed class StreamTextDecoder {
         public DecodedTextDelegate Decoded { get; set; }
         public DecodedTextDelegate Completed { get; set; }
         public BufferPool<char> TextBuffer { get; set; }

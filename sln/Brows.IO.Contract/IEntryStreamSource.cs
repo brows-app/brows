@@ -8,8 +8,8 @@ namespace Brows {
         string EntryName { get; }
         string RelativePath { get; }
         string SourceFile { get; }
+        string SourceDirectory { get; }
         long StreamLength { get; }
-        bool StreamValid { get; }
         Stream Stream();
         Task<IEntryStreamReady> StreamReady(CancellationToken token);
     }

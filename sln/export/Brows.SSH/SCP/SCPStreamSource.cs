@@ -10,7 +10,9 @@ namespace Brows.SCP {
         private ScpRecv SCPRecv;
 
         protected sealed override Stream Stream() {
-            return SCPRecv.Stream();
+            return Entry.Info.Kind == SSHEntryKind.File
+                ? SCPRecv?.Stream()
+                : null;
         }
 
         protected sealed override async Task<IEntryStreamReady> StreamReady(CancellationToken token) {
@@ -26,11 +28,13 @@ namespace Brows.SCP {
                     .Substring(Entry.Provider.Uri.AbsolutePath.Length)
                     .TrimStart('/'));
 
+        public sealed override string SourceDirectory =>
+            Entry.Info.Kind == SSHEntryKind.Directory
+                ? RelativePath
+                : null;
+
         public sealed override long StreamLength =>
             Entry.Info.Length ?? 0;
-
-        public sealed override bool StreamValid =>
-            Entry.Info.Kind == SSHEntryKind.File;
 
         public SSHClient Client { get; }
 

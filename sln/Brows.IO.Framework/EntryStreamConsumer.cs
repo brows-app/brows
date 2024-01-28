@@ -8,6 +8,7 @@ namespace Brows {
     public static class EntryStreamConsumer {
         public static async Task Consume(this IEntryStreamSet entryStreamSet, EntryStreamConsumingDelegate consuming, IOperationProgress progress, CancellationToken token) {
             if (null == entryStreamSet) throw new ArgumentNullException(nameof(entryStreamSet));
+            if (null == consuming) throw new ArgumentNullException(nameof(consuming));
             var set = entryStreamSet;
             using
             var sourcesReady = set.StreamSourceReady();
@@ -23,21 +24,14 @@ namespace Brows {
                 if (token.IsCancellationRequested) {
                     token.ThrowIfCancellationRequested();
                 }
-                using
-                var streamReady = await source.StreamReady(token);
-                var streamValid = source.StreamValid;
-                if (streamValid) {
-                    if (progress != null) {
-                        progress.Change(data: source.EntryName);
-                    }
-                    await using
-                    var stream = source.Stream();
-                    if (stream != null) {
-                        if (consuming != null) {
-                            var task = consuming(source, stream, progress, token);
-                            if (task != null) {
-                                await task;
-                            }
+                if (progress != null) {
+                    progress.Change(data: source.EntryName);
+                }
+                using (var streamReady = await source.StreamReady(token)) {
+                    await using (var stream = source.Stream()) {
+                        var task = consuming(source, stream, progress, token);
+                        if (task != null) {
+                            await task;
                         }
                     }
                 }
@@ -48,14 +42,21 @@ namespace Brows {
         }
 
         public static async Task ConsumeFromMemory(this IEntryStreamSet entryStreamSet, EntryStreamConsumingDelegate consuming, IOperationProgress progress, CancellationToken token) {
+            if (null == consuming) throw new ArgumentNullException(nameof(consuming));
             await Consume(entryStreamSet, progress: progress, token: token, consuming: async (source, stream, progress, token) => {
-                await using var memory = source.StreamLength <= int.MaxValue
-                    ? new MemoryStream(Convert.ToInt32(source.StreamLength))
-                    : new MemoryStream();
-                await stream.CopyToAsync(memory, token);
-                if (consuming != null) {
+                if (stream == null) {
+                    var task = consuming(source, stream, progress, token);
+                    if (task != null) {
+                        await task;
+                    }
+                }
+                else {
+                    await using var memory = source.StreamLength <= int.MaxValue
+                        ? new MemoryStream(Convert.ToInt32(source.StreamLength))
+                        : new MemoryStream();
+                    await stream.CopyToAsync(memory, token);
                     memory.Position = 0;
-                    var task = consuming(source, memory, progress, token);
+                    var task = consuming.Invoke(source, memory, progress, token);
                     if (task != null) {
                         await task;
                     }

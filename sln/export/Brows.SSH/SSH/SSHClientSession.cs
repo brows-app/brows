@@ -167,22 +167,37 @@ namespace Brows.SSH {
         }
 
         public async Task<ScpRecv> SCPRecv(string path, CancellationToken token) {
+            if (Log.Info()) {
+                Log.Info(Log.Join(nameof(SCPRecv), nameof(Lock), path));
+            }
             await Lock(token);
             var conn = await Conn.Ready(token);
             var 
             recv = new ScpRecv(conn, path);
             recv.Disposed += (s, e) => {
+                if (Log.Info()) {
+                    Log.Info(Log.Join(nameof(SCPRecv), nameof(Unlock), path));
+                }
                 Unlock();
             };
             return recv;
         }
 
         public async Task<ScpSend> SCPSend(string path, int mode, long size, CancellationToken token) {
+            if (Log.Info()) {
+                Log.Info(
+                    Log.Join(nameof(SCPSend), nameof(Lock), path),
+                    Log.Join(nameof(mode), mode),
+                    Log.Join(nameof(size), size));
+            }
             await Lock(token);
             var conn = await Conn.Ready(token);
             var
             send = new ScpSend(conn, path, mode, size);
             send.Disposed += (s, e) => {
+                if (Log.Info()) {
+                    Log.Info(Log.Join(nameof(SCPSend), nameof(Unlock), path));
+                }
                 Unlock();
             };
             return send;

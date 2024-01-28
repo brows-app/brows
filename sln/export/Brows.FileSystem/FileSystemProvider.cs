@@ -314,7 +314,7 @@ namespace Brows {
                 if (target is not FileSystemProvider provider) {
                     return false;
                 }
-                var files = io.Files();
+                var files = io.FileSources();
                 if (files.Count == 0) {
                     return false;
                 }
@@ -332,7 +332,7 @@ namespace Brows {
                 if (target is not FileSystemProvider provider) {
                     return false;
                 }
-                var files = io.Files();
+                var files = io.FileSources();
                 if (files.Count > 0) {
                     var service = provider.Factory.CopyFilesToDirectory;
                     if (service == null) {
@@ -344,26 +344,38 @@ namespace Brows {
                 if (streams.Count > 0) {
                     var directory = provider.Directory.FullName;
                     await Task.WhenAll(streams.Select(set => Task.Run(cancellationToken: token, function: async () => {
-                        await set.Consume(progress: progress, token: token, consuming: async (source, stream, progress, token) => {
-                            var relativePath = source.RelativePath?.Trim()?.Trim(PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar) ?? "";
-                            if (relativePath != "") {
-                                var ext = PATH.GetExtension(relativePath);
-                                var fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
-                                for (; ; ) {
-                                    if (fileInfo.Exists == false) {
-                                        if (DIRECTORY.Exists(fileInfo.DirectoryName) == false) {
-                                            DIRECTORY.CreateDirectory(fileInfo.DirectoryName);
+                        await set.Consume(progress: progress, token: token,
+                            consuming: async (source, stream, progress, token) => {
+                                var relativePath = source.RelativePath?.Trim()?.Trim(PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar) ?? "";
+                                if (relativePath != "") {
+                                    if (stream == null) {
+                                        var sourceDirectory = source.SourceDirectory;
+                                        if (sourceDirectory != null) {
+                                            var directoryInfo = new DirectoryInfo(PATH.Combine(directory, relativePath));
+                                            if (directoryInfo.Exists == false) {
+                                                DIRECTORY.CreateDirectory(directoryInfo.FullName);
+                                            }
                                         }
-                                        break;
                                     }
-                                    relativePath = relativePath + ".copy" + ext;
-                                    fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
+                                    else {
+                                        var ext = PATH.GetExtension(relativePath);
+                                        var fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
+                                        for (; ; ) {
+                                            if (fileInfo.Exists == false) {
+                                                if (DIRECTORY.Exists(fileInfo.DirectoryName) == false) {
+                                                    DIRECTORY.CreateDirectory(fileInfo.DirectoryName);
+                                                }
+                                                break;
+                                            }
+                                            relativePath = relativePath + ".copy" + ext;
+                                            fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
+                                        }
+                                        await using (var file = fileInfo.Create()) {
+                                            await stream.CopyToAsync(file, token);
+                                        }
+                                    }
                                 }
-                                await using (var file = fileInfo.Create()) {
-                                    await stream.CopyToAsync(file, token);
-                                }
-                            }
-                        });
+                            });
                     })));
                     return true;
                 }

@@ -10,7 +10,7 @@ namespace Brows.Exports {
 
         public async Task<bool> Work(IEnumerable<IProvidedIO> collection, IOperationProgress progress, CancellationToken token) {
             if (collection is null) return false;
-            var files = collection.Files();
+            var files = collection.FileSources();
             var streamSets = collection.StreamSets();
             if (streamSets.Count == 0 && files.Count == 0) {
                 return false;

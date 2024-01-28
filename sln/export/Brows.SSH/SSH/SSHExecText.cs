@@ -44,14 +44,11 @@ namespace Brows.SSH {
             return new StdErrText(exec);
         }
 
-        bool IStreamText.StreamValid =>
-            true;
-
         long IStreamText.StreamLength =>
             throw new NotSupportedException();
 
         Task<IDisposable> IStreamText.StreamReady(CancellationToken token) {
-            return null;
+            return Task.FromResult(default(IDisposable));
         }
 
         Stream IStreamText.StreamText() {

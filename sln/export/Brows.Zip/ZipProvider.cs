@@ -2,7 +2,6 @@
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -103,103 +102,51 @@ namespace Brows {
             }
         }
 
-        private sealed class CopyFromProvidedIO : ICopyProvidedIO, IProviderExport<ZipProvider> {
+        private sealed class CopyProvidedIO : ICopyProvidedIO, IProviderExport<ZipProvider> {
             public async Task<bool> Work(IEnumerable<IProvidedIO> io, IProvider target, IOperationProgress progress, CancellationToken token) {
                 if (io is null) throw new ArgumentNullException(nameof(io));
-                var files = io.Files();
+                if (target is not ZipProvider provider) {
+                    return false;
+                }
+                var files = await io.FlattenFiles(progress, token);
                 if (files.Count > 0) {
-                    return await new CopyFromFiles().Work(files, target, progress, token);
+                    return await new CopyFromFiles().Work(files, provider, progress, token);
                 }
                 var streams = io.StreamSets();
                 if (streams.Count > 0) {
-                    return await new CopyFromStreams().Work(streams, target, progress, token);
+                    return await new CopyFromStreams().Work(streams, provider, progress, token);
                 }
                 return false;
             }
-        }
 
-        private sealed class CopyFromFiles {
-            public async Task<bool> Work(IEnumerable<string> files, IProvider target, IOperationProgress progress, CancellationToken token) {
-                if (target is not ZipProvider provider) {
-                    return false;
-                }
-                var list = files?.Where(file => !string.IsNullOrWhiteSpace(file))?.ToList();
-                if (list == null) return false;
-                if (list.Count == 0) {
-                    return false;
-                }
-                if (progress != null) {
-                    progress.Change(addTarget: list.Count);
-                }
-                var zipFiles = await Task.Run(cancellationToken: token, function: () => {
-                    var fileIsDir = list.Count == 1;
-                    var fileInfos = list.SelectMany(item => {
-                        if (token.IsCancellationRequested) {
-                            token.ThrowIfCancellationRequested();
-                        }
-                        if (progress != null) {
-                            progress.Change(data: Path.GetFileName(item));
-                            progress.Change(1);
-                        }
-                        var infos = Array.Empty<FileInfo>().AsEnumerable();
-                        var f = new FileInfo(item);
-                        if (f.Exists) {
-                            infos = new[] { f };
-                            fileIsDir = false;
-                        }
-                        else {
-                            var d = new DirectoryInfo(item);
-                            if (d.Exists) {
-                                infos = d.EnumerateFiles(searchPattern: "*", searchOption: SearchOption.AllDirectories);
-                            }
-                        }
-                        return infos.Select(f => {
-                            if (token.IsCancellationRequested) {
-                                token.ThrowIfCancellationRequested();
-                            }
-                            if (progress != null) {
-                                progress.Change(data: f.Name);
-                            }
-                            return f;
-                        });
+            private sealed class CopyFromFiles {
+                public async Task<bool> Work(IEnumerable<ProvidedFile> files, ZipProvider provider, IOperationProgress progress, CancellationToken token) {
+                    if (null == files) throw new ArgumentNullException(nameof(files));
+                    if (null == provider) throw new ArgumentNullException(nameof(provider));
+                    await provider.Zip.ArchivePath.Update(progress: progress, token: token, info: new() {
+                        CreateEntriesFromFiles = files.ToDictionary(
+                            file => string.IsNullOrWhiteSpace(provider.Zip.RelativePath.Original)
+                                ? file.RelativePath
+                                : string.Join("/", provider.Zip.RelativePath.Original, file.RelativePath),
+                            file => file.OriginalPath)
                     });
-                    var filePaths = fileInfos.Select(f => f.FullName).ToList();
-                    var fileNames = FileSystemPath.SkipCommonOf(filePaths, StringComparer.Ordinal, backtrack: fileIsDir ? 1 : 0).ToList();
-                    var zipFiles = fileNames
-                        .Select(f => new {
-                            Path = f.OriginalPath,
-                            Name = f.RelativePath
-                                .Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                                .Replace(Path.DirectorySeparatorChar, '/')
-                                .Replace(Path.AltDirectorySeparatorChar, '/')
-                        })
-                        .ToList();
-                    return zipFiles;
-                });
-                await provider.Zip.ArchivePath.Update(progress: progress, token: token, info: new() {
-                    CreateEntriesFromFiles = zipFiles.ToDictionary(
-                        file => string.IsNullOrWhiteSpace(provider.Zip.RelativePath.Original)
-                            ? file.Name
-                            : string.Join("/", provider.Zip.RelativePath.Original, file.Name),
-                        file => file.Path)
-                });
-                return true;
-            }
-        }
-
-        private sealed class CopyFromStreams {
-            public async Task<bool> Work(IEnumerable<IEntryStreamSet> entryStreamSets, IProvider target, IOperationProgress progress, CancellationToken token) {
-                var sets = entryStreamSets.Where(s => s is not null)?.ToList();
-                if (sets == null) return false;
-                if (sets.Count == 0) return false;
-                if (target is not ZipProvider provider) {
-                    return false;
+                    return true;
                 }
-                var archive = provider.Zip.ArchivePath;
-                await archive.Update(progress: progress, token: token, info: new ZipArchiveUpdate {
-                    CopyStreamSets = sets
-                });
-                return true;
+            }
+
+            private sealed class CopyFromStreams {
+                public async Task<bool> Work(IEnumerable<IEntryStreamSet> entryStreamSets, ZipProvider provider, IOperationProgress progress, CancellationToken token) {
+                    if (null == provider) throw new ArgumentNullException(nameof(provider));
+                    if (null == entryStreamSets) throw new ArgumentNullException(nameof(entryStreamSets));
+                    var sets = entryStreamSets.Where(s => s is not null)?.ToList();
+                    if (sets == null) return false;
+                    if (sets.Count == 0) return false;
+                    var archive = provider.Zip.ArchivePath;
+                    await archive.Update(progress: progress, token: token, info: new ZipArchiveUpdate {
+                        CopyStreamSets = sets
+                    });
+                    return true;
+                }
             }
         }
     }

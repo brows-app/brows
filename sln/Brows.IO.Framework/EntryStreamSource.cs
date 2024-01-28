@@ -37,8 +37,8 @@ namespace Brows {
         public abstract long StreamLength { get; }
         public abstract string RelativePath { get; }
 
-        public virtual bool StreamValid => true;
         public virtual string SourceFile => null;
+        public virtual string SourceDirectory => null;
 
         Stream IEntryStreamSource.Stream() {
             return Stream(@private: true);

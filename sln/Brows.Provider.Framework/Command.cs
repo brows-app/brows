@@ -203,7 +203,7 @@ namespace Brows {
 
         public override string HelpLine =>
             _HelpLine ?? (
-            _HelpLine = Cli.Display<TParameter>(default).Split(new[] { ' ' }, 2).LastOrDefault());
+            _HelpLine = Cli.Display(new TParameter()).Split([' '], 2).LastOrDefault());
         private string _HelpLine;
 
         protected virtual TParameter ParameterFactory(string parameter, string conf) {

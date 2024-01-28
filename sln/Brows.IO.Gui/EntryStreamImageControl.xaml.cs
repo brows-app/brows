@@ -18,11 +18,7 @@ namespace Brows {
                 Log.Info(nameof(ConsumeSource));
             }
             var stream = EntryStreamGui;
-            if (stream?.Source?.StreamValid != true) {
-                Image.Source = null;
-                return false;
-            }
-            var lengthMax = stream.Options?.ImageSourceLengthMax;
+            var lengthMax = stream?.Options?.ImageSourceLengthMax;
             if (lengthMax.HasValue && lengthMax.Value < stream.Source.StreamLength) {
                 Image.Source = null;
                 return false;
@@ -31,7 +27,7 @@ namespace Brows {
             var image = default(ImageSource);
             try {
                 image = await stream.Source.Image(token);
-                return true;
+                return image != null;
             }
             catch (Exception ex) {
                 if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
@@ -58,7 +54,6 @@ namespace Brows {
                 Log.Info(nameof(Image_Loaded));
             }
             await ChangeEntryStreamGui();
-
         }
 
         private void Image_Unloaded(object sender, RoutedEventArgs e) {
