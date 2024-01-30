@@ -46,7 +46,6 @@ namespace Brows {
         }
 
         private sealed class StreamText : IStreamText {
-            public bool StreamValid => Source.StreamValid;
             public long StreamLength => Source.StreamLength;
 
             public IEntryStreamSource Source { get; }

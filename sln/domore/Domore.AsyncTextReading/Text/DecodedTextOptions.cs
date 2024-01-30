@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Domore.Buffers;
+using Domore.IO;
+using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Domore.Text {
-    using Buffers;
-    using IO;
-    using Logs;
-
     public class DecodedTextOptions {
         private static readonly ILog Log = Logging.For(typeof(DecodedTextOptions));
         private readonly List<BufferPool> Pools = new();

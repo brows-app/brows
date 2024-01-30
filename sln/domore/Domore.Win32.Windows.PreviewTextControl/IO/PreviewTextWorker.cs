@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Domore.IO.Extensions;
+using Domore.Logs;
+using Domore.Text;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.IO {
-    using Extensions;
-    using Logs;
-    using Text;
-
     internal class PreviewTextWorker {
         private static readonly ILog Log = Logging.For(typeof(PreviewTextWorker));
 
@@ -22,9 +21,6 @@ namespace Domore.IO {
             var sourceLengthMax = SourceLengthMax;
             try {
                 return await Task.Run(cancellationToken: cancellationToken, function: async () => {
-                    if (source.StreamValid == false) {
-                        return null;
-                    }
                     if (sourceLengthMax.HasValue) {
                         var length = source.StreamLength;
                         if (length > sourceLengthMax.Value) {

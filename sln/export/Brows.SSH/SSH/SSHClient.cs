@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.SSH {
-    internal abstract class SSHClient : Notifier, IAsyncDisposable {
+    internal abstract class SSHClient : SSHClientBase, IAsyncDisposable {
         private static readonly ILog Log = Logging.For(typeof(SSHClient));
 
         private int ProviderCount;
@@ -107,7 +107,7 @@ namespace Brows.SSH {
             }
         }
 
-        public async IAsyncEnumerable<SSHFileInfo> ListFilesRecursively(Uri uri, [EnumeratorCancellation] CancellationToken token) {
+        public async IAsyncEnumerable<SSHFileInfo> ListRecursively(Uri uri, [EnumeratorCancellation] CancellationToken token) {
             var list = List(uri, token);
             await foreach (var item in list) {
                 switch (item.Kind) {
@@ -115,10 +115,11 @@ namespace Brows.SSH {
                         yield return item;
                         break;
                     case SSHEntryKind.Directory:
+                        yield return item;
                         var
                         urib = new UriBuilder(uri);
                         urib.Path = item.Path;
-                        await foreach (var i in ListFilesRecursively(urib.Uri, token)) {
+                        await foreach (var i in ListRecursively(urib.Uri, token)) {
                             yield return i;
                         }
                         break;

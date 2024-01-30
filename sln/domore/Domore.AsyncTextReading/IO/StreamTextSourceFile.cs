@@ -6,9 +6,6 @@ namespace Domore.IO {
         public sealed override long StreamLength =>
             FileInfo.Length;
 
-        public sealed override bool StreamValid =>
-            FileInfo.Exists;
-
         public FileInfo FileInfo { get; }
 
         public StreamTextSourceFile(FileInfo fileInfo) {

@@ -2,4 +2,7 @@
     <PropertyGroup>
         <NoWarn>CS8981</NoWarn>
     </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Domore.Logs" Version="8.0.2.92" />
+    </ItemGroup>
 </Project>

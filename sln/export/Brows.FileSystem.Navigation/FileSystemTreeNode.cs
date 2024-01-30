@@ -147,8 +147,8 @@ namespace Brows {
             public string EntryName => Node.Name;
             public string RelativePath => Node.Info?.Name;
             public string SourceFile => Node.Info?.FullName;
+            public string SourceDirectory => null;
             public long StreamLength => 0;
-            public bool StreamValid => false;
 
             public FileSystemTreeNode Node { get; }
 

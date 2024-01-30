@@ -4,9 +4,12 @@ using System.IO;
 namespace Brows {
     internal sealed class FileSystemStreamSource : EntryStreamSource<FileSystemEntry> {
         protected sealed override Stream Stream() {
-            var file = Entry.Info as FileInfo;
-            if (file == null) throw new InvalidOperationException();
-            return file.OpenRead();
+            if (Entry.Info is FileInfo file) {
+                if (file.Exists) {
+                    return file.OpenRead();
+                }
+            }
+            return null;
         }
 
         public sealed override string SourceFile =>
@@ -19,10 +22,6 @@ namespace Brows {
             Entry.Info is FileInfo file
                 ? file.Length
                 : 0;
-
-        public sealed override bool StreamValid =>
-            Entry.Info is FileInfo file &&
-            file.Exists;
 
         public FileSystemStreamSource(FileSystemEntry entry) : base(entry) {
         }
