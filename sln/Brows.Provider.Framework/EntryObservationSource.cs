@@ -12,6 +12,13 @@ namespace Brows {
             SelectionChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        private void Entry_Drop(object sender, EntryDropEventArgs e) {
+            if (e != null) {
+                Drop = e.Drop;
+                Drop = null;
+            }
+        }
+
         private void Entry_Selected(object sender, EntrySelectedEventArgs e) {
             Selected(sender as IEntry);
         }
@@ -33,6 +40,7 @@ namespace Brows {
 
         private void Initialize(IEntry entry) {
             if (null == entry) throw new ArgumentNullException(nameof(entry));
+            entry.Drop += Entry_Drop;
             entry.Selected += Entry_Selected;
             Selected(entry);
         }
@@ -42,14 +50,29 @@ namespace Brows {
             if (Select.Remove(entry)) {
                 SelectChanged();
             }
+            if (Drop == entry) {
+                Drop = null;
+            }
+            entry.Drop -= Entry_Drop;
             entry.Selected -= Entry_Selected;
         }
 
+        public event EventHandler DropChanged;
         public event EventHandler SelectionChanged;
         public event EventHandler ObservationChanged;
 
         public object Items =>
             Collection;
+
+        public IPanelDrop Drop {
+            get => _Drop;
+            private set {
+                if (Change(ref _Drop, value, nameof(Drop))) {
+                    DropChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+        private IPanelDrop _Drop;
 
         public IReadOnlyList<IEntry> Observation =>
             Collection;
@@ -82,6 +105,7 @@ namespace Brows {
         }
 
         public void End() {
+            DropChanged = null;
             SelectionChanged = null;
             ObservationChanged = null;
         }

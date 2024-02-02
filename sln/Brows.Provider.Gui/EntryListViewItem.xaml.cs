@@ -1,3 +1,5 @@
+using Brows.Gui;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -54,6 +56,14 @@ namespace Brows {
                 }
             }
             base.OnMouseUp(e);
+        }
+
+        protected override void OnDrop(DragEventArgs e) {
+            if (DataContext is Entry entry) {
+                entry.Drop(new ProviderDrop(entry, e));
+                e.Handled = true;
+            }
+            base.OnDrop(e);
         }
 
         public EntryListView ParentListView {

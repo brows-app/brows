@@ -190,12 +190,17 @@ namespace Brows {
             }
         }
 
-        protected sealed override Task<bool> Drop(IPanelDrop data, IOperationProgress operationProgress, CancellationToken token) {
+        protected sealed override async Task<bool> Drop(IPanelDrop data, IOperationProgress operationProgress, CancellationToken token) {
             var service = Factory.DropDirectoryInfoData;
             if (service != null) {
-                return service.Work(Directory, data, operationProgress, token);
+                if (data != null) {
+                    var directory = data.Target is FileSystemEntry e && e.Info is DirectoryInfo d
+                        ? d
+                        : Directory;
+                    return await service.Work(directory, data, operationProgress, token);
+                }
             }
-            return Task.FromResult(false);
+            return false;
         }
 
         protected sealed override void Dispose(bool disposing) {

@@ -37,6 +37,7 @@ cmd[Operations]                     .input                      = !
 cmd[Operations]                     .press[1+SHIFT]             = *
 cmd[Operations]                     .press[1+SHIFT+CTRL]        = * clearerrors=true
 cmd[Palette]                        .press[CTRL+L]              = *
+cmd[Palette]                        .press[CTRL+SHIFT+L]        = * show=providerid
 cmd[PanelAdd]                       .input                      = panel-add|pa
 cmd[PanelAdd]                       .press[CTRL+N]              = * from=activepanel
 cmd[PanelShift]                     .input                      = panel-shift|ps

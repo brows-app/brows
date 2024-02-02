@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Brows {
     internal abstract class EntryObservation : Notifier, IEntryObservation, IProviderFocus, ICommandSourceObject, IControlled<IEntryObservationController> {
+        private static readonly PropertyChangedEventArgs DropEvent = new(nameof(Drop));
         private static readonly PropertyChangedEventArgs CurrentEvent = new(nameof(Current));
         private static readonly PropertyChangedEventArgs ObservedEvent = new(nameof(Observed));
         private static readonly PropertyChangedEventArgs SelectedEvent = new(nameof(Selected));
@@ -19,6 +20,11 @@ namespace Brows {
         private void Controller_CurrentEntryChanged(object sender, EventArgs e) {
             CurrentChanged?.Invoke(this, e);
             NotifyPropertyChanged(CurrentEvent);
+        }
+
+        private void Collection_DropChanged(object sender, EventArgs e) {
+            DropChanged?.Invoke(this, e);
+            NotifyPropertyChanged(DropEvent);
         }
 
         private void Collection_ObservationChanged(object sender, EventArgs e) {
@@ -55,12 +61,14 @@ namespace Brows {
             get {
                 if (_Collection == null) {
                     _Collection = new();
+                    _Collection.DropChanged += Collection_DropChanged;
                     _Collection.SelectionChanged += Collection_SelectionChanged;
                     _Collection.ObservationChanged += Collection_ObservationChanged;
                 }
                 return _Collection;
             }
         }
+
         private EntryObservationSource _Collection;
 
         protected async Task Add(IEnumerable<IEntry> items, int count) {
@@ -144,6 +152,7 @@ namespace Brows {
             }
         }
 
+        public event EventHandler DropChanged;
         public event EventHandler SortingChanged;
         public event EventHandler CurrentChanged;
         public event EventHandler SelectedChanged;
@@ -180,6 +189,9 @@ namespace Brows {
         public IReadOnlyList<IEntry> Sorting =>
             SortingList;
 
+        public IPanelDrop Drop =>
+            Collection.Drop;
+
         public IReadOnlySet<IEntry> Selected =>
             Collection.Selection;
 
@@ -209,6 +221,7 @@ namespace Brows {
             CurrentChanged = null;
             SelectedChanged = null;
             ObservedChanged = null;
+            Collection.DropChanged -= Collection_DropChanged;
             Collection.SelectionChanged -= Collection_SelectionChanged;
             Collection.ObservationChanged -= Collection_ObservationChanged;
             Collection.Clear();

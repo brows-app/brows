@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Windows;
 
-namespace Brows.Gui {
-    internal sealed class PanelDrop : IPanelDrop {
+namespace Brows {
+    public sealed class ProviderDrop : IPanelDrop {
         private IEnumerable<string> GetFiles() {
             var data = Drag.Data;
             if (data == null) yield break;
@@ -33,9 +33,11 @@ namespace Brows.Gui {
                 ? Files
                 : Array.Empty<string>();
 
+        public object Target { get; }
         public DragEventArgs Drag { get; }
 
-        public PanelDrop(DragEventArgs drag) {
+        public ProviderDrop(object target, DragEventArgs drag) {
+            Target = target;
             Drag = drag ?? throw new ArgumentNullException(nameof(drag));
         }
     }

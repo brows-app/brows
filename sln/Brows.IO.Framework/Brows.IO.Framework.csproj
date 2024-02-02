@@ -2,7 +2,7 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Domore.Notification" Version="8.0.2.92" />
+      <PackageReference Include="Domore.Notification" Version="8.0.3.93" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />

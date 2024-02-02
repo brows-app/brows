@@ -3,9 +3,9 @@ using System.Windows;
 using System.Windows.Input;
 
 namespace Brows.Gui {
-    internal class PanelController : Controller<IPanelController>, IPanelController {
+    internal sealed class PanelController : Controller<IPanelController>, IPanelController {
         private void UserControl_Drop(object sender, DragEventArgs e) {
-            Dropped = new PanelDrop(e);
+            Dropped = new ProviderDrop(Element.DataContext, e);
             Drop?.Invoke(this, e);
             Dropped = null;
         }

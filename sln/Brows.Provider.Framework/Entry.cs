@@ -10,6 +10,7 @@ namespace Brows {
         private static readonly ILog Log = Logging.For(typeof(Entry));
         private static readonly PropertyChangedEventArgs SelectEventArgs = new(nameof(Select));
 
+        private event EntryDropEventHandler DropEvent;
         private event EntrySelectedEventHandler SelectedEvent;
         private event EntryRefreshedEventHandler RefreshedEvent;
 
@@ -17,6 +18,10 @@ namespace Brows {
             _DataInstance ?? (
             _DataInstance = new EntryDataInstance(this, Provider.Data.Definition, Provider.Token));
         private EntryDataInstance _DataInstance;
+
+        internal void Drop(IPanelDrop drop) {
+            DropEvent?.Invoke(this, new EntryDropEventArgs(drop));
+        }
 
         protected internal CancellationToken Token =>
             Provider.Token;
@@ -58,6 +63,11 @@ namespace Brows {
 
         public override string ToString() {
             return ID;
+        }
+
+        event EntryDropEventHandler IEntry.Drop {
+            add => DropEvent += value;
+            remove => DropEvent -= value;
         }
 
         event EntrySelectedEventHandler IEntry.Selected {

@@ -27,6 +27,25 @@ namespace Brows {
             State = PanelState.For(this);
         }
 
+        private void Drop(IPanelDrop data) {
+            var provider = Provider;
+            if (provider != null) {
+                var op = Commander.Operator;
+                if (op != null) {
+                    op.Operate("Drop", async (progress, token) => {
+                        await provider.Drop(data, progress, token);
+                    });
+                }
+            }
+        }
+
+        private void EntryObservation_DropChanged(object sender, EventArgs e) {
+            var drop = Provider?.Observation?.Drop;
+            if (drop != null) {
+                Drop(drop);
+            }
+        }
+
         private void EntryObservation_SortingChanged(object sender, EventArgs e) {
             UpdatePanelState();
         }
@@ -60,17 +79,9 @@ namespace Brows {
         }
 
         private void Controller_Drop(object sender, EventArgs e) {
-            var controller = sender as IPanelController;
-            if (controller != null) {
-                var provider = Provider;
-                if (provider != null) {
-                    var op = Commander.Operator;
-                    if (op != null) {
-                        op.Operate("Drop", async (operationProgress, cancellationToken) => {
-                            await provider.Drop(controller.Dropped, operationProgress, cancellationToken);
-                        });
-                    }
-                }
+            var drop = Controller?.Dropped;
+            if (drop != null) {
+                Drop(drop);
             }
         }
 
@@ -102,6 +113,7 @@ namespace Brows {
             var provider = Provider;
             if (provider != null) {
                 using (provider) {
+                    provider.Observation.DropChanged -= EntryObservation_DropChanged;
                     provider.Observation.CurrentChanged -= EntryObservation_CurrentChanged;
                     provider.Observation.SortingChanged -= EntryObservation_SortingChanged;
                     provider.Observation.ObservedChanged -= EntryObservation_ObservedChanged;
@@ -120,6 +132,7 @@ namespace Brows {
             if (Log.Info()) {
                 Log.Info(nameof(Start) + " > " + provider?.GetType()?.Name);
             }
+            provider.Observation.DropChanged += EntryObservation_DropChanged;
             provider.Observation.CurrentChanged += EntryObservation_CurrentChanged;
             provider.Observation.SortingChanged += EntryObservation_SortingChanged;
             provider.Observation.ObservedChanged += EntryObservation_ObservedChanged;

@@ -11,7 +11,7 @@ namespace Brows {
         void Begin();
         void End();
         void Refresh();
-        Task<bool> Drop(IPanelDrop data, IOperationProgress operationProgress, CancellationToken cancellationToken);
+        Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token);
         TExport Import<TExport>() where TExport : IProviderExport;
     }
 }

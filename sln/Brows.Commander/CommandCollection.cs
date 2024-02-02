@@ -1,3 +1,5 @@
+using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -5,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class CommandCollection {
+        private static readonly ILog Log = Logging.For(typeof(CommandCollection));
+
         private readonly List<ICommand> List;
 
         private Dictionary<IGesture, HashSet<ICommand>> GestureSet {
@@ -57,9 +61,18 @@ namespace Brows {
         }
 
         public async Task Init(CancellationToken token) {
-            await Task.WhenAll(List.Select(async item => {
-                await item.Init(token);
+            var tasks = new List<Task>(List.Select(async item => {
+                try {
+                    await item.Init(token);
+                }
+                catch (Exception ex) {
+                    if (Log.Warn()) {
+                        Log.Warn(ex);
+                    }
+                    List.Remove(item);
+                }
             }));
+            await Task.WhenAll(tasks);
         }
 
         public IEnumerable<ICommand> AsEnumerable() {
