@@ -164,6 +164,10 @@ namespace Brows {
         IEntryDataDefinitionSet IProvider.Data =>
             Data.Definition;
 
+        Task IProvider.Refresh(CancellationToken token) {
+            return Refresh(token);
+        }
+
         Task<bool> IProvider.Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(Drop), ID));

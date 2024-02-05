@@ -22,10 +22,12 @@ namespace Brows {
         private static readonly PropertyChangedEventArgs ErrorMessageEvent = new(nameof(ErrorMessage));
         private static readonly PropertyChangedEventArgs ErrorEvent = new(nameof(Error));
         private static readonly PropertyChangedEventArgs TargetEvent = new(nameof(Target));
+        private static readonly PropertyChangedEventArgs TargetStringEvent = new(nameof(TargetString));
         private static readonly PropertyChangedEventArgs ProgressEvent = new(nameof(Progress));
-        private static readonly PropertyChangedEventArgs[] TargetDependents = new[] { ProgressPercentEvent };
-        private static readonly PropertyChangedEventArgs[] ProgressDependents = new[] { ProgressPercentEvent };
-        private static readonly PropertyChangedEventArgs[] ErrorDependents = new[] { ErrorMessageEvent };
+        private static readonly PropertyChangedEventArgs ProgressStringEvent = new(nameof(ProgressString));
+        private static readonly PropertyChangedEventArgs[] TargetDependents = [ProgressPercentEvent, TargetStringEvent];
+        private static readonly PropertyChangedEventArgs[] ProgressDependents = [ProgressPercentEvent, ProgressStringEvent];
+        private static readonly PropertyChangedEventArgs[] ErrorDependents = [ErrorMessageEvent];
 
         private bool MakingRelevant;
         private Stopwatch Stopwatch;
@@ -35,11 +37,11 @@ namespace Brows {
         private readonly object ProgressLocker = new();
         private readonly object RelevantLocker = new();
 
-        private OperationBase Child(string name, OperationDelegate task) {
+        private OperationBase Child(string name, OperationProgressKind progressKind, OperationDelegate task) {
             if (Log.Info()) {
                 Log.Info(nameof(Child) + " > " + name);
             }
-            var child = new OperationBase(name, this, task);
+            var child = new OperationBase(name, progressKind, this, task);
             ChildCollection.Add(child);
             return child;
         }
@@ -221,6 +223,14 @@ namespace Brows {
         public long Target { get; private set; }
         public long Progress { get; private set; }
         public double ProgressPercent { get; private set; }
+        
+        public string TargetString =>
+            ProgressKind == OperationProgressKind.FileSize ? EntryDataConverter.FileSize.From(Target, null, null) :
+            Target.ToString();
+
+        public string ProgressString =>
+            ProgressKind == OperationProgressKind.FileSize ? EntryDataConverter.FileSize.From(Progress, null, null) :
+            Progress.ToString();
 
         public string Name {
             get => _Name;
@@ -290,16 +300,24 @@ namespace Brows {
         public Task Completion { get; }
         public OperationBase Parent { get; }
         public OperationDelegate Task { get; }
+        public OperationProgressKind ProgressKind { get; }
 
-        public OperationBase(string name, OperationBase parent, OperationDelegate task) {
+        public OperationBase(string name, OperationProgressKind progressKind, OperationBase parent, OperationDelegate task) {
             Task = task ?? throw new ArgumentNullException(nameof(task));
             Name = name;
             Parent = parent;
             Depth = Parent == null ? 0 : (Parent.Depth + 1);
+            ProgressKind = progressKind;
             Completion = Operate();
         }
 
+        public OperationBase(string name, OperationBase parent, OperationDelegate task) : this(name, OperationProgressKind.None, parent, task) {
+        }
+
         private sealed class ProgressWrapper : IOperationProgress {
+            public OperationProgressKind Kind =>
+                Operation.ProgressKind;
+
             public OperationBase Operation { get; }
 
             public ProgressWrapper(OperationBase operation) {
@@ -316,8 +334,8 @@ namespace Brows {
                 Operation.ChangeProgress(addProgress: addProgress, setProgress: setProgress, addTarget: addTarget, setTarget: setTarget);
             }
 
-            public void Child(string name, OperationDelegate task) {
-                Operation.Child(name, task);
+            public void Child(string name, OperationProgressKind kind, OperationDelegate task) {
+                Operation.Child(name, kind, task);
             }
         }
     }

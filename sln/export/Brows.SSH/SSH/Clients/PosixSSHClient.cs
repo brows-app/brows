@@ -44,10 +44,11 @@ namespace Brows.SSH.Clients {
         }
 
         public sealed override async Task Delete(SSHFileInfo item, CancellationToken token) {
-            ArgumentNullException.ThrowIfNull(item);
+            if (null == item) throw new ArgumentNullException(nameof(item));
+            var esc = item.Path?.Replace("\"", "\\\"");
             var cmd =
-                item.Kind == SSHEntryKind.File ? $"rm -f {item.Path}" :
-                item.Kind == SSHEntryKind.Directory ? $"rm -rf {item.Path}" :
+                item.Kind == SSHEntryKind.File ? $"rm -f \"{esc}\"" :
+                item.Kind == SSHEntryKind.Directory ? $"rm -rf \"{esc}\"" :
                 null;
             if (cmd == null) {
                 return;
@@ -55,6 +56,26 @@ namespace Brows.SSH.Clients {
             var outp = SSH(cmd, token);
             await foreach (var @out in outp) {
             }
+        }
+
+        public sealed override async Task<string> CheckSum(string hash, SSHFileInfo item, CancellationToken token) {
+            if (null == hash) throw new ArgumentNullException(nameof(hash));
+            if (null == item) throw new ArgumentNullException(nameof(item));
+            if (item.Kind == SSHEntryKind.File) {
+                var esc = item.Path?.Replace("\"", "\\\"");
+                var sum = $"{hash.ToLowerInvariant()}sum";
+                var cmd = $"{sum} \"{esc}\"";
+                var outp = SSH(cmd, token);
+                await foreach (var s in outp) {
+                    if (s.Kind == SSHClientOutputKind.StdOut) {
+                        var parts = s.Content?.Split();
+                        if (parts.Length > 0) {
+                            return parts[0];
+                        }
+                    }
+                }
+            }
+            return "";
         }
 
         private sealed class EntryInfo : SSHFileInfo {

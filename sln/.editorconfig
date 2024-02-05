@@ -268,7 +268,7 @@ dotnet_style_qualification_for_method = false:silent
 dotnet_style_qualification_for_event = false:silent
 dotnet_diagnostic.CA1510.severity = none
 
-[*.{xml,xaml,html,cshtml,csproj}]
+[*.{xml,xaml,html,cshtml,csproj,props}]
 tab_width = 4
 indent_size = 2
 indent_style = space

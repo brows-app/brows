@@ -14,7 +14,7 @@ namespace Brows.SSH {
     internal sealed class SSHClientSession : Notifier, IAsyncDisposable {
         private static readonly ILog Log = Logging.For(typeof(SSHClientSession));
 
-        private readonly SemaphoreSlim Locker = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim Locker = new(1, 1);
 
         private TaskCache<Conn>.WithRefresh Conn =>
             _Conn ?? (
@@ -29,10 +29,9 @@ namespace Brows.SSH {
         }
 
         private void Unlock() {
-            if (Disposed) {
-                throw new ObjectDisposedException(objectName: nameof(SSHClientSession));
+            if (Disposed == false) {
+                Locker.Release();
             }
-            Locker.Release();
         }
 
         private async Task<T> Lock<T>(Func<CancellationToken, Task<T>> task, CancellationToken token) {
@@ -172,7 +171,7 @@ namespace Brows.SSH {
             }
             await Lock(token);
             var conn = await Conn.Ready(token);
-            var 
+            var
             recv = new ScpRecv(conn, path);
             recv.Disposed += (s, e) => {
                 if (Log.Info()) {

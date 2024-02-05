@@ -48,8 +48,8 @@
             <TextBlock Grid.Column="0" Text="{Binding DepthString}" TextAlignment="Right"/>
             <TextBlock Grid.Column="1" Text="{Binding Name}"/>
             <TextBlock Grid.Column="2" Text="{Binding Data}"/>
-            <TextBlock Grid.Column="3" Text="{Binding Progress}"/>
-            <TextBlock Grid.Column="4" Text="{Binding Target}"/>
+            <TextBlock Grid.Column="3" Text="{Binding ProgressString}"/>
+            <TextBlock Grid.Column="4" Text="{Binding TargetString}"/>
             <local:OperationProgressBar 
                 Grid.Column="5" 
                 Maximum="100" 

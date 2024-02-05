@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Brows {
+namespace Brows.Data {
     internal static class SSHEntryData {
         public sealed class Length : Definition<long?> {
             public Length() : base(i => i.Kind == SSHEntryKind.File ? i.Length : null) {

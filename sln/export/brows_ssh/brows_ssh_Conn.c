@@ -3,9 +3,9 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 struct brows_ssh_Conn {
-    brows_ssh_Host                  host;
-    brows_ssh_HostFamily            host_family;
-    brows_ssh_Port                  port;
+    int64_t                         host;
+    int32_t                         host_family;
+    int32_t                         port;
     char*                           username;
     char*                           fingerprint;
     const char*                     fingerprint_hash_func;
@@ -169,18 +169,18 @@ brows_ERROR brows_ssh_Conn_connect(brows_ssh_Conn* p, brows_Canceler* cancel) {
     if (p->session != NULL) {
         return brows_ERROR_SSH_CONN_SESSION_EXISTS;
     }
-    brows_ssh_Port port = p->port;
+    USHORT port = htons(p->port);
     if (port < 0 || port > UINT16_MAX) {
         return brows_ssh_ERROR_PORT_OUT_OF_RANGE;
     }
     if (port == 0) {
         port = 22;
     }
-    brows_ssh_HostFamily host_family = p->host_family;
+    int32_t host_family = p->host_family;
     if (host_family < 0 || host_family > UINT16_MAX) {
         return brows_ssh_ERROR_HOST_FAMILY_OUT_OF_RANGE;
     }
-    brows_ssh_Host host = p->host;
+    ULONG host = (ULONG)p->host;
     if (host < 0 || host > UINT32_MAX) {
         return brows_ssh_ERROR_HOST_OUT_OF_RANGE;
     }
@@ -200,7 +200,7 @@ brows_ERROR brows_ssh_Conn_connect(brows_ssh_Conn* p, brows_Canceler* cancel) {
 
     struct sockaddr_in sin = { 0 };
     sin.sin_family = host_family;
-    sin.sin_port = htons(port);
+    sin.sin_port = port;
     sin.sin_addr.s_addr = (ULONG)host;
 
     int connected = connect(p->socket, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in));
@@ -337,17 +337,17 @@ const char* brows_ssh_Conn_get_fingerprint_hash_func(brows_ssh_Conn* p) {
     return p->fingerprint_hash_func;
 }
 
-brows_ssh_Host brows_ssh_Conn_get_host(brows_ssh_Conn* p) {
+int64_t brows_ssh_Conn_get_host(brows_ssh_Conn* p) {
     assert(p);
     return p->host;
 }
 
-brows_ssh_HostFamily brows_ssh_Conn_get_host_family(brows_ssh_Conn* p) {
+int32_t brows_ssh_Conn_get_host_family(brows_ssh_Conn* p) {
     assert(p);
     return p->host_family;
 }
 
-brows_ssh_Port brows_ssh_Conn_get_port(brows_ssh_Conn* p) {
+int32_t brows_ssh_Conn_get_port(brows_ssh_Conn* p) {
     assert(p);
     return p->port;
 }
@@ -357,19 +357,19 @@ brows_ssh_Username brows_ssh_Conn_get_username(brows_ssh_Conn* p) {
     return p->username;
 }
 
-brows_ERROR brows_ssh_Conn_set_host(brows_ssh_Conn* p, brows_ssh_Host v) {
+brows_ERROR brows_ssh_Conn_set_host(brows_ssh_Conn* p, int64_t v) {
     assert(p);
     p->host = v;
     return brows_ERROR_NONE;
 }
 
-brows_ERROR brows_ssh_Conn_set_host_family(brows_ssh_Conn* p, brows_ssh_HostFamily v) {
+brows_ERROR brows_ssh_Conn_set_host_family(brows_ssh_Conn* p, int32_t v) {
     assert(p);
     p->host_family = v;
     return brows_ERROR_NONE;
 }
 
-brows_ERROR brows_ssh_Conn_set_port(brows_ssh_Conn* p, brows_ssh_Port v) {
+brows_ERROR brows_ssh_Conn_set_port(brows_ssh_Conn* p, int32_t v) {
     assert(p);
     p->port = v;
     return brows_ERROR_NONE;

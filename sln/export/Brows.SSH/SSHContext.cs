@@ -5,16 +5,6 @@ using System.Linq;
 
 namespace Brows {
     public static class SSHContext {
-        public static bool HasSSHClient(this ICommandContext commandContext, out SSHClientBase sshClient) {
-            if (null == commandContext) throw new ArgumentNullException(nameof(commandContext));
-            if (true == commandContext.HasPanel(out var active) && active.HasProvider(out SSHProvider provider)) {
-                sshClient = provider.ClientReady();
-                return sshClient != null;
-            }
-            sshClient = null;
-            return false;
-        }
-
         public static bool HasSourceSSHFileInfo(this ICommandContext commandContext, out SSHFileInfo item, out IReadOnlyList<SSHFileInfo> list) {
             if (null == commandContext) throw new ArgumentNullException(nameof(commandContext));
             if (false == commandContext.HasSource<SSHEntry>(out var entry, out var entries)) {

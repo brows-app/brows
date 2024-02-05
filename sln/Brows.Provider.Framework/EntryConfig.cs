@@ -49,6 +49,12 @@ namespace Brows {
         }
         private ObservationConfig _Observe;
 
+        public DelayedRefreshConfig DelayedRefresh {
+            get => _DelayedRefresh ??= new();
+            set => _DelayedRefresh = value;
+        }
+        private DelayedRefreshConfig _DelayedRefresh;
+
         public class ObservationConfig {
             public ChunkConfig Add {
                 get => _Add ?? (_Add = new());
@@ -66,6 +72,10 @@ namespace Brows {
         public class ChunkConfig {
             public int Size { get; set; } = 1000;
             public int Delay { get; set; } = 10;
+        }
+
+        public class DelayedRefreshConfig {
+            public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(2.5);
         }
     }
 }

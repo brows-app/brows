@@ -63,7 +63,7 @@ namespace Brows {
             }
         }
 
-        private static class FileSize {
+        internal static class FileSize {
             public static string From(long fileLength, string format, IFormatProvider formatProvider) {
                 string frmt = string.IsNullOrWhiteSpace(format) ? null : format;
                 string unit;

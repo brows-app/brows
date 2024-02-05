@@ -2,6 +2,7 @@
 using Brows.SCP;
 using Brows.SSH;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,6 +32,10 @@ namespace Brows {
             await foreach (var item in List(token)) {
                 await Provide(item);
             }
+        }
+
+        protected sealed override Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
+            return base.Drop(data, progress, token);
         }
 
         public SSHProvider(SSHProviderFactory factory, Uri uri, object icon) : base(factory, uri, icon) {
@@ -103,8 +108,10 @@ namespace Brows {
                     var items = files.Select(file => new FileItem(provider, file)).Where(item => !string.IsNullOrWhiteSpace(item.DestinationPath)).ToList();
                     var dests = items.Select(item => item.DestinationDirectory).Where(dest => !string.IsNullOrWhiteSpace(dest)).Distinct();
                     var client = await provider.Client.Ready(token);
+                    var refresh = new ProviderDelayedRefresh(provider);
                     foreach (var dest in dests) {
                         await client.CreateDirectory(dest, token);
+                        await refresh.Work(token);
                     }
                     foreach (var item in items) {
                         await Task.Run(cancellationToken: token, function: async () => {
@@ -112,14 +119,31 @@ namespace Brows {
                             var source = item.OriginalPath;
                             var sourceFile = new FileInfo(source);
                             if (sourceFile.Exists) {
-                                var destination = item.DestinationPath;
-                                using var scpSend = await client.SCPSend(destination, config.Scp.Mode, sourceFile.Length, token);
-                                using var scpSendStream = scpSend.Stream();
-                                await using var stream = sourceFile.OpenRead();
-                                await stream.CopyToAsync(scpSendStream, token);
+                                progress.Child(sourceFile.Name, OperationProgressKind.FileSize, async (progress, token) => {
+                                    progress.Change(setTarget: sourceFile.Length);
+                                    var destination = item.DestinationPath;
+                                    using var scpSend = await client.SCPSend(destination, config.Scp.Mode, sourceFile.Length, token);
+                                    using var scpSendStream = scpSend.Stream();
+                                    await using var stream = sourceFile.OpenRead();
+                                    var bufferSize = 81920;
+                                    if (bufferSize > sourceFile.Length) {
+                                        bufferSize = (int)sourceFile.Length;
+                                    }
+                                    var buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+                                    for (; ; ) {
+                                        var read = await stream.ReadAsync(buffer, token);
+                                        if (read == 0) {
+                                            break;
+                                        }
+                                        await scpSendStream.WriteAsync(buffer, offset: 0, count: read, token);
+                                        progress.Change(read);
+                                    }
+                                });
                             }
                         });
+                        await refresh.Work(token);
                     }
+                    await refresh.Work(final: true, token);
                     return true;
                 }
 
