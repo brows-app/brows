@@ -129,14 +129,20 @@ namespace Brows {
                                     if (bufferSize > sourceFile.Length) {
                                         bufferSize = (int)sourceFile.Length;
                                     }
-                                    var buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-                                    for (; ; ) {
-                                        var read = await stream.ReadAsync(buffer, token);
-                                        if (read == 0) {
-                                            break;
+                                    var pool = ArrayPool<byte>.Shared;
+                                    var buffer = pool.Rent(bufferSize);
+                                    try {
+                                        for (; ; ) {
+                                            var read = await stream.ReadAsync(buffer, token);
+                                            if (read == 0) {
+                                                break;
+                                            }
+                                            await scpSendStream.WriteAsync(buffer, offset: 0, count: read, token);
+                                            progress.Change(read);
                                         }
-                                        await scpSendStream.WriteAsync(buffer, offset: 0, count: read, token);
-                                        progress.Change(read);
+                                    }
+                                    finally {
+                                        pool.Return(buffer);
                                     }
                                 });
                             }

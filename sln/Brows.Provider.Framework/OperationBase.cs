@@ -225,11 +225,11 @@ namespace Brows {
         public double ProgressPercent { get; private set; }
         
         public string TargetString =>
-            ProgressKind == OperationProgressKind.FileSize ? EntryDataConverter.FileSize.From(Target, null, null) :
+            ProgressKind == OperationProgressKind.FileSize ? EntryDataConverter.FileSize.From(Target, "0.00", null) :
             Target.ToString();
 
         public string ProgressString =>
-            ProgressKind == OperationProgressKind.FileSize ? EntryDataConverter.FileSize.From(Progress, null, null) :
+            ProgressKind == OperationProgressKind.FileSize ? EntryDataConverter.FileSize.From(Progress, "0.00", null) :
             Progress.ToString();
 
         public string Name {
