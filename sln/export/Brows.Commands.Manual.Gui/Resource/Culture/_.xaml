@@ -1,40 +1,93 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <CompositeCollection x:Key="Manual_TextCollection">
-        <TextBlock>
+  <CompositeCollection x:Key="Manual_TextCollection">
+    <TextBlock>
             <Run Text="Brows" FontWeight="Bold"/>
             <Run Text="is a file manager for power users."/>
-        </TextBlock>
-        <TextBlock>
+    </TextBlock>
+    <TextBlock>
             <Run Text="Control+N" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
             <Run Text="opens a new panel."/>
-        </TextBlock>
-        <TextBlock>
+    </TextBlock>
+    <TextBlock>
             <Run Text="Tab" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
             <Run Text="cycles through panels."/>
-        </TextBlock>
-        <TextBlock>
+    </TextBlock>
+    <TextBlock>
             <Run Text="Control+L" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
             <Run Text="launches the command palette. From there, type commands or paths to navigate the file system."/>
-        </TextBlock>
-        <Border/>
-        <TextBlock FontWeight="Bold">
-            LICENSE
-        </TextBlock>
-        <TextBlock/>
-        <TextBlock>
+    </TextBlock>
+    <Border/>
+    <TextBlock FontWeight="Bold">
+      BROWS LICENSE
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
             Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-        </TextBlock>
-        <TextBlock/>
-        <TextBlock>
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
             The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-        </TextBlock>
-        <TextBlock/>
-        <TextBlock>
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
             THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-        </TextBlock>
-    </CompositeCollection>
-    <DataTemplate x:Key="CommandContextHint_CommanderManualData">
-        <Control Template="{DynamicResource CommandContextDataGesture_Hint_Down_Up}"/>
-    </DataTemplate>
+    </TextBlock>
+    <Border/>
+    <TextBlock FontWeight="Bold">
+      LIBSSH2 LICENSE
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock><Run Text="Copyright (c) 2004-2007 Sara Golemon &lt;sarag@libssh2.org&gt;"/></TextBlock>
+    <TextBlock><Run Text="Copyright (c) 2005,2006 Mikhail Gusarov &lt;dottedmag@dottedmag.net&gt;"/></TextBlock>
+    <TextBlock><Run Text="Copyright (c) 2006-2007 The Written Word, Inc."/></TextBlock>
+    <TextBlock><Run Text="Copyright (c) 2007 Eli Fant &lt;elifantu@mail.ru&gt;"/></TextBlock>
+    <TextBlock><Run Text="Copyright (c) 2009-2023 Daniel Stenberg"/></TextBlock>
+    <TextBlock><Run Text="Copyright (C) 2008, 2009 Simon Josefsson"/></TextBlock>
+    <TextBlock><Run Text="Copyright (c) 2000 Markus Friedl"/></TextBlock>
+    <TextBlock><Run Text="Copyright (c) 2015 Microsoft Corp."/></TextBlock>
+    <TextBlock><Run Text="All rights reserved."/></TextBlock>
+    <TextBlock/>
+    <TextBlock>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</TextBlock>
+    <TextBlock/>
+    <TextBlock>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</TextBlock>
+    <TextBlock/>
+    <TextBlock>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</TextBlock>
+    <TextBlock/>
+    <TextBlock>Neither the name of the copyright holder nor the names of any other contributors may be used to endorse or promote products derived from this software without specific prior written permission.</TextBlock>
+    <TextBlock/>
+    <TextBlock>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</TextBlock>
+    <Border/>
+    <TextBlock FontWeight="Bold">
+      OPENSSL LICENSE
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock HorizontalAlignment="Center">Apache License</TextBlock>
+    <TextBlock HorizontalAlignment="Center">Version 2.0, January 2004</TextBlock>
+    <TextBlock HorizontalAlignment="Center">https://www.apache.org/licenses/</TextBlock>
+    <Border/>
+    <TextBlock FontWeight="Bold">
+      ZLIB LICENSE
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>Copyright notice:</TextBlock>
+    <TextBlock/>
+    <TextBlock>(C) 1995-2022 Jean-loup Gailly and Mark Adler</TextBlock>
+    <TextBlock/>
+    <TextBlock>This software is provided 'as-is', without any express or implied warranty.  In no event will the authors be held liable for any damages arising from the use of this software.</TextBlock>
+    <TextBlock/>
+    <TextBlock>Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:</TextBlock>
+    <TextBlock/>
+    <TextBlock>1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.</TextBlock>
+    <TextBlock/>
+    <TextBlock>2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.</TextBlock>
+    <TextBlock/>
+    <TextBlock>3. This notice may not be removed or altered from any source distribution.</TextBlock>
+    <TextBlock/>
+    <TextBlock>Jean-loup Gailly jloup@gzip.org</TextBlock>
+    <TextBlock>Mark Adler madler@alumni.caltech.edu</TextBlock>
+  </CompositeCollection>
+  <DataTemplate x:Key="CommandContextHint_CommanderManualData">
+    <Control Template="{DynamicResource CommandContextDataGesture_Hint_Down_Up}"/>
+  </DataTemplate>
 </ResourceDictionary>

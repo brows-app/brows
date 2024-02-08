@@ -196,6 +196,11 @@
     <ClInclude Include="brows_ssh.h" />
     <ClInclude Include="brows_ssh_internal.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="libssh2.license" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="openssl.license" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="zlib.license" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
