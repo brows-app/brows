@@ -1,4 +1,5 @@
 ﻿using Brows.Gui;
+using Domore.Logs;
 using Domore.Notification;
 using System;
 using System.Collections.Generic;
@@ -8,10 +9,12 @@ using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class CommandPaletteInput : Notifier, ICommandPalette, IControlled<ICommandPaletteInputController> {
+        private static readonly ILog Log = Logging.For(typeof(CommandPaletteInput));
+
         private int DelayState;
         private bool TextSuggestions = true;
         private CancellationTokenSource SuggestionTokenSource;
-        private CommandSuggestionCollector SuggestionCollector;
+        private readonly CommandSuggestionCollector SuggestionCollector;
         private readonly CommandSuggestionCollection SuggestionCollection;
 
         private Dictionary<IGesture, Action> GestureAction =>
@@ -58,16 +61,6 @@ namespace Brows {
                 var act = e.Triggered = GestureAction.TryGetValue(e.Gesture, out var action);
                 if (act) {
                     action();
-                }
-            }
-        }
-
-        private void SuggestionCollection_CurrentSuggestionChanged(object sender, EventArgs e) {
-            var suggestion = SuggestionCollection.CurrentSuggestion;
-            if (suggestion != null) {
-                var input = (suggestion.Input ?? "").Trim();
-                if (input != "") {
-                    TakeSuggestion(input);
                 }
             }
         }
@@ -147,8 +140,18 @@ namespace Brows {
             }
         }
 
+        private void SuggestionCollection_CurrentSuggestionChanged(object sender, EventArgs e) {
+            var suggestion = SuggestionCollection.CurrentSuggestion;
+            if (suggestion != null) {
+                var input = (suggestion.Input ?? "").Trim();
+                if (input != "") {
+                    TakeSuggestion(input);
+                }
+            }
+        }
+
         private void SuggestionCollector_InputSuggestionChanged(object sender, EventArgs e) {
-            var inputSuggestion = SuggestionCollector?.InputSuggestion;
+            var inputSuggestion = SuggestionCollector.InputSuggestion;
             if (inputSuggestion != null) {
                 TextSuggestion = inputSuggestion;
                 MatchSuggestion();
@@ -177,46 +180,61 @@ namespace Brows {
             }
         }
 
-        private async void Set(string text) {
+        private async void Suggest(string text) {
             if (TextSuggestions) {
                 MatchSuggestion();
-                var delayState = ++DelayState;
-                var delay = Delay;
-                if (delay > 0) {
-                    var delayToken = SuggestionTokenSource?.Token ?? default;
-                    try {
-                        await Task.Delay(delay, delayToken);
+            }
+            else {
+                return;
+            }
+            if (Log.Debug()) {
+                Log.Debug(Log.Join(nameof(Suggest), text));
+            }
+            try {
+                SuggestionTokenSource?.Cancel();
+            }
+            catch (ObjectDisposedException) {
+            }
+            using (var tokenSource = SuggestionTokenSource = new CancellationTokenSource()) {
+                var
+                token = tokenSource.Token;
+                token.Register(() => {
+                    if (Log.Debug()) {
+                        Log.Debug(Log.Join(nameof(Suggest), text, nameof(token.Register), "canceled"));
                     }
-                    catch (OperationCanceledException canceled) when (canceled?.CancellationToken == delayToken) {
+                });
+                try {
+                    var delayState = ++DelayState;
+                    var delay = Delay;
+                    if (delay > 0) {
+                        if (Log.Debug()) {
+                            Log.Debug(Log.Join(nameof(Suggest), text, nameof(Delay), delay));
+                        }
+                        await Task.Delay(delay, token);
+                    }
+                    if (delayState != DelayState) {
+                        if (Log.Debug()) {
+                            Log.Debug(Log.Join(nameof(Suggest), text, nameof(delayState), delayState, nameof(DelayState), DelayState));
+                        }
                         return;
                     }
+                    DelayState = 0;
+                    TextSuggestion = null;
+                    Suggesting?.Invoke(this, EventArgs.Empty);
+                    SuggestionCollection.Clear();
+                    SuggestionCollector.Context = Context;
+                    SuggestionCollector.Collection = SuggestionCollection;
+                    SuggestionCollector.Commands = Commander.Commands.AsEnumerable();
+                    await SuggestionCollector.Collect(token);
                 }
-                if (delayState != DelayState) {
-                    return;
-                }
-                DelayState = 0;
-                TextSuggestion = null;
-                if (SuggestionTokenSource != null) {
-                    SuggestionTokenSource.Cancel();
-                }
-                if (SuggestionCollector != null) {
-                    SuggestionCollector.InputSuggestionChanged -= SuggestionCollector_InputSuggestionChanged;
-                    SuggestionCollector = null;
-                }
-                using (var tokenSource = SuggestionTokenSource = new()) {
-                    var token = tokenSource.Token;
-                    try {
-                        SuggestionCollection.Clear();
-                        Suggesting?.Invoke(this, EventArgs.Empty);
-                        SuggestionCollector = new CommandSuggestionCollector(Context, Commander.Commands.AsEnumerable());
-                        SuggestionCollector.Collection = SuggestionCollection;
-                        SuggestionCollector.InputSuggestionChanged += SuggestionCollector_InputSuggestionChanged;
-                        await SuggestionCollector.Collect(token);
+                catch (OperationCanceledException canceled) when (canceled?.CancellationToken == token) {
+                    if (Log.Debug()) {
+                        Log.Debug(Log.Join(nameof(Suggest), text, nameof(OperationCanceledException)));
                     }
-                    catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
-                    }
-                    finally {
-                        SuggestionTokenSource = null;
+                }
+                catch (Exception ex) {
+                    if (Log.Error()) {
+                        Log.Error(ex);
                     }
                 }
             }
@@ -235,11 +253,11 @@ namespace Brows {
         private int _Delay = 100;
 
         public string Text {
-            get => _Text ?? (_Text = "");
+            get => _Text ??= "";
             set {
                 if (Change(ref _Text, value, nameof(Text))) {
                     Context = null;
-                    Set(text: _Text);
+                    Suggest(_Text);
                 }
             }
         }
@@ -272,10 +290,12 @@ namespace Brows {
         public CommandPaletteConf Conf { get; }
 
         public CommandPaletteInput(Commander commander, CommandSource source) {
-            Commander = commander;
+            Commander = commander ?? throw new ArgumentNullException(nameof(commander));
             Source = source;
             SuggestionCollection = new();
             SuggestionCollection.CurrentSuggestionChanged += SuggestionCollection_CurrentSuggestionChanged;
+            SuggestionCollector = new();
+            SuggestionCollector.InputSuggestionChanged += SuggestionCollector_InputSuggestionChanged;
             Conf = new();
             Conf.Escaped += Conf_Escaped;
             Conf.EscapedUp += Conf_EscapedUp;
@@ -283,20 +303,17 @@ namespace Brows {
         }
 
         public CommandContext Context {
-            get =>
-                _Context ?? (
-                _Context = new CommandContext(Commander, Source, new CommandLine(Text, Conf.Text), this));
+            get => _Context ??=
+                new CommandContext(Commander, Source, new CommandLine(Text, Conf.Text), this);
             private set =>
                 Change(ref _Context, value, nameof(Context));
         }
         private CommandContext _Context;
 
         public CommandContext ContextSuggestion {
-            get =>
-                _ContextSuggestion ?? (
-                _ContextSuggestion = TextSuggestion == null
-                    ? null
-                    : new CommandContext(Commander, Source, new CommandLine(TextSuggestion, Conf.Text), this));
+            get => _ContextSuggestion ??= TextSuggestion == null
+                ? null
+                : new CommandContext(Commander, Source, new CommandLine(TextSuggestion, Conf.Text), this);
             private set =>
                 Change(ref _ContextSuggestion, value, nameof(ContextSuggestion));
         }
@@ -311,10 +328,12 @@ namespace Brows {
         }
 
         public void Escape() {
-            Escaping?.Invoke(this, EventArgs.Empty);
-            if (SuggestionTokenSource != null) {
-                SuggestionTokenSource.Cancel();
+            try {
+                SuggestionTokenSource?.Cancel();
             }
+            catch (ObjectDisposedException) {
+            }
+            Escaping?.Invoke(this, EventArgs.Empty);
         }
 
         public void Select(int start, int length) {

@@ -1,12 +1,11 @@
-﻿using Domore.Notification;
+﻿using Brows.Gui;
+using Domore.Notification;
 using System;
 using System.Collections.ObjectModel;
 
 namespace Brows {
-    using Gui;
-
     internal sealed class CommandSuggestionCollection : Notifier, IControlled<ICommandSuggestionCollectionController> {
-        private readonly ObservableCollection<ICommandSuggestion> Observable = new();
+        private readonly ObservableCollection<ICommandSuggestion> Observable = [];
 
         private void Controller_CurrentSuggestionChanged(object sender, EventArgs e) {
             CurrentSuggestion = Controller?.CurrentSuggestion;

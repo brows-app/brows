@@ -8,5 +8,6 @@ namespace Brows {
         string Alias { get; }
         bool History { get; }
         int Relevance { get; }
+        int GroupOrder { get; }
     }
 }

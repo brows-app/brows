@@ -114,7 +114,7 @@ namespace Brows {
                         await refresh.Work(token);
                     }
                     foreach (var item in items) {
-                        await Task.Run(cancellationToken: token, function: async () => {
+                        await Task.Run(cancellationToken: token, action: () => {
                             var config = provider.Config;
                             var source = item.OriginalPath;
                             var sourceFile = new FileInfo(source);

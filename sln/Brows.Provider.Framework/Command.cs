@@ -93,10 +93,11 @@ namespace Brows {
         protected virtual IEnumerable<Type> Source =>
             null;
 
-        protected ICommandSuggestion Suggestion(ICommandContext context, string input, string help = null, string group = null, int? relevance = null, string description = null, string press = null, string alias = null, bool? history = null) {
+        protected ICommandSuggestion Suggestion(ICommandContext context, string input, string help = null, string group = null, int? relevance = null, string description = null, string press = null, string alias = null, bool? history = null, int? groupOrder = null) {
             return new CommandSuggestion {
                 Description = description ?? CommandTranslation.Description(Name),
                 Group = CommandTranslation.Group(group),
+                GroupOrder = groupOrder ?? 0,
                 Help = help ?? input,
                 History = history ?? false,
                 Input = input,

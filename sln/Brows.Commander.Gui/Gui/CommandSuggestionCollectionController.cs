@@ -17,8 +17,10 @@ namespace Brows.Gui {
             Element.Items.CurrentChanged += Items_CurrentChanged;
             Element.Items.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ICommandSuggestion.Group)));
             Element.Items.IsLiveSorting = true;
+            Element.Items.LiveSortingProperties.Add(nameof(ICommandSuggestion.GroupOrder));
             Element.Items.LiveSortingProperties.Add(nameof(ICommandSuggestion.Relevance));
             Element.Items.LiveSortingProperties.Add(nameof(ICommandSuggestion.Input));
+            Element.Items.SortDescriptions.Add(new SortDescription(nameof(ICommandSuggestion.GroupOrder), ListSortDirection.Ascending));
             Element.Items.SortDescriptions.Add(new SortDescription(nameof(ICommandSuggestion.Relevance), ListSortDirection.Ascending));
             Element.Items.SortDescriptions.Add(new SortDescription(nameof(ICommandSuggestion.Input), ListSortDirection.Ascending));
         }

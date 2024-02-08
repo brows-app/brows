@@ -9,24 +9,22 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    internal sealed class OpenDirectory : Command {
-        private static string Home =>
-            _Home ?? (
-            _Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify));
+    internal sealed class DirectoryOpen : Command {
+        private static string Home => _Home ??=
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify);
         private static string _Home;
 
-        private EnumerationOptions SuggestionEnumerationOptions =>
-            _SuggestionEnumerationOptions ?? (
-            _SuggestionEnumerationOptions = new EnumerationOptions {
+        private EnumerationOptions SuggestionEnumerationOptions => _SuggestionEnumerationOptions ??=
+            new EnumerationOptions {
                 AttributesToSkip = FileAttributes.Offline | FileAttributes.ReparsePoint | FileAttributes.System,
                 IgnoreInaccessible = true,
                 MatchCasing = MatchCasing.CaseInsensitive,
                 RecurseSubdirectories = false,
                 ReturnSpecialDirectories = false
-            });
+            };
         private EnumerationOptions _SuggestionEnumerationOptions;
 
-        private Task<(DirectoryInfo Directory, Func<string, string> Replace)> SuggestionRoot(string input, CancellationToken token) {
+        private static Task<(DirectoryInfo Directory, Func<string, string> Replace)> SuggestionRoot(string input, CancellationToken token) {
             return Task.Run(cancellationToken: token, function: () => {
                 var replace = new Func<string, string>(s => s);
                 var parts = input.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -36,14 +34,14 @@ namespace Brows.Commands {
                 if (parts[0] == "~") {
                     var home = Home;
                     parts[0] = home;
-                    replace = s => "~" + s.Substring(home.Length);
+                    replace = s => string.Concat("~", s.AsSpan(home.Length));
                 }
                 else {
                     var envVar = parts[0];
                     if (envVar.StartsWith('%') && envVar.EndsWith('%')) {
                         var expand = Environment.ExpandEnvironmentVariables(envVar);
                         parts[0] = expand;
-                        replace = s => envVar + s.Substring(expand.Length);
+                        replace = s => string.Concat(envVar, s.AsSpan(expand.Length));
                     }
                 }
                 var path = string.Join(Path.DirectorySeparatorChar, parts) + Path.DirectorySeparatorChar;
@@ -58,7 +56,7 @@ namespace Brows.Commands {
             });
         }
 
-        private IAsyncEnumerable<string> EnumerateDirectories(DirectoryInfo directory, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token) {
+        private static IAsyncEnumerable<string> EnumerateDirectories(DirectoryInfo directory, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token) {
             if (null == directory) throw new ArgumentNullException(nameof(directory));
             var directories = directory.EnumerateDirectories(searchPattern, enumerationOptions);
             var channel = Channel.CreateUnbounded<string>(new UnboundedChannelOptions { SingleReader = true });
@@ -123,7 +121,8 @@ namespace Brows.Commands {
                 await foreach (var directory in directories) {
                     yield return Suggestion(
                         context: context,
-                        group: nameof(OpenDirectory),
+                        group: nameof(DirectoryOpen),
+                        groupOrder: 1000000,
                         input: replace(directory));
                 }
             }
@@ -147,11 +146,11 @@ namespace Brows.Commands {
                     var env = new string(input.TakeWhile(c => c != Path.DirectorySeparatorChar && c != Path.AltDirectorySeparatorChar).ToArray());
                     var isEnv = env.EndsWith('%');
                     if (isEnv) {
-                        input = Environment.ExpandEnvironmentVariables(env) + input.Substring(env.Length);
+                        input = string.Concat(Environment.ExpandEnvironmentVariables(env), input.AsSpan(env.Length));
                     }
                 }
             }
-            var invalid = Path.GetInvalidPathChars().Any(c => input.Contains(c));
+            var invalid = DirectoryX.Invalid(input);
             if (invalid) {
                 return false;
             }
@@ -174,7 +173,7 @@ namespace Brows.Commands {
             if (context.HasInput(out var input) == false) {
                 yield break;
             }
-            var mightBePath = input.Contains(Path.DirectorySeparatorChar) || input.Contains(Path.AltDirectorySeparatorChar);
+            var mightBePath = DirectoryX.Separated(input);
             if (mightBePath == false) {
                 yield break;
             }

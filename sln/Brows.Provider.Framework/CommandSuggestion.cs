@@ -2,6 +2,7 @@ namespace Brows {
     internal sealed class CommandSuggestion : ICommandSuggestion {
         public string Help { get; init; }
         public int Relevance { get; init; }
+        public int GroupOrder { get; init; }
         public string Input { get; init; }
         public string Group { get; init; }
         public string Description { get; init; }

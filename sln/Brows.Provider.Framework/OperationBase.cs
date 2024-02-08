@@ -11,23 +11,25 @@ using TASK = System.Threading.Tasks.Task;
 namespace Brows {
     internal class OperationBase : Notifier, IOperation {
         private static readonly ILog Log = Logging.For(typeof(OperationBase));
-        private static readonly PropertyChangedEventArgs NameEvent = new(nameof(Name));
-        private static readonly PropertyChangedEventArgs DataEvent = new(nameof(Data));
-        private static readonly PropertyChangedEventArgs ProgressingEvent = new(nameof(Progressing));
         private static readonly PropertyChangedEventArgs CancelingEvent = new(nameof(Canceling));
         private static readonly PropertyChangedEventArgs CompleteEvent = new(nameof(Complete));
         private static readonly PropertyChangedEventArgs CompleteWithErrorEvent = new(nameof(CompleteWithError));
-        private static readonly PropertyChangedEventArgs RelevantEvent = new(nameof(Relevant));
-        private static readonly PropertyChangedEventArgs ProgressPercentEvent = new(nameof(ProgressPercent));
-        private static readonly PropertyChangedEventArgs ErrorMessageEvent = new(nameof(ErrorMessage));
+        private static readonly PropertyChangedEventArgs DataEvent = new(nameof(Data));
         private static readonly PropertyChangedEventArgs ErrorEvent = new(nameof(Error));
+        private static readonly PropertyChangedEventArgs ErrorMessageEvent = new(nameof(ErrorMessage));
+        private static readonly PropertyChangedEventArgs NameEvent = new(nameof(Name));
+        private static readonly PropertyChangedEventArgs ProgressEvent = new(nameof(Progress));
+        private static readonly PropertyChangedEventArgs ProgressingEvent = new(nameof(Progressing));
+        private static readonly PropertyChangedEventArgs ProgressKindEvent = new(nameof(ProgressKind));
+        private static readonly PropertyChangedEventArgs ProgressPercentEvent = new(nameof(ProgressPercent));
+        private static readonly PropertyChangedEventArgs ProgressStringEvent = new(nameof(ProgressString));
+        private static readonly PropertyChangedEventArgs RelevantEvent = new(nameof(Relevant));
         private static readonly PropertyChangedEventArgs TargetEvent = new(nameof(Target));
         private static readonly PropertyChangedEventArgs TargetStringEvent = new(nameof(TargetString));
-        private static readonly PropertyChangedEventArgs ProgressEvent = new(nameof(Progress));
-        private static readonly PropertyChangedEventArgs ProgressStringEvent = new(nameof(ProgressString));
-        private static readonly PropertyChangedEventArgs[] TargetDependents = [ProgressPercentEvent, TargetStringEvent];
-        private static readonly PropertyChangedEventArgs[] ProgressDependents = [ProgressPercentEvent, ProgressStringEvent];
         private static readonly PropertyChangedEventArgs[] ErrorDependents = [ErrorMessageEvent];
+        private static readonly PropertyChangedEventArgs[] ProgressDependents = [ProgressPercentEvent, ProgressStringEvent];
+        private static readonly PropertyChangedEventArgs[] ProgressKindDependents = [ProgressStringEvent, TargetStringEvent];
+        private static readonly PropertyChangedEventArgs[] TargetDependents = [ProgressPercentEvent, TargetStringEvent];
 
         private bool MakingRelevant;
         private Stopwatch Stopwatch;
@@ -232,6 +234,12 @@ namespace Brows {
             ProgressKind == OperationProgressKind.FileSize ? EntryDataConverter.FileSize.From(Progress, "0.00", null) :
             Progress.ToString();
 
+        public OperationProgressKind ProgressKind {
+            get => _ProgressKind;
+            private set => Change(ref _ProgressKind, value, ProgressKindEvent, ProgressKindDependents);
+        }
+        private OperationProgressKind _ProgressKind;
+
         public string Name {
             get => _Name;
             private set => Change(ref _Name, value, NameEvent);
@@ -300,7 +308,6 @@ namespace Brows {
         public Task Completion { get; }
         public OperationBase Parent { get; }
         public OperationDelegate Task { get; }
-        public OperationProgressKind ProgressKind { get; }
 
         public OperationBase(string name, OperationProgressKind progressKind, OperationBase parent, OperationDelegate task) {
             Task = task ?? throw new ArgumentNullException(nameof(task));
@@ -324,7 +331,10 @@ namespace Brows {
                 Operation = operation ?? throw new ArgumentNullException(nameof(operation));
             }
 
-            public void Change(long? addProgress, long? setProgress, long? addTarget, long? setTarget, string name, string data) {
+            public void Change(long? addProgress, long? setProgress, long? addTarget, long? setTarget, string name, string data, OperationProgressKind? kind) {
+                if (kind != null) {
+                    Operation.ProgressKind = kind.Value;
+                }
                 if (name != null) {
                     Operation.Name = name;
                 }
