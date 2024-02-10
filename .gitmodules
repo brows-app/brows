@@ -1,0 +1,4 @@
+[submodule "winget-pkgs"]
+	path = winget-pkgs
+	url = https://github.com/brows-app/winget-pkgs.git
+	branch = brows
