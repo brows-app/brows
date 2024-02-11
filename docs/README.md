@@ -6,6 +6,8 @@
 
 ***Control+L*** launches the command palette. From there, type commands or paths to navigate the file system.
 
+Install with winget `winget install Brows.App`
+
 Download releases **[here](https://github.com/brows-app/brows/releases)**.
 
 Report bugs and make feature requests **[here](https://github.com/brows-app/brows/issues)**.
@@ -39,3 +41,7 @@ Find files and folders by pressing ***CONTROL+F*** and entering a pattern. Navig
 Run CLI processes by pressing ***SHIFT+>*** and entering your command.
 
 ![Process commands](assets/img/Process.gif)
+
+Browse a remote Linux file system with SSH.
+
+![SSH connection](assets/img/SSH.gif)
