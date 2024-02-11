@@ -10,9 +10,14 @@ using System.Threading.Tasks;
 
 namespace Brows {
     public abstract class Command : ICommand {
+        private static readonly ILog Log = Logging.For(typeof(Command));
+
         private readonly CommandHistory History = new();
 
         private bool Valid(ICommandContext context) {
+            if (Enabled == false) {
+                return false;
+            }
             if (Provided(context) == false) {
                 return false;
             }
@@ -78,6 +83,13 @@ namespace Brows {
             }
         }
         private string _Name;
+
+        protected virtual bool Enabled =>
+            Config?.Enabled != false;
+
+        protected virtual CommandConfig Config => _Config ??=
+            new CommandConfig();
+        private CommandConfig _Config;
 
         protected CommandSuggestionRelevance SuggestionRelevance =>
             _SuggestionRelevance ?? (
@@ -162,6 +174,9 @@ namespace Brows {
 
         public ICommandTrigger Trigger { get; private set; }
 
+        bool ICommand.Enabled => Enabled;
+        object ICommand.Config => Config;
+
         bool ICommand.TriggeredWork(ICommandContext context) {
             if (Valid(context) == false) {
                 return false;
@@ -192,6 +207,9 @@ namespace Brows {
         }
 
         async Task ICommand.Init(CancellationToken token) {
+            if (Log.Info()) {
+                Log.Info(Log.Join(nameof(Init), this));
+            }
             Trigger = await CommandTrigger.For(this, token);
             await Init(token);
         }

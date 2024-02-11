@@ -208,16 +208,15 @@ namespace Brows.SSH {
                 var conn = await Conn.Ready(t);
                 var cancel = BrowsCanceler.From(t);
                 var secret = auth.Secret;
-                var publicKeyFile = auth.PublicKeyFile?.Trim() ?? "";
                 var privateKeyFile = auth.PrivateKeyFile?.Trim() ?? "";
-                if (privateKeyFile == "" && publicKeyFile == "") {
+                if (privateKeyFile == "") {
                     await Task.Run(cancellationToken: t, action: () => {
                         conn.AuthByPassword(secret, cancel);
                     });
                 }
                 else {
                     await Task.Run(cancellationToken: t, action: () => {
-                        conn.AuthByKeyFile(publicKeyFile, privateKeyFile, secret, cancel);
+                        conn.AuthByKeyFile(auth.PublicKeyFile, privateKeyFile, secret, cancel);
                     });
                 }
                 return default(object);

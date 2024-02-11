@@ -17,7 +17,7 @@ namespace Brows {
         private static extern void brows_logging(IntPtr handler);
 
         [UnmanagedFunctionPointer(Call, CharSet = Chars)]
-        private delegate void brows_logged_handler(int severity, IntPtr message);
+        private delegate int brows_logged_handler(int severity, IntPtr message);
 
         [UnmanagedFunctionPointer(Call, CharSet = Chars)]
         private delegate int brows_logging_handler(int severity);
@@ -28,13 +28,15 @@ namespace Brows {
         private readonly IntPtr LoggedFunctionPointer;
         private readonly IntPtr LoggingFunctionPointer;
 
-        private void LoggedHandler(int severity, IntPtr message) {
-            try {                
+        private int LoggedHandler(int severity, IntPtr message) {
+            try {
                 Log.Data((LogSeverity)severity, Marshal.PtrToStringAnsi(message));
             }
             catch (Exception ex) {
                 Console.WriteLine(ex);
+                return -1;
             }
+            return 0;
         }
 
         private int LoggingHandler(int severity) {

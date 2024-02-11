@@ -13,6 +13,7 @@ namespace Brows.Commands {
     internal sealed class DirectoryFound : Command {
         private static readonly ILog Log = Logging.For(typeof(DirectoryFound));
 
+        private readonly Option Opt = new();
         private readonly Dictionary<string, DirectoryCache> Cache = new(StringComparer.OrdinalIgnoreCase);
 
         private ICommandSuggestion Suggestion(ICommandContext context, DirectoryItem item) {
@@ -20,7 +21,7 @@ namespace Brows.Commands {
                 context: context,
                 description: item.Path,
                 group: nameof(DirectoryFound),
-                groupOrder: SuggestionGroupOrder,
+                groupOrder: Opt.SuggestionGroupOrder,
                 help: item.Name,
                 input: item.Path,
                 relevance: context.HasInput(out var input)
@@ -28,13 +29,15 @@ namespace Brows.Commands {
                     : null);
         }
 
+        protected sealed override CommandConfig Config => Opt;
+
         protected sealed override async IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, [EnumeratorCancellation] CancellationToken token) {
             if (context is null) yield break;
             if (context.DidTrigger(out _)) yield break;
             if (context.HasInput(out var input) == false) {
                 yield break;
             }
-            var lengthIsSufficient = input?.Length > 3;
+            var lengthIsSufficient = input.Length >= Opt.InputLengthTrigger;
             if (lengthIsSufficient == false) {
                 yield break;
             }
@@ -48,7 +51,7 @@ namespace Brows.Commands {
             }
             if (Cache.TryGetValue(input, out var cache)) {
                 var cacheAge = cache.Age;
-                var cacheExpired = cacheAge > CacheDuration;
+                var cacheExpired = cacheAge > Opt.CacheDuration;
                 if (Log.Info()) {
                     Log.Info(Log.Join(nameof(input), input, nameof(cache), cacheAge, nameof(cacheExpired), cacheExpired));
                 }
@@ -134,8 +137,11 @@ namespace Brows.Commands {
             }
         }
 
-        public int SuggestionGroupOrder { get; set; } = 1000;
-        public TimeSpan CacheDuration { get; set; } = TimeSpan.FromSeconds(10);
+        private sealed class Option : CommandConfig {
+            public int InputLengthTrigger { get; set; } = 4;
+            public int SuggestionGroupOrder { get; set; } = 1000;
+            public TimeSpan CacheDuration { get; set; } = TimeSpan.FromSeconds(10);
+        }
 
         private sealed class DirectoryItem {
             public string Path { get; private init; }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Domore.Conf.Converters;
+using System.Collections.Generic;
 
 namespace Brows.SSHConnection {
     public sealed class SSHConnectionConfig : EntryConfig {
@@ -12,6 +13,21 @@ namespace Brows.SSHConnection {
             return new[] {
                 KeyValuePair.Create(nameof(SSHConnectionEntryData.Order), EntrySortDirection.Ascending)
             };
+        }
+
+        public Dictionary<string, PrivateKeyOption> PrivateKey {
+            get => _PrivateKey ??= [];
+            set => _PrivateKey = value;
+        }
+        private Dictionary<string, PrivateKeyOption> _PrivateKey;
+
+        public sealed class PrivateKeyOption {
+            [ConfListItems]
+            public List<string> File {
+                get => _File ??= [];
+                set => _File = value;
+            }
+            private List<string> _File;
         }
     }
 }

@@ -1,6 +1,10 @@
+using Brows.Config;
+using Domore.Conf;
+using Domore.IO;
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,18 +65,42 @@ namespace Brows {
         }
 
         public async Task Init(CancellationToken token) {
-            var tasks = new List<Task>(List.Select(async item => {
+            if (Log.Info()) {
+                Log.Info(nameof(Init));
+            }
+            var configPath = Path.Join(ConfigPath.FileRoot, "commands.conf");
+            var configFile = await FileSystemTask.ExistingFile(configPath, token);
+            var config = configFile == null ? null : Conf.Contain(configFile.FullName);
+            var items = new List<ICommand>(List);
+            await Task.WhenAll(items.Select(async command => {
+                if (config != null) {
+                    if (Log.Info()) {
+                        Log.Info(Log.Join(nameof(config.Configure), command));
+                    }
+                    var type = command.GetType();
+                    var name = type.Name;
+                    var assembly = type.Assembly?.GetName()?.Name;
+                    var namespac = type.Namespace;
+                    config.Configure(command.Config, key: name);
+                    config.Configure(command.Config, key: name + $"[{assembly}]");
+                    config.Configure(command.Config, key: name + $"[{assembly}][{namespac}]");
+                }
                 try {
-                    await item.Init(token);
+                    await command.Init(token);
                 }
                 catch (Exception ex) {
                     if (Log.Warn()) {
                         Log.Warn(ex);
                     }
-                    List.Remove(item);
+                    List.Remove(command);
+                }
+                if (command.Enabled == false) {
+                    if (Log.Info()) {
+                        Log.Info(Log.Join(command, nameof(command.Enabled), command.Enabled));
+                    }
+                    List.Remove(command);
                 }
             }));
-            await Task.WhenAll(tasks);
         }
 
         public IEnumerable<ICommand> AsEnumerable() {

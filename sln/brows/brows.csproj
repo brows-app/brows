@@ -52,6 +52,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Remove="brows.config\commands.conf" />
+    <None Remove="brows.config\default\commands.conf.default" />
+    <None Remove="brows.config\default\sshconnection.conf.default" />
     <None Remove="brows.config\program.conf" />
   </ItemGroup>
   <ItemGroup>

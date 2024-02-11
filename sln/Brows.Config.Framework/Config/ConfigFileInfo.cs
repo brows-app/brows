@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using FILE = System.IO.File;
 
 namespace Brows.Config {
-    internal class ConfigFileInfo {
+    internal abstract class ConfigFileInfo {
         private static readonly ILog Log = Logging.For(typeof(ConfigFileInfo));
         private static readonly Dictionary<string, object> Locker = new();
 
@@ -57,7 +57,7 @@ namespace Brows.Config {
             return loaded;
         }
 
-        public class For<TConfig> : ConfigFileInfo where TConfig : new() {
+        public sealed class For<TConfig> : ConfigFileInfo where TConfig : new() {
             public For(string file, string @default) : base(file, @default) {
             }
 

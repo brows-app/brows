@@ -69,6 +69,10 @@ namespace Brows.SSH.Native {
 
         private void UseBytes(SecureString secureString, Action<IntPtr> callback) {
             if (null == callback) throw new ArgumentNullException(nameof(callback));
+            if (null == secureString) {
+                callback(IntPtr.Zero);
+                return;
+            }
             var byts = default(byte[]);
             try {
                 var bstr = Marshal.SecureStringToBSTR(secureString);
@@ -97,6 +101,10 @@ namespace Brows.SSH.Native {
 
         private void UseBytes(string s, Action<IntPtr> callback) {
             if (null == callback) throw new ArgumentNullException(nameof(callback));
+            if (null == s) {
+                callback(IntPtr.Zero);
+                return;
+            }
             var byt = Encoding.GetBytes(s);
             var pin = GCHandle.Alloc(byt, GCHandleType.Pinned);
             try {

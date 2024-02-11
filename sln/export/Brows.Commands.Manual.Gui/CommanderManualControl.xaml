@@ -30,7 +30,6 @@
                     <TextBlock>
                         <Run Text="Brows" FontWeight="Bold"/>
                         <Run Text="{Binding Version, Mode=OneWay, StringFormat='v{0}'}"/>
-                        <Run Text="{Binding CopyrightYear, Mode=OneWay, StringFormat='© Ken Yourek {0}'}"/>
                     </TextBlock>
                 </Border>
             </Grid>

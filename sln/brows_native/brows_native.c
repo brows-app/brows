@@ -4,24 +4,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void (*logged_handler)(brows_LogLevel, const char*);
-static int (*logging_handler)(brows_LogLevel);
+static  brows_ERROR (*logged_handler)   (brows_LogLevel, const char*);
+static  int32_t     (*logging_handler)  (brows_LogLevel);
 
-void brows_logged(void (*handler)(brows_LogLevel, const char* message)) {
+void brows_logged(brows_ERROR(*handler)(brows_LogLevel, const char* message)) {
     logged_handler = handler;
 }
 
-void brows_logging(int32_t (*handler)(brows_LogLevel)) {
+void brows_logging(int32_t(*handler)(brows_LogLevel)) {
     logging_handler = handler;
 }
 
-void brows_log(brows_LogLevel severity, const char* format, ...) {
+brows_ERROR brows_log(brows_LogLevel severity, const char* format, ...) {
     if (!logged_handler) {
-        return;
+        return brows_ERROR_NONE;
     }
     if (logging_handler) {
         if (!logging_handler(severity)) {
-            return;
+            return brows_ERROR_NONE;
         }
     }
 
@@ -29,6 +29,7 @@ void brows_log(brows_LogLevel severity, const char* format, ...) {
     va_list arg_copy;
     size_t buffer_size;
     char* buffer = NULL;
+    brows_ERROR err = brows_ERROR_NONE;
 
     va_start(arg_list, format);
     va_copy(arg_copy, arg_list);
@@ -38,28 +39,26 @@ void brows_log(brows_LogLevel severity, const char* format, ...) {
         goto cleanup;
     }
     if (size < 0) {
-        // TODO: Error?
+        err = brows_ERROR_LOG_SIZE;
         goto cleanup;
     }
     buffer_size = size + 1;
     buffer = calloc(buffer_size, sizeof(char));
     if (!buffer) {
-        // TODO: Error?
+        err = brows_ERROR_LOG_ALLOC;
         goto cleanup;
     }
     int written = vsnprintf(buffer, buffer_size, format, arg_copy);
     if (written < 0) {
-        // TODO: Error?
+        err = brows_ERROR_LOG_PRINT;
         goto cleanup;
     }
-    logged_handler(severity, buffer);
+    err = logged_handler(severity, buffer);
 cleanup:
     va_end(arg_copy);
     va_end(arg_list);
-
-    if (buffer) {
-        free(buffer);
-    }
+    free(buffer);
+    return err;
 }
 
 brows_ERROR brows_init(void) {

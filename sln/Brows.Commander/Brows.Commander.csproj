@@ -14,6 +14,7 @@
         <ProjectReference Include="..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
         <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
         <ProjectReference Include="..\Brows.Logs\Brows.Logs.csproj" />
+        <ProjectReference Include="..\domore\Domore.FileSystem\Domore.FileSystem.csproj" />
         <ProjectReference Include="..\domore\Domore.IPC\Domore.IPC.csproj" />
     </ItemGroup>
 </Project>

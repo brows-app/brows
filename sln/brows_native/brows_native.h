@@ -33,6 +33,9 @@
 #define     brows_ERROR                         int32_t
 #define     brows_ERROR_NONE                    0
 #define     brows_ERROR_CANCELED                1
+#define     brows_ERROR_LOG_SIZE                -19
+#define     brows_ERROR_LOG_ALLOC               -20
+#define     brows_ERROR_LOG_PRINT               -21
 
 #define     brows_LOG(SEVERITY, FORMAT, ...)    brows_log(SEVERITY, FORMAT, __VA_ARGS__)
 #define     brows_LOG_DEBUG(FORMAT, ...)        brows_LOG(brows_LogLevel_debug, FORMAT, __VA_ARGS__)
@@ -58,7 +61,7 @@ struct brows_Canceler {
 };
 
 brows_native    brows_ERROR                     brows_init(void);
-brows_native    void                            brows_log(brows_LogLevel, const char*, ...);
+brows_native    brows_ERROR                     brows_log(brows_LogLevel, const char*, ...);
 brows_native    void                            brows_logged(void (*)(brows_LogLevel, const char*));
 brows_native    void                            brows_logging(int32_t (*)(brows_LogLevel));
 
