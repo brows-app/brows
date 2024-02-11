@@ -42,6 +42,6 @@ Run CLI processes by pressing ***SHIFT+>*** and entering your command.
 
 ![Process commands](assets/img/Process.gif)
 
-Browse a remote Linux file system with SSH.
+Browse a remote Linux file system with ***SSH***.
 
 ![SSH connection](assets/img/SSH.gif)
