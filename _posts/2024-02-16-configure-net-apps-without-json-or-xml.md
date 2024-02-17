@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Configuring .NET apps without JSON or XML
+title: Configure .NET apps without JSON or XML
 author: the Brows app developers
 excerpt: XML and JSON have long been the configuration formats of choice in the .NET ecosystem. For something entirely different, continue reading.
 tags: Domore Domore.Conf Conf Config Configuration
