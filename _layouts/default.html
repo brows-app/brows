@@ -29,17 +29,8 @@
       <section>
         {{ content }}
       </section>
-      <footer>
-        <p>
-            <small>
-                {% if site.github.is_project_page %}
-                    This project is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a><br/>
-                {% endif %}            
-                Theme by <a href="https://github.com/orderedlist">orderedlist</a>
-            </small>
-        </p>
-      </footer>
+      {% include footer.html %}
     </div>
-    <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
+    {% include scripts.html %}
   </body>
 </html>

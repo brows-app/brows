@@ -6,5 +6,5 @@ layout: default
 ### [{{ post.title }}]({{ post.url }})
 > {{ post.excerpt }}
 
-<sub><sup>[{{ post.url }}]({{ post.url }})</sup></sub>
+<sub><sup>[{{ post.url | absolute_url}}]({{ post.url }})</sup></sub>
 {% endfor %}
