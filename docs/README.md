@@ -1,4 +1,4 @@
-**Brows** is a file manager for power users.
+**Brows** is a file manager with a command palette.
 
 ***Control+N*** opens a new panel.
 

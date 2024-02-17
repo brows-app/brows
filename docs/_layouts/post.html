@@ -4,8 +4,12 @@
     {% include head-default.html %}
   </head>
   <body>      
-    <h2>{{ page.title }}</h2>
-    <section>{{ content }}</section>
+    <div class="wrapper">
+      <h2>{{ page.title }}</h2>
+      <sup>posted {{ page.date | date: "%Y-%m-%d" }} by {{ page.author }}</sup>
+      <hr />
+      {{ content }}
+    </div>
     <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
   </body>
 </html>

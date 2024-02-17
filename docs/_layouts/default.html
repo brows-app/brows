@@ -24,30 +24,10 @@
           <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
         </ul>
         {% endif %}
-
-        <ul>
-        {% for post in site.posts %}
-          <li>
-            <a href="{{ post.url }}">{{ post.title }}</a>
-          </li>
-        {% endfor %}
-        </ul>
-        
-        {% comment %}
-        <p>
-            <ul>
-                {% for doc in site.docs %}
-                    <li><a href="{{ doc.url }}">{{ doc.title }}</a></li>
-                {% endfor %}
-            </ul>
-        </p>
-        {% endcomment %}
       </header>
       
       <section>
-
-      {{ content }}
-
+        {{ content }}
       </section>
       <footer>
         <p>

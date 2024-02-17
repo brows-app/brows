@@ -6,10 +6,8 @@ description: Brows is a Windows file manager for power users.
 
 show_downloads: true
 
-permalink: /:title/
+permalink: /post/:title/
 markdown: kramdown
-paginate: 5
-paginate_path: "/:num/"
 date_format: "%b %-d, %Y"
 
 collections:
