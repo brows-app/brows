@@ -2,9 +2,15 @@ theme: jekyll-theme-minimal
 
 title: Brows
 logo: logo.png
-description: Brows is a keyboard-centric file browser
+description: Brows is a Windows file manager for power users.
 
 show_downloads: true
+
+permalink: /:title/
+markdown: kramdown
+paginate: 5
+paginate_path: "/:num/"
+date_format: "%b %-d, %Y"
 
 collections:
   docs:
