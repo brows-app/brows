@@ -23,7 +23,7 @@ class MyConfig {
 ```
 A configuration file for that class might look like this.
 ```
-My config . Theme = dark
+My config . Theme = light
 my config . Weekend starts on = Saturday
 ```
 If that configuration file exists alongside an application's *.exe* with the same name as
@@ -34,7 +34,7 @@ Conf.Configure(obj);
 ```
 I'm sure you can guess what the output will be.
 ```csharp
-Console.WriteLine(obj.Theme);           // dark
+Console.WriteLine(obj.Theme);           // light
 Console.WriteLine(obj.WeekendStartsOn); // Saturday
 ```
 
@@ -44,7 +44,7 @@ Console.WriteLine(obj.WeekendStartsOn); // Saturday
 
 --------------------------------------------------------------
 ### So far things seem pretty simple. Let's make them simpler.
-Change the configuration file to look like this:
+Change the configuration file to look like this.
 ```csharp
 Theme = dark
 Weekend starts on = Saturday
@@ -62,7 +62,7 @@ That behavior allows some interesting conveniences. Suppose the class above is s
 class PartyAnimal : MyConfig { }
 class CollegeStudent : PartyAnimal { }
 ```
-And the configuration changes to this:
+And the configuration changes to this.
 ```
 Theme = dark
 Weekend starts on = Friday
@@ -74,7 +74,7 @@ var pa = Conf.Configure(new PartyAnimal(), key: "");
 var cs = Conf.Configure(new CollegeStudent(), key: "");
 Conf.Configure(cs);
 ```
-The college student is configured twice, first with a blank key to gather generic configuration for
+The college student was configured twice, first with a blank key to gather generic configuration for
 all instances of `MyConfig`, then with a key matching the name of the type. The output is as follows.
 ```
 Console.WriteLine(pa.Theme);           // dark
@@ -86,7 +86,7 @@ Both the party animal and the college student got the same configuration for the
 college student has more specific configuration for the starting day of his weekend.
 
 > Notice that a new instance of each type was passed to `Conf.Configure`.
-> That same instance is returned from the method.
+> That same instance was returned from the method.
 
 ------------------------------------------------
 ### Let's set some rules that we've seen so far.
