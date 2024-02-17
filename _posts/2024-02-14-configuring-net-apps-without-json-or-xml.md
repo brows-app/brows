@@ -156,3 +156,5 @@ class[ Physics 200 ].professor.name = Georges Lemaître
 In a future post, I'll go over custom configuration parsing, attributes for configuring
 your configuration, and reversing the whole process to convert a POCO class into a
 configuration file.
+
+<a href="https://www.codeproject.com" rel="tag" style="display:none">CodeProject</a>
