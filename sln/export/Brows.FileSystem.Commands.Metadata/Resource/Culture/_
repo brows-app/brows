@@ -1,3 +1,0 @@
-﻿Command_Description_FileSystem_Metadata         = Set file metadata
-Operation_Error_MetadataInfoIsNotFileException  = The entry is not a file.
-Operation_Error_MetadataFailedException         = Unable to set metadata on the file.

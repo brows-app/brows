@@ -1,7 +1,0 @@
-﻿<GridViewColumnHeader x:Class="Brows.EntryGridViewColumnHeader"
-                      x:ClassModifier="internal"
-                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                      Command="{Binding SortCommand}"
-                      CommandParameter="{Binding Key, RelativeSource={x:Static RelativeSource.Self}}">
-</GridViewColumnHeader>

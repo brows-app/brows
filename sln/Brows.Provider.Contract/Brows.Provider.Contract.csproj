@@ -1,8 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-    </PropertyGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Brows.Composition.Contract\Brows.Composition.Contract.csproj" />
-      <ProjectReference Include="..\Brows.Trigger.Contract\Brows.Trigger.Contract.csproj" />
-    </ItemGroup>
-</Project>

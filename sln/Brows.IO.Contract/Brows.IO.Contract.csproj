@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-    </PropertyGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Brows.Composition.Contract\Brows.Composition.Contract.csproj" />
-      <ProjectReference Include="..\Brows.Provider.Contract\Brows.Provider.Contract.csproj" />
-      <ProjectReference Include="..\domore\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj" />
-    </ItemGroup>
-</Project>

@@ -1,7 +1,0 @@
-﻿# If true, bookmark the location provided by the current panel.
-Add =
-
-# If set, creates a session from this window's panels with the
-# given name. A session, when loaded, will remove all panels
-# from the window and open each location in the session.
-Session = 

@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Brows.Request.Contract\Brows.Request.Contract.csproj" />
-    </ItemGroup>
-</Project>

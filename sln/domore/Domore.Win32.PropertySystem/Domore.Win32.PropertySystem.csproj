@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-    </PropertyGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Domore.Win32\Domore.Win32.csproj" />
-    </ItemGroup>
-</Project>

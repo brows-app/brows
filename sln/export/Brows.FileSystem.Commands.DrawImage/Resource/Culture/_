@@ -1,3 +1,0 @@
-﻿Command_Description_FileSystem_DrawImage                = Convert image files
-Operation_Error_DrawImageUnknownBitmapEncoderException  = The encoder is not available.
-Operation_Error_DrawImageInfoIsNotFileException         = The entry is not a file.

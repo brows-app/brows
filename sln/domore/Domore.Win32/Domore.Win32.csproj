@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <NoWarn>CS8981</NoWarn>
-    </PropertyGroup>
-    <ItemGroup>
-      <PackageReference Include="Domore.Logs" Version="8.0.3.93" />
-    </ItemGroup>
-</Project>

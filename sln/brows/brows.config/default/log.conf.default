@@ -1,8 +1,0 @@
-﻿#
-# WARNING: This file will be overwritten when a new version of the application is installed.
-# To customize the application's configuration, copy this file to its directory's parent and
-# remove the .default extension.
-#
-
-Log[Console].Config.Default.Format                          = {log} ({sev})
-Log[Console].Config.Default.Severity                        = Warn
