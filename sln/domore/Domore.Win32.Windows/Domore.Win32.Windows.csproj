@@ -4,7 +4,7 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Domore.Logs" Version="8.0.3.93" />
+      <PackageReference Include="Domore.Logs" Version="8.0.3.94" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Domore.Win32\Domore.Win32.csproj" />

@@ -14,7 +14,7 @@ namespace Brows.Commands {
             if (false == active.HasSSHClient(out var client)) return false;
             if (false == active.HasProvider(out SSHProvider provider)) return false;
             return context.Operate(async (progress, token) => {
-                var refresh = new ProviderDelayedRefresh(provider);
+                var refresh = new ProviderPostponedRefresh(provider);
                 foreach (var item in list) {
                     await client.Delete(item, token);
                     await refresh.Work(token);

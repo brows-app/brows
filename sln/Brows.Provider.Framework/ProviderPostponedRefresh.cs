@@ -4,13 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    public sealed class ProviderDelayedRefresh {
+    public sealed class ProviderPostponedRefresh {
         private bool Refreshed;
         private readonly Stopwatch Stopwatch;
 
         public Provider Provider { get; }
 
-        public ProviderDelayedRefresh(Provider provider) {
+        public ProviderPostponedRefresh(Provider provider) {
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
             Stopwatch = Stopwatch.StartNew();
         }
@@ -21,7 +21,7 @@ namespace Brows {
                     return false;
                 }
             }
-            var refresh = final || Stopwatch.Elapsed > Provider.Config?.DelayedRefresh?.Interval;
+            var refresh = final || Stopwatch.Elapsed > Provider.Config?.PostponedRefresh?.Interval;
             if (refresh) {
                 var provider = (IProvider)Provider;
                 await provider.Refresh(token);

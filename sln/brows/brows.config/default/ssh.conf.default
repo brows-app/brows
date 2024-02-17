@@ -5,3 +5,5 @@
 #
 
 SCP.Mode = 0777
+
+PostponedRefresh.Interval = 00:00:02.50
