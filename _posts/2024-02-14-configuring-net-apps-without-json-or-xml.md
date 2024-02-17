@@ -157,4 +157,4 @@ In a future post, I'll go over custom configuration parsing, attributes for conf
 your configuration, and reversing the whole process to convert a POCO class into a
 configuration file.
 
-<a href="https://www.codeproject.com" rel="tag" style="display:none">CodeProject</a>
+<a href="https://www.codeproject.com/script/Articles/BlogFeedList.aspx?amid=16204319" rel="tag" style="display:none">CodeProject</a>
