@@ -14,8 +14,14 @@ brows_ERROR brows_ssh_Chan_get_channel(brows_ssh_Chan* p, brows_Canceler* cancel
         brows_LOG_ERROR("brows_ssh_Chan_get_channel > %s", "NULL");
         return brows_ERROR_SSH_CHAN_GET_CHANNEL_IS_NULL;
     }
-    *channel = p->channel;
+    if (channel) {
+        *channel = p->channel;
+    }
     return brows_ERROR_NONE;
+}
+
+brows_ERROR brows_ssh_Chan_ready(brows_ssh_Chan* p, brows_Canceler* cancel) {
+    return brows_ssh_Chan_get_channel(p, cancel, NULL);
 }
 
 brows_ssh_Chan* brows_ssh_Chan_init(brows_ssh_Chan* p, brows_ssh_Conn* conn, brows_ssh_ChannelFactory* channel_factory) {

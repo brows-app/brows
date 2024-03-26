@@ -21,10 +21,11 @@ namespace Brows.Windows {
                 var
                 window = new CommanderWindow { DataContext = e.Commander };
                 window.Show();
+                WindowShown?.Invoke(this, e);
             }
         }
 
-        private void App_Startup(object sender, StartupEventArgs e) {
+        private void Exports_Ready(object sender, EventArgs e) {
             var
             domain = new CommanderDomain(App.Exports.Import);
             domain.Ended += Service_Ended;
@@ -32,11 +33,13 @@ namespace Brows.Windows {
             domain.Begin();
         }
 
+        public event EventHandler WindowShown;
+
         public WindowsApplication App { get; }
 
         public AppService(WindowsApplication app) {
             App = app ?? throw new ArgumentNullException(nameof(app));
-            App.Startup += App_Startup;
+            App.Exports.Ready += Exports_Ready;
         }
     }
 }

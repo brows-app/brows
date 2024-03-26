@@ -5,6 +5,7 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
+      <ProjectReference Include="..\..\Brows.Message.Framework\Brows.Message.Framework.csproj" />
       <ProjectReference Include="..\..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
       <ProjectReference Include="..\Brows.FileSystem.Navigation\Brows.FileSystem.Navigation.csproj" />
     </ItemGroup>

@@ -8,6 +8,7 @@ cmd[Bookmark]                       .input                      = bookmark|bm
 cmd[Bookmark]                       .press[CTRL+B]              = *
 cmd[Bookmark]                       .press[CTRL+D]              = * add=true
 cmd[ClipboardCopy]                  .press[CTRL+C]              = *
+cmd[ClipboardCopy]                  .press[CTRL+X]              = * moveonpaste=true
 cmd[ClipboardPaste]                 .press[CTRL+V]              = *
 cmd[Close]                          .input                      = close
 cmd[Close]                          .press[ALT+F4]              = *

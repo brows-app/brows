@@ -1,35 +1,74 @@
-﻿using System;
+﻿using Brows.Config;
+using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Config;
-
     internal sealed class CommandTrigger : ICommandTrigger {
+        private static readonly ILog Log = Logging.For(typeof(CommandTrigger));
+        private static readonly SemaphoreSlim Locker = new(1, 1);
+
+        private static IConfig<Trigger> Config {
+            get {
+                if (_Config == null) {
+                    _Config = Configure.File<Trigger>();
+                    _Config.Changed += Config_Changed;
+                }
+                return _Config;
+            }
+        }
+        private static IConfig<Trigger> _Config;
+
         private CommandTrigger(IInputTrigger input, IGestureTriggerCollection gesture) {
             Input = input;
             Gesture = gesture;
         }
 
-        public static async Task<CommandTrigger> For(Command command, CancellationToken cancellationToken) {
+        private static async void Config_Changed(object sender, EventArgs e) {
+            if (Log.Info()) {
+                Log.Info(nameof(Config_Changed));
+            }
+            await Locker.WaitAsync();
+            try {
+                await Config.Load(default);
+                Changed?.Invoke(null, e);
+            }
+            finally {
+                Locker.Release();
+            }
+        }
+
+        public static event EventHandler Changed;
+
+        public IInputTrigger Input { get; }
+        public IGestureTriggerCollection Gesture { get; }
+
+        public static CommandTrigger For(Command command) {
             if (null == command) throw new ArgumentNullException(nameof(command));
             var name = command.Name;
-            var conf = await Configure.File<Trigger>().Load(cancellationToken);
-            if (conf.Cmd.TryGetValue(name, out var cmd) == false) {
+            var conf = Config.Loaded;
+            var confCmd = conf?.Cmd;
+            if (confCmd == null) {
+                return null;
+            }
+            if (confCmd.TryGetValue(name, out var cmd) == false) {
                 var type = command.GetType();
-                if (conf.Cmd.TryGetValue(type.Name, out cmd) == false) {
+                if (confCmd.TryGetValue(type.Name, out cmd) == false) {
                     return null;
                 }
             }
             return new CommandTrigger(cmd.TriggerInput(), cmd.TriggerGesture());
         }
 
-        public IInputTrigger Input { get; }
-        public IGestureTriggerCollection Gesture { get; }
+        public static async Task<CommandTrigger> For(Command command, CancellationToken token) {
+            await Config.Load(token);
+            return For(command);
+        }
 
-        private class Trigger {
+        private sealed class Trigger {
             public Dictionary<string, Command> Cmd {
                 get => _Cmd ?? (_Cmd = new(StringComparer.OrdinalIgnoreCase));
                 set => _Cmd = value;

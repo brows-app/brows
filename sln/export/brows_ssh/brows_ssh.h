@@ -111,10 +111,11 @@ brows_ssh   brows_ERROR                                 brows_ssh_init(void);
 brows_ssh   brows_ERROR                                 brows_ssh_exit(void);
 brows_ssh   const char*                                 brows_ssh_name(brows_ERROR);
 
+brows_ssh   brows_ERROR                                 brows_ssh_Chan_close                    (brows_ssh_Chan*, brows_Canceler*);
 brows_ssh   brows_ERROR                                 brows_ssh_Chan_eof                      (brows_ssh_Chan*, int32_t* result, brows_Canceler*);
 brows_ssh   brows_ERROR                                 brows_ssh_Chan_exec                     (brows_ssh_Chan*, const char* command, brows_Canceler*);
 brows_ssh   brows_ERROR                                 brows_ssh_Chan_flush                    (brows_ssh_Chan*, int stream_id, brows_Canceler*);
-brows_ssh   brows_ERROR                                 brows_ssh_Chan_close                    (brows_ssh_Chan*, brows_Canceler*);
+brows_ssh   brows_ERROR                                 brows_ssh_Chan_ready                    (brows_ssh_Chan*, brows_Canceler*);
 
 brows_ssh   brows_ERROR                                 brows_ssh_Conn_auth_by_password         (brows_ssh_Conn*, const char* password, brows_Canceler*);
 brows_ssh   brows_ERROR                                 brows_ssh_Conn_auth_by_key_file         (brows_ssh_Conn*, const char* public_key_file, const char* private_key_file, const char* passphrase, brows_Canceler*);

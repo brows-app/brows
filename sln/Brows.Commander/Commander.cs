@@ -11,24 +11,37 @@ namespace Brows {
     internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderController> {
         private static readonly ILog Log = Logging.For(typeof(Commander));
 
+        private MessageSet MessageSet;
+
         private PanelCollection PanelCollection =>
             _PanelCollection ?? (
             _PanelCollection = new PanelCollection(Providers, this));
         private PanelCollection _PanelCollection;
 
         private async void Controller_Loaded(object sender, EventArgs e) {
+            var token = CancellationToken.None;
             Loaded?.Invoke(this, e);
+
+            var messageSet = MessageSet;
+            if (messageSet != null){
+                messageSet.Message -= MessageSet_Message;
+                messageSet.Dispose();
+            }
+            MessageSet = await Messages.Create(Controller?.NativeWindow(), token);
+            MessageSet.Message += MessageSet_Message;
+            
             var load = Load.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
             foreach (var item in load) {
-                await AddPanel(item, CancellationToken.None);
+                await AddPanel(item, token);
             }
             if (First) {
-                await ShowPalette(null, "? ", 0, 2, CancellationToken.None);
+                await ShowPalette(null, "? ", 0, 2, token);
             }
         }
 
         private void Controller_WindowClosed(object sender, EventArgs e) {
             PanelCollection.Clear();
+            MessageSet?.Dispose();
             Closed?.Invoke(this, e);
         }
 
@@ -41,6 +54,29 @@ namespace Brows {
         private void Controller_WindowGesture(object sender, GestureEventArgs e) {
             if (e != null) {
                 e.Triggered = Input(e.Gesture, e.Source);
+            }
+        }
+
+        private async void MessageSet_Message(object source, MessageEventArgs e) {
+            var token = CancellationToken.None;
+            var message = e?.Message;
+            if (message != null) {
+                IEnumerable<Task> tasks() {
+                    foreach (var panel in PanelCollection) {
+                        async Task task() {
+                            try {
+                                await panel.Post(message, token);
+                            }
+                            catch (Exception ex) {
+                                if (Log.Error()) {
+                                    Log.Error(ex);
+                                }
+                            }
+                        }
+                        yield return task();
+                    }
+                }
+                await Task.WhenAll(tasks());
             }
         }
 
@@ -63,12 +99,14 @@ namespace Brows {
             var triggered = Commands.Triggered(gesture, out var commands);
             if (triggered) {
                 foreach (var command in commands) {
-                    var shortcut = command.Trigger.Gesture[gesture].Shortcut;
-                    var cmdLine = new CommandLine(shortcut, null);
-                    var context = new CommandContext(this, new CommandSource(source), cmdLine, gesture);
-                    var work = command.TriggeredWork(context);
-                    if (work) {
-                        return true;
+                    var shortcut = command?.Trigger?.Gesture?[gesture]?.Shortcut;
+                    if (shortcut != null) {
+                        var cmdLine = new CommandLine(shortcut, null);
+                        var context = new CommandContext(this, new CommandSource(source), cmdLine, gesture);
+                        var work = command.TriggeredWork(context);
+                        if (work) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -129,11 +167,13 @@ namespace Brows {
 
         public CommanderDomain Domain { get; }
         public CommandCollection Commands { get; }
+        public MessageSetFactory Messages { get; }
         public ProviderFactorySet Providers { get; }
 
-        public Commander(ProviderFactorySet providers, CommandCollection commands, CommanderDomain domain) {
+        public Commander(ProviderFactorySet providers, MessageSetFactory messages, CommandCollection commands, CommanderDomain domain) {
             Commands = commands ?? throw new ArgumentNullException(nameof(commands));
             Domain = domain;
+            Messages = messages;
             Providers = providers;
         }
 
@@ -197,9 +237,18 @@ namespace Brows {
             Controller?.CloseWindow();
         }
 
+        public object NativeWindow() {
+            return Controller?.NativeWindow();
+        }
+
         bool ICommander.HasOperations(out IOperationCollection collection) {
             collection = Operator.Operations;
             return collection.Count > 0;
+        }
+
+        bool ICommander.HasWindow(out object native) {
+            native = NativeWindow();
+            return native != null;
         }
 
         ICommanderController IControlled<ICommanderController>.Controller {

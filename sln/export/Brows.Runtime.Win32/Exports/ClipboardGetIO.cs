@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace Brows.Exports {
     internal sealed class ClipboardGetIO : IClipboardGetIO {
-        private readonly Win32ClipboardData ClipboardData = Win32ClipboardData.Instance;
+        private readonly ClipboardData ClipboardData = ClipboardData.Instance;
 
-        public async Task<bool> Work(ICollection<IProvidedIO> collection, IOperationProgress progress, CancellationToken token) {
-            if (collection == null) {
-                return false;
-            }
+        private async Task<bool> MoveOnPaste(CancellationToken token) {
+            await Task.CompletedTask;
+            return ClipboardData.PreferredDropEffect == DragDropEffects.Move;
+        }
+
+        private static async Task<IReadOnlyList<string>> FileDropList(CancellationToken token) {
             var files = new List<string>();
             var filesDropped = Clipboard.ContainsFileDropList();
             if (filesDropped) {
@@ -25,16 +27,31 @@ namespace Brows.Exports {
                     }
                 }
             }
-            var s = ClipboardData.Get<IEntryStreamSet>().Where(s => s is not null).ToList();
-            var f = files.Count > 0 ? new[] { EntryStreamSet.FromFiles(files) } : Array.Empty<IEntryStreamSet>();
-            var a = s.Concat(f).ToList();
-            if (a.Count == 0) {
+            await Task.CompletedTask;
+            return files;
+        }
+
+        public async Task<bool> Work(ICollection<IProvidedIO> collection, IClipboardGetIOData data, IOperationProgress progress, CancellationToken token) {
+            if (collection == null) {
+                return false;
+            }
+            var files = await FileDropList(token);
+            if (files.Count > 0) {
+                if (data != null) {
+                    var moveOnPaste = data.MoveOnPaste = await MoveOnPaste(token);
+                    if (moveOnPaste) {
+                        Clipboard.Clear();
+                        ClipboardData.Reset();
+                    }
+                }
+            }
+            var f = files.Count > 0 ? [EntryStreamSet.FromFiles(files)] : Array.Empty<IEntryStreamSet>();
+            if (f.Length == 0) {
                 return false;
             }
             collection.Add(new ProvidedIO {
-                StreamSets = a
+                StreamSets = f
             });
-            await Task.CompletedTask;
             return true;
         }
     }

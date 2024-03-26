@@ -4,9 +4,7 @@ using Brows.SSH;
 using Domore.IO;
 using Domore.Logs;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -60,23 +58,29 @@ namespace Brows {
                 var entries = source.Items?.OfType<SSHEntry>()?.ToList();
                 if (entries?.Count > 0) {
                     var client = await provider.Client.Ready(token);
-                    var streams = new List<SCPStreamSource>();
-                    foreach (var entry in entries) {
-                        if (entry?.Info?.Kind == SSHEntryKind.File) {
-                            streams.Add(new SCPStreamSource(entry, client));
-                        }
-                        if (entry?.Info?.Kind == SSHEntryKind.Directory) {
-                            await foreach (var info in client.ListRecursively(entry.Uri, token)) {
-                                streams.Add(new SCPStreamSource(new SSHEntry(provider, info), client));
+                    async IAsyncEnumerable<SCPStreamSource> streams([EnumeratorCancellation] CancellationToken token) {
+                        foreach (var entry in entries) {
+                            if (token.IsCancellationRequested) {
+                                token.ThrowIfCancellationRequested();
+                            }
+                            if (entry?.Info?.Kind == SSHEntryKind.File) {
+                                yield return new SCPStreamSource(entry, client);
+                            }
+                            if (entry?.Info?.Kind == SSHEntryKind.Directory) {
+                                await foreach (var info in client.ListRecursively(entry.Uri, token)) {
+                                    if (token.IsCancellationRequested) {
+                                        token.ThrowIfCancellationRequested();
+                                    }
+                                    yield return new SCPStreamSource(new SSHEntry(provider, info), client);
+                                }
                             }
                         }
                     }
-                    io.Add(new ProvidedIO { StreamSets = new[] { new SCPStreamSet(streams) } });
+                    io.Add(new ProvidedIO { StreamSets = new[] { new SCPStreamSet(streams(token)) } });
                     added = true;
                 }
                 //var treeNodes = source.Items?.OfType<FileSystemTreeNode>()?.ToList();
-                //if (treeNodes?.Count > 0) {
-                //    var streams = treeNodes.Select(n => n.StreamSource);
+                //if (treeNodes?.Count > 0) {                //    var streams = treeNodes.Select(n => n.StreamSource);
                 //    var streamSet = new FileSystemTreeNode.StreamSet(streams);
                 //    io.Add(new ProvidedIO { StreamSets = new[] { streamSet } });
                 //    added = true;
@@ -127,33 +131,18 @@ namespace Brows {
                             }
                             continue;
                         }
-                        progress.Child(sourceFile.Name, OperationProgressKind.FileSize, async (progress, token) => {
+                        await progress.Child(sourceFile.Name, OperationProgressKind.FileSize, async (progress, token) => {
                             var srcLength = sourceFile.Length;
                             var destination = item.DestinationPath;
                             progress.Change(setTarget: srcLength);
                             await Task.Run(cancellationToken: token, function: async () => {
                                 using var scpSend = await client.SCPSend(destination, config.Scp.Mode, srcLength, token);
-                                using var scpSendStream = scpSend.Stream();
-                                await using var stream = sourceFile.OpenRead();
-                                var bufferSize = 81920;
-                                if (bufferSize > srcLength) {
-                                    bufferSize = (int)srcLength;
-                                }
-                                var pool = ArrayPool<byte>.Shared;
-                                var buffer = pool.Rent(bufferSize);
-                                try {
-                                    for (; ; ) {
-                                        var read = await stream.ReadAsync(buffer, token);
-                                        if (read == 0) {
-                                            break;
-                                        }
-                                        await scpSendStream.WriteAsync(buffer, offset: 0, count: read, token);
-                                        progress.Change(read);
-                                    }
-                                }
-                                finally {
-                                    pool.Return(buffer);
-                                }
+                                using var scpDest = scpSend.Stream();
+                                await using var fileSource = sourceFile.OpenRead();
+                                await progress.Copy(
+                                    source: fileSource,
+                                    destination: scpDest,
+                                    token: token);
                             });
                         });
                         await refresh.Work(token);

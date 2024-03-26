@@ -1,8 +1,13 @@
 {
-  "profiles": {
-    "brows": {
-      "commandName": "Project",
-      "nativeDebugging": true
+    "profiles": {
+        "brows": {
+            "commandName": "Project",
+            "nativeDebugging": true
+        },
+        "brows splash.show=false": {
+            "commandName": "Project",
+            "commandLineArgs": "splash.show=false",
+            "nativeDebugging": true
+        }
     }
-  }
 }

@@ -369,21 +369,19 @@ namespace Brows {
                 EntryInfo = entryInfo ?? throw new ArgumentNullException(nameof(entryInfo));
             }
 
-            protected sealed override Task<IEntryStreamReady> StreamReady(CancellationToken token) {
-                return Task.FromResult<IEntryStreamReady>(new Disposable(this));
-            }
-
-            protected sealed override Stream Stream() {
+            protected sealed override async Task<IEntryStreamReady> StreamReady(CancellationToken token) {
                 if (EntryInfo.Kind == ZipEntryKind.File) {
-                    Locked = EntryInfo.Archive.Locker.Lock();
-                    Archive = Archive.Open(EntryInfo.Archive, ZipArchiveMode.Read, CancellationToken.None);
-                    var entry = Archive.Zip.GetEntry(EntryInfo.Name.Original);
-                    if (entry == null) {
-                        throw new EntryNotFoundException();
-                    }
-                    return entry.Open();
+                    await Task.Run(cancellationToken: token, action: () => {
+                        Locked = EntryInfo.Archive.Locker.Lock();
+                        Archive = Archive.Open(EntryInfo.Archive, ZipArchiveMode.Read, CancellationToken.None);
+                        var entry = Archive.Zip.GetEntry(EntryInfo.Name.Original);
+                        if (entry == null) {
+                            throw new EntryNotFoundException();
+                        }
+                        Stream = entry.Open();
+                    });
                 }
-                return null;
+                return new Disposable(this);
             }
 
             public sealed override long StreamLength =>

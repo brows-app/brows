@@ -1,13 +1,11 @@
 ﻿using Brows.Exports;
 using Brows.FileSystem;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class DriveProviderFactory : ProviderFactory<DriveProvider>, IFileSystemNavigationService {
         protected sealed override async Task<DriveProvider> CreateFor(string id, IPanel panel, CancellationToken token) {
-            if (panel is null) throw new ArgumentNullException(nameof(panel));
             if (id != Drives.ID) {
                 return null;
             }

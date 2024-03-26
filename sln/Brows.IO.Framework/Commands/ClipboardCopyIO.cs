@@ -8,13 +8,19 @@ namespace Brows.Commands {
             if (false == context.HasSource(out var source)) return false;
             if (false == context.HasPanel(out var active)) return false;
             if (false == active.HasProviderService(out var provider, out IProvideIO service)) return false;
+            if (false == context.GetParameter(out var parameter)) return false;
             return context.Operate(async (progress, token) => {
+                var clipboard = Clipboard;
+                if (clipboard == null) {
+                    return false;
+                }
                 var io = new List<IProvidedIO>();
                 var ioWork = await service.Work(io, source, provider, progress, token);
                 if (ioWork == false) {
                     return false;
                 }
-                var task = Clipboard?.Work(io, progress, token);
+                var data = new ClipboardData { MoveOnPaste = parameter.MoveOnPaste };
+                var task = clipboard.Work(io, data, progress, token);
                 if (task == null) {
                     return false;
                 }
@@ -25,6 +31,7 @@ namespace Brows.Commands {
         public IClipboardSetIO Clipboard { get; set; }
 
         public class Parameter {
+            public bool MoveOnPaste { get; set; }
         }
     }
 }

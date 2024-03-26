@@ -40,41 +40,39 @@ namespace Brows.Commands {
                 var propertyList = await Task.WhenAll(parameterSet.Keys
                     .Where(p => !string.IsNullOrWhiteSpace(p))
                     .Select(async p => KeyValuePair.Create(p, await Property(p, token))));
-                foreach (var fileSystemInfo in fileSystemInfos) {
-                    progress.Child(fileSystemInfo.Name, async (progess, token) => {
-                        if (fileSystemInfo is not FileInfo file) {
-                            throw new MetadataInfoIsNotFileException(fileSystemInfo);
-                        }
-                        progress.Change(addTarget: 1);
-                        var propSet = false;
-                        var propDict = propertyList.ToDictionary(p => p.Key, p => p.Value);
-                        var propFile = file.FullName;
-                        var propError = new Dictionary<string, Exception>();
-                        await Task.Run(cancellationToken: token, action: () => {
-                            foreach (var pair in propDict) {
-                                var propertyValue = parameterSet[pair.Key];
-                                var propertyDescription = pair.Value;
-                                try {
-                                    PropertySystem.SetPropertyValue(propFile, propertyDescription, propertyValue);
-                                    propSet = true;
-                                }
-                                catch (Exception ex) {
-                                    if (Log.Info()) {
-                                        Log.Info(Log.Join(nameof(Exception), propertyDescription.CanonicalName, propFile), ex);
-                                    }
-                                    propError[propertyDescription.CanonicalName] = ex;
-                                }
+                return await progress.Children(fileSystemInfos, fileSystemInfo => (fileSystemInfo.Name, OperationProgressKind.None, async (progress, token) => {
+                    if (fileSystemInfo is not FileInfo file) {
+                        throw new MetadataInfoIsNotFileException(fileSystemInfo);
+                    }
+                    progress.Change(addTarget: 1);
+                    var propSet = false;
+                    var propDict = propertyList.ToDictionary(p => p.Key, p => p.Value);
+                    var propFile = file.FullName;
+                    var propError = new Dictionary<string, Exception>();
+                    await Task.Run(cancellationToken: token, action: () => {
+                        foreach (var pair in propDict) {
+                            var propertyValue = parameterSet[pair.Key];
+                            var propertyDescription = pair.Value;
+                            try {
+                                PropertySystem.SetPropertyValue(propFile, propertyDescription, propertyValue);
+                                propSet = true;
                             }
-                        });
-                        if (propSet) {
-                            progress.Change(addProgress: 1);
-                        }
-                        else {
-                            throw new MetadataFailedException(fileSystemInfo, propError);
+                            catch (Exception ex) {
+                                if (Log.Info()) {
+                                    Log.Info(Log.Join(nameof(Exception), propertyDescription.CanonicalName, propFile), ex);
+                                }
+                                propError[propertyDescription.CanonicalName] = ex;
+                            }
                         }
                     });
+                    if (propSet) {
+                        progress.Change(addProgress: 1);
+                    }
+                    else {
+                        throw new MetadataFailedException(fileSystemInfo, propError);
+                    }
                 }
-                return true;
+                ));
             });
         }
 

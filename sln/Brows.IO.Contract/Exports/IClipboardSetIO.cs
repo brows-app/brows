@@ -4,6 +4,6 @@ using System.Threading.Tasks;
 
 namespace Brows.Exports {
     public interface IClipboardSetIO : IExport {
-        Task<bool> Work(IEnumerable<IProvidedIO> collection, IOperationProgress progress, CancellationToken token);
+        Task<bool> Work(IEnumerable<IProvidedIO> collection, IClipboardSetIOData data, IOperationProgress progress, CancellationToken token);
     }
 }

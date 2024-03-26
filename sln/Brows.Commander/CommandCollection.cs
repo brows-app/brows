@@ -34,12 +34,16 @@ namespace Brows {
                 }
                 return _GestureSet;
             }
+            set {
+                _GestureSet = null;
+            }
         }
         private Dictionary<IGesture, HashSet<ICommand>> _GestureSet;
 
-        private Dictionary<string, HashSet<ICommand>> InputSet =>
-            _InputSet ?? (
-            _InputSet = new());
+        private Dictionary<string, HashSet<ICommand>> InputSet {
+            get => _InputSet ??= [];
+            set => _InputSet = value;
+        }
         private Dictionary<string, HashSet<ICommand>> _InputSet;
 
         public CommandCollection(IEnumerable<ICommand> items) {
@@ -93,13 +97,19 @@ namespace Brows {
                         Log.Warn(ex);
                     }
                     List.Remove(command);
+                    return;
                 }
                 if (command.Enabled == false) {
                     if (Log.Info()) {
                         Log.Info(Log.Join(command, nameof(command.Enabled), command.Enabled));
                     }
                     List.Remove(command);
+                    return;
                 }
+                command.TriggerChanged += (s, e) => {
+                    InputSet = null;
+                    GestureSet = null;
+                };
             }));
         }
 

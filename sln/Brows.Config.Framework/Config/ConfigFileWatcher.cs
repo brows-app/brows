@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Config {
-    internal class ConfigFileWatcher {
+    internal sealed class ConfigFileWatcher {
         private static readonly ILog Log = Logging.For(typeof(ConfigFileWatcher));
         private static readonly ConfigFileWatcher Instance = new();
         private readonly List<ConfigFileInfo> Subscribers = new();
@@ -26,14 +26,16 @@ namespace Brows.Config {
             if (Log.Info()) {
                 Log.Info($"{e?.ChangeType} > {e?.FullPath}");
             }
-            var subs = Subscribers.ToList();
-            foreach (var sub in subs) {
+            Subscribers.ToList().ForEach(sub => {
                 var name = Path.GetFileName(sub.File);
                 if (name == e?.Name) {
+                    if (Log.Info()) {
+                        Log.Info($"{nameof(Subscribers.Remove)} > {sub.File}");
+                    }
                     sub.Invalidate();
                     Subscribers.Remove(sub);
                 }
-            }
+            });
         }
 
         private async ValueTask Ready(CancellationToken cancellationToken) {
@@ -50,6 +52,9 @@ namespace Brows.Config {
         }
 
         public static async Task Subscribe(ConfigFileInfo info, CancellationToken cancellationToken) {
+            if (Log.Info()) {
+                Log.Info($"{nameof(Subscribe)} > {info?.File}");
+            }
             await Instance.Ready(cancellationToken);
             Instance.Subscribers.Add(info);
         }

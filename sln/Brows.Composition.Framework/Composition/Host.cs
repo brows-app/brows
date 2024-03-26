@@ -15,21 +15,18 @@ namespace Brows.Composition {
     internal sealed class Host {
         private static readonly ILog Log = Logging.For(typeof(Host));
 
-        private TaskCache<IReadOnlyList<Export>> LoadCache =>
-            _LoadCache ?? (
-            _LoadCache = new TaskCache<IReadOnlyList<Export>>(LoadWork));
+        private TaskCache<IReadOnlyList<Export>> LoadCache => _LoadCache ??=
+            new TaskCache<IReadOnlyList<Export>>(LoadWork);
         private TaskCache<IReadOnlyList<Export>> _LoadCache;
 
-        private string BaseDirectory =>
-            _BaseDirectory ?? (
-            _BaseDirectory = AppContext.BaseDirectory);
+        private string BaseDirectory => _BaseDirectory ??=
+            AppContext.BaseDirectory;
         private string _BaseDirectory;
 
-        private string ExportDirectory =>
-            _ExportDirectory ?? (
-            _ExportDirectory = Path.Combine(
+        private string ExportDirectory => _ExportDirectory ??=
+            Path.Combine(
                 Path.GetDirectoryName(Environment.ProcessPath),
-                "brows.export"));
+                "brows.export");
         private string _ExportDirectory;
 
         private IReadOnlyList<Export> ExportFrom(Func<ReflectionContext, ComposablePartCatalog> factory) {
@@ -75,7 +72,7 @@ namespace Brows.Composition {
             return exports.SelectMany(e => e).ToList();
         }
 
-        public static readonly Host Current = new Host();
+        public static readonly Host Current = new();
 
         public async Task<IReadOnlyList<Export>> Load(CancellationToken token) {
             return await LoadCache.Ready(token);

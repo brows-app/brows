@@ -17,6 +17,10 @@ namespace Brows {
         public sealed override string Name { get; }
         public new DriveProvider Provider => base.Provider;
 
+        public char? Char => _Char ??=
+            Name.Length > 0 ? Name.ToUpperInvariant()[0] : default;
+        private char? _Char;
+
         public DriveInfo Info { get; }
         public DriveType Kind { get; }
 

@@ -10,27 +10,27 @@ namespace Brows {
         private static readonly ILog Log = Logging.For(typeof(CommanderDomain));
 
         private readonly object Locker = new();
-        private readonly List<Commander> Commanders = new List<Commander>();
+        private readonly List<Commander> Commanders = [];
         private CancellationTokenSource TokenSource;
 
-        private IConfig<CommanderConfig> Config =>
-            _Config ?? (
-            _Config = Configure.File<CommanderConfig>());
+        private MessageSetFactory Messages => _Messages ??=
+            new MessageSetFactory(Import.List<IMessageFactory>());
+        private MessageSetFactory _Messages;
+
+        private IConfig<CommanderConfig> Config => _Config ??=
+            Configure.File<CommanderConfig>();
         private IConfig<CommanderConfig> _Config;
 
-        private CommanderMessenger Messenger =>
-            _Messenger ?? (
-            _Messenger = new CommanderMessenger());
+        private CommanderMessenger Messenger => _Messenger ??=
+            new CommanderMessenger();
         private CommanderMessenger _Messenger;
 
-        private CommandCollection Commands =>
-            _Commands ?? (
-            _Commands = new CommandCollection(Import.List<ICommand>()));
+        private CommandCollection Commands => _Commands ??=
+            new CommandCollection(Import.List<ICommand>());
         private CommandCollection _Commands;
 
-        private ProviderFactorySet Providers =>
-            _Providers ?? (
-            _Providers = new ProviderFactorySet(Import.List<IProviderFactory>()));
+        private ProviderFactorySet Providers => _Providers ??=
+            new ProviderFactorySet(Import.List<IProviderFactory>());
         private ProviderFactorySet _Providers;
 
         private void Commander_Closed(object sender, EventArgs e) {
@@ -45,7 +45,7 @@ namespace Brows {
         }
 
         private Commander Commander(bool first, IReadOnlyList<string> load) {
-            var commander = new Commander(Providers, Commands, this) {
+            var commander = new Commander(Providers, Messages, Commands, this) {
                 First = first,
                 Load = load
             };

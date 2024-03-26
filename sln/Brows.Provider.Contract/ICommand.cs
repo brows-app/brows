@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
     public interface ICommand : IExport {
+        event EventHandler TriggerChanged;
         bool Enabled { get; }
         object Config { get; }
         ICommandTrigger Trigger { get; }

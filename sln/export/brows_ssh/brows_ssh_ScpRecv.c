@@ -52,12 +52,14 @@ brows_ssh_ScpRecv* brows_ssh_ScpRecv_create(brows_ssh_Conn* conn, const char* pa
         p->read = 0;
         p->path = path;
         brows_ssh_Chan_init(&p->base, conn, brows_ssh_ScpRecv_channel_factory);
+        brows_LOG_INFO("scp recv create > %s", p->path);
     }
     return p;
 }
 
 void brows_ssh_ScpRecv_destroy(brows_ssh_ScpRecv* p) {
     if (p) {
+        brows_LOG_INFO("scp recv destroy > %s", p->path);
         brows_ssh_Chan_free(&p->base);
         free(p);
     }
@@ -76,6 +78,7 @@ int64_t brows_ssh_ScpRecv_get_position(brows_ssh_ScpRecv* p) {
 brows_ERROR brows_ssh_ScpRecv_read(brows_ssh_ScpRecv* p, char* buf, size_t buf_len, size_t* result, brows_Canceler* cancel) {
     assert(p);
     assert(result);
+    brows_LOG_DEBUG("scp recv read > %zu > %s", buf_len, p->path);
     LIBSSH2_CHANNEL* channel = NULL;
     brows_ERROR get_channel_err = brows_ssh_Chan_get_channel(&p->base, cancel, &channel);
     if (get_channel_err) {
@@ -100,12 +103,13 @@ brows_ERROR brows_ssh_ScpRecv_read(brows_ssh_ScpRecv* p, char* buf, size_t buf_l
                 } 
                 continue;
             }
-            brows_LOG_ERROR("libssh2_channel_read > %d", read);
+            brows_LOG_ERROR("libssh2_channel_read > %z", read);
             return brows_ERROR_libssh2_channel_read;
         }
-        brows_LOG_DEBUG("libssh2_channel_read > %d", read);
+        brows_LOG_DEBUG("libssh2_channel_read > %z", read);
         p->read = read + p->read;
         *result = read;
+        brows_LOG_DEBUG("scp recv read > %z > %"PRId64, read, p->read);
         return brows_ERROR_NONE;
     }
 }

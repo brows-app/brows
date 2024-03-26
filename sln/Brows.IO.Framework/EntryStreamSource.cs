@@ -5,28 +5,13 @@ using System.Threading.Tasks;
 
 namespace Brows {
     public abstract class EntryStreamSource : IEntryStreamSource {
-        private readonly object Locker = new();
-        private bool Streamed;
-
-        private Stream Stream(bool @private) {
-            if (Streamed == false) {
-                lock (Locker) {
-                    if (Streamed == false) {
-                        Streamed = true;
-                        return Stream();
-                    }
-                }
-            }
-            throw new EntryStreamSourceUsedException(this);
-        }
-
+        protected Stream Stream { get; set; }
         protected IEntry Entry { get; }
 
         protected EntryStreamSource(IEntry entry) {
             Entry = entry ?? throw new ArgumentNullException(nameof(entry));
         }
 
-        protected abstract Stream Stream();
         protected virtual Task<IEntryStreamReady> StreamReady(CancellationToken token) {
             return Task.FromResult<IEntryStreamReady>(new EntryStreamReady());
         }
@@ -40,9 +25,8 @@ namespace Brows {
         public virtual string SourceFile => null;
         public virtual string SourceDirectory => null;
 
-        Stream IEntryStreamSource.Stream() {
-            return Stream(@private: true);
-        }
+        Stream IEntryStreamSource.Stream =>
+            Stream;
 
         Task<IEntryStreamReady> IEntryStreamSource.StreamReady(CancellationToken token) {
             return StreamReady(token);

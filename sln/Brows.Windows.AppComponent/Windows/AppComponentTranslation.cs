@@ -1,3 +1,4 @@
+using Domore.Threading.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,52 +8,54 @@ using System.Threading.Tasks;
 
 namespace Brows.Windows {
     public sealed class AppComponentTranslation : ITranslation {
-        private bool Loaded;
-        private readonly ConcurrentDictionary<string, string> Value = new ConcurrentDictionary<string, string>();
-        private readonly ConcurrentDictionary<string, IReadOnlySet<string>> Alias = new ConcurrentDictionary<string, IReadOnlySet<string>>();
+        private readonly ConcurrentDictionary<string, string> Value = new();
+        private readonly ConcurrentDictionary<string, IReadOnlySet<string>> Alias = new();
 
-        private async Task Load(CancellationToken cancellationToken) {
-            var coll = Collection;
-            var tasks = new List<Task>();
-            foreach (var item in coll) {
-                tasks.Add(item.Alias(cancellationToken));
-                tasks.Add(item.Translate(cancellationToken));
-            }
-            await Task.WhenAll(tasks);
-            foreach (var item in coll) {
-                var translate = await item.Translate(cancellationToken);
-                foreach (var t in translate) {
-                    Value[t.Key] = t.Value;
+        private TaskCache<AppComponentTranslation> Load => _Load ??=
+            new(async token => {
+                var comps = Components;
+                var tasks = new List<Task>();
+                foreach (var item in comps) {
+                    tasks.Add(item.Alias(token));
+                    tasks.Add(item.Translate(token));
                 }
-                var alias = await item.Alias(cancellationToken);
-                foreach (var a in alias) {
-                    if (Alias.TryGetValue(a.Key, out var value) == false) {
-                        Alias[a.Key] = value = new HashSet<string>();
+                await Task.WhenAll(tasks);
+                foreach (var item in comps) {
+                    var translate = await item.Translate(token);
+                    foreach (var t in translate) {
+                        Value[t.Key] = t.Value;
                     }
-                    var list = (ICollection<string>)value;
-                    foreach (var v in a.Value) {
-                        list.Add(v);
+                    var alias = await item.Alias(token);
+                    foreach (var a in alias) {
+                        if (Alias.TryGetValue(a.Key, out var value) == false) {
+                            Alias[a.Key] = value = new HashSet<string>();
+                        }
+                        var list = (ICollection<string>)value;
+                        foreach (var v in a.Value) {
+                            list.Add(v);
+                        }
                     }
                 }
-            }
-        }
+                return this;
+            });
+        private TaskCache<AppComponentTranslation> _Load;
 
         public object this[string key] =>
             Value.TryGetValue(key, out var value)
                 ? value
                 : null;
 
-        public AppComponentCollection Collection { get; }
+        private AppComponentCollection Components { get; }
 
-        public AppComponentTranslation(AppComponentCollection collection) {
-            Collection = collection ?? throw new ArgumentNullException(nameof(collection));
+        private AppComponentTranslation(AppComponentCollection collection) {
+            Components = collection ?? throw new ArgumentNullException(nameof(collection));
         }
 
-        public void Load() {
-            if (Loaded == false) {
-                Loaded = true;
-                Task.Run(async () => await Load(CancellationToken.None)).Wait();
-            }
+        public static async Task<AppComponentTranslation> Ready(AppComponentCollection components, CancellationToken token) {
+            var
+            @this = new AppComponentTranslation(components);
+            @this = await @this.Load.Ready(token);
+            return @this;
         }
 
         string ITranslation.Value(string key) {

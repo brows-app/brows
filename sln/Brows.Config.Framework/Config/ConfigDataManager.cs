@@ -5,26 +5,25 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Config {
-    internal class ConfigDataManager : IConfig {
+    internal abstract class ConfigDataManager : IConfig {
         public string ID { get; }
 
         public ConfigDataManager(string id) {
             ID = id;
         }
 
-        public class Of<TData> : ConfigDataManager, IConfig<TData> where TData : class, INotifyPropertyChanged, new() {
+        public sealed class Of<TData> : ConfigDataManager, IConfig<TData> where TData : class, INotifyPropertyChanged, new() {
             private int ChangeState;
             private readonly int ChangeDelay = 1000;
             private readonly SemaphoreSlim ChangeLocker = new(1, 1);
 
-            private TaskCache<TData> Cache =>
-                _Cache ?? (
-                _Cache = new TaskCache<TData>(async token => {
+            private TaskCache<TData> Cache => _Cache ??=
+                new TaskCache<TData>(async token => {
                     var
                     loaded = await Payload(new TData()).Load(token);
                     loaded.PropertyChanged += Loaded_PropertyChanged;
                     return loaded;
-                }));
+                });
             private TaskCache<TData> _Cache;
 
             private ConfigDataPayload<TData> Payload(TData data) {
@@ -57,6 +56,11 @@ namespace Brows.Config {
             public Task<TData> Load(CancellationToken token) {
                 return Cache.Ready(token);
             }
+        }
+
+        event EventHandler IConfig.Changed {
+            add { }
+            remove { }
         }
     }
 }

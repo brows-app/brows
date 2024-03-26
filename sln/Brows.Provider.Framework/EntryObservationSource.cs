@@ -5,8 +5,8 @@ using System.Collections.ObjectModel;
 
 namespace Brows {
     internal sealed class EntryObservationSource : Notifier {
-        private readonly HashSet<IEntry> Select = new();
-        private readonly ObservableCollection<IEntry> Collection = new();
+        private readonly HashSet<IEntry> Select = [];
+        private readonly ObservableCollection<IEntry> Collection = [];
 
         private void SelectChanged() {
             SelectionChanged?.Invoke(this, EventArgs.Empty);
@@ -59,7 +59,6 @@ namespace Brows {
 
         public event EventHandler DropChanged;
         public event EventHandler SelectionChanged;
-        public event EventHandler ObservationChanged;
 
         public object Items =>
             Collection;
@@ -107,7 +106,6 @@ namespace Brows {
         public void End() {
             DropChanged = null;
             SelectionChanged = null;
-            ObservationChanged = null;
         }
     }
 }

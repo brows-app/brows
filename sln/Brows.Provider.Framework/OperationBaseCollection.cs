@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Brows {
     internal sealed class OperationBaseCollection : IEnumerable<OperationBase> {
-        private readonly ObservableCollection<OperationBase> Observable = new();
+        private readonly ObservableCollection<OperationBase> Observable = [];
 
         public object Source =>
             Observable;

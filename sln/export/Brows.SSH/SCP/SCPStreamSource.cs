@@ -1,25 +1,24 @@
 ﻿using Brows.SSH;
 using Brows.SSH.Native;
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.SCP {
     internal sealed class SCPStreamSource : EntryStreamSource<SSHEntry> {
-        private ScpRecv SCPRecv;
-
-        protected sealed override Stream Stream() {
-            return Entry.Info.Kind == SSHEntryKind.File
-                ? SCPRecv?.Stream()
-                : null;
-        }
-
         protected sealed override async Task<IEntryStreamReady> StreamReady(CancellationToken token) {
-            var path = Entry.Info.Path;
-            var scpRecv = await Client.SCPRecv(path, token);
-            SCPRecv = scpRecv;
-            return new Disposable(SCPRecv);
+            if (Entry.Info.Kind == SSHEntryKind.File) {
+                var path = Entry.Info.Path;
+                var cancel = BrowsCanceler.From(token);
+                var scpRecv = await Client.SCPRecv(path, token);
+                var scpRecvReady = Task.Run(cancellationToken: token, action: () => {
+                    scpRecv.Ready(cancel);
+                });
+                await scpRecvReady;
+                Stream = scpRecv.Stream();
+                return new Disposable(scpRecv);
+            }
+            return await base.StreamReady(token);
         }
 
         public sealed override string RelativePath =>

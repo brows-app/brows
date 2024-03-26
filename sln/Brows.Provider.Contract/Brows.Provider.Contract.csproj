@@ -3,6 +3,7 @@
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\Brows.Composition.Contract\Brows.Composition.Contract.csproj" />
+      <ProjectReference Include="..\Brows.Message.Contract\Brows.Message.Contract.csproj" />
       <ProjectReference Include="..\Brows.Trigger.Contract\Brows.Trigger.Contract.csproj" />
     </ItemGroup>
 </Project>

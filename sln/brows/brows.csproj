@@ -12,6 +12,8 @@
     <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
     <ProjectReference Include="..\Brows.Config.Contract\Brows.Config.Contract.csproj" />
     <ProjectReference Include="..\Brows.Config.Framework\Brows.Config.Framework.csproj" />
+    <ProjectReference Include="..\Brows.Message.Contract\Brows.Message.Contract.csproj" />
+    <ProjectReference Include="..\Brows.Message.Framework\Brows.Message.Framework.csproj" />
     <ProjectReference Include="..\Brows.Native.Framework\Brows.Native.Framework.csproj" />
     <ProjectReference Include="..\Brows.Provider.Contract\Brows.Provider.Contract.csproj" />
     <ProjectReference Include="..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
@@ -58,8 +60,9 @@
     <None Remove="brows.config\program.conf" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Domore.Logs" Version="8.0.3.94" />
-    <PackageReference Include="Domore.Logs.Conf" Version="8.0.3.94" />
+    <PackageReference Include="Domore.Conf.Cli" Version="8.0.4.95" />
+    <PackageReference Include="Domore.Logs" Version="8.0.4.95" />
+    <PackageReference Include="Domore.Logs.Conf" Version="8.0.4.95" />
   </ItemGroup>
   <Target Name="GetTargetPath" Returns="@(Brows_SetupOutputPath)">
     <ItemGroup Condition="'$(OutputType)' == 'Library'">

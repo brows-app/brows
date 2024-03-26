@@ -4,6 +4,9 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
     <ItemGroup>
+      <PackageReference Include="Domore.Async.TaskCaching" Version="8.0.4.95" />
+    </ItemGroup>
+    <ItemGroup>
       <ProjectReference Include="..\Brows.Translation.Contract\Brows.Translation.Contract.csproj" />
     </ItemGroup>
 </Project>

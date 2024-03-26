@@ -12,6 +12,7 @@ namespace Brows {
         void End();
         void Refresh();
         Task Refresh(CancellationToken token);
+        Task<bool> Take(IMessage message, CancellationToken token);
         Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token);
         TExport Import<TExport>() where TExport : IProviderExport;
     }

@@ -62,8 +62,8 @@ struct brows_Canceler {
 
 brows_native    brows_ERROR                     brows_init(void);
 brows_native    brows_ERROR                     brows_log(brows_LogLevel, const char*, ...);
-brows_native    void                            brows_logged(void (*)(brows_LogLevel, const char*));
-brows_native    void                            brows_logging(int32_t (*)(brows_LogLevel));
+brows_native    void                            brows_logged(brows_ERROR(*)(brows_LogLevel, const char*));
+brows_native    void                            brows_logging(int32_t(*)(brows_LogLevel));
 
 brows_native    int32_t                         brows_canceled(brows_Canceler*);
 

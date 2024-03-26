@@ -169,6 +169,8 @@ namespace Brows {
             await Task.CompletedTask;
         }
 
+        public event EventHandler TriggerChanged;
+
         public virtual string HelpLine => CommandTranslation.Help(Name);
         public virtual string ConfText => CommandTranslation.Conf(this);
 
@@ -211,6 +213,10 @@ namespace Brows {
                 Log.Info(Log.Join(nameof(Init), this));
             }
             Trigger = await CommandTrigger.For(this, token);
+            CommandTrigger.Changed += (s, e) => {
+                Trigger = CommandTrigger.For(this);
+                TriggerChanged?.Invoke(this, EventArgs.Empty);
+            };
             await Init(token);
         }
     }

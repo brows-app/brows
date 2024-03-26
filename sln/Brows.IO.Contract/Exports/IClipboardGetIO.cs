@@ -4,6 +4,6 @@ using System.Threading.Tasks;
 
 namespace Brows.Exports {
     public interface IClipboardGetIO : IExport {
-        Task<bool> Work(ICollection<IProvidedIO> collection, IOperationProgress progress, CancellationToken token);
+        Task<bool> Work(ICollection<IProvidedIO> collection, IClipboardGetIOData data, IOperationProgress progress, CancellationToken token);
     }
 }

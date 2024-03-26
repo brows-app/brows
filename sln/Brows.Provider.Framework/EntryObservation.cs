@@ -63,7 +63,6 @@ namespace Brows {
                     _Collection = new();
                     _Collection.DropChanged += Collection_DropChanged;
                     _Collection.SelectionChanged += Collection_SelectionChanged;
-                    _Collection.ObservationChanged += Collection_ObservationChanged;
                 }
                 return _Collection;
             }
@@ -159,14 +158,12 @@ namespace Brows {
         public event EventHandler ObservedChanged;
         public event EventHandler ControllerChanged;
 
-        public EntryDataView DataView =>
-            _DataView ?? (
-            _DataView = new EntryDataView(Provider, Collection));
+        public EntryDataView DataView => _DataView ??=
+            new EntryDataView(Provider, Collection);
         private EntryDataView _DataView;
 
-        public object SortCommand =>
-            _SortCommand ?? (
-            _SortCommand = Request.Create(key => {
+        public object SortCommand => _SortCommand ??=
+            Request.Create(key => {
                 var k = $"{key}";
                 var sorting = DataView.Sorting;
                 var direction = sorting.TryGetValue(k, out var d)
@@ -177,7 +174,7 @@ namespace Brows {
                     direction == EntrySortDirection.Ascending ? EntrySortDirection.Descending :
                     null;
                 DataView.Sort(sorting.Change(k, direction));
-            }));
+            });
         private object _SortCommand;
 
         public object Source =>
@@ -223,7 +220,6 @@ namespace Brows {
             ObservedChanged = null;
             Collection.DropChanged -= Collection_DropChanged;
             Collection.SelectionChanged -= Collection_SelectionChanged;
-            Collection.ObservationChanged -= Collection_ObservationChanged;
             Collection.Clear();
             Collection.End();
         }

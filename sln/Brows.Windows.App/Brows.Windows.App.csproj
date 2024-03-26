@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>net8.0-windows</TargetFrameworks>
-        <UseWPF>true</UseWPF>
-    </PropertyGroup>
-    <ItemGroup>
-      <Resource Include="..\..\splash.png" Link="splash.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Brows.Commander.Gui\Brows.Commander.Gui.csproj" />
-        <ProjectReference Include="..\Brows.Logs\Brows.Logs.csproj" />
-        <ProjectReference Include="..\Brows.Program.Framework\Brows.Program.Framework.csproj" />
-        <ProjectReference Include="..\domore\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="..\..\splash.png" Link="splash.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Commander.Gui\Brows.Commander.Gui.csproj" />
+    <ProjectReference Include="..\Brows.Logs\Brows.Logs.csproj" />
+    <ProjectReference Include="..\Brows.Program.Framework\Brows.Program.Framework.csproj" />
+    <ProjectReference Include="..\domore\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
+  </ItemGroup>
 </Project>

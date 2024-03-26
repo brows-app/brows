@@ -149,6 +149,7 @@ namespace Brows {
             public string SourceFile => Node.Info?.FullName;
             public string SourceDirectory => null;
             public long StreamLength => 0;
+            public Stream Stream => null;
 
             public FileSystemTreeNode Node { get; }
 
@@ -158,10 +159,6 @@ namespace Brows {
 
             public Task<IEntryStreamReady> StreamReady(CancellationToken token) {
                 return Task.FromResult<IEntryStreamReady>(new EntryStreamReady());
-            }
-
-            public Stream Stream() {
-                return null;
             }
         }
 

@@ -17,6 +17,9 @@ namespace Brows.SSH.Native {
         [DllImport(SSHNative.Dll, CallingConvention = SSHNative.Call)]
         private static extern int brows_ssh_Chan_flush(IntPtr p, int stream_id, ref BrowsCanceler cancel);
 
+        [DllImport(SSHNative.Dll, CallingConvention = SSHNative.Call)]
+        private static extern int brows_ssh_Chan_ready(IntPtr p, ref BrowsCanceler cancel);
+
         public Encoding Encoding {
             get => _Encoding ?? (_Encoding = Encoding.UTF8);
             set => _Encoding = value;
@@ -45,6 +48,10 @@ namespace Brows.SSH.Native {
                 Log.Debug(Log.Join(nameof(Flush), streamID));
             }
             Try(() => brows_ssh_Chan_flush(GetHandle(), streamID, ref cancel));
+        }
+
+        public void Ready(BrowsCanceler cancel) {
+            Try(() => brows_ssh_Chan_ready(GetHandle(), ref cancel));
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,31 +11,27 @@ namespace Brows {
             var set = entryStreamSet;
             using
             var sourcesReady = set.StreamSourceReady();
-            var sources = set.StreamSource()?.Where(s => s != null)?.ToList();
-            if (sources == null) return;
-            if (sources.Count == 0) {
+            var sources = set.StreamSource(token);
+            if (sources == null) {
                 return;
             }
-            if (progress != null) {
-                progress.Change(addTarget: sources.Count);
-            }
-            foreach (var source in sources) {
+            await foreach (var source in sources) {
                 if (token.IsCancellationRequested) {
                     token.ThrowIfCancellationRequested();
+                }
+                if (source == null) {
+                    continue;
                 }
                 if (progress != null) {
                     progress.Change(data: source.EntryName);
                 }
                 using (var streamReady = await source.StreamReady(token)) {
-                    await using (var stream = source.Stream()) {
+                    await using (var stream = source.Stream) {
                         var task = consuming(source, stream, progress, token);
                         if (task != null) {
                             await task;
                         }
                     }
-                }
-                if (progress != null) {
-                    progress.Change(1);
                 }
             }
         }

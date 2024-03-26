@@ -37,6 +37,26 @@ namespace Brows.Commands {
             if (context.HasInput(out var input) == false) {
                 yield break;
             }
+            var mightBeEnvVar = input.Length > 0 && input[0] == '%';
+            if (mightBeEnvVar) {
+                var inp = input.Length > 2 && input.EndsWith('%')
+                    ? input.Substring(1, input.Length - 2)
+                    : input.Length > 1
+                        ? input.Substring(1)
+                        : "";
+                var envVars = await DirectoryX.EnvironmentVariablePaths(token);
+                foreach (var envVar in envVars) {
+                    if (token.IsCancellationRequested) {
+                        token.ThrowIfCancellationRequested();
+                    }
+                    var name = envVar.Key;
+                    var suggest = name.StartsWith(inp, StringComparison.OrdinalIgnoreCase);
+                    if (suggest) {
+                        yield return Suggestion(context, new DirectoryItem { Name = name, Path = envVar.Value });
+                    }
+                }
+                yield break;
+            }
             var lengthIsSufficient = input.Length >= Opt.InputLengthTrigger;
             if (lengthIsSufficient == false) {
                 yield break;
@@ -144,8 +164,8 @@ namespace Brows.Commands {
         }
 
         private sealed class DirectoryItem {
-            public string Path { get; private init; }
-            public string Name { get; private init; }
+            public string Path { get; init; }
+            public string Name { get; init; }
 
             public static DirectoryItem From(DirectoryInfo info) {
                 if (null == info) throw new ArgumentNullException(nameof(info));

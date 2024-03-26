@@ -2,10 +2,104 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows.SSH.Native {
     internal abstract class ChanStream : Stream {
         private static readonly ILog Log = Logging.For(typeof(ChanStream));
+
+        private int PrivateRead(byte[] buffer, int offset, int count, CancellationToken token) {
+            if (buffer is null) throw new ArgumentNullException(nameof(buffer));
+            if (buffer.Length < (offset + count)) throw new ArgumentException();
+
+            if (count < 0) throw new ArgumentOutOfRangeException(paramName: nameof(count));
+            if (offset < 0) throw new ArgumentOutOfRangeException(paramName: nameof(offset));
+#if DEBUG
+            if (Log.Debug()) {
+                Log.Debug($"{nameof(PrivateRead)} length:[{buffer.Length}] offset:[{offset}] count:[{count}]");
+            }
+#endif
+            var pin = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            try {
+                var address = pin.AddrOfPinnedObject();
+                var pointer = address + offset;
+#if DEBUG
+                if (Log.Debug()) {
+                    Log.Debug($"{nameof(PrivateRead)} address:[{address}] pointer:[{pointer}]");
+                }
+#endif
+                var canceler = BrowsCanceler.From(token);
+                for (; ; ) {
+                    var read = NativeRead(Chan.GetHandle(), StreamID, pointer, (nuint)count, canceler);
+#if DEBUG
+                    if (Log.Debug()) {
+                        Log.Debug($"{nameof(PrivateRead)} read:[{read}]");
+                    }
+#endif
+                    if (read == 0) {
+                        if (count == 0) {
+                            return 0;
+                        }
+                        var eof = Chan.EOF(canceler);
+                        if (eof) {
+                            return 0;
+                        }
+                        //continue;
+                        //Chan.EOF is returning false even thought I think it should be true...
+                        return 0;
+                    }
+                    return (int)read;
+                }
+            }
+            finally {
+                pin.Free();
+            }
+        }
+
+        private void PrivateWrite(byte[] buffer, int offset, int count, CancellationToken token) {
+#if DEBUG
+            if (Log.Debug()) {
+                Log.Debug($"{nameof(PrivateWrite)} length:[{buffer?.Length}] offset:[{offset}] count:[{count}]");
+            }
+#endif
+            var pin = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            try {
+                var address = pin.AddrOfPinnedObject();
+                var pointer = address + offset;
+#if DEBUG
+                if (Log.Debug()) {
+                    Log.Debug($"{nameof(PrivateWrite)} address:[{address}] pointer:[{pointer}]");
+                }
+#endif
+                var canceler = BrowsCanceler.From(token);
+                var totalWrite = default(nint);
+                var originalCount = count;
+                for (; ; ) {
+                    var write = NativeWrite(Chan.GetHandle(), StreamID, pointer, (nuint)count, canceler);
+#if DEBUG
+                    if (Log.Debug()) {
+                        Log.Debug($"{nameof(PrivateWrite)} write:[{write}]");
+                    }
+#endif
+                    var thisWrite = (nint)write;
+                    var totalWritten = totalWrite += thisWrite;
+                    if (totalWritten >= originalCount) {
+                        break;
+                    }
+                    count -= (int)thisWrite;
+                    pointer += thisWrite;
+#if DEBUG
+                    if (Log.Debug()) {
+                        Log.Debug($"{nameof(PrivateWrite)} pointer:[{pointer}] tally:[{totalWrite}] remain:[{count}]");
+                    }
+#endif
+                }
+            }
+            finally {
+                pin.Free();
+            }
+        }
 
         protected virtual nuint NativeRead(IntPtr p, int streamID, IntPtr buf, nuint bufLen, BrowsCanceler cancel) {
             throw new NotSupportedException();
@@ -52,95 +146,23 @@ namespace Brows.SSH.Native {
         }
 
         public sealed override int Read(byte[] buffer, int offset, int count) {
-            if (buffer is null) throw new ArgumentNullException(nameof(buffer));
-            if (buffer.Length < (offset + count)) throw new ArgumentException();
+            return PrivateRead(buffer, offset, count, CancellationToken.None);
+        }
 
-            if (count < 0) throw new ArgumentOutOfRangeException(paramName: nameof(count));
-            if (offset < 0) throw new ArgumentOutOfRangeException(paramName: nameof(offset));
-#if DEBUG
-            if (Log.Debug()) {
-                Log.Debug($"{nameof(Read)} length:[{buffer.Length}] offset:[{offset}] count:[{count}]");
-            }
-#endif
-            var pin = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            try {
-                var address = pin.AddrOfPinnedObject();
-                var pointer = address + offset;
-#if DEBUG
-                if (Log.Debug()) {
-                    Log.Debug($"{nameof(Read)} address:[{address}] pointer:[{pointer}]");
-                }
-#endif
-                var canceler = BrowsCanceler.None;
-                for (; ; ) {
-                    var read = NativeRead(Chan.GetHandle(), StreamID, pointer, (nuint)count, canceler);
-#if DEBUG
-                    if (Log.Debug()) {
-                        Log.Debug($"{nameof(Read)} read:[{read}]");
-                    }
-#endif
-                    if (read == 0) {
-                        if (count == 0) {
-                            return 0;
-                        }
-                        var eof = Chan.EOF(canceler);
-                        if (eof) {
-                            return 0;
-                        }
-                        //continue;
-                        //Chan.EOF is returning false even thought I think it should be true...
-                        return 0;
-                    }
-                    return (int)read;
-                }
-            }
-            finally {
-                pin.Free();
-            }
+        public sealed override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) {
+            return await Task.Run(cancellationToken: cancellationToken, function: () => {
+                return PrivateRead(buffer, offset, count, cancellationToken);
+            });
         }
 
         public sealed override void Write(byte[] buffer, int offset, int count) {
-#if DEBUG
-            if (Log.Debug()) {
-                Log.Debug($"{nameof(Write)} length:[{buffer?.Length}] offset:[{offset}] count:[{count}]");
-            }
-#endif
-            var pin = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            try {
-                var address = pin.AddrOfPinnedObject();
-                var pointer = address + offset;
-#if DEBUG
-                if (Log.Debug()) {
-                    Log.Debug($"{nameof(Write)} address:[{address}] pointer:[{pointer}]");
-                }
-#endif
-                var canceler = BrowsCanceler.None;
-                var totalWrite = default(nint);
-                var originalCount = count;
-                for (; ; ) {
-                    var write = NativeWrite(Chan.GetHandle(), StreamID, pointer, (nuint)count, canceler);
-#if DEBUG
-                    if (Log.Debug()) {
-                        Log.Debug($"{nameof(Write)} write:[{write}]");
-                    }
-#endif
-                    var thisWrite = (nint)write;
-                    var totalWritten = totalWrite += thisWrite;
-                    if (totalWritten >= originalCount) {
-                        break;
-                    }
-                    count -= (int)thisWrite;
-                    pointer += thisWrite;
-#if DEBUG
-                    if (Log.Debug()) {
-                        Log.Debug($"{nameof(Write)} pointer:[{pointer}] tally:[{totalWrite}] remain:[{count}]");
-                    }
-#endif
-                }
-            }
-            finally {
-                pin.Free();
-            }
+            PrivateWrite(buffer, offset, count, CancellationToken.None);
+        }
+
+        public sealed override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) {
+            await Task.Run(cancellationToken: cancellationToken, action: () => {
+                PrivateWrite(buffer, offset, count, cancellationToken);
+            });
         }
     }
 }

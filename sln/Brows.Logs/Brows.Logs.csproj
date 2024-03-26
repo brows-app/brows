@@ -2,6 +2,6 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Domore.Logs" Version="8.0.3.94" />
+        <PackageReference Include="Domore.Logs" Version="8.0.4.95" />
     </ItemGroup>
 </Project>

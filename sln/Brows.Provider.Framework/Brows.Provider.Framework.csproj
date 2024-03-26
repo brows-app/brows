@@ -2,8 +2,8 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Domore.Conf.Cli" Version="8.0.3.94" />
-      <PackageReference Include="Domore.Notification" Version="8.0.3.94" />
+      <PackageReference Include="Domore.Conf.Cli" Version="8.0.4.95" />
+      <PackageReference Include="Domore.Notification" Version="8.0.4.95" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Brows.Composition.Contract\Brows.Composition.Contract.csproj" />

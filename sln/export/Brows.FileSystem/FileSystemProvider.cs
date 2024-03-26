@@ -203,6 +203,19 @@ namespace Brows {
             return false;
         }
 
+        protected sealed override async Task<bool> Take(IMessage message, CancellationToken token) {
+            if (message is DeviceChange deviceChange) {
+                if (deviceChange.Info is DeviceChangeVolume volume) {
+                    var affected = await volume.Affects(Directory, token);
+                    if (affected == true) {
+                        await Change(Drives.ID, token);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
         protected sealed override void Dispose(bool disposing) {
             if (disposing) {
                 using (ThisEvent)
@@ -345,46 +358,47 @@ namespace Brows {
                     }
                     return await service.Work(files, provider.Directory.FullName, progress, token);
                 }
-                var streams = io.StreamSets();
-                if (streams.Count > 0) {
-                    var directory = provider.Directory.FullName;
-                    await Task.WhenAll(streams.Select(set => Task.Run(cancellationToken: token, function: async () => {
-                        await set.Consume(progress: progress, token: token,
-                            consuming: async (source, stream, progress, token) => {
-                                var relativePath = source.RelativePath?.Trim()?.Trim(PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar) ?? "";
-                                if (relativePath != "") {
-                                    if (stream == null) {
-                                        var sourceDirectory = source.SourceDirectory;
-                                        if (sourceDirectory != null) {
-                                            var directoryInfo = new DirectoryInfo(PATH.Combine(directory, relativePath));
-                                            if (directoryInfo.Exists == false) {
-                                                DIRECTORY.CreateDirectory(directoryInfo.FullName);
-                                            }
-                                        }
-                                    }
-                                    else {
-                                        var ext = PATH.GetExtension(relativePath);
-                                        var fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
-                                        for (; ; ) {
-                                            if (fileInfo.Exists == false) {
-                                                if (DIRECTORY.Exists(fileInfo.DirectoryName) == false) {
-                                                    DIRECTORY.CreateDirectory(fileInfo.DirectoryName);
-                                                }
-                                                break;
-                                            }
-                                            relativePath = relativePath + ".copy" + ext;
-                                            fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
-                                        }
-                                        await using (var file = fileInfo.Create()) {
-                                            await stream.CopyToAsync(file, token);
-                                        }
-                                    }
-                                }
-                            });
-                    })));
-                    return true;
+                if (progress != null) {
+                    progress.Change(kind: OperationProgressKind.FileSize);
                 }
-                return false;
+                var streams = io.StreamSets();
+                if (streams.Count == 0) {
+                    return false;
+                }
+                var directory = provider.Directory.FullName;
+                await Task.WhenAll(streams.Select(set => set.Consume(progress: progress, token: token, consuming: async (source, stream, progress, token) => {
+                    var relativePath = source.RelativePath?.Trim()?.Trim(PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar) ?? "";
+                    if (relativePath == "") {
+                        return;
+                    }
+                    if (stream == null) {
+                        var sourceDirectory = source.SourceDirectory;
+                        if (sourceDirectory != null) {
+                            var path = PATH.Combine(directory, relativePath);
+                            await FileSystemTask.CreateDirectory(path, token);
+                        }
+                        return;
+                    }
+                    var fileInfo = await Task.Run(cancellationToken: token, function: () => {
+                        var ext = PATH.GetExtension(relativePath);
+                        var fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
+                        for (; ; ) {
+                            if (fileInfo.Exists == false) {
+                                if (DIRECTORY.Exists(fileInfo.DirectoryName) == false) {
+                                    DIRECTORY.CreateDirectory(fileInfo.DirectoryName);
+                                }
+                                return fileInfo;
+                            }
+                            relativePath = relativePath + ".copy" + ext;
+                            fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
+                        }
+                    });
+                    await progress.Child(relativePath, OperationProgressKind.FileSize, async (progress, token) => {
+                        await using var destination = await Task.Run(cancellationToken: token, function: fileInfo.Create);
+                        await progress.Copy(stream, destination, token);
+                    });
+                })));
+                return true;
             }
         }
 

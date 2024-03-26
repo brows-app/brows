@@ -2,7 +2,8 @@
 
 namespace Brows {
     public interface IProgramCommand {
-        string Line { get; }
+        string CommandLine { get; }
         IReadOnlyList<string> Args { get; }
+        T Configure<T>(T target);
     }
 }

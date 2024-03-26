@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace Brows.Exports {
     internal sealed class ClipboardSetIO : IClipboardSetIO {
-        private readonly Win32ClipboardData ClipboardData = Win32ClipboardData.Instance;
+        private readonly ClipboardData ClipboardData = ClipboardData.Instance;
 
-        public async Task<bool> Work(IEnumerable<IProvidedIO> collection, IOperationProgress progress, CancellationToken token) {
+        public async Task<bool> Work(IEnumerable<IProvidedIO> collection, IClipboardSetIOData data, IOperationProgress progress, CancellationToken token) {
             if (collection is null) return false;
             var files = collection.FileSources();
             var streamSets = collection.StreamSets();
@@ -16,16 +17,16 @@ namespace Brows.Exports {
                 return false;
             }
             Clipboard.Clear();
-            ClipboardData.Clear();
-            var
-            fileDropList = new StringCollection();
-            foreach (var f in files) {
-                fileDropList.Add(f);
+            ClipboardData.Reset();
+            ClipboardData.PreferredDropEffect = data?.MoveOnPaste == true
+                ? DragDropEffects.Move
+                : DragDropEffects.Copy;
+            if (files.Count > 0) {
+                var fileArr = files.ToArray();
+                var fileLst = new StringCollection();
+                fileLst.AddRange(fileArr);
+                Clipboard.SetFileDropList(fileLst);
             }
-            if (fileDropList.Count > 0) {
-                Clipboard.SetFileDropList(fileDropList);
-            }
-            ClipboardData.Add(streamSets);
             await Task.CompletedTask;
             return true;
         }

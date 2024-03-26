@@ -6,16 +6,16 @@ using System.Windows.Media.Imaging;
 
 namespace Brows.Extensions {
     internal static class EntryStreamSourceExtension {
-        public static async Task<BitmapImage> Image(this IEntryStreamSource entryStreamSource, CancellationToken cancellationToken) {
+        public static async Task<BitmapImage> Image(this IEntryStreamSource entryStreamSource, CancellationToken token) {
             if (entryStreamSource is null) throw new ArgumentNullException(nameof(entryStreamSource));
-            var entryStreamMemory = await Task.Run(cancellationToken: cancellationToken, function: async () => {
-                using (await entryStreamSource.StreamReady(cancellationToken)) {
-                    await using (var stream = entryStreamSource.Stream()) {
+            var entryStreamMemory = await Task.Run(cancellationToken: token, function: async () => {
+                using (await entryStreamSource.StreamReady(token)) {
+                    await using (var stream = entryStreamSource.Stream) {
                         if (stream == null) {
                             return null;
                         }
                         var memory = new MemoryStream();
-                        await stream.CopyToAsync(memory, cancellationToken);
+                        await stream.CopyToAsync(memory, token);
                         return memory;
                     }
                 }

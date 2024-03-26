@@ -6,7 +6,7 @@ using System.Windows.Interop;
 namespace Brows.Gui {
     internal class CommanderController : Controller<ICommanderController>, ICommanderController {
         private Window Window;
-        private object WindowHandle;
+        private IntPtr WindowHandle;
 
         private void Window_Closed(object sender, EventArgs e) {
             WindowClosed?.Invoke(this, e);
@@ -49,11 +49,23 @@ namespace Brows.Gui {
         }
 
         protected override void OnLoaded(EventArgs e) {
-            Window = Window.GetWindow(Element);
-            Window.Closed += Window_Closed;
-            Window.PreviewKeyDown += Window_PreviewKeyDown;
-            Window.PreviewTextInput += Window_PreviewTextInput;
-            Window.PreviewMouseDoubleClick += Window_PreviewMouseDoubleClick;
+            var newWindow = Window.GetWindow(Element);
+            var oldWindow = Window;
+            if (oldWindow != newWindow) {
+                if (oldWindow != null) {
+                    oldWindow.Closed -= Window_Closed;
+                    oldWindow.PreviewKeyDown -= Window_PreviewKeyDown;
+                    oldWindow.PreviewTextInput -= Window_PreviewTextInput;
+                    oldWindow.PreviewMouseDoubleClick -= Window_PreviewMouseDoubleClick;
+                }
+                if (newWindow != null) {
+                    newWindow.Closed += Window_Closed;
+                    newWindow.PreviewKeyDown += Window_PreviewKeyDown;
+                    newWindow.PreviewTextInput += Window_PreviewTextInput;
+                    newWindow.PreviewMouseDoubleClick += Window_PreviewMouseDoubleClick;
+                }
+            }
+            Window = newWindow;
             WindowHandle = new WindowInteropHelper(Window).Handle;
             base.OnLoaded(e);
         }
@@ -67,7 +79,7 @@ namespace Brows.Gui {
                 window.PreviewMouseDoubleClick -= Window_PreviewMouseDoubleClick;
             }
             Window = null;
-            WindowHandle = null;
+            WindowHandle = 0;
             base.OnUnloaded(e);
         }
 
@@ -87,7 +99,8 @@ namespace Brows.Gui {
         }
 
         object ICommanderController.NativeWindow() {
-            return WindowHandle;
+            var h = WindowHandle;
+            return h == IntPtr.Zero ? default(object) : h;
         }
     }
 }

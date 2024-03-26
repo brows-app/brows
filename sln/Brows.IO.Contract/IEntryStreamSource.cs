@@ -10,7 +10,7 @@ namespace Brows {
         string SourceFile { get; }
         string SourceDirectory { get; }
         long StreamLength { get; }
-        Stream Stream();
+        Stream Stream { get; }
         Task<IEntryStreamReady> StreamReady(CancellationToken token);
     }
 }

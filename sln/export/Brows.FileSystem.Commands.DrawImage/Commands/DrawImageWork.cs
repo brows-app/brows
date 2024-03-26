@@ -28,12 +28,11 @@ namespace Brows.Commands {
             ThreadPool = threadPool ?? throw new ArgumentNullException(nameof(threadPool));
         }
 
-        public async Task<bool> Run(IOperationProgress progress, CancellationToken token) {
-            foreach (var info in Info) {
-                if (token.IsCancellationRequested) {
-                    token.ThrowIfCancellationRequested();
-                }
-                progress.Child(info.Name, async (progress, token) => {
+        public Task<bool> Run(IOperationProgress progress, CancellationToken token) {
+            ArgumentNullException.ThrowIfNull(progress);
+            return progress.Children(Info, info => (info.Name, OperationProgressKind.None, async (progress, t) => {
+                async Task work(FileSystemInfo info, IOperationProgress progress, CancellationToken token) {
+                    ArgumentNullException.ThrowIfNull(progress);
                     token.ThrowIfCancellationRequested();
                     progress.Change(addTarget: 2);
                     if (info is FileInfo file) {
@@ -54,9 +53,12 @@ namespace Brows.Commands {
                     else {
                         throw new DrawImageInfoIsNotFileException(info);
                     }
-                });
+                }
+                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, t)) {
+                    await work(info, progress, tokenSource.Token);
+                }
             }
-            return await Task.FromResult(true);
+            ));
         }
 
         private sealed class DrawImageInfoIsNotFileException : Exception {

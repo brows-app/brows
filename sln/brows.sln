@@ -269,6 +269,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.FileSystem.Commands.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.FileSystem.Commands.DirectoryFound", "export\Brows.FileSystem.Commands.DirectoryFound\Brows.FileSystem.Commands.DirectoryFound.csproj", "{028CACCA-9157-48A3-8C45-6A16170054B4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "brows_runtime_win32", "export\brows_runtime_win32\brows_runtime_win32.vcxproj", "{7425A2C8-A4E2-4390-B936-FFE17D4E345F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{498B8ECC-336E-4040-8CE6-E92B3F4B849B} = {498B8ECC-336E-4040-8CE6-E92B3F4B849B}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Message.Contract", "Brows.Message.Contract\Brows.Message.Contract.csproj", "{1AC675D7-E41A-4BDD-9407-D3D7D68A69F6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brows.Message.Framework", "Brows.Message.Framework\Brows.Message.Framework.csproj", "{D99D74C8-D2B9-4010-913C-ECDA9440736E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -619,6 +628,18 @@ Global
 		{028CACCA-9157-48A3-8C45-6A16170054B4}.Debug|x64.Build.0 = Debug|Any CPU
 		{028CACCA-9157-48A3-8C45-6A16170054B4}.Release|x64.ActiveCfg = Release|Any CPU
 		{028CACCA-9157-48A3-8C45-6A16170054B4}.Release|x64.Build.0 = Release|Any CPU
+		{7425A2C8-A4E2-4390-B936-FFE17D4E345F}.Debug|x64.ActiveCfg = Debug|x64
+		{7425A2C8-A4E2-4390-B936-FFE17D4E345F}.Debug|x64.Build.0 = Debug|x64
+		{7425A2C8-A4E2-4390-B936-FFE17D4E345F}.Release|x64.ActiveCfg = Release|x64
+		{7425A2C8-A4E2-4390-B936-FFE17D4E345F}.Release|x64.Build.0 = Release|x64
+		{1AC675D7-E41A-4BDD-9407-D3D7D68A69F6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1AC675D7-E41A-4BDD-9407-D3D7D68A69F6}.Debug|x64.Build.0 = Debug|Any CPU
+		{1AC675D7-E41A-4BDD-9407-D3D7D68A69F6}.Release|x64.ActiveCfg = Release|Any CPU
+		{1AC675D7-E41A-4BDD-9407-D3D7D68A69F6}.Release|x64.Build.0 = Release|Any CPU
+		{D99D74C8-D2B9-4010-913C-ECDA9440736E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D99D74C8-D2B9-4010-913C-ECDA9440736E}.Debug|x64.Build.0 = Debug|Any CPU
+		{D99D74C8-D2B9-4010-913C-ECDA9440736E}.Release|x64.ActiveCfg = Release|Any CPU
+		{D99D74C8-D2B9-4010-913C-ECDA9440736E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -717,6 +738,9 @@ Global
 		{1F58679F-CECE-495D-8F42-18270580BA8F} = {8A41031D-4C50-4B11-B214-4A71702D58CD}
 		{45788DAE-01A7-4E87-91EA-545DC9F593ED} = {8A41031D-4C50-4B11-B214-4A71702D58CD}
 		{028CACCA-9157-48A3-8C45-6A16170054B4} = {8A41031D-4C50-4B11-B214-4A71702D58CD}
+		{7425A2C8-A4E2-4390-B936-FFE17D4E345F} = {A5DFAF88-251D-44A7-8556-D1B85FBE9294}
+		{1AC675D7-E41A-4BDD-9407-D3D7D68A69F6} = {A50FDCE3-4081-4E45-AC1D-6C89C5D12C24}
+		{D99D74C8-D2B9-4010-913C-ECDA9440736E} = {A50FDCE3-4081-4E45-AC1D-6C89C5D12C24}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACCE6DE0-243F-4142-A633-809E34F44F64}

@@ -2,7 +2,7 @@
 using System.Threading;
 
 namespace Domore.IO {
-    internal class FileSystemEventPath {
+    internal sealed class FileSystemEventPath {
         private FileSystemNotifier Notifier =>
             _Notifier ?? (
             _Notifier = new FileSystemNotifier(Path));

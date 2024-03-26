@@ -109,6 +109,10 @@ namespace Brows {
         protected internal virtual void DragSelected(object source) {
         }
 
+        protected virtual Task<bool> Take(IMessage message, CancellationToken token) {
+            return Task.FromResult(false);
+        }
+
         protected virtual Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
             return Task.FromResult(false);
         }
@@ -166,6 +170,10 @@ namespace Brows {
 
         Task IProvider.Refresh(CancellationToken token) {
             return Refresh(token);
+        }
+
+        Task<bool> IProvider.Take(IMessage message, CancellationToken token) {
+            return Take(message, token);
         }
 
         Task<bool> IProvider.Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {

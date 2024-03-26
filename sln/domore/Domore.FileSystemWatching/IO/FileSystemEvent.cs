@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -6,14 +7,12 @@ using System.Threading.Tasks;
 using PATH = System.IO.Path;
 
 namespace Domore.IO {
-    using Logs;
-
-    public class FileSystemEvent {
+    public sealed class FileSystemEvent {
         private static readonly ILog Log = Logging.For(typeof(FileSystemEvent));
-        private static readonly Dictionary<string, string> Keys = new();
-        private static readonly Dictionary<string, FileSystemEventPath> Cache = new();
+        private static readonly Dictionary<string, string> Keys = [];
+        private static readonly Dictionary<string, FileSystemEventPath> Cache = [];
         private static readonly FileSystemPath FileSystemPath = new();
-        private static readonly char[] FileSystemTrimChars = new[] { PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar };
+        private static readonly char[] FileSystemTrimChars = [PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar];
 
         private static string Key(string path) {
             if (null == path) throw new ArgumentNullException(nameof(path));

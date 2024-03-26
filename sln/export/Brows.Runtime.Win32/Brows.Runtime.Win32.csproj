@@ -1,17 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-    <PropertyGroup>
-        <TargetFrameworks>net8.0-windows</TargetFrameworks>
-        <UseWPF>true</UseWPF>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
-        <ProjectReference Include="..\..\Brows.Provider.Contract\Brows.Provider.Contract.csproj" />
-        <ProjectReference Include="..\..\Brows.IO.Contract\Brows.IO.Contract.csproj" />
-        <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
-        <ProjectReference Include="..\..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />
-        <ProjectReference Include="..\..\domore\Domore.Win32.STAThreadPool\Domore.Win32.STAThreadPool.csproj" />
-        <ProjectReference Include="..\..\domore\Domore.Win32.Windows\Domore.Win32.Windows.csproj" />
-        <ProjectReference Include="..\..\domore\Domore.Win32\Domore.Win32.csproj" />
-        <ProjectReference Include="..\Brows.Commands.Process\Brows.Commands.Process.csproj" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
+    <ProjectReference Include="..\..\Brows.Message.Framework\Brows.Message.Framework.csproj" />
+    <ProjectReference Include="..\..\Brows.Native.Framework\Brows.Native.Framework.csproj" />
+    <ProjectReference Include="..\..\Brows.Provider.Contract\Brows.Provider.Contract.csproj" />
+    <ProjectReference Include="..\..\Brows.IO.Contract\Brows.IO.Contract.csproj" />
+    <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
+    <ProjectReference Include="..\..\domore\Domore.Win32.PropertySystem\Domore.Win32.PropertySystem.csproj" />
+    <ProjectReference Include="..\..\domore\Domore.Win32.STAThreadPool\Domore.Win32.STAThreadPool.csproj" />
+    <ProjectReference Include="..\..\domore\Domore.Win32.Windows\Domore.Win32.Windows.csproj" />
+    <ProjectReference Include="..\..\domore\Domore.Win32\Domore.Win32.csproj" />
+    <ProjectReference Include="..\Brows.Commands.Process\Brows.Commands.Process.csproj" />
+  </ItemGroup>
 </Project>

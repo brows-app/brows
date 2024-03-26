@@ -9,14 +9,12 @@ using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class ProgramMain {
-        private WindowsProgram Default =>
-            _Default ?? (
-            _Default = new WindowsProgram());
+        private WindowsProgram Default => _Default ??=
+            new WindowsProgram();
         private WindowsProgram _Default;
 
-        private IReadOnlyList<IProgram> Programs =>
-            _Programs ?? (
-            _Programs = Array.Empty<IProgram>());
+        private IReadOnlyList<IProgram> Programs => _Programs ??=
+            Array.Empty<IProgram>();
         private IReadOnlyList<IProgram> _Programs;
 
         private ProgramCommand Command { get; }
@@ -27,7 +25,7 @@ namespace Brows {
             Command = command ?? throw new ArgumentNullException(nameof(command));
         }
 
-        private bool ProgramNameValid(string s) {
+        private static bool ProgramNameValid(string s) {
             if (s?.Length > 0) {
                 if (s.StartsWith('_') || char.IsLetter(s[0])) {
                     if (s.All(c => char.IsLetterOrDigit(c) || c == '_')) {
@@ -57,14 +55,14 @@ namespace Brows {
 
         private static async Task<int> Main(string[] args) {
             using (var programConsole = new ProgramConsole()) {
-                var ct = CancellationToken.None;
+                var token = CancellationToken.None;
                 var command = new ProgramCommand(Environment.CommandLine, args);
                 var program = new ProgramMain(programConsole, command);
-                var programConfig = await Configure.File<ProgramConfig>().Load(ct);
+                var programConfig = await Configure.File<ProgramConfig>().Load(token);
                 if (programConfig.Console) {
                     programConsole.Show();
                 }
-                var logConfigPath = await ConfigPath.FileReady(ct);
+                var logConfigPath = await ConfigPath.FileReady(token);
                 var logConfigFile = Path.Combine(logConfigPath, "log.conf");
                 Log.Conf.Configure(logConfigFile);
                 try {

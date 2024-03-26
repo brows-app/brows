@@ -59,7 +59,7 @@ namespace Brows {
             }
 
             Stream IStreamText.StreamText() {
-                return Source.Stream();
+                return Source.Stream;
             }
         }
     }

@@ -217,15 +217,15 @@ namespace Brows {
             }
         }
 
+        public event EventHandler Completed;
+        public event EventHandler ProgressChanged;
         public event EventHandler RelevantChanged;
         public event EventHandler TargetChanged;
-        public event EventHandler ProgressChanged;
-        public event EventHandler Completed;
 
         public long Target { get; private set; }
         public long Progress { get; private set; }
         public double ProgressPercent { get; private set; }
-        
+
         public string TargetString =>
             ProgressKind == OperationProgressKind.FileSize ? EntryDataConverter.FileSize.From(Target, "0.00", null) :
             Target.ToString();
@@ -322,16 +322,16 @@ namespace Brows {
         }
 
         private sealed class ProgressWrapper : IOperationProgress {
-            public OperationProgressKind Kind =>
-                Operation.ProgressKind;
-
             public OperationBase Operation { get; }
 
             public ProgressWrapper(OperationBase operation) {
                 Operation = operation ?? throw new ArgumentNullException(nameof(operation));
             }
 
-            public void Change(long? addProgress, long? setProgress, long? addTarget, long? setTarget, string name, string data, OperationProgressKind? kind) {
+            OperationProgressKind IOperationProgress.Kind =>
+                Operation.ProgressKind;
+
+            void IOperationProgress.Change(long? addProgress, long? setProgress, long? addTarget, long? setTarget, string name, string data, OperationProgressKind? kind) {
                 if (kind != null) {
                     Operation.ProgressKind = kind.Value;
                 }
@@ -344,8 +344,15 @@ namespace Brows {
                 Operation.ChangeProgress(addProgress: addProgress, setProgress: setProgress, addTarget: addTarget, setTarget: setTarget);
             }
 
-            public void Child(string name, OperationProgressKind kind, OperationDelegate task) {
-                Operation.Child(name, kind, task);
+            async Task IOperationProgress.Child(string name, OperationProgressKind kind, OperationDelegate task) {
+                var child = Operation.Child(name, kind, task);
+                var complete = child.Completion;
+                try {
+                    await complete;
+                }
+                catch {
+                    // Errors should be caught in Operate
+                }
             }
         }
     }

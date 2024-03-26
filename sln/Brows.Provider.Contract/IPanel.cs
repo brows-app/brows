@@ -14,7 +14,8 @@ namespace Brows {
         bool HasEntries<TEntry>(out IReadOnlyList<TEntry> entries) where TEntry : class, IEntry;
         bool HasProvider<TProvider>(out TProvider provider) where TProvider : class, IProvider;
         bool HasProviderService<TService>(out IProvider provider, out TService service) where TService : class, IProviderExport;
-        Task<SecureString> GetSecret(string promptFormat, IEnumerable<string> promptArgs, CancellationToken token);
+        bool HasWindow(out object native);
         Task<bool> Provide(string id, CancellationToken token);
+        Task<SecureString> GetSecret(string promptFormat, IEnumerable<string> promptArgs, CancellationToken token);
     }
 }

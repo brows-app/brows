@@ -10,9 +10,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands {
     internal sealed class DirectoryOpen : Command {
-        private static string Home => _Home ??=
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify);
-        private static string _Home;
+        private static string Home => DirectoryX.UserProfilePath;
 
         private EnumerationOptions SuggestionEnumerationOptions => _SuggestionEnumerationOptions ??=
             new EnumerationOptions {

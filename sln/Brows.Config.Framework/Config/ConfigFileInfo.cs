@@ -10,7 +10,9 @@ using FILE = System.IO.File;
 namespace Brows.Config {
     internal abstract class ConfigFileInfo {
         private static readonly ILog Log = Logging.For(typeof(ConfigFileInfo));
-        private static readonly Dictionary<string, object> Locker = new();
+        private static readonly Dictionary<string, object> Locker = [];
+
+        private event EventHandler Invalidated;
 
         private ConfigFileInfo(string file, string @default) {
             File = file;
@@ -24,15 +26,36 @@ namespace Brows.Config {
             }
             return await Task.Run(cancellationToken: token, function: () => {
                 lock (locker) {
-                    file = FILE.Exists(file)
-                        ? file
-                        : Default;
-                    return Conf.Contain(file).Configure(new TConfig(), key: "");
+                    for (var i = 0; ; i++) {
+                        file = FILE.Exists(file)
+                            ? file
+                            : Default;
+                        var err = default(Exception);
+                        var conf = Conf.Contain(file);
+                        var config = new TConfig();
+                        try {
+                            return conf.Configure(config, key: "");
+                        }
+                        catch (IOException ex) {
+                            err = ex;
+                        }
+                        if (i > 3) {
+                            if (Log.Error()) {
+                                Log.Error(err);
+                            }
+                            if (Log.Warn()) {
+                                Log.Warn($"Unable to configure > {typeof(TConfig).Name}");
+                            }
+                            return config;
+                        }
+                        if (Log.Info()) {
+                            Log.Info(err?.Message);
+                        }
+                        Thread.Sleep(250);
+                    }
                 }
             });
         }
-
-        public event EventHandler Invalidated;
 
         public bool Invalid { get; private set; }
         public string File { get; }
@@ -46,14 +69,16 @@ namespace Brows.Config {
             Invalidated?.Invoke(this, EventArgs.Empty);
         }
 
-        public static async Task<For<TConfig>> Load<TConfig>(CancellationToken cancellationToken) where TConfig : new() {
-            var dir = await ConfigPath.FileReady(cancellationToken);
+        public static async Task<For<TConfig>> Load<TConfig>(EventHandler invalidated, CancellationToken token) where TConfig : new() {
+            var dir = await ConfigPath.FileReady(token);
             var type = typeof(TConfig).Name.ToLowerInvariant();
             var name = type.EndsWith("config") ? type.Substring(0, type.Length - "config".Length) : type;
             var file = Path.Combine(dir, $"{name}.conf");
             var dflt = Path.Combine(dir, "default", $"{name}.conf.default");
-            var loaded = new For<TConfig>(file, dflt);
-            await ConfigFileWatcher.Subscribe(loaded, cancellationToken);
+            var
+            loaded = new For<TConfig>(file, dflt);
+            loaded.Invalidated += invalidated;
+            await ConfigFileWatcher.Subscribe(loaded, token);
             return loaded;
         }
 
@@ -61,8 +86,8 @@ namespace Brows.Config {
             public For(string file, string @default) : base(file, @default) {
             }
 
-            public Task<TConfig> Configure(CancellationToken cancellationToken) {
-                return Configure<TConfig>(cancellationToken);
+            public Task<TConfig> Configure(CancellationToken token) {
+                return Configure<TConfig>(token);
             }
         }
     }

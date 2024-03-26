@@ -1,15 +1,16 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class FileSystemStreamSource : EntryStreamSource<FileSystemEntry> {
-        protected sealed override Stream Stream() {
+        protected sealed override async Task<IEntryStreamReady> StreamReady(CancellationToken token) {
             if (Entry.Info is FileInfo file) {
                 if (file.Exists) {
-                    return file.OpenRead();
+                    Stream = await Task.Run(file.OpenRead, token);
                 }
             }
-            return null;
+            return await base.StreamReady(token);
         }
 
         public sealed override string SourceFile =>

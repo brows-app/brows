@@ -1,14 +1,17 @@
 using Domore.Logs;
 using System;
-using System.Runtime.ExceptionServices;
 using System.Windows;
 using System.Windows.Threading;
+
+#if BROWS_LOG_FIRSTCHANCEEXCEPTION
+using System.Runtime.ExceptionServices;
+#endif
 
 namespace Brows.Windows {
     internal sealed class AppLogger {
         private static readonly ILog Log = Logging.For(typeof(AppLogger));
         private readonly AppDomain Domain;
-#if DEBUG
+#if BROWS_LOG_FIRSTCHANCEEXCEPTION
         private void Domain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e) {
             if (Log.Debug()) {
                 Log.Debug(nameof(Domain.FirstChanceException), e?.Exception);
@@ -75,7 +78,7 @@ namespace Brows.Windows {
             Domain.DomainUnload += Domain_DomainUnload;
             Domain.ProcessExit += Domain_ProcessExit;
             Domain.UnhandledException += Domain_UnhandledException;
-#if DEBUG
+#if BROWS_LOG_FIRSTCHANCEEXCEPTION
             Domain.FirstChanceException += Domain_FirstChanceException;
 #endif
         }

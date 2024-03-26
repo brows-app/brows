@@ -12,8 +12,8 @@ namespace Brows {
     internal sealed class Panel : Notifier, IPanel, IControlled<IPanelController> {
         private static readonly ILog Log = Logging.For(typeof(Panel));
 
-        private readonly PanelInput Input = new PanelInput();
-        private readonly PanelHistory History = new PanelHistory();
+        private readonly PanelInput Input = new();
+        private readonly PanelHistory History = new();
 
         private void LoadCurrentHistory() {
             History.CurrentLoadOpportunity(Provider, loaded: () => {
@@ -233,6 +233,13 @@ namespace Brows {
             Commander = commander ?? throw new ArgumentNullException(nameof(commander));
         }
 
+        public async Task Post(IMessage message, CancellationToken token) {
+            var task = Provider?.Take(message, token);
+            if (task != null) {
+                await task;
+            }
+        }
+
         public async Task<bool> Provide(string id, CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(nameof(Provide) + " > " + id);
@@ -330,6 +337,11 @@ namespace Brows {
                 observation.Current(match);
             }
             return true;
+        }
+
+        bool IPanel.HasWindow(out object native) {
+            native = Commander.NativeWindow();
+            return native != null;
         }
 
         bool IPanel.HasView(out IEntryDataView view) {

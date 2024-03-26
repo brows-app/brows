@@ -5,6 +5,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+using MESSAGEEVENTARGS = Domore.IPC.MessageEventArgs;
+
 namespace Brows {
     internal sealed class CommanderMessenger {
         private static readonly ILog Log = Logging.For(typeof(CommanderMessenger));
@@ -26,7 +28,7 @@ namespace Brows {
             _Messenger = Factory.Create());
         private Messenger _Messenger;
 
-        private void Factory_MessageHandler(object sender, MessageEventArgs e) {
+        private void Factory_MessageHandler(object sender, MESSAGEEVENTARGS e) {
             if (e != null) {
                 if (Log.Info()) {
                     Log.Info(e.Message);
