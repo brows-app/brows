@@ -415,12 +415,8 @@ namespace Brows {
                 return Agent.HasSource(out source);
             }
 
-            public bool ShowPalette(string input) {
-                return Agent.ShowPalette(input);
-            }
-
-            public bool ShowPalette(string input, int selectedStart, int selectedLength) {
-                return Agent.ShowPalette(input, selectedStart, selectedLength);
+            public bool ShowPalette(ICommandPaletteConfig config) {
+                return Agent.ShowPalette(config);
             }
         }
     }

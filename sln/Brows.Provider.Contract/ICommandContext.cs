@@ -27,8 +27,7 @@ namespace Brows {
         bool DidTrigger(out IReadOnlySet<ICommand> commands);
         bool HasSource(out ICommandSource source);
         bool HasSource<T>(out T item, out IReadOnlyList<T> items);
-        bool ShowPalette(string input);
-        bool ShowPalette(string input, int selectedStart, int selectedLength);
+        bool ShowPalette(ICommandPaletteConfig config);
         bool Operate(Func<IOperationProgress, CancellationToken, Task<bool>> task);
     }
 }

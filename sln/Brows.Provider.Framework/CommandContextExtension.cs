@@ -26,5 +26,18 @@ namespace Brows {
                     return false;
             }
         }
+
+        public static bool ShowPalette(this ICommandContext commandContext, string input) {
+            return ShowPalette(commandContext, input, 0, 0);
+        }
+
+        public static bool ShowPalette(this ICommandContext commandContext, string input, int selectedStart, int selectedLength) {
+            ArgumentNullException.ThrowIfNull(commandContext);
+            return commandContext.ShowPalette(new CommandPaletteConfig {
+                Input = input,
+                SelectedLength = selectedLength,
+                SelectedStart = selectedStart
+            });
+        }
     }
 }

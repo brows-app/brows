@@ -224,7 +224,7 @@ namespace Brows {
                     SuggestionCollection.Clear();
                     SuggestionCollector.Context = Context;
                     SuggestionCollector.Collection = SuggestionCollection;
-                    SuggestionCollector.Commands = Commander.Commands.AsEnumerable();
+                    SuggestionCollector.Commands = SuggestCommands ?? Commander.Commands.AsEnumerable();
                     await SuggestionCollector.Collect(token);
                 }
                 catch (OperationCanceledException canceled) when (canceled?.CancellationToken == token) {
@@ -242,6 +242,8 @@ namespace Brows {
 
         public event EventHandler Escaping;
         public event EventHandler Suggesting;
+
+        public IEnumerable<ICommand> SuggestCommands { get; set; }
 
         public object Suggestions =>
             SuggestionCollection;

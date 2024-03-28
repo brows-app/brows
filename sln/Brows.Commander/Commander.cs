@@ -23,19 +23,23 @@ namespace Brows {
             Loaded?.Invoke(this, e);
 
             var messageSet = MessageSet;
-            if (messageSet != null){
+            if (messageSet != null) {
                 messageSet.Message -= MessageSet_Message;
                 messageSet.Dispose();
             }
             MessageSet = await Messages.Create(Controller?.NativeWindow(), token);
             MessageSet.Message += MessageSet_Message;
-            
+
             var load = Load.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
             foreach (var item in load) {
                 await AddPanel(item, token);
             }
             if (First) {
-                await ShowPalette(null, "? ", 0, 2, token);
+                await ShowPalette(source: null, token: token, config: new CommandPaletteConfig {
+                    Input = "? ",
+                    SelectedStart = 0,
+                    SelectedLength = 2
+                });
             }
         }
 
@@ -214,7 +218,7 @@ namespace Brows {
             return removed;
         }
 
-        public async Task<bool> ShowPalette(CommandSource source, string input, int selectedStart, int selectedLength, CancellationToken token) {
+        public async Task<bool> ShowPalette(CommandSource source, ICommandPaletteConfig config, CancellationToken token) {
             if (Palette != null) {
                 await Task.CompletedTask;
                 return false;
@@ -226,9 +230,10 @@ namespace Brows {
                 PanelCollection.Active?.Activate();
             }
             palette.Escaping += palette_Escaping;
-            palette.Input.Text = input;
-            palette.Input.SelectedStartOnLoad = selectedStart;
-            palette.Input.SelectedLengthOnLoad = selectedLength;
+            palette.Input.Text = config?.Input;
+            palette.Input.SelectedStartOnLoad = config?.SelectedStart ?? 0;
+            palette.Input.SelectedLengthOnLoad = config?.SelectedLength ?? 0;
+            palette.Input.SuggestCommands = config?.SuggestCommands;
             Palette = palette;
             return true;
         }

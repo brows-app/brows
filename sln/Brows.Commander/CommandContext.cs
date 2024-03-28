@@ -9,11 +9,10 @@ namespace Brows {
     internal sealed class CommandContext : Notifier, ICommandContext {
         private static readonly IReadOnlySet<ICommand> EmptyCommands = new HashSet<ICommand>(0);
 
-        private string Input =>
-            _Input ?? (
-            _Input = Line?.HasInput(out var input) == true
+        private string Input => _Input ??=
+            Line?.HasInput(out var input) == true
                 ? input.Trim()
-                : "");
+                : "";
         private string _Input;
 
         private CommandContext(Commander commander, CommandSource source, CommandLine line, ICommandPalette palette, IGesture gesture) {
@@ -24,14 +23,12 @@ namespace Brows {
             Palette = palette;
         }
 
-        public IReadOnlySet<ICommand> TriggeringCommands =>
-            _TriggeringCommands ?? (
-            _TriggeringCommands =
-                Line != null && Line.HasCommand(out var command) && Commander.Commands.Triggered(command, out var lineCommands)
-                    ? lineCommands
-                    : Gesture != null && Commander.Commands.Triggered(Gesture, out var gestureCommands)
-                        ? gestureCommands
-                        : EmptyCommands);
+        public IReadOnlySet<ICommand> TriggeringCommands => _TriggeringCommands ??=
+            Line != null && Line.HasCommand(out var command) && Commander.Commands.Triggered(command, out var lineCommands)
+                ? lineCommands
+                : Gesture != null && Commander.Commands.Triggered(Gesture, out var gestureCommands)
+                    ? gestureCommands
+                    : EmptyCommands;
         private IReadOnlySet<ICommand> _TriggeringCommands;
 
         public Commander Commander { get; }
@@ -241,14 +238,11 @@ namespace Brows {
             return true;
         }
 
-        public bool ShowPalette(string input) {
-            return ShowPalette(input, 0, 0);
-        }
-
-        public bool ShowPalette(string input, int selectedStart, int selectedLength) {
+        public bool ShowPalette(ICommandPaletteConfig config) {
             return Operate(async (progress, token) => {
-                return await Commander.ShowPalette(Source, input, selectedStart, selectedLength, token);
+                return await Commander.ShowPalette(Source, config, token);
             });
+
         }
     }
 }
