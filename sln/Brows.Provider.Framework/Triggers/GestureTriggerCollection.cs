@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Brows {
-    internal sealed class CommandGestureTriggerCollection : IGestureTriggerCollection {
+namespace Brows.Triggers {
+    internal sealed class GestureTriggerCollection : IGestureTriggerCollection {
         private readonly IReadOnlyDictionary<IGesture, IGestureTrigger> Set;
 
-        private CommandGestureTriggerCollection(IReadOnlyDictionary<IGesture, IGestureTrigger> set) {
+        private GestureTriggerCollection(IReadOnlyDictionary<IGesture, IGestureTrigger> set) {
             Set = set ?? throw new ArgumentNullException(nameof(set));
         }
 
@@ -17,14 +17,14 @@ namespace Brows {
         public int Count =>
             Set.Count;
 
-        public static CommandGestureTriggerCollection From(IReadOnlyDictionary<IGesture, string> set) {
+        public static GestureTriggerCollection From(IReadOnlyDictionary<IGesture, string> set) {
             if (null == set) throw new ArgumentNullException(nameof(set));
-            return new CommandGestureTriggerCollection(set.ToDictionary(
+            return new GestureTriggerCollection(set.ToDictionary(
                 g => g.Key,
-                g => (IGestureTrigger)new CommandGestureTrigger(g.Key, g.Value)));
+                g => (IGestureTrigger)new GestureTrigger(g.Value, g.Key)));
         }
 
-        public static CommandGestureTriggerCollection Combine(params CommandGestureTriggerCollection[] collections) {
+        public static GestureTriggerCollection Combine(params GestureTriggerCollection[] collections) {
             if (null == collections) throw new ArgumentNullException(nameof(collections));
             var set = new Dictionary<IGesture, IGestureTrigger>();
             foreach (var collection in collections) {
@@ -32,15 +32,15 @@ namespace Brows {
                     set[item.Key] = item.Value;
                 }
             }
-            return new CommandGestureTriggerCollection(set);
+            return new GestureTriggerCollection(set);
         }
 
-        IEnumerator<IGestureTrigger> IEnumerable<IGestureTrigger>.GetEnumerator() {
-            return ((IEnumerable<IGestureTrigger>)Set.Values).GetEnumerator();
+        public IEnumerator<IGestureTrigger> GetEnumerator() {
+            return Set.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            return ((IEnumerable)Set.Values).GetEnumerator();
+            return GetEnumerator();
         }
     }
 }

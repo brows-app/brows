@@ -1,6 +1,8 @@
 namespace Brows {
     public interface ICommandTrigger {
-        IInputTrigger Input { get; }
-        IGestureTriggerCollection Gesture { get; }
+        IInputTriggerCollection Inputs { get; }
+        IGestureTriggerCollection Gestures { get; }
+        bool Triggered(string s, out IInputTrigger trigger);
+        bool Triggered(IGesture g, out IGestureTrigger trigger);
     }
 }

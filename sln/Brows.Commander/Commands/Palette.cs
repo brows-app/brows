@@ -32,11 +32,29 @@ namespace Brows.Commands {
 
             public string Input(ICommandContext context) {
                 var show = Show;
-                return
-                    show == Show.Nothing ? "" :
-                    show == Show.ProviderID && context.HasPanel(out var active) && active.HasProvider(out Provider provider) 
-                        ? provider.ID 
-                        : "";
+                switch (show) {
+                    case Show.Nothing:
+                        break;
+                    case Show.EntryID: {
+                        if (context.HasPanel(out var active)) {
+                            if (active.HasSelection(out var entries)) {
+                                if (entries.Count > 0) {
+                                    return entries.FirstOrDefault()?.ID;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    case Show.ProviderID: {
+                        if (context.HasPanel(out var active)) {
+                            if (active.HasProvider(out Provider provider)) {
+                                return provider.ID;
+                            }
+                        }
+                        break;
+                    }
+                }
+                return "";
             }
 
             public IEnumerable<ICommand> SuggestCommands(ICommandContext context) {
@@ -67,6 +85,7 @@ namespace Brows.Commands {
 
         public enum Show {
             Nothing = 0,
+            EntryID,
             ProviderID
         }
     }

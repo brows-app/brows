@@ -26,7 +26,7 @@ namespace Brows {
             string comment(string s) => "# " + s;
             var builder = new StringBuilder();
             var helpLine = command.HelpLine;
-            var inputTrigger = command.Trigger?.Input?.String;
+            var inputTrigger = command.Trigger?.Inputs?.Main?.Input;
             if (inputTrigger != null) {
                 if (helpLine != null) {
                     helpLine = comment(inputTrigger) + " " + string.Join(Environment.NewLine, helpLine
@@ -39,17 +39,17 @@ namespace Brows {
             if (helpLine != null) {
                 builder.AppendLine(helpLine);
             }
-            var gestures = command.Trigger?.Gesture;
+            var gestures = command.Trigger?.Gestures;
             if (gestures != null && gestures.Count > 0) {
                 builder.AppendLine(comment(""));
                 foreach (var gesture in gestures) {
-                    builder.AppendLine(comment($"[{gesture.Display}] {gesture.Shortcut}"));
+                    builder.AppendLine(comment($"[{gesture.Display}] {gesture.Defined}"));
                 }
             }
             builder.AppendLine(comment(""));
             builder.AppendLine(comment(Description(command.Name)));
             builder.AppendLine();
-            builder.AppendLine(Translate.Value($"Command_Conf_{command.Name}")?.Replace("{input}", command.Trigger?.Input?.String));
+            builder.AppendLine(Translate.Value($"Command_Conf_{command.Name}")?.Replace("{input}", command.Trigger?.Inputs?.Main?.Input));
             return builder.ToString().Trim();
         }
     }

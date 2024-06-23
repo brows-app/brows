@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class CommandContext : Notifier, ICommandContext {
-        private static readonly IReadOnlySet<ICommand> EmptyCommands = new HashSet<ICommand>(0);
+        private static readonly IReadOnlyDictionary<IInputTrigger, ICommand> EmptyStringCommands = new Dictionary<IInputTrigger, ICommand>();
+        private static readonly IReadOnlyDictionary<IGestureTrigger, ICommand> EmptyGestureCommands = new Dictionary<IGestureTrigger, ICommand>();
+
+        private IReadOnlySet<ICommand> TriggeredCommands => _TriggeredCommands ??=
+            TriggeredCommand.Values.ToHashSet();
+        private IReadOnlySet<ICommand> _TriggeredCommands;
 
         private string Input => _Input ??=
             Line?.HasInput(out var input) == true
@@ -23,13 +28,29 @@ namespace Brows {
             Palette = palette;
         }
 
-        public IReadOnlySet<ICommand> TriggeringCommands => _TriggeringCommands ??=
-            Line != null && Line.HasCommand(out var command) && Commander.Commands.Triggered(command, out var lineCommands)
-                ? lineCommands
-                : Gesture != null && Commander.Commands.Triggered(Gesture, out var gestureCommands)
-                    ? gestureCommands
-                    : EmptyCommands;
-        private IReadOnlySet<ICommand> _TriggeringCommands;
+        private Dictionary<ITrigger, ICommand> GetTriggeredCommands() {
+            var set = new Dictionary<ITrigger, ICommand>();
+            var commands = Commander.Commands;
+            if (commands != null) {
+                var line = Line;
+                if (line != null && line.HasCommand(out var command) && commands.Triggered(command, out var triggeredByLine)) {
+                    foreach (var triggered in triggeredByLine) {
+                        set[triggered.Key] = triggered.Value;
+                    }
+                }
+                var gesture = Gesture;
+                if (gesture != null && commands.Triggered(gesture, out var triggeredByGesture)) {
+                    foreach (var triggered in triggeredByGesture) {
+                        set[triggered.Key] = triggered.Value;
+                    }
+                }
+            }
+            return set;
+        }
+
+        public IReadOnlyDictionary<ITrigger, ICommand> TriggeredCommand => _TriggeredCommand ??=
+            GetTriggeredCommands();
+        private IReadOnlyDictionary<ITrigger, ICommand> _TriggeredCommand;
 
         public Commander Commander { get; }
         public CommandLine Line { get; }
@@ -50,12 +71,12 @@ namespace Brows {
         }
 
         public bool DidTrigger(out IReadOnlySet<ICommand> commands) {
-            commands = TriggeringCommands;
+            commands = TriggeredCommands;
             return commands.Count > 0 && (Line?.HasTrigger(out _) ?? true);
         }
 
         public bool MayTrigger(ICommand command) {
-            return TriggeringCommands.Contains(command);
+            return TriggeredCommands.Contains(command);
         }
 
         public bool DidTrigger(ICommand command) {

@@ -100,12 +100,13 @@ namespace Brows {
                     panel.Activate();
                 }
             }
-            var triggered = Commands.Triggered(gesture, out var commands);
+            var triggered = Commands.Triggered(gesture, out var items);
             if (triggered) {
-                foreach (var command in commands) {
-                    var shortcut = command?.Trigger?.Gesture?[gesture]?.Shortcut;
-                    if (shortcut != null) {
-                        var cmdLine = new CommandLine(shortcut, null);
+                foreach (var item in items) {
+                    var command = item.Value;
+                    var defined = command?.Trigger?.Gestures?[gesture]?.Defined;
+                    if (defined != null) {
+                        var cmdLine = new CommandLine(defined, null);
                         var context = new CommandContext(this, new CommandSource(source), cmdLine, gesture);
                         var work = command.TriggeredWork(context);
                         if (work) {

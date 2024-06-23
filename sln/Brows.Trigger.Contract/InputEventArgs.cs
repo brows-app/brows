@@ -1,14 +1,9 @@
-﻿using System;
-
-namespace Brows {
-    public sealed class InputEventArgs : EventArgs {
-        public bool Triggered { get; set; }
+﻿namespace Brows {
+    public sealed class InputEventArgs : TriggerEventArgs {
         public string Text { get; }
-        public object Source { get; }
 
-        public InputEventArgs(string text, object source) {
+        public InputEventArgs(string text, object source) : base(source) {
             Text = text;
-            Source = source;
         }
     }
 }

@@ -40,6 +40,7 @@ cmd[Operations]                     .press[1+SHIFT+CTRL]        = * clearerrors=
 cmd[Palette]                        .press[CTRL+L]              = *
 cmd[Palette]                        .press[CTRL+ALT+L]          = * suggest=*,!DirectoryFound
 cmd[Palette]                        .press[CTRL+SHIFT+L]        = * show=providerid
+cmd[Palette]                        .press[CTRL+SHIFT+ALT+L]    = * show=entryid
 cmd[PanelAdd]                       .input                      = panel-add|pa
 cmd[PanelAdd]                       .press[CTRL+N]              = * from=activepanel
 cmd[PanelShift]                     .input                      = panel-shift|ps

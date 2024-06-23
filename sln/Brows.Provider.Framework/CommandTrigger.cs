@@ -1,4 +1,5 @@
 ﻿using Brows.Config;
+using Brows.Triggers;
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
@@ -22,9 +23,9 @@ namespace Brows {
         }
         private static IConfig<Trigger> _Config;
 
-        private CommandTrigger(IInputTrigger input, IGestureTriggerCollection gesture) {
-            Input = input;
-            Gesture = gesture;
+        private CommandTrigger(InputTriggerCollection inputs, GestureTriggerCollection gestures) {
+            Inputs = inputs ?? throw new ArgumentNullException(nameof(inputs));
+            Gestures = gestures ?? throw new ArgumentNullException(nameof(gestures));
         }
 
         private static async void Config_Changed(object sender, EventArgs e) {
@@ -43,8 +44,33 @@ namespace Brows {
 
         public static event EventHandler Changed;
 
-        public IInputTrigger Input { get; }
-        public IGestureTriggerCollection Gesture { get; }
+        public InputTriggerCollection Inputs { get; }
+        public GestureTriggerCollection Gestures { get; }
+
+        IInputTriggerCollection ICommandTrigger.Inputs => Inputs;
+        IGestureTriggerCollection ICommandTrigger.Gestures => Gestures;
+
+        bool ICommandTrigger.Triggered(string s, out IInputTrigger trigger) {
+            foreach (var item in Inputs) {
+                if (item.Triggered(s)) {
+                    trigger = item;
+                    return true;
+                }
+            }
+            trigger = null;
+            return false;
+        }
+
+        bool ICommandTrigger.Triggered(IGesture g, out IGestureTrigger trigger) {
+            foreach (var gesture in Gestures) {
+                if (gesture?.Gesture?.Equals(g) == true) {
+                    trigger = gesture;
+                    return true;
+                }
+            }
+            trigger = null;
+            return false;
+        }
 
         public static CommandTrigger For(Command command) {
             if (null == command) throw new ArgumentNullException(nameof(command));
@@ -60,7 +86,7 @@ namespace Brows {
                     return null;
                 }
             }
-            return new CommandTrigger(cmd.TriggerInput(), cmd.TriggerGesture());
+            return new CommandTrigger(cmd.Inputs(), cmd.Gestures());
         }
 
         public static async Task<CommandTrigger> For(Command command, CancellationToken token) {
@@ -76,12 +102,12 @@ namespace Brows {
             private Dictionary<string, Command> _Cmd;
 
             public class Command {
-                private static CommandGestureTriggerCollection Triggers<TGesture>(string input, Dictionary<string, string> set) where TGesture : IGesture, new() {
+                private static GestureTriggerCollection Triggers<TGesture>(string input, Dictionary<string, string> set) where TGesture : IGesture, new() {
                     if (null == set) throw new ArgumentNullException(nameof(set));
-                    return CommandGestureTriggerCollection.From(set
+                    return GestureTriggerCollection.From(set
                         .SelectMany(pair => pair.Key
                             .Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                            .Select(key => (key: key, shortcut: pair.Value)))
+                            .Select(key => (key, shortcut: pair.Value)))
                         .ToDictionary(
                             pair => new TGesture().Parse(pair.key),
                             pair => pair.shortcut.Replace(
@@ -92,30 +118,49 @@ namespace Brows {
                 public string Input { get; set; }
 
                 public Dictionary<string, string> Press {
-                    get => _Press ?? (_Press = new());
+                    get => _Press ??= new();
                     set => _Press = value;
                 }
                 private Dictionary<string, string> _Press;
 
                 public Dictionary<string, string> Click {
-                    get => _Click ?? (_Click = new());
+                    get => _Click ??= new();
                     set => _Click = value;
                 }
                 private Dictionary<string, string> _Click;
 
-                public IInputTrigger TriggerInput() {
-                    var input = Input?.Trim() ?? "";
-                    if (input == "") {
-                        return null;
-                    }
-                    var parts = input.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                    return new CommandTriggerInput(parts[0], parts.Skip(1).ToArray());
+                public Dictionary<string, string> Macro {
+                    get => _Macro ??= new();
+                    set => _Macro = value;
+                }
+                private Dictionary<string, string> _Macro;
+
+                public InputTriggerCollection Inputs() {
+                    var inputInput = Input?.Trim() ?? "";
+                    var inputParts = inputInput.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    var inputTrigger = inputParts.Length == 0
+                        ? null
+                        : new InputTrigger(null, inputParts[0], inputParts.Skip(1).ToArray());
+                    var macro = Macro;
+                    var macroTriggers = macro.Select(m => {
+                        var macroInput = m.Key?.Trim() ?? "";
+                        var macroParts = macroInput.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        if (macroParts.Length == 0) {
+                            return null;
+                        }
+                        var macroDefined = m.Value.Replace("*", inputParts.Length == 0 ? "*" : inputParts[0]);
+                        var macroTrigger = new InputTrigger(macroDefined, macroParts[0], macroParts.Skip(1).ToArray());
+                        return macroTrigger;
+                    });
+                    return new InputTriggerCollection(macroTriggers
+                        .Prepend(inputTrigger)
+                        .Where(trigger => trigger != null));
                 }
 
-                public CommandGestureTriggerCollection TriggerGesture() {
+                public GestureTriggerCollection Gestures() {
                     var press = Triggers<PressGesture>(Input, Press);
                     var click = Triggers<ClickGesture>(Input, Click);
-                    return CommandGestureTriggerCollection.Combine(press, click);
+                    return GestureTriggerCollection.Combine(press, click);
                 }
             }
         }

@@ -2,6 +2,7 @@
 using Domore.Logs;
 using Domore.Notification;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,10 +58,12 @@ namespace Brows.Diagnostics {
         public string Input { get; }
         public string WorkingDirectory { get; }
         public IFixProcessStartInfoError Fix { get; }
+        public IReadOnlyDictionary<string, string> Environment { get; }
 
-        public ProcessWrapper(string input, string workingDirectory, IFixProcessStartInfoError fix) {
+        public ProcessWrapper(string input, string workingDirectory, IReadOnlyDictionary<string, string> environment, IFixProcessStartInfoError fix) {
             Fix = fix;
             Input = input;
+            Environment = environment;
             WorkingDirectory = workingDirectory;
         }
 
@@ -114,6 +117,7 @@ namespace Brows.Diagnostics {
             };
             using (var process = Process = new Process()) {
                 process.StartInfo = startInfo;
+                process.StartInfo.Environment(Environment);
                 try {
                     try {
                         process.Start();

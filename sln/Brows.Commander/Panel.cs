@@ -384,6 +384,11 @@ namespace Brows {
             return entries.Count > 0;
         }
 
+        bool IPanel.HasProvider(out IProvider provider) {
+            provider = Provider;
+            return provider != null;
+        }
+
         bool IPanel.HasProvider<TProvider>(out TProvider provider) {
             provider = Provider as TProvider;
             return provider != null;

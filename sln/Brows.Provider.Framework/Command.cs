@@ -97,7 +97,7 @@ namespace Brows {
         private CommandSuggestionRelevance _SuggestionRelevance;
 
         protected string InputTrigger =>
-            Trigger?.Input?.String;
+            Trigger?.Inputs?.Main?.Input;
 
         protected virtual Type Provider =>
             null;
@@ -113,8 +113,8 @@ namespace Brows {
                 Help = help ?? input,
                 History = history ?? false,
                 Input = input,
-                Alias = alias ?? string.Join(",", Trigger?.Input?.Aliases?.AsEnumerable() ?? Array.Empty<string>()),
-                Press = press ?? string.Join(",", Trigger?.Gesture?.Select(p => p.Display) ?? Array.Empty<string>()),
+                Alias = alias ?? string.Join(",", Trigger?.Inputs?.Main?.Aliases?.AsEnumerable() ?? Array.Empty<string>()),
+                Press = press ?? string.Join(",", Trigger?.Gestures?.Select(p => p.Display) ?? Array.Empty<string>()),
                 Relevance = relevance ?? 0
             };
         }
@@ -140,27 +140,41 @@ namespace Brows {
             }
             if (context.HasLine(out var line)) {
                 var command = line.HasCommand(out var c) ? c : "";
-                var trigger = Trigger?.Input;
-                if (trigger != null) {
-                    var relevance = SuggestionRelevance.From(trigger.Options, command);
-                    if (relevance.HasValue) {
-                        yield return Suggestion(
-                            context: context,
-                            help: trigger.String + " " + HelpLine,
-                            input: trigger.String,
-                            relevance: relevance.Value);
-                        foreach (var item in History.AsEnumerable()) {
-                            if (item.HasInput(out var input)) {
+                var triggers = Trigger?.Inputs;
+                if (triggers != null) {
+                    foreach (var trigger in triggers) {
+                        var relevance = SuggestionRelevance.From(trigger.Options, command);
+                        if (relevance.HasValue) {
+                            if (trigger.Defined != null) {
+                                yield return Suggestion(
+                                    alias: string.Join(",", trigger.Aliases?.AsEnumerable() ?? Array.Empty<string>()),
+                                    press: string.Join(",", Trigger.Gestures?.Where(g => g.Defined == trigger.Defined).Select(g => g.Display) ?? Array.Empty<string>()),
+                                    context: context,
+                                    description: trigger.Defined,
+                                    help: trigger.Input + " " + HelpLine,
+                                    input: trigger.Input,
+                                    relevance: relevance.Value);
+                            }
+                            else {
                                 yield return Suggestion(
                                     context: context,
-                                    help: input,
-                                    history: true,
-                                    input: input,
-                                    description: "",
-                                    alias: "",
-                                    press: "",
-                                    relevance: relevance.Value,
-                                    group: "CommandHistory");
+                                    help: trigger.Input + " " + HelpLine,
+                                    input: trigger.Input,
+                                    relevance: relevance.Value);
+                            }
+                            foreach (var item in History.AsEnumerable()) {
+                                if (item.HasInput(out var input)) {
+                                    yield return Suggestion(
+                                        context: context,
+                                        help: input,
+                                        history: true,
+                                        input: input,
+                                        description: "",
+                                        alias: "",
+                                        press: "",
+                                        relevance: relevance.Value,
+                                        group: "CommandHistory");
+                                }
                             }
                         }
                     }

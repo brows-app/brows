@@ -103,8 +103,17 @@ namespace Brows {
             if (context == null) {
                 return false;
             }
-            var triggered = context.TriggeringCommands;
-            var triggeredCommand = triggered.FirstOrDefault(command => command.TriggeredWork(context));
+            var triggered = context.TriggeredCommand;
+            var triggeredCommand = triggered
+                .Select(item => (trigger: item.Key, macro: item.Key?.Defined, command: item.Value))
+                .Select(item => (item.command, context: string.IsNullOrWhiteSpace(item.macro) ? context : new CommandContext(
+                    commander: context.Commander,
+                    source: context.Source,
+                    line: new CommandLine(item.macro, null),
+                    palette: context.Palette)))
+                .Select(item => item.command?.TriggeredWork(item.context) == true ? item.command : null)
+                .Where(command => command != null)
+                .FirstOrDefault();
             if (triggeredCommand == null) {
                 var arbitraryCommand = Commander.Commands.AsEnumerable().FirstOrDefault(command => command.ArbitraryWork(context));
                 if (arbitraryCommand == null) {

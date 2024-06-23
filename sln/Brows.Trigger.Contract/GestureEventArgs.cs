@@ -1,13 +1,8 @@
-﻿using System;
-
-namespace Brows {
-    public sealed class GestureEventArgs : EventArgs {
-        public bool Triggered { get; set; }
-        public object Source { get; }
+﻿namespace Brows {
+    public sealed class GestureEventArgs : TriggerEventArgs {
         public IGesture Gesture { get; }
 
-        public GestureEventArgs(IGesture gesture, object source) {
-            Source = source;
+        public GestureEventArgs(IGesture gesture, object source) : base(source) {
             Gesture = gesture;
         }
     }

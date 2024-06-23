@@ -15,57 +15,58 @@ namespace Brows {
 
         private readonly List<ICommand> List;
 
-        private Dictionary<IGesture, HashSet<ICommand>> GestureSet {
-            get {
-                if (_GestureSet == null) {
-                    _GestureSet = new();
-                    foreach (var item in List) {
-                        var triggers = item.Trigger?.Gesture;
-                        if (triggers != null) {
-                            foreach (var trigger in triggers) {
-                                var g = trigger.Gesture;
-                                var list = _GestureSet.ContainsKey(g)
-                                    ? (_GestureSet[g])
-                                    : (_GestureSet[g] = new HashSet<ICommand>());
-                                list.Add(item);
-                            }
-                        }
-                    }
-                }
-                return _GestureSet;
-            }
-            set {
-                _GestureSet = null;
-            }
+        private Dictionary<IGesture, IReadOnlyDictionary<IGestureTrigger, ICommand>> GestureSet {
+            get => _GestureSet ??= [];
+            set => _GestureSet = value;
         }
-        private Dictionary<IGesture, HashSet<ICommand>> _GestureSet;
+        private Dictionary<IGesture, IReadOnlyDictionary<IGestureTrigger, ICommand>> _GestureSet;
 
-        private Dictionary<string, HashSet<ICommand>> InputSet {
+        private Dictionary<string, IReadOnlyDictionary<IInputTrigger, ICommand>> InputSet {
             get => _InputSet ??= [];
             set => _InputSet = value;
         }
-        private Dictionary<string, HashSet<ICommand>> _InputSet;
+        private Dictionary<string, IReadOnlyDictionary<IInputTrigger, ICommand>> _InputSet;
 
         public CommandCollection(IEnumerable<ICommand> items) {
             List = new List<ICommand>(items);
         }
 
-        public bool Triggered(string input, out IReadOnlySet<ICommand> commands) {
-            var s = input;
-            if (InputSet.TryGetValue(s, out var list) == false) {
-                InputSet[s] = list = List.Where(c => c.Trigger?.Input?.Triggered(s) ?? false).ToHashSet();
+        public bool Triggered(string input, out IReadOnlyDictionary<IInputTrigger, ICommand> commands) {
+            if (input == null) {
+                commands = null;
+                return false;
             }
-            commands = list;
+            var inputSet = InputSet;
+            if (inputSet.TryGetValue(input, out var set) == false) {
+                inputSet[input] = set = List
+                    .Select(command =>
+                        command.Trigger?.Triggered(input, out var trigger) == true
+                            ? KeyValuePair.Create(trigger, command)
+                            : default(KeyValuePair<IInputTrigger, ICommand>?))
+                    .Where(item => item.HasValue)
+                    .ToDictionary(item => item.Value.Key, item => item.Value.Value);
+            }
+            commands = set;
             return commands.Count > 0;
         }
 
-        public bool Triggered(IGesture gesture, out IReadOnlySet<ICommand> commands) {
-            if (GestureSet.TryGetValue(gesture, out var list)) {
-                commands = list;
-                return true;
+        public bool Triggered(IGesture gesture, out IReadOnlyDictionary<IGestureTrigger, ICommand> commands) {
+            if (gesture == null) {
+                commands = null;
+                return false;
             }
-            commands = null;
-            return false;
+            var gestureSet = GestureSet;
+            if (gestureSet.TryGetValue(gesture, out var set) == false) {
+                gestureSet[gesture] = set = List
+                    .Select(command =>
+                        command.Trigger?.Triggered(gesture, out var trigger) == true
+                            ? KeyValuePair.Create(trigger, command)
+                            : default(KeyValuePair<IGestureTrigger, ICommand>?))
+                    .Where(item => item.HasValue)
+                    .ToDictionary(item => item.Value.Key, item => item.Value.Value);
+            }
+            commands = set;
+            return commands.Count > 0;
         }
 
         public async Task Init(CancellationToken token) {

@@ -12,6 +12,7 @@ namespace Brows {
         bool HasEntry(out IEntry current);
         bool HasEntries(out IReadOnlyList<IEntry> entries);
         bool HasEntries<TEntry>(out IReadOnlyList<TEntry> entries) where TEntry : class, IEntry;
+        bool HasProvider(out IProvider provider);
         bool HasProvider<TProvider>(out TProvider provider) where TProvider : class, IProvider;
         bool HasProviderService<TService>(out IProvider provider, out TService service) where TService : class, IProviderExport;
         bool HasWindow(out object native);

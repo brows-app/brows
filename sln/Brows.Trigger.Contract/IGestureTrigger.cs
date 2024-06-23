@@ -1,7 +1,7 @@
 ﻿namespace Brows {
-    public interface IGestureTrigger {
+    public interface IGestureTrigger : ITrigger {
         IGesture Gesture { get; }
-        string Shortcut { get; }
         string Display { get; }
+        bool Triggered(IGesture gesture);
     }
 }

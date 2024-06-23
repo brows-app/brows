@@ -5,18 +5,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using FILE = System.IO.File;
 
 namespace Brows.Config {
     internal abstract class ConfigFileInfo {
         private static readonly ILog Log = Logging.For(typeof(ConfigFileInfo));
-        private static readonly Dictionary<string, object> Locker = [];
+        private static readonly Dictionary<string, object> Locker = new(StringComparer.OrdinalIgnoreCase);
 
         private event EventHandler Invalidated;
 
-        private ConfigFileInfo(string file, string @default) {
+        private ConfigFileInfo(string file, string @default, string special) {
             File = file;
             Default = @default;
+            Special = special;
         }
 
         private async Task<TConfig> Configure<TConfig>(CancellationToken token) where TConfig : new() {
@@ -26,33 +26,36 @@ namespace Brows.Config {
             }
             return await Task.Run(cancellationToken: token, function: () => {
                 lock (locker) {
-                    for (var i = 0; ; i++) {
-                        file = FILE.Exists(file)
-                            ? file
-                            : Default;
-                        var err = default(Exception);
-                        var conf = Conf.Contain(file);
-                        var config = new TConfig();
-                        try {
-                            return conf.Configure(config, key: "");
-                        }
-                        catch (IOException ex) {
-                            err = ex;
-                        }
-                        if (i > 3) {
-                            if (Log.Error()) {
-                                Log.Error(err);
+                    TConfig config(TConfig target, string file) {
+                        for (var i = 0; ; i++) {
+                            var err = default(Exception);
+                            var conf = Conf.Contain(file, special: Special);
+                            try {
+                                return conf.Configure(target, key: "");
                             }
-                            if (Log.Warn()) {
-                                Log.Warn($"Unable to configure > {typeof(TConfig).Name}");
+                            catch (IOException ex) {
+                                err = ex;
                             }
-                            return config;
+                            if (i > 3) {
+                                if (Log.Error()) {
+                                    Log.Error(err);
+                                }
+                                if (Log.Warn()) {
+                                    Log.Warn($"Unable to configure > {typeof(TConfig).Name}");
+                                }
+                                return target;
+                            }
+                            if (Log.Info()) {
+                                Log.Info(err?.Message);
+                            }
+                            Thread.Sleep(250);
                         }
-                        if (Log.Info()) {
-                            Log.Info(err?.Message);
-                        }
-                        Thread.Sleep(250);
                     }
+                    var
+                    target = new TConfig();
+                    target = config(target, Default);
+                    target = config(target, file);
+                    return target;
                 }
             });
         }
@@ -60,6 +63,7 @@ namespace Brows.Config {
         public bool Invalid { get; private set; }
         public string File { get; }
         public string Default { get; }
+        public string Special { get; }
 
         public void Invalidate() {
             if (Log.Info()) {
@@ -76,14 +80,14 @@ namespace Brows.Config {
             var file = Path.Combine(dir, $"{name}.conf");
             var dflt = Path.Combine(dir, "default", $"{name}.conf.default");
             var
-            loaded = new For<TConfig>(file, dflt);
+            loaded = new For<TConfig>(file, dflt, "brows");
             loaded.Invalidated += invalidated;
             await ConfigFileWatcher.Subscribe(loaded, token);
             return loaded;
         }
 
         public sealed class For<TConfig> : ConfigFileInfo where TConfig : new() {
-            public For(string file, string @default) : base(file, @default) {
+            public For(string file, string @default, string special) : base(file, @default, special) {
             }
 
             public Task<TConfig> Configure(CancellationToken token) {
