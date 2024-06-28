@@ -1,13 +1,13 @@
 ﻿using Brows.Commands;
 using Brows.Gui;
+using Brows.Gui.Collections;
 using Domore.Notification;
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
 
 namespace Brows {
     internal sealed class FileSystemFindResult : Notifier, IControlled<IFileSystemFindResultController> {
-        private readonly ObservableCollection<FoundInInfo> Collection = new();
+        private readonly SyncedCollection<FoundInInfo> Collection = [];
 
         private void Controller_CurrentChanged(object sender, EventArgs e) {
             CurrentItem = Controller?.CurrentItem;
@@ -15,23 +15,6 @@ namespace Brows {
 
         public object Source =>
             Collection;
-
-        public IFileSystemFindResultController Controller {
-            get => _Controller;
-            set {
-                var oldValue = _Controller;
-                var newValue = value;
-                if (Change(ref _Controller, newValue, nameof(Controller))) {
-                    if (oldValue != null) {
-                        oldValue.CurrentChanged -= Controller_CurrentChanged;
-                    }
-                    if (newValue != null) {
-                        newValue.CurrentChanged += Controller_CurrentChanged;
-                    }
-                }
-            }
-        }
-        private IFileSystemFindResultController _Controller;
 
         public FoundInInfo CurrentItem {
             get => _CurrentItem;
@@ -83,10 +66,29 @@ namespace Brows {
 
         public void Add(FoundInInfo[] item) {
             if (item != null && item.Length > 0) {
-                foreach (var i in item) {
-                    Collection.Add(i);
+                Collection.Sync(() => {
+                    foreach (var i in item) {
+                        Collection.Add(i);
+                    }
+                });
+            }
+        }
+
+        IFileSystemFindResultController IControlled<IFileSystemFindResultController>.Controller {
+            set {
+                var newValue = value;
+                var oldValue = Controller;
+                if (oldValue != newValue) {
+                    if (oldValue != null) {
+                        oldValue.CurrentChanged -= Controller_CurrentChanged;
+                    }
+                    if (newValue != null) {
+                        newValue.CurrentChanged += Controller_CurrentChanged;
+                    }
+                    Controller = newValue;
                 }
             }
         }
+        private IFileSystemFindResultController Controller;
     }
 }

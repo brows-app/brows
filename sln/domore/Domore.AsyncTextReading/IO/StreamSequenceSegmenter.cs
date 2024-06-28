@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Domore.Buffers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Domore.IO {
-    using Buffers;
-
-    internal class StreamSequenceSegmenter {
+    internal sealed class StreamSequenceSegmenter {
         public BufferPool<byte> BufferPool { get; }
 
         public StreamSequenceSegmenter(BufferPool<byte> bufferPool) {
@@ -15,7 +14,7 @@ namespace Domore.IO {
         }
 
         public async IAsyncEnumerable<SequenceSegment<byte>> Segments(Stream stream, [EnumeratorCancellation] CancellationToken cancellationToken) {
-            if (null == stream) throw new ArgumentNullException(nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
             var buffer = default(byte[]);
             var cursor = 0;
             var segment = default(SequenceSegment<byte>);
@@ -24,7 +23,7 @@ namespace Domore.IO {
                     cursor = 0;
                     buffer = BufferPool.Rent();
                 }
-                var bytesRead = await stream.ReadAsync(buffer, cursor, buffer.Length - cursor, cancellationToken);
+                var bytesRead = await stream.ReadAsync(buffer, cursor, buffer.Length - cursor, cancellationToken).ConfigureAwait(false);
                 if (bytesRead == 0) {
                     break;
                 }

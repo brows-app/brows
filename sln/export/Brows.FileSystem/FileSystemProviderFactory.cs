@@ -11,35 +11,41 @@ namespace Brows {
         private static readonly ILog Log = Logging.For(typeof(FileSystemProviderFactory));
 
         private static async Task<DirectoryInfo> LoadDirectory(string id, CancellationToken token) {
-            return await Task.Run(cancellationToken: token, function: () => {
-                try {
-                    var info = new DirectoryInfo(id);
-                    return info.Exists
-                        ? info
-                        : null;
-                }
-                catch {
-                    return null;
-                }
-            });
+            return await Task
+                .Run(cancellationToken: token, function: () => {
+                    try {
+                        var info = new DirectoryInfo(id);
+                        return info.Exists
+                            ? info
+                            : null;
+                    }
+                    catch {
+                        return null;
+                    }
+                })
+                .ConfigureAwait(false);
         }
 
         protected sealed override async Task<FileSystemProvider> CreateFor(string id, IPanel panel, CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(CreateFor), id));
             }
-            var info = await LoadDirectory(id, token);
+            var info = await LoadDirectory(id, token).ConfigureAwait(false);
             if (info == null) {
                 return null;
             }
             if (Metadata == null) {
-                Metadata = await FileSystemMetaDataState.Load(MetadataSystemReader, token);
+                Metadata = await FileSystemMetaDataState
+                    .Load(MetadataSystemReader, token)
+                    .ConfigureAwait(false);
             }
             var caseCorrect = info.FullName;
             var caseSensitive = true;
-            await Task.WhenAll(
-                CaseCorrectFile?.Work(info.FullName, result => caseCorrect = result, token) ?? Task.CompletedTask,
-                CaseSensitiveDirectory?.Work(info.FullName, result => caseSensitive = result, token) ?? Task.CompletedTask);
+            await Task
+                .WhenAll(
+                    CaseCorrectFile?.Work(info.FullName, result => caseCorrect = result, token) ?? Task.CompletedTask,
+                    CaseSensitiveDirectory?.Work(info.FullName, result => caseSensitive = result, token) ?? Task.CompletedTask)
+                .ConfigureAwait(false);
             if (Log.Info()) {
                 Log.Info(
                     Log.Join(nameof(caseCorrect), caseCorrect),

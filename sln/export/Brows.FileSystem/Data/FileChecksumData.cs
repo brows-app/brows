@@ -12,14 +12,18 @@ namespace Brows.Data {
             HashName = hashName;
         }
 
-        protected sealed override async Task<string> GetValue(FileSystemEntry entry, Action<string> progress, CancellationToken cancellationToken) {
+        protected sealed override async Task<string> GetValue(FileSystemEntry entry, Action<string> progress, CancellationToken token) {
             if (entry == null) return null;
             if (entry.Info is FileInfo file) {
                 var hash = default(byte[]);
-                var stream = await Task.Run(file.OpenRead, cancellationToken);
+                var stream = await Task
+                    .Run(file.OpenRead, token)
+                    .ConfigureAwait(false);
                 await using (stream) {
                     using (var hashAlgorithm = (HashAlgorithm)CryptoConfig.CreateFromName(HashName)) {
-                        hash = await hashAlgorithm.ComputeHashAsync(stream, cancellationToken);
+                        hash = await hashAlgorithm
+                            .ComputeHashAsync(stream, token)
+                            .ConfigureAwait(false);
                     }
                 }
                 return BitConverter

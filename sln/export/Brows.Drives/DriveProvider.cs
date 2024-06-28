@@ -11,11 +11,11 @@ namespace Brows {
     internal sealed class DriveProvider : Provider<DriveEntry, DrivesConfig>, IFileSystemNavigationProvider {
         private static readonly ILog Log = Logging.For(typeof(DriveProvider));
 
-        private async Task<IReadOnlyList<DriveEntry>> List(CancellationToken token) {
-            return await Task.Run(cancellationToken: token, function: () => {
+        private Task<IReadOnlyList<DriveEntry>> List(CancellationToken token) {
+            return Task.Run(cancellationToken: token, function: () => {
                 var drives = DriveInfo.GetDrives();
                 var entries = drives.Select(d => new DriveEntry(this, d)).ToList();
-                return entries;
+                return (IReadOnlyList<DriveEntry>)entries;
             });
         }
 

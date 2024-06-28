@@ -37,27 +37,31 @@ namespace Domore.IO {
                 }
             }
             var writer = Channel.Writer;
-            await Task.Run(cancellationToken: cancellationToken, function: async () => {
-                var infos = directoryInfo.EnumerateFileSystemInfos(SearchPattern, enumerationOptions);
-                foreach (var info in infos) {
-                    if (cancellationToken.IsCancellationRequested) {
-                        cancellationToken.ThrowIfCancellationRequested();
-                    }
-                    if (Ignore(info)) {
-                        continue;
-                    }
-                    if (info is FileInfo file) {
-                        await writer.WriteAsync(file, cancellationToken);
-                        Interlocked.Add(ref _FileCount, 1);
-                    }
-                    else {
-                        if (info is DirectoryInfo directory) {
-                            queue.Enqueue(directory);
-                            Interlocked.Add(ref _DirectoryCount, 1);
+            await Task
+                .Run(cancellationToken: cancellationToken, function: async () => {
+                    var infos = directoryInfo.EnumerateFileSystemInfos(SearchPattern, enumerationOptions);
+                    foreach (var info in infos) {
+                        if (cancellationToken.IsCancellationRequested) {
+                            cancellationToken.ThrowIfCancellationRequested();
+                        }
+                        if (Ignore(info)) {
+                            continue;
+                        }
+                        if (info is FileInfo file) {
+                            await writer
+                                .WriteAsync(file, cancellationToken)
+                                .ConfigureAwait(false);
+                            Interlocked.Add(ref _FileCount, 1);
+                        }
+                        else {
+                            if (info is DirectoryInfo directory) {
+                                queue.Enqueue(directory);
+                                Interlocked.Add(ref _DirectoryCount, 1);
+                            }
                         }
                     }
-                }
-            });
+                })
+                .ConfigureAwait(false);
         }
 
         private async Task WriteAll(CancellationToken cancellationToken) {
@@ -77,23 +81,25 @@ namespace Domore.IO {
             async Task continuation(Queue<DirectoryInfo> queue) {
                 var tasks = new List<Task>();
                 while (queue.TryDequeue(out var directory)) {
-                    await writer.WriteAsync(directory, cancellationToken);
+                    await writer
+                        .WriteAsync(directory, cancellationToken)
+                        .ConfigureAwait(false);
                     if (recurse) {
                         var q = new Queue<DirectoryInfo>();
                         async Task t() {
-                            await WriteFilesAndQueueDirectories(directory, options, q, cancellationToken);
-                            await continuation(q);
+                            await WriteFilesAndQueueDirectories(directory, options, q, cancellationToken).ConfigureAwait(false);
+                            await continuation(q).ConfigureAwait(false);
                         }
                         tasks.Add(t());
                     }
                 }
                 if (tasks.Count > 0) {
-                    await Task.WhenAll(tasks);
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
                 }
             }
             var q = new Queue<DirectoryInfo>();
-            await WriteFilesAndQueueDirectories(DirectoryInfo, options, q, cancellationToken);
-            await continuation(q);
+            await WriteFilesAndQueueDirectories(DirectoryInfo, options, q, cancellationToken).ConfigureAwait(false);
+            await continuation(q).ConfigureAwait(false);
         }
 
         internal DirectoryInfo DirectoryInfo { get; }
@@ -118,9 +124,13 @@ namespace Domore.IO {
         public bool EnumerateReparsePoints { get; set; }
 
         public IAsyncEnumerator<FileSystemInfo> GetAsyncEnumerator(CancellationToken cancellationToken) {
-            if (Locked) throw new LockedException();
+            if (Locked) {
+                throw new LockedException();
+            }
             lock (Locker) {
-                if (Locked) throw new LockedException();
+                if (Locked) {
+                    throw new LockedException();
+                }
                 Locked = true;
             }
             var writer = Channel.Writer;

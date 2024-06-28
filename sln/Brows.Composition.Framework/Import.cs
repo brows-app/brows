@@ -6,52 +6,65 @@ using System.Reflection;
 
 namespace Brows {
     internal sealed class Import : IImport {
-        private readonly Dictionary<Type, Import> CacheOf = new();
-        private readonly Dictionary<Type, Import> CacheFor = new();
-        private readonly Dictionary<Type, object> CacheGet = new();
-        private readonly Dictionary<Type, IReadOnlyList<object>> CacheList = new();
-        private readonly Dictionary<Type, Dictionary<PropertyInfo, object>> CachePopulate = new();
+        private readonly Dictionary<Type, Import> CacheOf = [];
+        private readonly Dictionary<Type, Import> CacheFor = [];
+        private readonly Dictionary<Type, object> CacheGet = [];
+        private readonly Dictionary<Type, IReadOnlyList<object>> CacheList = [];
+        private readonly Dictionary<Type, Dictionary<PropertyInfo, object>> CachePopulate = [];
 
         private Import Of(Type type) {
-            var cache = CacheOf;
-            if (cache.TryGetValue(type, out var value) == false) {
-                cache[type] = value = new Import(Export
-                    .Where(export => export.Implements(type))
-                    .ToList());
+            if (CacheOf.TryGetValue(type, out var value) == false) {
+                lock (CacheOf) {
+                    if (CacheOf.TryGetValue(type, out value) == false) {
+                        CacheOf[type] = value = new Import(Export
+                            .Where(export => export.Implements(type))
+                            .ToList());
+                    }
+                }
             }
             return value;
         }
 
         private Import For(Type type) {
-            var cache = CacheFor;
-            if (cache.TryGetValue(type, out var value) == false) {
-                cache[type] = value = new Import(Export
-                    .Where(export => export.Targets(type))
-                    .ToList());
+            if (CacheFor.TryGetValue(type, out var value) == false) {
+                lock (CacheFor) {
+                    if (CacheFor.TryGetValue(type, out value) == false) {
+                        CacheFor[type] = value = new Import(Export
+                            .Where(export => export.Targets(type))
+                            .ToList());
+                    }
+                }
             }
             return value;
         }
 
         private object Get(Type type) {
             var cache = CacheGet;
-            if (cache.TryGetValue(type, out var value) == false) {
-                cache[type] = value = Of(type)
-                    .Export
-                    .Select(export => export.Instance)
-                    .Where(instance => instance != null)
-                    .FirstOrDefault();
+            if (CacheGet.TryGetValue(type, out var value) == false) {
+                lock (CacheGet) {
+                    if (CacheGet.TryGetValue(type, out value) == false) {
+                        CacheGet[type] = value = Of(type)
+                            .Export
+                            .Select(export => export.Instance)
+                            .Where(instance => instance != null)
+                            .FirstOrDefault();
+                    }
+                }
             }
             return value;
         }
 
         private IReadOnlyList<object> List(Type type) {
-            var cache = CacheList;
-            if (cache.TryGetValue(type, out var value) == false) {
-                cache[type] = value = Of(type)
-                    .Export
-                    .Select(export => export.Instance)
-                    .Where(instance => instance != null)
-                    .ToList();
+            if (CacheList.TryGetValue(type, out var value) == false) {
+                lock (CacheList) {
+                    if (CacheList.TryGetValue(type, out value) == false) {
+                        CacheList[type] = value = Of(type)
+                            .Export
+                            .Select(export => export.Instance)
+                            .Where(instance => instance != null)
+                            .ToList();
+                    }
+                }
             }
             return value;
         }
@@ -63,18 +76,21 @@ namespace Brows {
         }
 
         public void Populate(object obj) {
-            if (obj != null) {
-                var type = obj.GetType();
-                var cache = CachePopulate;
-                if (cache.TryGetValue(type, out var value) == false) {
-                    cache[type] = value = type.GetProperties()
-                        .Where(p =>
-                            p.CanWrite &&
-                            p.GetIndexParameters().Length == 0 &&
-                            p.PropertyType.IsAssignableTo(typeof(IExport)))
-                        .ToDictionary(
-                            p => p,
-                            p => For(type).Get(p.PropertyType) ?? Get(p.PropertyType));
+            var type = obj?.GetType();
+            if (type != null) {
+                if (CachePopulate.TryGetValue(type, out var value) == false) {
+                    lock (CachePopulate) {
+                        if (CachePopulate.TryGetValue(type, out value) == false) {
+                            CachePopulate[type] = value = type.GetProperties()
+                                .Where(p =>
+                                    p.CanWrite &&
+                                    p.GetIndexParameters().Length == 0 &&
+                                    p.PropertyType.IsAssignableTo(typeof(IExport)))
+                                .ToDictionary(
+                                    p => p,
+                                    p => For(type).Get(p.PropertyType) ?? Get(p.PropertyType));
+                        }
+                    }
                 }
                 foreach (var item in value) {
                     item.Key.SetValue(obj, item.Value);

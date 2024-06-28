@@ -1,3 +1,4 @@
+using Domore.Logs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,9 +8,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Domore.IO {
-    using Logs;
-
-    internal class FileSystemEventChannel {
+    internal sealed class FileSystemEventChannel {
         private static readonly ILog Log = Logging.For(typeof(FileSystemEventChannel));
 
         public string Path { get; set; }
@@ -43,7 +42,7 @@ namespace Domore.IO {
                     Log.Debug(nameof(FileSystemWatcher) + "[" + e?.ChangeType + "][" + e?.FullPath + "][" + path + "]");
                 }
                 try {
-                    await writer.WriteAsync(e, cancellationToken);
+                    await writer.WriteAsync(e, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex) {
                     if (ex is OperationCanceledException canceled && canceled.CancellationToken == cancellationToken) {
@@ -85,7 +84,7 @@ namespace Domore.IO {
             });
             try {
                 for (; ; ) {
-                    var writing = await reader.WaitToReadAsync(cancellationToken);
+                    var writing = await reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false);
                     if (writing == false) {
                         break;
                     }

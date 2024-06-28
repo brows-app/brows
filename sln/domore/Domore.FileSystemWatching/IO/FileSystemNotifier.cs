@@ -1,12 +1,11 @@
+using Domore.Logs;
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.IO {
-    using Logs;
-
-    public class FileSystemNotifier {
+    public sealed class FileSystemNotifier {
         private static readonly ILog Log = Logging.For(typeof(FileSystemNotifier));
         private readonly object Locker = new();
         private readonly FileSystemEventChannel Channel;
@@ -17,7 +16,7 @@ namespace Domore.IO {
             }
             var error = default(Exception);
             try {
-                await foreach (var change in Channel.Read(cancellationToken)) {
+                await foreach (var change in Channel.Read(cancellationToken).ConfigureAwait(false)) {
                     var e = new FileSystemNotifyEventArgs(change);
                     void invoke(object _) {
                         Read?.Invoke(this, e.FileSystemEvent);
@@ -45,7 +44,7 @@ namespace Domore.IO {
                 error = ex;
             }
             if (error != null) {
-                var directoryExists = await Task.Run(() => Directory.Exists(Path), cancellationToken);
+                var directoryExists = await Task.Run(() => Directory.Exists(Path), cancellationToken).ConfigureAwait(false);
                 if (directoryExists == false) {
                     if (Log.Info()) {
                         Log.Info($"{nameof(Directory.Exists)}[{directoryExists}][{Path}]");
@@ -91,7 +90,7 @@ namespace Domore.IO {
             }
             try {
                 for (; ; ) {
-                    var error = await RunOnce(cancellationToken);
+                    var error = await RunOnce(cancellationToken).ConfigureAwait(false);
                     if (error is null) {
                         return null;
                     }

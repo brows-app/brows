@@ -17,7 +17,7 @@ namespace Brows.Native {
         }
 
         protected void Try(Func<int> result) {
-            if (null == result) throw new ArgumentNullException(nameof(result));
+            ArgumentNullException.ThrowIfNull(result);
             var error = result();
             if (error != 0) {
                 throw new NativeErrorException(error);
@@ -34,20 +34,22 @@ namespace Brows.Native {
 
         public async Task<bool> Loaded(CancellationToken token) {
             if (this != Brows) {
-                await Brows.Loaded(token);
+                await Brows.Loaded(token).ConfigureAwait(false);
             }
             if (Handle == IntPtr.Zero) {
                 try {
-                    await Task.Run(cancellationToken: token, action: () => {
-                        if (Handle == IntPtr.Zero) {
-                            lock (Locker) {
-                                if (Handle == IntPtr.Zero) {
-                                    Handle = NativePath.Load(Dll);
-                                    HandleLoaded();
+                    await Task
+                        .Run(cancellationToken: token, action: () => {
+                            if (Handle == IntPtr.Zero) {
+                                lock (Locker) {
+                                    if (Handle == IntPtr.Zero) {
+                                        Handle = NativePath.Load(Dll);
+                                        HandleLoaded();
+                                    }
                                 }
                             }
-                        }
-                    });
+                        })
+                        .ConfigureAwait(false);
                 }
                 catch (Exception ex) {
                     if (Log.Error()) {
@@ -61,17 +63,19 @@ namespace Brows.Native {
 
         public async Task Freed(CancellationToken token) {
             if (Handle != IntPtr.Zero) {
-                await Task.Run(cancellationToken: token, action: () => {
-                    if (Handle != IntPtr.Zero) {
-                        lock (Locker) {
-                            if (Handle != IntPtr.Zero) {
-                                HandleFreeing();
-                                NativePath.Free(Handle);
-                                Handle = IntPtr.Zero;
+                await Task
+                    .Run(cancellationToken: token, action: () => {
+                        if (Handle != IntPtr.Zero) {
+                            lock (Locker) {
+                                if (Handle != IntPtr.Zero) {
+                                    HandleFreeing();
+                                    NativePath.Free(Handle);
+                                    Handle = IntPtr.Zero;
+                                }
                             }
                         }
-                    }
-                });
+                    })
+                    .ConfigureAwait(false);
             }
         }
     }

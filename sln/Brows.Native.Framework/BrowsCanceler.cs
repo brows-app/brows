@@ -3,13 +3,13 @@ using System.Threading;
 
 namespace Brows {
     [StructLayout(LayoutKind.Sequential)]
-    public struct BrowsCanceler {
+    public readonly struct BrowsCanceler {
         [UnmanagedFunctionPointer(BrowsNative.Call, CharSet = BrowsNative.Chars)]
         private delegate int CanceledDelegate(ref BrowsCanceler p);
 
-        private CanceledDelegate Canceled;
+        private readonly CanceledDelegate Canceled;
 
-        public static readonly BrowsCanceler None = new BrowsCanceler();
+        public static readonly BrowsCanceler None = new();
 
         private BrowsCanceler(CanceledDelegate canceled) {
             Canceled = canceled;

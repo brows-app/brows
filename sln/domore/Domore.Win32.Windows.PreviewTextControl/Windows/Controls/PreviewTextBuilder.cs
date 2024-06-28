@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Domore.Text;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
 namespace Domore.Windows.Controls {
-    using Text;
-
     internal sealed class PreviewTextBuilder : DecodedTextBuilder {
         public PreviewTextControl Control { get; }
 

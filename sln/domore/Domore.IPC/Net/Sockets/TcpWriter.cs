@@ -7,23 +7,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.Net.Sockets {
-    internal class TcpWriter : IDisposable {
-        private Stream Stream =>
-            _Stream ?? (
-            _Stream = Client.GetStream());
+    internal sealed class TcpWriter : IDisposable {
+        private Stream Stream => _Stream ??= Client.GetStream();
         private Stream _Stream;
 
-        private StreamWriter StreamWriter =>
-            _StreamWriter ?? (
-            _StreamWriter = new StreamWriter(Stream, Encoding) { AutoFlush = false });
+        private StreamWriter StreamWriter => _StreamWriter ??= new StreamWriter(Stream, Encoding) { AutoFlush = false };
         private StreamWriter _StreamWriter;
 
-        private TcpClient Client =>
-            _Client ?? (
-            _Client = new TcpClient());
+        private TcpClient Client => _Client ??= new TcpClient();
         private TcpClient _Client;
 
-        protected virtual void Dispose(bool disposing) {
+        private void Dispose(bool disposing) {
             if (disposing) {
                 try {
                     _Stream?.Dispose();
@@ -54,13 +48,13 @@ namespace Domore.Net.Sockets {
             Encoding = encoding;
         }
 
-        public async Task Connect(CancellationToken cancellationToken) {
-            await Client.ConnectAsync(EndPoint, cancellationToken);
+        public ValueTask Connect(CancellationToken cancellationToken) {
+            return Client.ConnectAsync(EndPoint, cancellationToken);
         }
 
         public async Task Write(string s, CancellationToken cancellationToken) {
-            await StreamWriter.WriteLineAsync(s);
-            await StreamWriter.FlushAsync();
+            await StreamWriter.WriteLineAsync(s).ConfigureAwait(false);
+            await StreamWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public void Dispose() {

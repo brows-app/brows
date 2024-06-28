@@ -5,7 +5,7 @@ namespace Brows {
         public bool ExtractOverwrites { get; set; }
 
         public Dictionary<string, string> ExtractEntriesToFiles {
-            get => _ExtractEntriesToFiles ?? (_ExtractEntriesToFiles = new());
+            get => _ExtractEntriesToFiles ??= [];
             set => _ExtractEntriesToFiles = value;
         }
         private Dictionary<string, string> _ExtractEntriesToFiles;

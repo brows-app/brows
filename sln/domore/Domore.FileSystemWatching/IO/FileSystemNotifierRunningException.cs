@@ -1,6 +1,6 @@
 ﻿using System;
 
 namespace Domore.IO {
-    internal class FileSystemNotifierRunningException : Exception {
+    internal sealed class FileSystemNotifierRunningException : Exception {
     }
 }

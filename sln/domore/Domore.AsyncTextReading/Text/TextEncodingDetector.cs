@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Text;
 
 namespace Domore.Text {
-    internal class TextEncodingDetector {
+    internal sealed class TextEncodingDetector {
         private const bool ThrowOnInvalid = true;
 
         private byte[] Slice(ReadOnlySequence<byte> sequence) {

@@ -3,9 +3,7 @@ using System.Windows.Controls;
 
 namespace Brows.Windows {
     internal sealed class AppComponentDataTemplateSelector : DataTemplateSelector {
-        private Application Application =>
-            _Application ?? (
-            _Application = Application.Current);
+        private Application Application => _Application ??= Application.Current;
         private Application _Application;
 
         public string Kind { get; }

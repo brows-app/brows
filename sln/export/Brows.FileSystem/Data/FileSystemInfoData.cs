@@ -76,7 +76,7 @@ namespace Brows.Data {
                 var icon = default(object);
                 var task = Service?.Work(entry.Info, hint: null, set: result => icon = result, token);
                 if (task != null) {
-                    await task;
+                    await task.ConfigureAwait(false);
                 }
                 return icon;
             }
@@ -98,7 +98,7 @@ namespace Brows.Data {
                     return null;
                 }
                 var result = default(object);
-                var worked = await service.Work(entry.Info, set: overlay => result = overlay, token);
+                var worked = await service.Work(entry.Info, set: overlay => result = overlay, token).ConfigureAwait(false);
                 if (worked == false) {
                     return null;
                 }
@@ -120,7 +120,7 @@ namespace Brows.Data {
                 var obj = default(object);
                 var task = Service?.Work(entry.Info, ImageWidth, ImageHeight, set: result => obj = result, token);
                 if (task != null) {
-                    await task;
+                    await task.ConfigureAwait(false);
                 }
                 return obj;
             }
@@ -142,7 +142,7 @@ namespace Brows.Data {
                 var obj = default(object);
                 var task = Service?.Work(entry.Info, ImageWidth, ImageHeight, set: result => obj = result, token);
                 if (task != null) {
-                    await task;
+                    await task.ConfigureAwait(false);
                 }
                 return obj;
             }
@@ -195,7 +195,7 @@ namespace Brows.Data {
             }
 
             protected sealed override async Task<T> GetValue(FileSystemEntry entry, Action<T> progress, CancellationToken token) {
-                var info = await entry.FileSystemCache.Ready(token);
+                var info = await entry.FileSystemCache.Ready(token).ConfigureAwait(false);
                 if (info.Exists) {
                     return Func(info);
                 }

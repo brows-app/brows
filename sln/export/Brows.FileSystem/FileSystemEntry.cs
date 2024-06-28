@@ -15,8 +15,8 @@ namespace Brows {
 
         private FileSystemEntryRefreshDelay RefreshDelay;
 
-        private async Task<FileSystemInfo> FileSystemWork(CancellationToken token) {
-            return await Task.Run(cancellationToken: token, function: () => {
+        private Task<FileSystemInfo> FileSystemWork(CancellationToken token) {
+            return Task.Run(cancellationToken: token, function: () => {
                 Info.Refresh();
                 return Info;
             });
@@ -33,7 +33,9 @@ namespace Brows {
                         .ToDictionary(
                             key => Provider.Factory.Metadata.System[key].Definition,
                             key => default(IMetadataValue));
-                    await service.Work(file.FullName, dict, null, token);
+                    await service
+                        .Work(file.FullName, dict, null, token)
+                        .ConfigureAwait(false);
                     return dict.ToDictionary(item => item.Key.Key, item => item.Value);
                 }
             }

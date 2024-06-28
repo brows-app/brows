@@ -1,47 +1,52 @@
 ﻿<UserControl x:Class="Brows.FileSystemFindResultControl"
+             x:ClassModifier="internal"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:brows="http://schemas.brows.app/xaml"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:find="clr-namespace:Brows;assembly=Brows.FileSystem.Commands.Find"
-             xmlns:local="clr-namespace:Brows">
-    <UserControl.Style>
-        <Style TargetType="UserControl">
-            <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
-        </Style>
-    </UserControl.Style>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Style="{DynamicResource FileSystemFindResult_TextBlock_Root}"/>
-            <TextBlock Grid.Column="1" Style="{DynamicResource FileSystemFindResult_TextBlock_MatchTried}"/>
-            <TextBlock Grid.Column="2" Style="{DynamicResource FileSystemFindResult_TextBlock_MatchMatched}"/>
-        </Grid>
-        <Grid Grid.Row="1">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Margin" Value="5 0 0 0"/>
-                </Style>
-            </Grid.Style>
-            <ListView x:Name="ListView" ItemsSource="{Binding Source}">
-                <ListView.Resources>
-                    <DataTemplate DataType="{x:Type find:FoundInDirectoryName}">
-                        <local:FoundInDirectoryNameGrid/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type find:FoundInFileName}">
-                        <local:FoundInFileNameGrid/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type find:FoundInFileText}">
-                        <local:FoundInFileTextGrid/>
-                    </DataTemplate>
-                </ListView.Resources>
-            </ListView>
-        </Grid>
+             xmlns:local="clr-namespace:Brows"
+             xmlns:find="clr-namespace:Brows;assembly=Brows.FileSystem.Commands.Find">
+  <UserControl.Style>
+    <Style TargetType="UserControl">
+      <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+    </Style>
+  </UserControl.Style>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Style="{DynamicResource FileSystemFindResult_TextBlock_Root}"/>
+      <TextBlock Grid.Column="1" Style="{DynamicResource FileSystemFindResult_TextBlock_MatchTried}"/>
+      <TextBlock Grid.Column="2" Style="{DynamicResource FileSystemFindResult_TextBlock_MatchMatched}"/>
     </Grid>
+    <Grid Grid.Row="1">
+      <Grid.Style>
+        <Style TargetType="Grid">
+          <Setter Property="Margin" Value="5 0 0 0"/>
+        </Style>
+      </Grid.Style>
+      <brows:SyncedCollectionView x:Name="ListView" ItemsSource="{Binding Source}">
+        <brows:SyncedCollectionView.Resources>
+          <DataTemplate DataType="{x:Type find:FoundInDirectoryName}">
+            <local:FoundInDirectoryNameGrid/>
+          </DataTemplate>
+          <DataTemplate DataType="{x:Type find:FoundInFileError}">
+            <local:FoundInFileErrorGrid/>
+          </DataTemplate>
+          <DataTemplate DataType="{x:Type find:FoundInFileName}">
+            <local:FoundInFileNameGrid/>
+          </DataTemplate>
+          <DataTemplate DataType="{x:Type find:FoundInFileText}">
+            <local:FoundInFileTextGrid/>
+          </DataTemplate>
+        </brows:SyncedCollectionView.Resources>
+      </brows:SyncedCollectionView>
+    </Grid>
+  </Grid>
 </UserControl>

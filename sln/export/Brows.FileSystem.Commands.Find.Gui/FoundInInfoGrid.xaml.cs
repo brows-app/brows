@@ -1,5 +1,5 @@
 ﻿namespace Brows {
-    partial class FoundInInfoGrid {
+    sealed partial class FoundInInfoGrid {
         public FoundInInfoGrid() {
             InitializeComponent();
         }

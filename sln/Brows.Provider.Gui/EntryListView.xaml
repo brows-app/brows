@@ -5,16 +5,16 @@
           xmlns:local="clr-namespace:Brows"
           VirtualizingStackPanel.IsVirtualizing="True"
           VirtualizingStackPanel.VirtualizationMode="Recycling">
-    <ListView.Style>
-        <Style TargetType="ListView">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="IsSynchronizedWithCurrentItem" Value="True"/>
-            <Setter Property="Padding" Value="10 0 0 0"/>
-            <Setter Property="SelectionMode" Value="Extended"/>
-        </Style>
-    </ListView.Style>
-    <ListView.View>
-        <local:EntryGridView x:Name="GridView"/>
-    </ListView.View>
+  <ListView.Style>
+    <Style TargetType="ListView">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="IsSynchronizedWithCurrentItem" Value="True"/>
+      <Setter Property="Padding" Value="10 0 0 0"/>
+      <Setter Property="SelectionMode" Value="Extended"/>
+    </Style>
+  </ListView.Style>
+  <ListView.View>
+    <local:EntryGridView x:Name="GridView"/>
+  </ListView.View>
 </ListView>

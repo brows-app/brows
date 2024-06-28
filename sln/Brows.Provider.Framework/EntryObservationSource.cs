@@ -57,6 +57,11 @@ namespace Brows {
             entry.Selected -= Entry_Selected;
         }
 
+        private void PrivateAdd(IEntry entry) {
+            Collection.Add(entry);
+            Initialize(entry);
+        }
+
         public event EventHandler DropChanged;
         public event EventHandler SelectionChanged;
 
@@ -80,14 +85,13 @@ namespace Brows {
             Select;
 
         public void Add(IEntry entry) {
-            Collection.Add(entry);
-            Initialize(entry);
+            PrivateAdd(entry);
         }
 
         public void Add(params IEntry[] entries) {
-            if (null == entries) throw new ArgumentNullException(nameof(entries));
+            ArgumentNullException.ThrowIfNull(entries);
             foreach (var entry in entries) {
-                Add(entry);
+                PrivateAdd(entry);
             }
         }
 

@@ -17,7 +17,7 @@ namespace Brows {
         internal ZipArchivePath Archive { get; }
 
         internal static ZipEntryInfo File(ZipArchivePath archive, ZipEntryName name, ZipArchiveEntry zipArchiveEntry) {
-            if (null == zipArchiveEntry) throw new ArgumentNullException(nameof(zipArchiveEntry));
+            ArgumentNullException.ThrowIfNull(zipArchiveEntry);
             return new ZipEntryInfo(archive, name, ZipEntryKind.File) {
                 Attributes = zipArchiveEntry.ExternalAttributes,
                 CRC32 = zipArchiveEntry.Crc32,
@@ -47,8 +47,8 @@ namespace Brows {
         public int? Attributes { get; private init; }
         public DateTimeOffset? LastWriteTime { get; private init; }
 
-        public async Task Extract(string destination, bool overwrite, CancellationToken cancellationToken) {
-            await Extract(
+        public Task Extract(string destination, bool overwrite, CancellationToken cancellationToken) {
+            return Extract(
                 map: new Dictionary<string, ZipEntryInfo> {
                     { destination, this }
                 },
@@ -57,9 +57,9 @@ namespace Brows {
                 cancellationToken: cancellationToken);
         }
 
-        public static async Task Extract(IEnumerable<KeyValuePair<string, ZipEntryInfo>> map, bool overwrite, IOperationProgress progress, CancellationToken cancellationToken) {
-            if (null == map) throw new ArgumentNullException(nameof(map));
-            await Task.WhenAll(map
+        public static Task Extract(IEnumerable<KeyValuePair<string, ZipEntryInfo>> map, bool overwrite, IOperationProgress progress, CancellationToken cancellationToken) {
+            ArgumentNullException.ThrowIfNull(map);
+            return Task.WhenAll(map
                 .Select(pair => new {
                     FilePath = pair.Key,
                     EntryInfo = pair.Value

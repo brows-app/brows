@@ -23,7 +23,7 @@ namespace Brows {
         private readonly FileSystemEventTask FileEvent;
 
         private TaskCache<ZipEntryInfoCollection> EntryInfoCache {
-            get => _EntryInfoCache ?? (_EntryInfoCache = new(EntryInfoLoad));
+            get => _EntryInfoCache ??= new(EntryInfoLoad);
             set => _EntryInfoCache = value;
         }
         private TaskCache<ZipEntryInfoCollection> _EntryInfoCache;
@@ -97,8 +97,8 @@ namespace Brows {
         }
 
         private static string MakeFullName(FileInfo file, ZipArchiveNest nest) {
-            if (null == file) throw new ArgumentNullException(nameof(file));
-            if (null == nest) throw new ArgumentNullException(nameof(nest));
+            ArgumentNullException.ThrowIfNull(file);
+            ArgumentNullException.ThrowIfNull(nest);
             return string.Join(">", nest.Prepend(file.FullName));
         }
 
@@ -136,9 +136,8 @@ namespace Brows {
             _FileDeleted = new());
         private ZipArchiveFileEvent _FileDeleted;
 
-        public string Parent =>
-            _Parent ?? (
-            _Parent = Nest.Count == 0
+        public string Parent => _Parent ??=
+            Nest.Count == 0
                 ? File.DirectoryName
                 : string.Join(">", Nest
                     .Select((s, i) => {
@@ -154,7 +153,7 @@ namespace Brows {
                         return null;
                     })
                     .Where(s => s != null)
-                    .Prepend(File.FullName)));
+                    .Prepend(File.FullName));
         private string _Parent;
 
         public string FullName { get; }
@@ -165,8 +164,8 @@ namespace Brows {
         public ZipArchiveNest Nest { get; }
 
         public static ZipArchivePath Get(FileInfo file, ZipArchiveNest nest) {
-            if (null == file) throw new ArgumentNullException(nameof(file));
-            if (null == nest) throw new ArgumentNullException(nameof(nest));
+            ArgumentNullException.ThrowIfNull(file);
+            ArgumentNullException.ThrowIfNull(nest);
             var key = MakeFullName(file, nest);
             lock (Set) {
                 if (Set.TryGetValue(key, out var value) == false) {
@@ -203,12 +202,12 @@ namespace Brows {
             return EntryInfoCache.Result;
         }
 
-        public async Task<ZipEntryInfoCollection> EntryInfo(CancellationToken cancellationToken) {
-            return await EntryInfoCache.Ready(cancellationToken);
+        public Task<ZipEntryInfoCollection> EntryInfo(CancellationToken cancellationToken) {
+            return EntryInfoCache.Ready(cancellationToken);
         }
 
         public async Task Read(ZipArchiveRead info, IOperationProgress progress, CancellationToken cancellationToken) {
-            if (null == info) throw new ArgumentNullException(nameof(info));
+            ArgumentNullException.ThrowIfNull(info);
             if (Log.Info()) {
                 Log.Info(nameof(Read) + " > " + FullName);
             }
@@ -248,7 +247,7 @@ namespace Brows {
         }
 
         public async Task Update(ZipArchiveUpdate info, IOperationProgress progress, CancellationToken token) {
-            if (null == info) throw new ArgumentNullException(nameof(info));
+            ArgumentNullException.ThrowIfNull(info);
             if (Log.Info()) {
                 Log.Info(nameof(Update) + " > " + FullName);
             }

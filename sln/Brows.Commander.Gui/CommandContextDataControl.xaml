@@ -1,12 +1,12 @@
 ﻿<UserControl x:Class="Brows.CommandContextDataControl"
              x:ClassModifier="internal"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:brows="http://schemas.brows.app/xaml">
-    <UserControl.Resources>
-        <Style TargetType="ListView" BasedOn="{StaticResource CommandPalette_ListView}"/>
-    </UserControl.Resources>
-    <ContentControl 
-        Content="{Binding Current}" 
-        ContentTemplateSelector="{Binding Item[CommandContextData], Source={x:Static brows:AppComponent.DataTemplateSelector}}"/>
+             xmlns:brows="http://schemas.brows.app/xaml"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <UserControl.Resources>
+    <Style TargetType="ListView" BasedOn="{StaticResource CommandPalette_ListView}"/>
+    <Style TargetType="brows:SyncedCollectionView" BasedOn="{StaticResource CommandPalette_ListView}"/>
+  </UserControl.Resources>
+  <ContentControl Content="{Binding Current}" 
+                  ContentTemplateSelector="{Binding Item[CommandContextData], Source={x:Static brows:AppComponent.DataTemplateSelector}}"/>
 </UserControl>

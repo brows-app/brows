@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Domore.Buffers;
+using Domore.Logs;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.Text {
-    using Buffers;
-    using Logs;
-
-    internal class TextDecoders {
+    internal sealed class TextDecoders {
         private static readonly ILog Log = Logging.For(typeof(TextDecoders));
 
         private List<TextDecoder> Encoders(SequenceUpdater<byte> byteSequence) {
@@ -29,13 +28,13 @@ namespace Domore.Text {
         public BufferPool<char> BufferPool { get; set; }
 
         public IReadOnlyList<string> Encoding {
-            get => _Encoding ?? (_Encoding = new List<string>());
+            get => _Encoding ??= new List<string>();
             set => _Encoding = value;
         }
         private IReadOnlyList<string> _Encoding;
 
         public IReadOnlyDictionary<string, string> EncodingFallback {
-            get => _EncodingFallback ?? (_EncodingFallback = new Dictionary<string, string>());
+            get => _EncodingFallback ??= new Dictionary<string, string>();
             set => _EncodingFallback = value;
         }
         private IReadOnlyDictionary<string, string> _EncodingFallback;
@@ -67,8 +66,8 @@ namespace Domore.Text {
                     }
                 }
                 var tasks = running.Select(d => d.Decode(cancellationToken));
-                var task = await Task.WhenAny(tasks);
-                var decoded = await task;
+                var task = await Task.WhenAny(tasks).ConfigureAwait(false);
+                var decoded = await task.ConfigureAwait(false);
                 if (decoded.Complete) {
                     if (Log.Info()) {
                         Log.Info($"{nameof(running.Remove)}[{decoded.Encoding}]");
@@ -84,7 +83,7 @@ namespace Domore.Text {
                 if (decoded.Error == false && decoded.Canceled == false) {
                     var handle = Decoded;
                     if (handle != null) {
-                        await handle(decoded, cancellationToken);
+                        await handle(decoded, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

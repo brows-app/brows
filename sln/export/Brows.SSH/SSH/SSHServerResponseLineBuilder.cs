@@ -21,7 +21,7 @@ namespace Brows.SSH {
                 var line =
                 LineBuilder.ToString();
                 LineBuilder.Clear();
-                await LineChannel.Writer.WriteAsync(line, token);
+                await LineChannel.Writer.WriteAsync(line, token).ConfigureAwait(false);
             }
             LineChannel.Writer.Complete();
             await Task.CompletedTask;
@@ -29,18 +29,20 @@ namespace Brows.SSH {
 
         protected sealed override async Task Add(ReadOnlyMemory<char> memory, CancellationToken token) {
             var chars = memory.ToArray();
-            await Task.WhenAll(chars.Select(c => {
-                if (c == '\n') {
-                    var line =
-                    LineBuilder.ToString();
-                    LineBuilder.Clear();
-                    return LineChannel.Writer.WriteAsync(line, token).AsTask();
-                }
-                else {
-                    LineBuilder.Append(c);
-                    return Task.CompletedTask;
-                }
-            }));
+            await Task
+                .WhenAll(chars.Select(c => {
+                    if (c == '\n') {
+                        var line =
+                        LineBuilder.ToString();
+                        LineBuilder.Clear();
+                        return LineChannel.Writer.WriteAsync(line, token).AsTask();
+                    }
+                    else {
+                        LineBuilder.Append(c);
+                        return Task.CompletedTask;
+                    }
+                }))
+                .ConfigureAwait(false);
         }
 
         protected sealed override async Task Clear(CancellationToken token) {
@@ -51,7 +53,7 @@ namespace Brows.SSH {
         public event EventHandler Reset;
 
         public async IAsyncEnumerable<string> Lines([EnumeratorCancellation] CancellationToken token) {
-            await foreach (var line in LineChannel.Reader.ReadAllAsync(token)) {
+            await foreach (var line in LineChannel.Reader.ReadAllAsync(token).ConfigureAwait(false)) {
                 yield return line;
             }
         }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Domore.Buffers;
+using Domore.IO;
+using Domore.Logs;
+using System;
 using System.Buffers;
 using System.Text;
 using System.Threading;
@@ -6,11 +9,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Domore.Text {
-    using Buffers;
-    using IO;
-    using Logs;
-
-    internal class TextDecoder {
+    internal sealed class TextDecoder {
         private static readonly ILog Log = Logging.For(typeof(TextDecoder));
 
         private readonly Encoding Encoding;
@@ -41,9 +40,11 @@ namespace Domore.Text {
         }
 
         private TextDecoderStates Update() {
-            if (Log.Info()) {
-                Log.Info($"{nameof(Update)}[{EncodingName}]");
+#if DEBUG
+            if (Log.Debug()) {
+                Log.Debug($"{nameof(Update)}[{EncodingName}]");
             }
+#endif
             if (States.HasFlag(TextDecoderStates.Complete)) {
                 return States;
             }
@@ -66,9 +67,11 @@ namespace Domore.Text {
                     StreamReader.Decode(sequence, BufferWriter);
                 }
                 catch (Exception ex) {
+#if DEBUG
                     if (Log.Debug()) {
                         Log.Debug($"{nameof(Exception)}[{EncodingName}]", ex);
                     }
+#endif
                     return Complete(TextDecoderStates.Error, ex);
                 }
                 if (sequenceComplete) {
@@ -118,7 +121,7 @@ namespace Domore.Text {
         }
 
         public async Task<DecodedText> Decode(CancellationToken cancellationToken) {
-            var wait = await Ch.Reader.WaitToReadAsync(cancellationToken);
+            var wait = await Ch.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false);
             if (wait == false) {
                 return Decoded();
             }

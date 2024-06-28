@@ -26,7 +26,7 @@ namespace Domore.IO {
             var read = new StreamSequenceSegmenter(StreamBuffer);
             var segments = read.Segments(stream, cancellationToken);
             var segment1 = default(SequenceSegment<byte>);
-            await foreach (var segment in segments) {
+            await foreach (var segment in segments.ConfigureAwait(false)) {
                 if (decode.IsCompleted) {
                     break;
                 }
@@ -34,10 +34,10 @@ namespace Domore.IO {
                 sequence.Update(segment1, segment);
             }
             sequence.Complete();
-            var result = await decode;
+            var result = await decode.ConfigureAwait(false);
             var completed = Completed?.Invoke(result, cancellationToken);
             if (completed != null) {
-                await completed;
+                await completed.ConfigureAwait(false);
             }
             return result;
         }

@@ -117,7 +117,9 @@ namespace Brows.Commands {
                                         }
                                         token.ThrowIfCancellationRequested();
                                     }
-                                    await suggestionWriter.WriteAsync(dir, token);
+                                    await suggestionWriter
+                                        .WriteAsync(dir, token)
+                                        .ConfigureAwait(false);
                                     bag.Add(dir);
                                 }
                             }
@@ -130,7 +132,9 @@ namespace Brows.Commands {
                                 }
                             }
                         }));
-                    await Task.WhenAll(driveTasks);
+                    await Task
+                        .WhenAll(driveTasks)
+                        .ConfigureAwait(false);
                     Cache[input] = new(input, bag);
                 }
                 catch (Exception ex) {
@@ -149,7 +153,7 @@ namespace Brows.Commands {
                     suggestionWriter.Complete(suggestionError);
                 }
             });
-            await foreach (var item in suggestionChannel.Reader.ReadAllAsync(token)) {
+            await foreach (var item in suggestionChannel.Reader.ReadAllAsync(token).ConfigureAwait(false)) {
                 if (token.IsCancellationRequested) {
                     token.ThrowIfCancellationRequested();
                 }

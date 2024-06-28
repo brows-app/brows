@@ -26,7 +26,7 @@ namespace Brows.Data {
         public static async Task<FileSystemMetaDataState> Load(IMetadataSystemReader service, CancellationToken token) {
             if (null == service) throw new ArgumentNullException(nameof(service));
             var list = new List<IMetadataDefinition>();
-            var work = await service.Work(list, null, null, token);
+            var work = await service.Work(list, null, null, token).ConfigureAwait(false);
             var data = work == false
                 ? new()
                 : list
@@ -38,7 +38,9 @@ namespace Brows.Data {
 
         public async Task<File> Load(string file, object state, CancellationToken token) {
             if (FileSet.TryGetValue(file, out var metadata) == false || metadata.State != state) {
-                FileSet[file] = metadata = await File.Load(file, state, Service, token);
+                FileSet[file] = metadata = await File
+                    .Load(file, state, Service, token)
+                    .ConfigureAwait(false);
             }
             return metadata;
         }
@@ -62,7 +64,9 @@ namespace Brows.Data {
             public static async Task<File> Load(string path, object state, IMetadataSystemReader reader, CancellationToken token) {
                 if (null == reader) throw new ArgumentNullException(nameof(reader));
                 var list = new List<IMetadataDefinition>();
-                var work = await reader.Work(list, path, null, token);
+                var work = await reader
+                    .Work(list, path, null, token)
+                    .ConfigureAwait(false);
                 return new File(path, state, list);
             }
         }

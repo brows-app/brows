@@ -12,8 +12,8 @@ namespace Brows {
         string IProgram.Name =>
             Name;
 
-        async Task<int> IProgram.Run(IProgramContext context, CancellationToken token) {
-            return await Run(context, token);
+        Task<int> IProgram.Run(IProgramContext context, CancellationToken token) {
+            return Run(context, token);
         }
     }
 

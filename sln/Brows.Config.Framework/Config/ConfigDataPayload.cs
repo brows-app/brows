@@ -8,23 +8,23 @@ using FILE = System.IO.File;
 using PATH = System.IO.Path;
 
 namespace Brows.Config {
-    internal class ConfigDataPayload {
+    internal abstract class ConfigDataPayload {
         private static readonly ILog Log = Logging.For(typeof(ConfigDataPayload));
 
         private async Task<(string Head, string Path)> File(CancellationToken cancellationToken) {
-            var root = await ConfigPath.DataReady(cancellationToken);
+            var root = await ConfigPath.DataReady(cancellationToken).ConfigureAwait(false);
             var head = ConfigDataHead.For(Type, ID);
             var path = PATH.Combine(root, head + ".brws");
             return (Head: head, Path: path);
         }
 
-        public string ID { get; }
-        public string Type { get; }
-
-        public ConfigDataPayload(string type, string id) {
+        protected ConfigDataPayload(string type, string id) {
             ID = id;
             Type = type;
         }
+
+        public string ID { get; }
+        public string Type { get; }
 
         public static ConfigDataPayload<TData> For<TData>(TData data, string id) {
             return new Of<TData>(data, id);
@@ -39,21 +39,23 @@ namespace Brows.Config {
                 var text = data?.ConfText(key: "", multiline: true);
                 if (text != null) {
                     string comment(string s) => $"# {s}";
-                    var file = await File(cancellationToken);
+                    var file = await File(cancellationToken).ConfigureAwait(false);
                     var fileText = string.Join(Environment.NewLine, comment(file.Head), comment(Type), comment(ID), "", text);
                     if (Log.Info()) {
                         Log.Info(
                             nameof(Save) + " > " + Type,
                             nameof(file) + " > " + file.Path);
                     }
-                    await FILE.WriteAllTextAsync(file.Path, fileText, cancellationToken);
+                    await FILE
+                        .WriteAllTextAsync(file.Path, fileText, cancellationToken)
+                        .ConfigureAwait(false);
                 }
                 return data;
             }
 
             public sealed override async Task<TData> Load(CancellationToken cancellationToken) {
                 var data = Data;
-                var file = await File(cancellationToken);
+                var file = await File(cancellationToken).ConfigureAwait(false);
                 if (Log.Info()) {
                     Log.Info(
                         nameof(Load) + " > " + Type,
@@ -61,7 +63,9 @@ namespace Brows.Config {
                 }
                 var text = default(string);
                 try {
-                    text = await System.IO.File.ReadAllTextAsync(file.Path, cancellationToken);
+                    text = await FILE
+                        .ReadAllTextAsync(file.Path, cancellationToken)
+                        .ConfigureAwait(false);
                 }
                 catch (FileNotFoundException) {
                     return data;

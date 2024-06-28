@@ -11,12 +11,12 @@ namespace Domore.IO {
     internal sealed class DirectoryDeleter {
         private static readonly ILog Log = Logging.For(typeof(DirectoryDeleter));
 
-        private static async Task Delete(DirectoryInfo directory, CancellationToken cancellationToken) {
+        private static Task Delete(DirectoryInfo directory, CancellationToken cancellationToken) {
             if (null == directory) throw new ArgumentNullException(nameof(directory));
             if (Log.Debug()) {
                 Log.Debug(nameof(Delete) + " > " + directory.FullName);
             }
-            await Task.Run(cancellationToken: cancellationToken, action: () => {
+            return Task.Run(cancellationToken: cancellationToken, action: () => {
                 if (directory == null) return;
                 if (DIRECTORY.Exists(directory.FullName) == false) return;
                 try {
@@ -52,7 +52,9 @@ namespace Domore.IO {
             };
             async Task delete(FileInfo file) {
                 progress?.SetCurrentInfo(file);
-                await FileDeleter.Delete(file, cancellationToken);
+                await FileDeleter
+                    .Delete(file, cancellationToken)
+                    .ConfigureAwait(false);
                 progress?.AddToProgress(1);
             }
             await foreach (var item in enumerable.WithCancellation(cancellationToken)) {
@@ -66,11 +68,13 @@ namespace Domore.IO {
                     dirList.Add(directory);
                 }
             }
-            await Task.WhenAll(fileTasks);
+            await Task
+                .WhenAll(fileTasks)
+                .ConfigureAwait(false);
             progress?.SetCurrentInfo(Directory);
             var err = default(Exception);
             try {
-                await Delete(Directory, cancellationToken);
+                await Delete(Directory, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex) {
                 if (Log.Info()) {
@@ -86,19 +90,21 @@ namespace Domore.IO {
                 if (dirList.Count == 0) {
                     break;
                 }
-                var dir = await Task.Run(cancellationToken: cancellationToken, function: () => dirList
-                    .OrderByDescending(d => d.FullName.Length)
-                    .FirstOrDefault(d => DIRECTORY.Exists(d.FullName) && d.GetDirectories().Length == 0));
+                var dir = await Task
+                    .Run(cancellationToken: cancellationToken, function: () => dirList
+                        .OrderByDescending(d => d.FullName.Length)
+                        .FirstOrDefault(d => DIRECTORY.Exists(d.FullName) && d.GetDirectories().Length == 0))
+                    .ConfigureAwait(false);
                 if (dir == null) {
                     break;
                 }
                 progress?.SetCurrentInfo(dir);
-                await Delete(dir, cancellationToken);
+                await Delete(dir, cancellationToken).ConfigureAwait(false);
                 progress?.AddToProgress(1);
                 dirList.Remove(dir);
             }
             progress?.SetCurrentInfo(Directory);
-            await Delete(Directory, cancellationToken);
+            await Delete(Directory, cancellationToken).ConfigureAwait(false);
             progress?.AddToProgress(1);
         }
     }

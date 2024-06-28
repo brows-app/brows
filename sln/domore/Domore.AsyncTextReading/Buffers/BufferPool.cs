@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace Domore.Buffers {
-    internal class BufferPool {
+    internal abstract class BufferPool {
         private readonly List<BufferRental> Buffers = new();
 
         public bool Clear { get; set; }
@@ -22,7 +22,7 @@ namespace Domore.Buffers {
             }
         }
 
-        public class Of<T> : BufferPool {
+        public abstract class Of<T> : BufferPool {
             public ArrayPool<T> Pool {
                 get => _Pool ?? (_Pool = ArrayPool<T>.Shared);
                 set => _Pool = value;

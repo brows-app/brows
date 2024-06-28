@@ -3,7 +3,7 @@
 namespace Domore.IPC {
     public delegate void MessengerErrorEventHandler(object sender, MessengerErrorEventArgs e);
 
-    public class MessengerErrorEventArgs : EventArgs {
+    public sealed class MessengerErrorEventArgs : EventArgs {
         public bool Exit { get; set; }
         public Exception Exception { get; }
 

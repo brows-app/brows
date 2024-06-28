@@ -26,11 +26,11 @@ namespace Brows.Windows {
         }
 
         public IEnumerator<AppComponent> GetEnumerator() {
-            return ((IEnumerable<AppComponent>)List).GetEnumerator();
+            return List.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            return ((IEnumerable)List).GetEnumerator();
+            return GetEnumerator();
         }
     }
 }

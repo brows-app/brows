@@ -5,15 +5,15 @@ namespace Domore.Buffers {
     internal delegate void SequenceUpdatedEventHandler(object sender, SequenceUpdatedEventArgs e);
     internal delegate void SequenceUpdatedEventHandler<T>(object sender, SequenceUpdatedEventArgs<T> e);
 
-    internal class SequenceUpdatedEventArgs : EventArgs {
-        public bool Complete { get; }
-
-        public SequenceUpdatedEventArgs(bool complete) {
+    internal abstract class SequenceUpdatedEventArgs : EventArgs {
+        protected SequenceUpdatedEventArgs(bool complete) {
             Complete = complete;
         }
+
+        public bool Complete { get; }
     }
 
-    internal class SequenceUpdatedEventArgs<T> : SequenceUpdatedEventArgs {
+    internal sealed class SequenceUpdatedEventArgs<T> : SequenceUpdatedEventArgs {
         public ReadOnlySequence<T> Sequence { get; }
 
         public SequenceUpdatedEventArgs(bool complete, ReadOnlySequence<T> sequence) : base(complete) {

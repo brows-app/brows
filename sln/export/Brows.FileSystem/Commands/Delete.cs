@@ -32,13 +32,19 @@ namespace Brows.Commands {
                         var groups = list.GroupBy(info => Path.GetDirectoryName(info.FullName));
                         foreach (var group in groups) {
                             var names = group.Select(info => info.Name).ToList();
-                            await service.Work(names, group.Key, parameter, progress, token);
+                            await service
+                                .Work(names, group.Key, parameter, progress, token)
+                                .ConfigureAwait(false);
                         }
                         return true;
                     case Mode.Managed:
                         var prog = new FileSystemOperationProgress(progress);
-                        var tasks = list.Select(async info => await FileSystemTask.Delete(info, prog, token)).ToList();
-                        await Task.WhenAll(tasks);
+                        var tasks = list
+                            .Select(info => FileSystemTask.Delete(info, prog, token))
+                            .ToList();
+                        await Task
+                            .WhenAll(tasks)
+                            .ConfigureAwait(false);
                         return tasks.Count > 0;
                 }
             });

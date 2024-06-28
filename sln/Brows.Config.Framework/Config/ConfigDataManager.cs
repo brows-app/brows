@@ -20,7 +20,7 @@ namespace Brows.Config {
             private TaskCache<TData> Cache => _Cache ??=
                 new TaskCache<TData>(async token => {
                     var
-                    loaded = await Payload(new TData()).Load(token);
+                    loaded = await Payload(new TData()).Load(token).ConfigureAwait(false);
                     loaded.PropertyChanged += Loaded_PropertyChanged;
                     return loaded;
                 });
@@ -31,14 +31,14 @@ namespace Brows.Config {
             }
 
             private async void Loaded_PropertyChanged(object sender, EventArgs e) {
-                var changeState = ChangeState = ChangeState + 1; await Task.Delay(ChangeDelay);
+                var changeState = ChangeState = ChangeState + 1; await Task.Delay(ChangeDelay).ConfigureAwait(false);
                 if (changeState == ChangeState) {
-                    await ChangeLocker.WaitAsync();
+                    await ChangeLocker.WaitAsync().ConfigureAwait(false);
                     try {
                         if (changeState == ChangeState) {
                             ChangeState = 0;
                             var payload = Payload(Loaded);
-                            await payload.Save(CancellationToken.None);
+                            await payload.Save(CancellationToken.None).ConfigureAwait(false);
                         }
                     }
                     finally {

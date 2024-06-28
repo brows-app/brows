@@ -1,5 +1,5 @@
 ﻿namespace Domore.Buffers {
-    internal class BufferSize {
+    internal sealed class BufferSize {
         public int Length { get; set; }
     }
 }

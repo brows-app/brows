@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Domore.Text {
     public class DecodedTextOptions {
         private static readonly ILog Log = Logging.For(typeof(DecodedTextOptions));
-        private readonly List<BufferPool> Pools = new();
+        private readonly List<BufferPool> Pools = [];
 
         private void Free() {
             lock (Pools) {
@@ -20,7 +20,7 @@ namespace Domore.Text {
         }
 
         private BufferPool<T> Pool<T>(BufferOptions options) {
-            if (null == options) throw new ArgumentNullException(nameof(options));
+            ArgumentNullException.ThrowIfNull(options);
             var pool = options.CreatePool<T>();
             lock (Pools) {
                 Pools.Add(pool);
@@ -48,25 +48,25 @@ namespace Domore.Text {
         }
 
         public BufferOptions StreamBuffer {
-            get => _StreamBuffer ?? (_StreamBuffer = new());
+            get => _StreamBuffer ??= new();
             set => _StreamBuffer = value;
         }
         private BufferOptions _StreamBuffer;
 
         public BufferOptions TextBuffer {
-            get => _TextBuffer ?? (_TextBuffer = new());
+            get => _TextBuffer ??= new();
             set => _TextBuffer = value;
         }
         private BufferOptions _TextBuffer;
 
         public Dictionary<string, string> EncodingFallback {
-            get => _EncodingFallback ?? (_EncodingFallback = new Dictionary<string, string>());
+            get => _EncodingFallback ??= [];
             set => _EncodingFallback = value;
         }
         private Dictionary<string, string> _EncodingFallback;
 
         public List<string> Encoding {
-            get => _Encoding ?? (_Encoding = new List<string>());
+            get => _Encoding ??= [];
             set => _Encoding = value;
         }
         private List<string> _Encoding;

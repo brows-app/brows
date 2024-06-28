@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 
 namespace Brows.Windows {
-    public class AppComponent {
+    public sealed class AppComponent {
         private Type ComponentResourceType =>
             _ComponentResourceType ?? (
             _ComponentResourceType = ComponentResource.GetType());
@@ -66,26 +66,26 @@ namespace Brows.Windows {
             return null;
         }
 
-        private async Task<string> ReadCulture(string extension) {
+        private async Task<string> ReadCulture(string extension, CancellationToken token) {
             var stream = StreamCulture(extension);
             if (stream != null) {
                 await using (stream) {
                     using (var reader = new StreamReader(stream)) {
-                        return await reader.ReadToEndAsync();
+                        return await reader.ReadToEndAsync(token).ConfigureAwait(false);
                     }
                 }
             }
             return null;
         }
 
-        private async Task<IEnumerable<KeyValuePair<string, string>>> SplitCulture(string extension) {
-            var read = await ReadCulture(extension);
+        private async Task<IEnumerable<KeyValuePair<string, string>>> SplitCulture(string extension, CancellationToken token) {
+            var read = await ReadCulture(extension, token).ConfigureAwait(false);
             var text = read?.Trim() ?? "";
-            var lines = text.Split(new[] { '\r', '\n' });
+            var lines = text.Split('\r', '\n');
             var items = lines
-                .Select(line => line.Split(new[] { '=' }, 2))
+                .Select(line => line.Split('=', 2))
                 .Where(pair => pair.Length == 2)
-                .Select(pair => new KeyValuePair<string, string>(key: pair[0].Trim(), value: pair[1].Trim()));
+                .Select(pair => KeyValuePair.Create(key: pair[0].Trim(), value: pair[1].Trim()));
             return items;
         }
 
@@ -113,10 +113,10 @@ namespace Brows.Windows {
             ComponentResource = componentResource ?? throw new ArgumentNullException(nameof(componentResource));
         }
 
-        internal async Task<IReadOnlyDictionary<string, string>> Translate(CancellationToken cancellationToken) {
+        internal async Task<IReadOnlyDictionary<string, string>> Translate(CancellationToken token) {
             if (_Translate == null) {
                 var dict = new Dictionary<string, string>();
-                var split = await SplitCulture("");
+                var split = await SplitCulture("", token).ConfigureAwait(false);
                 foreach (var pair in split) {
                     dict[pair.Key] = pair.Value;
                 }
@@ -131,7 +131,7 @@ namespace Brows.Windows {
                             await using (var stream = ComponentResourceAssembly.GetManifestResourceStream(resourceName)) {
                                 using (var reader = new StreamReader(stream)) {
                                     var key = match.Value;
-                                    var value = await reader.ReadToEndAsync();
+                                    var value = await reader.ReadToEndAsync(token).ConfigureAwait(false);
                                     dict[key] = value;
                                 }
                             }
@@ -144,10 +144,10 @@ namespace Brows.Windows {
         }
         private IReadOnlyDictionary<string, string> _Translate;
 
-        internal async Task<IReadOnlyDictionary<string, IEnumerable<string>>> Alias(CancellationToken cancellationToken) {
+        internal async Task<IReadOnlyDictionary<string, IEnumerable<string>>> Alias(CancellationToken token) {
             if (_Alias == null) {
                 var dict = new Dictionary<string, IEnumerable<string>>();
-                var split = await SplitCulture(".alias");
+                var split = await SplitCulture(".alias", token).ConfigureAwait(false);
                 foreach (var pair in split) {
                     if (dict.TryGetValue(pair.Key, out var value) == false) {
                         dict[pair.Key] = value = new HashSet<string>();
@@ -162,14 +162,12 @@ namespace Brows.Windows {
         }
         private IReadOnlyDictionary<string, IEnumerable<string>> _Alias;
 
-        public string ReferencedAssembly =>
-            _ReferencedAssembly ?? (
-            _ReferencedAssembly = ComponentResourceAssemblyName.Name);
+        public string ReferencedAssembly => _ReferencedAssembly ??=
+            ComponentResourceAssemblyName.Name;
         private string _ReferencedAssembly;
 
-        public static AppComponentDataTemplateSelectorCollection DataTemplateSelector =>
-            _DataTemplateSelector ?? (
-            _DataTemplateSelector = new AppComponentDataTemplateSelectorCollection());
+        public static AppComponentDataTemplateSelectorCollection DataTemplateSelector => _DataTemplateSelector ??=
+            new AppComponentDataTemplateSelectorCollection();
         private static AppComponentDataTemplateSelectorCollection _DataTemplateSelector;
     }
 }

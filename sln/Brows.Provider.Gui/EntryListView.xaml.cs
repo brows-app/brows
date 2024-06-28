@@ -3,7 +3,7 @@ using System.Collections;
 using System.Windows;
 
 namespace Brows {
-    partial class EntryListView {
+    sealed partial class EntryListView {
         protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue) {
             ItemsSourceChanged?.Invoke(this, EventArgs.Empty);
             base.OnItemsSourceChanged(oldValue, newValue);

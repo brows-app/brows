@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,8 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.IO {
-    using Logs;
-
     public sealed class FileSystemEventTasks {
         private static readonly ILog Log = Logging.For(typeof(FileSystemEventTasks));
         private static readonly Dictionary<string, FileSystemEventTasks> Set = new();
@@ -32,13 +31,13 @@ namespace Domore.IO {
                 return;
             }
             try {
-                await eventLocker.WaitAsync();
+                await eventLocker.WaitAsync().ConfigureAwait(false);
             }
             catch (ObjectDisposedException) {
                 return;
             }
             try {
-                await Task.WhenAll(List.Select(task => task(e)));
+                await Task.WhenAll(List.Select(task => task(e))).ConfigureAwait(false);
             }
             catch (Exception ex) {
                 if (ex is OperationCanceledException canceled) {

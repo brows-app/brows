@@ -8,10 +8,10 @@ using System.Text;
 using System.Threading;
 
 namespace Domore.Net.Sockets {
-    internal class TcpReader : IDisposable {
-        private TcpListener Listener;
+    internal sealed class TcpReader : IDisposable {
+        private readonly TcpListener Listener;
 
-        protected virtual void Dispose(bool disposing) {
+        private void Dispose(bool disposing) {
             if (disposing) {
                 try {
                     Listener?.Stop();
@@ -36,14 +36,14 @@ namespace Domore.Net.Sockets {
         }
 
         public async IAsyncEnumerable<string> ReadClient([EnumeratorCancellation] CancellationToken cancellationToken) {
-            using (var client = await Listener.AcceptTcpClientAsync(cancellationToken)) {
+            using (var client = await Listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false)) {
                 using (var stream = client.GetStream()) {
                     using (var reader = new StreamReader(stream, Encoding)) {
                         for (; ; ) {
                             if (cancellationToken.IsCancellationRequested) {
                                 cancellationToken.ThrowIfCancellationRequested();
                             }
-                            yield return await reader.ReadLineAsync();
+                            yield return await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
                         }
                     }
                 }

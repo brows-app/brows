@@ -13,7 +13,7 @@ namespace Brows {
             var icon = default(object);
             var task = DrivesIcon?.Work(drives, set: result => icon = result, token);
             if (task != null) {
-                var work = await task;
+                var work = await task.ConfigureAwait(false);
                 if (work == false) {
                     icon = null;
                 }

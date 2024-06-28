@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 
 namespace Brows.Config {
     public static class ConfigPath {
-        private static async Task<string> Ready(string directory, CancellationToken cancellationToken) {
-            return await Task.Run(cancellationToken: cancellationToken, function: async () => {
+        private static Task<string> Ready(string directory, CancellationToken cancellationToken) {
+            return Task.Run(cancellationToken: cancellationToken, function: async () => {
                 if (Directory.Exists(directory) == false) {
                     Directory.CreateDirectory(directory);
                     for (; ; ) {
                         if (Directory.Exists(directory)) {
                             break;
                         }
-                        await Task.Delay(1, cancellationToken);
+                        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
                     }
                 }
                 return directory;

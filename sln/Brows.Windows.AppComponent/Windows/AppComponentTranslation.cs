@@ -11,33 +11,38 @@ namespace Brows.Windows {
         private readonly ConcurrentDictionary<string, string> Value = new();
         private readonly ConcurrentDictionary<string, IReadOnlySet<string>> Alias = new();
 
-        private TaskCache<AppComponentTranslation> Load => _Load ??=
-            new(async token => {
-                var comps = Components;
-                var tasks = new List<Task>();
-                foreach (var item in comps) {
-                    tasks.Add(item.Alias(token));
-                    tasks.Add(item.Translate(token));
+        private TaskCache<AppComponentTranslation> Load => _Load ??= new(async token => {
+            var comps = Components;
+            var tasks = new List<Task>();
+            foreach (var item in comps) {
+                tasks.Add(item.Alias(token));
+                tasks.Add(item.Translate(token));
+            }
+            await Task
+                .WhenAll(tasks)
+                .ConfigureAwait(false);
+            foreach (var item in comps) {
+                var translate = await item
+                    .Translate(token)
+                    .ConfigureAwait(false);
+                foreach (var t in translate) {
+                    Value[t.Key] = t.Value;
                 }
-                await Task.WhenAll(tasks);
-                foreach (var item in comps) {
-                    var translate = await item.Translate(token);
-                    foreach (var t in translate) {
-                        Value[t.Key] = t.Value;
+                var alias = await item
+                    .Alias(token)
+                    .ConfigureAwait(false);
+                foreach (var a in alias) {
+                    if (Alias.TryGetValue(a.Key, out var value) == false) {
+                        Alias[a.Key] = value = new HashSet<string>();
                     }
-                    var alias = await item.Alias(token);
-                    foreach (var a in alias) {
-                        if (Alias.TryGetValue(a.Key, out var value) == false) {
-                            Alias[a.Key] = value = new HashSet<string>();
-                        }
-                        var list = (ICollection<string>)value;
-                        foreach (var v in a.Value) {
-                            list.Add(v);
-                        }
+                    var list = (ICollection<string>)value;
+                    foreach (var v in a.Value) {
+                        list.Add(v);
                     }
                 }
-                return this;
-            });
+            }
+            return this;
+        });
         private TaskCache<AppComponentTranslation> _Load;
 
         public object this[string key] =>
@@ -54,7 +59,7 @@ namespace Brows.Windows {
         public static async Task<AppComponentTranslation> Ready(AppComponentCollection components, CancellationToken token) {
             var
             @this = new AppComponentTranslation(components);
-            @this = await @this.Load.Ready(token);
+            @this = await @this.Load.Ready(token).ConfigureAwait(false);
             return @this;
         }
 

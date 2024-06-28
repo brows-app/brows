@@ -2,7 +2,7 @@
 using System.Buffers;
 
 namespace Domore.Buffers {
-    internal class SequenceSegment<T> : ReadOnlySequenceSegment<T> {
+    internal sealed class SequenceSegment<T> : ReadOnlySequenceSegment<T> {
         private SequenceSegment() {
         }
 

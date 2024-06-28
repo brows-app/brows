@@ -1,7 +1,7 @@
-﻿namespace Brows {
-    using Gui;
+﻿using Brows.Gui;
 
-    partial class FileSystemFindResultControl {
+namespace Brows {
+    sealed partial class FileSystemFindResultControl {
         public FileSystemFindResultControl() {
             InitializeComponent();
             new FileSystemFindResultController(this);

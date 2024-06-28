@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Domore.Net.Sockets;
+using System;
 
 namespace Domore.IPC {
-    using Net.Sockets;
-
     public sealed class MessengerFactory {
         internal MessengerErrorEventArgs OnError(Exception ex) {
             var e = default(MessengerErrorEventArgs);

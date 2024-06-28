@@ -1,7 +1,7 @@
 ﻿using System.Buffers;
 
 namespace Domore.Buffers {
-    public class BufferOptions {
+    public sealed class BufferOptions {
         internal BufferPool<T> CreatePool<T>() {
             return new BufferPool<T> {
                 Clear = Clear,

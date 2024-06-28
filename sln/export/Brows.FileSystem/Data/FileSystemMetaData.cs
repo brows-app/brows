@@ -19,11 +19,11 @@ namespace Brows.Data {
         protected sealed override async Task<FileSystemMetaData.MetadataValue> GetValue(FileSystemEntry entry, Action<FileSystemMetaData.MetadataValue> progress, CancellationToken token) {
             if (entry != null) {
                 var value = default(IMetadataValue);
-                var ready = await entry.MetadataCache.Ready(token);
+                var ready = await entry.MetadataCache.Ready(token).ConfigureAwait(false);
                 if (ready.TryGetValue(Key, out value)) {
                     return new MetadataValue(value);
                 }
-                var refresh = await entry.MetadataCache.Refreshed(token);
+                var refresh = await entry.MetadataCache.Refreshed(token).ConfigureAwait(false);
                 if (refresh.TryGetValue(Key, out value)) {
                     return new MetadataValue(value);
                 }
@@ -54,7 +54,7 @@ namespace Brows.Data {
             if (false == active.HasProvider(out FileSystemProvider provider)) return false;
             var entries = provider.Provided.ToList();
             foreach (var entry in entries) {
-                var file = await provider.Factory.Metadata.Load(entry.Info.FullName, palette, token);
+                var file = await provider.Factory.Metadata.Load(entry.Info.FullName, palette, token).ConfigureAwait(false);
                 if (file.Keys.Contains(Definition.Key)) {
                     return true;
                 }

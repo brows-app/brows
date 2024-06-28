@@ -1,5 +1,6 @@
 ﻿using Domore.IO;
 using Domore.Logs;
+using Domore.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,16 +11,18 @@ namespace Brows.Config {
     internal sealed class ConfigFileWatcher {
         private static readonly ILog Log = Logging.For(typeof(ConfigFileWatcher));
         private static readonly ConfigFileWatcher Instance = new();
+
         private readonly List<ConfigFileInfo> Subscribers = new();
-        private Task ReadyTask;
 
-        private ConfigFileWatcher() {
-        }
-
-        private async Task ReadyInit(CancellationToken cancellationToken) {
-            var path = await ConfigPath.FileReady(cancellationToken);
+        private TaskCache<object> Initialization => _Initialization ??= new TaskCache<object>(async token => {
+            var path = await ConfigPath.FileReady(token).ConfigureAwait(false);
             var evnt = new FileSystemEvent(path);
             evnt.Handler += FileSystemEvent_Handler;
+            return this;
+        });
+        private TaskCache<object> _Initialization;
+
+        private ConfigFileWatcher() {
         }
 
         private void FileSystemEvent_Handler(object sender, FileSystemEventArgs e) {
@@ -38,24 +41,12 @@ namespace Brows.Config {
             });
         }
 
-        private async ValueTask Ready(CancellationToken cancellationToken) {
-            if (ReadyTask == null) {
-                ReadyTask = ReadyInit(cancellationToken);
-                try {
-                    await ReadyTask;
-                }
-                catch {
-                    ReadyTask = null;
-                    throw;
-                }
-            }
-        }
-
-        public static async Task Subscribe(ConfigFileInfo info, CancellationToken cancellationToken) {
+        public static async Task Subscribe(ConfigFileInfo info, CancellationToken token) {
             if (Log.Info()) {
                 Log.Info($"{nameof(Subscribe)} > {info?.File}");
             }
-            await Instance.Ready(cancellationToken);
+            await
+            Instance.Initialization.Ready(token).ConfigureAwait(false);
             Instance.Subscribers.Add(info);
         }
     }

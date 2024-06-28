@@ -23,7 +23,7 @@ namespace Brows {
         private FileSystemEventTask ParentEvent;
 
         private async Task<FileSystemEntry> Create(string path, CancellationToken token) {
-            var existing = await FileSystemTask.Existing(path, token);
+            var existing = await FileSystemTask.Existing(path, token).ConfigureAwait(false);
             if (existing != null) {
                 return new FileSystemEntry(this, existing);
             }
@@ -197,7 +197,9 @@ namespace Brows {
                     var directory = data.Target is FileSystemEntry e && e.Info is DirectoryInfo d
                         ? d
                         : Directory;
-                    return await service.Work(directory, data, operationProgress, token);
+                    return await service
+                        .Work(directory, data, operationProgress, token)
+                        .ConfigureAwait(false);
                 }
             }
             return false;
@@ -208,7 +210,7 @@ namespace Brows {
                 if (deviceChange.Info is DeviceChangeVolume volume) {
                     var affected = await volume.Affects(Directory, token);
                     if (affected == true) {
-                        await Change(Drives.ID, token);
+                        await Change(Drives.ID, token).ConfigureAwait(false);
                     }
                 }
                 return true;

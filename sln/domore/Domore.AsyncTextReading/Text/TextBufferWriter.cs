@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Domore.Buffers;
+using System;
 using System.Buffers;
 
 namespace Domore.Text {
-    using Buffers;
-
-    internal class TextBufferWriter : IBufferWriter<char> {
+    internal sealed class TextBufferWriter : IBufferWriter<char> {
         private readonly SequenceUpdater<char> TextSequence = new();
 
         private int Cursor;

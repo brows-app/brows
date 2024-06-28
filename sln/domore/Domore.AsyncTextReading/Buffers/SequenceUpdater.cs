@@ -2,10 +2,10 @@
 using System.Buffers;
 
 namespace Domore.Buffers {
-    internal class SequenceUpdater {
+    internal abstract class SequenceUpdater {
     }
 
-    internal class SequenceUpdater<T> : SequenceUpdater {
+    internal sealed class SequenceUpdater<T> : SequenceUpdater {
         public event SequenceUpdatedEventHandler<T> Updated;
 
         public bool Completed { get; private set; }

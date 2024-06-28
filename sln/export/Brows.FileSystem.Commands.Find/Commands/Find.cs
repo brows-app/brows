@@ -60,7 +60,9 @@ namespace Brows.Commands {
                 RefreshInput = false
             });
             return context.Operate(async (progress, token) => {
-                await work.Done(progress, token);
+                await work
+                    .Done(progress, token)
+                    .ConfigureAwait(false);
                 return true;
             });
         }

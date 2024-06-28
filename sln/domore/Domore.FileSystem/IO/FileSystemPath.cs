@@ -6,8 +6,8 @@ using System.Linq;
 namespace Domore.IO {
     public static class FileSystemPath {
         public static string CommonOf(IEnumerable<string> paths, StringComparer comparer) {
-            if (null == paths) throw new ArgumentNullException(nameof(paths));
-            if (null == comparer) throw new ArgumentNullException(nameof(comparer));
+            ArgumentNullException.ThrowIfNull(paths);
+            ArgumentNullException.ThrowIfNull(comparer);
             var common = default(List<string>);
             var items = paths
                 .Where(path => path is not null)

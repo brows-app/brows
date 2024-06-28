@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Brows.Exports;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DRIVETYPE = System.IO.DriveType;
 
 namespace Brows {
-    using Exports;
-
     internal static class DriveInfoData {
         public sealed class Name : DriveInfoData<string> {
             public Name() : base(false, i => i.Name) {
@@ -75,7 +74,7 @@ namespace Brows {
                 if (task == null) {
                     return null;
                 }
-                var work = await task;
+                var work = await task.ConfigureAwait(false);
                 if (work == false) {
                     return null;
                 }
@@ -107,14 +106,16 @@ namespace Brows {
         }
 
         protected override async Task<T> GetValue(DriveEntry entry, Action<T> progress, CancellationToken token) {
-            await entry.Refresh(token);
-            return await Task.Run(cancellationToken: token, function: () => {
-                var info = entry.Info;
-                if (info.IsReady || Ready == false) {
-                    return Func(info);
-                }
-                return default;
-            });
+            await entry.Refresh(token).ConfigureAwait(false);
+            return await Task
+                .Run(cancellationToken: token, function: () => {
+                    var info = entry.Info;
+                    if (info.IsReady || Ready == false) {
+                        return Func(info);
+                    }
+                    return default;
+                })
+                .ConfigureAwait(false);
         }
     }
 }

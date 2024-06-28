@@ -16,14 +16,18 @@ namespace Brows.Config {
         public sealed class Of<TConfig> : ConfigFileManager, IConfig<TConfig> where TConfig : class, new() {
             private TaskCache<TConfig> Cache {
                 get => _Cache ??= new(async token => {
-                    var info = await ConfigFileInfo.Load<TConfig>(token: token, invalidated: (s, e) => {
-                        if (Log.Info()) {
-                            Log.Info($"invalidated > {typeof(TConfig).Name}");
-                        }
-                        Cache = null;
-                        Changed?.Invoke(this, EventArgs.Empty);
-                    });
-                    return await info.Configure(token);
+                    var info = await ConfigFileInfo
+                        .Load<TConfig>(token: token, invalidated: (s, e) => {
+                            if (Log.Info()) {
+                                Log.Info($"invalidated > {typeof(TConfig).Name}");
+                            }
+                            Cache = null;
+                            Changed?.Invoke(this, EventArgs.Empty);
+                        })
+                        .ConfigureAwait(false);
+                    return await info
+                        .Configure(token)
+                        .ConfigureAwait(false);
                 });
                 set => _Cache = value;
             }

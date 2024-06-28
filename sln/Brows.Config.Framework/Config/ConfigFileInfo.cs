@@ -19,12 +19,12 @@ namespace Brows.Config {
             Special = special;
         }
 
-        private async Task<TConfig> Configure<TConfig>(CancellationToken token) where TConfig : new() {
+        private Task<TConfig> Configure<TConfig>(CancellationToken token) where TConfig : new() {
             var file = File;
             if (Locker.TryGetValue(file, out var locker) == false) {
                 Locker[file] = locker = new();
             }
-            return await Task.Run(cancellationToken: token, function: () => {
+            return Task.Run(cancellationToken: token, function: () => {
                 lock (locker) {
                     TConfig config(TConfig target, string file) {
                         for (var i = 0; ; i++) {
@@ -74,7 +74,7 @@ namespace Brows.Config {
         }
 
         public static async Task<For<TConfig>> Load<TConfig>(EventHandler invalidated, CancellationToken token) where TConfig : new() {
-            var dir = await ConfigPath.FileReady(token);
+            var dir = await ConfigPath.FileReady(token).ConfigureAwait(false);
             var type = typeof(TConfig).Name.ToLowerInvariant();
             var name = type.EndsWith("config") ? type.Substring(0, type.Length - "config".Length) : type;
             var file = Path.Combine(dir, $"{name}.conf");
@@ -82,7 +82,7 @@ namespace Brows.Config {
             var
             loaded = new For<TConfig>(file, dflt, "brows");
             loaded.Invalidated += invalidated;
-            await ConfigFileWatcher.Subscribe(loaded, token);
+            await ConfigFileWatcher.Subscribe(loaded, token).ConfigureAwait(false);
             return loaded;
         }
 

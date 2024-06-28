@@ -16,8 +16,8 @@ namespace Brows {
             _Config = Configure.File<ProcessConfig>());
         private IConfig<ProcessConfig> _Config;
 
-        private async Task Start(string workingDirectory, IReadOnlyDictionary<string, string> environment, CancellationToken token) {
-            var config = await Config.Load(token);
+        private async Task Start(string workingDirectory, CancellationToken token) {
+            var config = await Config.Load(token).ConfigureAwait(false);
             var procDef = config?.Default;
             var procFile = procDef?.FileName?.Trim() ?? "";
             if (procFile != "") {
@@ -29,11 +29,10 @@ namespace Brows {
                     process.StartInfo.FileName = procFile;
                     process.StartInfo.UseShellExecute = true;
                     process.StartInfo.WorkingDirectory = workingDirectory ?? ENVIRONMENT.GetFolderPath(ENVIRONMENT.SpecialFolder.UserProfile);
-                    process.StartInfo.Environment(environment);
-                    await Task.Run(cancellationToken: token, function: process.Start);
+                    await Task.Run(cancellationToken: token, function: process.Start).ConfigureAwait(false);
                 }
                 finally {
-                    await Task.Run(process.Dispose);
+                    await Task.Run(process.Dispose).ConfigureAwait(false);
                 }
             }
         }
@@ -42,22 +41,20 @@ namespace Brows {
         public IList<ProcessWrapper> List { get; } = new List<ProcessWrapper>();
         public IDictionary<string, string> Environment { get; set; }
 
-        public async Task Start(string input, string workingDirectory, IReadOnlyDictionary<string, string> environment, CancellationToken token) {
-            var env = Environment?.ToDictionary() ?? new();
+        public Task Start(string input, string workingDirectory, IReadOnlyDictionary<string, string> environment, CancellationToken token) {
+            var i = input?.Trim() ?? "";
+            if (i == "") {
+                return Start(workingDirectory, token);
+            }
+            var env = Environment?.ToDictionary() ?? [];
             if (environment != null) {
                 foreach (var variable in environment) {
                     env[variable.Key] = variable.Value;
                 }
             }
-            var i = input?.Trim() ?? "";
-            if (i == "") {
-                await Start(workingDirectory, env, token);
-            }
-            else {
-                var process = new ProcessWrapper(i, workingDirectory, env, Fix);
-                List.Insert(0, process);
-                await process.Start(token);
-            }
+            var process = new ProcessWrapper(i, workingDirectory, env, Fix);
+            List.Insert(0, process);
+            return process.Start(token);
         }
     }
 }

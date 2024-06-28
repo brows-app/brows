@@ -13,11 +13,11 @@ namespace Brows {
         }
 
         public IEnumerator<string> GetEnumerator() {
-            return ((IEnumerable<string>)List).GetEnumerator();
+            return List.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            return ((IEnumerable)List).GetEnumerator();
+            return GetEnumerator();
         }
     }
 }

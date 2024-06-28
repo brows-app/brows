@@ -26,53 +26,53 @@ namespace Brows.Native {
         }
 
         protected bool GetBoolean(Func<IntPtr, int> get) {
-            if (null == get) throw new ArgumentNullException(nameof(get));
+            ArgumentNullException.ThrowIfNull(get);
             return get(Handle) != 0;
         }
 
         protected void SetBoolean(Func<IntPtr, int, int> set, bool value) {
-            if (null == set) throw new ArgumentNullException(nameof(set));
+            ArgumentNullException.ThrowIfNull(set);
             Try(() => set(Handle, value ? 1 : 0));
         }
 
         protected long GetInt64(Func<IntPtr, long> get) {
-            if (null == get) throw new ArgumentNullException(nameof(get));
+            ArgumentNullException.ThrowIfNull(get);
             return get(Handle);
         }
 
         protected void SetInt64(Func<IntPtr, long, int> set, long value) {
-            if (null == set) throw new ArgumentNullException(nameof(set));
+            ArgumentNullException.ThrowIfNull(set);
             Try(() => set(Handle, value));
         }
 
         protected int GetInt32(Func<IntPtr, int> get) {
-            if (null == get) throw new ArgumentNullException(nameof(get));
+            ArgumentNullException.ThrowIfNull(get);
             return get(Handle);
         }
 
         protected void SetInt32(Func<IntPtr, int, int> set, int value) {
-            if (null == set) throw new ArgumentNullException(nameof(set));
+            ArgumentNullException.ThrowIfNull(set);
             Try(() => set(Handle, value));
         }
 
         protected IntPtr GetIntPtr(Func<IntPtr, IntPtr> get) {
-            if (null == get) throw new ArgumentNullException(nameof(get));
+            ArgumentNullException.ThrowIfNull(get);
             return get(Handle);
         }
 
         protected void SetIntPtr(Func<IntPtr, IntPtr, int> set, IntPtr value) {
-            if (null == set) throw new ArgumentNullException(nameof(set));
+            ArgumentNullException.ThrowIfNull(set);
             Try(() => set(Handle, value));
         }
 
         protected string GetAnsiString(Func<IntPtr, IntPtr> get) {
-            if (null == get) throw new ArgumentNullException(nameof(get));
+            ArgumentNullException.ThrowIfNull(get);
             var p = get(Handle);
             return Marshal.PtrToStringAnsi(p);
         }
 
         protected void SetAnsiString(Func<IntPtr, IntPtr, int> set, string value) {
-            if (null == set) throw new ArgumentNullException(nameof(set));
+            ArgumentNullException.ThrowIfNull(set);
             var p = Marshal.StringToHGlobalAnsi(value);
             try {
                 Try(() => set(Handle, p));
@@ -83,12 +83,12 @@ namespace Brows.Native {
         }
 
         protected SecureString GetSecureString(Func<IntPtr, IntPtr> get) {
-            if (null == get) throw new ArgumentNullException(nameof(get));
+            ArgumentNullException.ThrowIfNull(get);
             return new SecureString();
         }
 
         protected void SetSecureString(Func<IntPtr, IntPtr, int> set, SecureString value) {
-            if (null == set) throw new ArgumentNullException(nameof(set));
+            ArgumentNullException.ThrowIfNull(set);
             var p = value == null ? IntPtr.Zero : Marshal.SecureStringToGlobalAllocAnsi(value);
             try {
                 Try(() => set(Handle, p));
@@ -99,7 +99,7 @@ namespace Brows.Native {
         }
 
         protected void Try(Func<int> result, Func<int, Exception> exceptionFactory = null) {
-            if (null == result) throw new ArgumentNullException(nameof(result));
+            ArgumentNullException.ThrowIfNull(result);
             var error = result();
             if (error != 0) {
                 throw exceptionFactory?.Invoke(error) ?? new NativeErrorException(error);
@@ -107,7 +107,7 @@ namespace Brows.Native {
         }
 
         protected void Try(Func<IntPtr, int> action, Func<int, Exception> exceptionFactory = null) {
-            if (null == action) throw new ArgumentNullException(nameof(action));
+            ArgumentNullException.ThrowIfNull(action);
             Try(() => action(Handle), exceptionFactory);
         }
 

@@ -8,7 +8,7 @@ namespace Brows {
         private static TaskCache<IImport> Cache =>
             _Cache ?? (
             _Cache = new(async token => {
-                var exports = await Host.Current.Load(token);
+                var exports = await Host.Current.Load(token).ConfigureAwait(false);
                 var
                 import = new Import(exports);
                 import.Populate();

@@ -1,4 +1,5 @@
-﻿using Domore.IO.Extensions;
+﻿using Brows.Config;
+using Domore.IO.Extensions;
 using Domore.Text;
 using System;
 using System.Collections.Generic;
@@ -8,8 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands {
-    using Config;
-
     internal sealed class FindInInfo {
         private readonly IMatcher Matcher;
 

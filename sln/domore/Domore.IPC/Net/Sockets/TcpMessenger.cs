@@ -1,16 +1,13 @@
-﻿using System;
+﻿using Domore.IPC;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.Net.Sockets {
-    using IPC;
-
     internal sealed class TcpMessenger : Messenger {
-        private TcpClientServer ClientServer =>
-            _ClientServer ?? (
-            _ClientServer = new TcpClientServer(Factory.Directory));
+        private TcpClientServer ClientServer => _ClientServer ??= new TcpClientServer(Factory.Directory);
         private TcpClientServer _ClientServer;
 
         public MessengerFactory Factory { get; }
@@ -20,17 +17,17 @@ namespace Domore.Net.Sockets {
         }
 
         public sealed override async Task Send(string message, CancellationToken cancellationToken) {
-            var writer = await ClientServer.ConnectWriter(cancellationToken);
+            var writer = await ClientServer.ConnectWriter(cancellationToken).ConfigureAwait(false);
             if (writer != null) {
                 using (writer) {
-                    await writer.Write(message, cancellationToken);
+                    await writer.Write(message, cancellationToken).ConfigureAwait(false);
                     Factory.OnMessageSent(message);
                 }
             }
         }
 
         public sealed override async IAsyncEnumerable<string> Receive([EnumeratorCancellation] CancellationToken cancellationToken) {
-            using (var reader = await ClientServer.StartReader(cancellationToken)) {
+            using (var reader = await ClientServer.StartReader(cancellationToken).ConfigureAwait(false)) {
                 var exit = false;
                 for (; ; ) {
                     if (cancellationToken.IsCancellationRequested) {
@@ -43,7 +40,7 @@ namespace Domore.Net.Sockets {
                     await using (var read = reads.GetAsyncEnumerator(cancellationToken)) {
                         var next = false;
                         try {
-                            next = await read.MoveNextAsync();
+                            next = await read.MoveNextAsync().ConfigureAwait(false);
                         }
                         catch (OperationCanceledException canceled) when (canceled.CancellationToken == cancellationToken) {
                             throw;

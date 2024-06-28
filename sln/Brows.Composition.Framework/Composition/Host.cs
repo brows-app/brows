@@ -68,14 +68,16 @@ namespace Brows.Composition {
             var directoryExportTask = Task.Run(cancellationToken: token, function: () => {
                 return ExportFrom(builder => new DirectoryCatalog(ExportDirectory, builder));
             });
-            var exports = await Task.WhenAll(applicationExportTask, directoryExportTask);
+            var exports = await Task
+                .WhenAll(applicationExportTask, directoryExportTask)
+                .ConfigureAwait(false);
             return exports.SelectMany(e => e).ToList();
         }
 
         public static readonly Host Current = new();
 
-        public async Task<IReadOnlyList<Export>> Load(CancellationToken token) {
-            return await LoadCache.Ready(token);
+        public Task<IReadOnlyList<Export>> Load(CancellationToken token) {
+            return LoadCache.Ready(token);
         }
     }
 }

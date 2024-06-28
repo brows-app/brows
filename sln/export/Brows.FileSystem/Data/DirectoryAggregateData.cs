@@ -17,21 +17,23 @@ namespace Brows.Data {
         protected abstract long Data(FileSystemInfo info);
 
         protected sealed override async Task<long?> GetValue(FileSystemEntry entry, Action<long?> progress, CancellationToken token) {
-            if (null == entry) throw new ArgumentNullException(nameof(entry));
-            if (null == progress) throw new ArgumentNullException(nameof(progress));
+            ArgumentNullException.ThrowIfNull(entry);
+            ArgumentNullException.ThrowIfNull(progress);
             var info = entry.Info;
             if (info is DirectoryInfo directory) {
                 var value = 0L;
                 progress(value);
                 try {
-                    return await Task.Run(cancellationToken: token, function: () => {
-                        var items = directory.EnumerateFileSystemInfos(SearchPattern, EnumerationOptions);
-                        foreach (var item in items) {
-                            token.ThrowIfCancellationRequested();
-                            progress(value += Data(item));
-                        }
-                        return value;
-                    });
+                    return await Task
+                        .Run(cancellationToken: token, function: () => {
+                            var items = directory.EnumerateFileSystemInfos(SearchPattern, EnumerationOptions);
+                            foreach (var item in items) {
+                                token.ThrowIfCancellationRequested();
+                                progress(value += Data(item));
+                            }
+                            return value;
+                        })
+                        .ConfigureAwait(false);
                 }
                 catch {
                     progress(null);

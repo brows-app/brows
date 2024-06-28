@@ -45,12 +45,12 @@ namespace Brows {
                 program = Programs.FirstOrDefault(p => programName.Equals(p.Name, StringComparison.OrdinalIgnoreCase));
             }
             if (program == null) {
-                var @default = program = await Default.Program(context, token);
+                var @default = program = await Default.Program(context, token).ConfigureAwait(false);
                 if (@default == null) {
                     return 0;
                 }
             }
-            return await program.Run(context, token);
+            return await program.Run(context, token).ConfigureAwait(false);
         }
 
         private static async Task<int> Main(string[] args) {
@@ -58,15 +58,15 @@ namespace Brows {
                 var token = CancellationToken.None;
                 var command = new ProgramCommand(Environment.CommandLine, args);
                 var program = new ProgramMain(programConsole, command);
-                var programConfig = await Configure.File<ProgramConfig>().Load(token);
+                var programConfig = await Configure.File<ProgramConfig>().Load(token).ConfigureAwait(false);
                 if (programConfig.Console) {
                     programConsole.Show();
                 }
-                var logConfigPath = await ConfigPath.FileReady(token);
+                var logConfigPath = await ConfigPath.FileReady(token).ConfigureAwait(false);
                 var logConfigFile = Path.Combine(logConfigPath, "log.conf");
                 Log.Conf.Configure(logConfigFile);
                 try {
-                    return await program.Run(CancellationToken.None);
+                    return await program.Run(CancellationToken.None).ConfigureAwait(false);
                 }
                 finally {
                     Logging.Complete();

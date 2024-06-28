@@ -1,5 +1,5 @@
 ﻿namespace Brows {
-    partial class FoundInFileNameGrid {
+    sealed partial class FoundInFileNameGrid {
         public FoundInFileNameGrid() {
             InitializeComponent();
         }

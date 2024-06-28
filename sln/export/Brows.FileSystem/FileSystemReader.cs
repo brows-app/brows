@@ -35,7 +35,7 @@ namespace Brows {
             using var source = WaitSource = new CancellationTokenSource();
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(source.Token, token);
             try {
-                await Task.Delay(timeout, linked.Token);
+                await Task.Delay(timeout, linked.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException canceled) when (canceled.CancellationToken == linked.Token) {
                 if (Log.Info()) {
@@ -49,14 +49,14 @@ namespace Brows {
         }
 
         public static FileSystemReader<T> Read<T>(DirectoryInfo directory, Func<FileSystemInfo, T> transform, CancellationToken token) {
-            if (directory is null) throw new ArgumentNullException(nameof(directory));
-            if (transform is null) throw new ArgumentNullException(nameof(transform));
+            ArgumentNullException.ThrowIfNull(directory);
+            ArgumentNullException.ThrowIfNull(transform);
             var channel = Channel.CreateUnbounded<T>(new UnboundedChannelOptions {
                 SingleWriter = true
             });
             var writer = channel.Writer;
             var reader = FileSystemReader<T>.Create(channel.Reader);
-            Task.Run(cancellationToken: token, function: async () => {
+            ThreadPool.QueueUserWorkItem(async _ => {
                 var error = default(Exception);
                 try {
                     foreach (var info in directory.EnumerateFileSystemInfos("*", EnumerationOptions)) {
@@ -71,7 +71,7 @@ namespace Brows {
                         }
                         var item = transform(info);
                         if (item != null) {
-                            await writer.WriteAsync(item);
+                            await writer.WriteAsync(item).ConfigureAwait(false);
                         }
                     }
                 }

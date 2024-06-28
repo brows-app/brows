@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 using DIRECTORY = System.IO.Directory;
 
 namespace Domore.Net.Sockets {
-    internal class TcpClientServer {
-        private Encoding Encoding =>
-            _Encoding ?? (
-            _Encoding = Encoding.UTF8);
+    internal sealed class TcpClientServer {
+        private Encoding Encoding => _Encoding ??= Encoding.UTF8;
         private Encoding _Encoding;
 
         private string PortPath(int? port = null) {
@@ -20,14 +18,14 @@ namespace Domore.Net.Sockets {
             var path = PortPath(port);
             var directory = Path.GetDirectoryName(path);
             DIRECTORY.CreateDirectory(directory);
-            await File.WriteAllTextAsync(path, port.ToString(), cancellationToken);
+            await File.WriteAllTextAsync(path, port.ToString(), cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<int?> LoadPort(CancellationToken cancellationToken) {
             var path = PortPath();
             var text = default(string);
             try {
-                text = await File.ReadAllTextAsync(path, cancellationToken);
+                text = await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
             }
             catch (FileNotFoundException) {
                 return null;
@@ -36,7 +34,7 @@ namespace Domore.Net.Sockets {
         }
 
         private async Task<IPEndPoint> LoadEndPoint(CancellationToken cancellationToken) {
-            var port = await LoadPort(cancellationToken);
+            var port = await LoadPort(cancellationToken).ConfigureAwait(false);
             return port.HasValue
                 ? new IPEndPoint(IPAddress.Loopback, port.Value)
                 : null;
@@ -49,12 +47,12 @@ namespace Domore.Net.Sockets {
         }
 
         public async Task<TcpWriter> ConnectWriter(CancellationToken cancellationToken) {
-            var endPoint = await LoadEndPoint(cancellationToken);
+            var endPoint = await LoadEndPoint(cancellationToken).ConfigureAwait(false);
             if (endPoint == null) {
                 return null;
             }
             var writer = new TcpWriter(endPoint, Encoding);
-            await writer.Connect(cancellationToken);
+            await writer.Connect(cancellationToken).ConfigureAwait(false);
             return writer;
         }
 
@@ -63,7 +61,7 @@ namespace Domore.Net.Sockets {
             reader.Start();
 
             var port = reader.Port;
-            await SavePort(port, cancellationToken);
+            await SavePort(port, cancellationToken).ConfigureAwait(false);
             return reader;
         }
     }

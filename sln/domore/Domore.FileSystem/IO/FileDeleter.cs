@@ -14,16 +14,16 @@ namespace Domore.IO {
             File = file ?? throw new ArgumentNullException(nameof(file));
         }
 
-        public async Task Delete(CancellationToken cancellationToken) {
-            await Delete(File, cancellationToken);
+        public Task Delete(CancellationToken cancellationToken) {
+            return Delete(File, cancellationToken);
         }
 
-        public static async Task Delete(FileInfo file, CancellationToken cancellationToken) {
-            if (null == file) throw new ArgumentNullException(nameof(file));
+        public static Task Delete(FileInfo file, CancellationToken cancellationToken) {
+            ArgumentNullException.ThrowIfNull(file);
             if (Log.Debug()) {
                 Log.Debug(nameof(Delete) + " > " + file.FullName);
             }
-            await Task.Run(cancellationToken: cancellationToken, action: () => {
+            return Task.Run(cancellationToken: cancellationToken, action: () => {
                 if (file == null) return;
                 if (file.Exists == false) return;
                 try {

@@ -3,7 +3,7 @@
 namespace Domore.IPC {
     public delegate void MessageEventHandler(object sender, MessageEventArgs e);
 
-    public class MessageEventArgs : EventArgs {
+    public sealed class MessageEventArgs : EventArgs {
         public MessageEventKind Kind { get; }
         public string Message { get; }
 
