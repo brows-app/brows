@@ -1,11 +1,11 @@
 ﻿using Brows.Gui;
+using Brows.Gui.Collections;
 using Domore.Notification;
 using System;
-using System.Collections.ObjectModel;
 
 namespace Brows {
     internal sealed class CommandSuggestionCollection : Notifier, IControlled<ICommandSuggestionCollectionController> {
-        private readonly ObservableCollection<ICommandSuggestion> Observable = [];
+        private readonly SyncedCollection<ICommandSuggestion> Observable = [];
 
         private void Controller_CurrentSuggestionChanged(object sender, EventArgs e) {
             CurrentSuggestion = Controller?.CurrentSuggestion;
@@ -24,11 +24,15 @@ namespace Brows {
         private ICommandSuggestion _CurrentSuggestion;
 
         public void Add(ICommandSuggestion suggestion) {
-            Observable.Add(suggestion);
+            Observable.Sync(() => {
+                Observable.Add(suggestion);
+            });
         }
 
         public void Clear() {
-            Observable.Clear();
+            Observable.Sync(() => {
+                Observable.Clear();
+            });
         }
 
         public void MoveCurrentSuggestion(PressKey pressKey) {

@@ -67,7 +67,7 @@ namespace Brows {
                 .GroupBy(item => item.EntryInfo.Archive)
                 .Select(group => group.Key.Read(
                     progress: progress,
-                    cancellationToken: cancellationToken,
+                    token: cancellationToken,
                     info: new() {
                         ExtractOverwrites = overwrite,
                         ExtractEntriesToFiles = group.ToDictionary(

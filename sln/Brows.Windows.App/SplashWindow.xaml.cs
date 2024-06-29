@@ -6,32 +6,37 @@ using System.Threading;
 
 namespace Brows {
     sealed partial class SplashWindow {
-        private void Logging_LogEvent(object sender, LogEventArgs e) {
-            var list = e?.LogList;
-            if (list != null) {
-                void work() {
-                    //LogText.Text = string.Join(Environment.NewLine, list.Prepend(LogText.Text));
-                    //LogText.ScrollToEnd();
-                }
-                if (Dispatcher.Thread != Thread.CurrentThread) {
-                    Dispatcher.BeginInvoke(work);
-                }
-                else {
-                    work();
-                }
-            }
-        }
+        //private void Logging_Event(object sender, LogEventArgs e) {
+        //    var list = e?.LogList;
+        //    if (list != null) {
+        //        void work() {
+        //            var text = LogText.Text;
+        //            if (text?.Length > 1000) {
+        //                text = text.Substring(1000);
+        //            }
+        //            text = string.Join(Environment.NewLine, list.Prepend(text));
+        //            LogText.Text = text;
+        //            LogText.ScrollToEnd();
+        //        }
+        //        if (Dispatcher.Thread != Thread.CurrentThread) {
+        //            Dispatcher.BeginInvoke(work);
+        //        }
+        //        else {
+        //            work();
+        //        }
+        //    }
+        //}
 
         protected sealed override void OnClosing(CancelEventArgs e) {
-            //Logging.LogEventSeverity = LogSeverity.None;
-            //Logging.LogEvent -= Logging_LogEvent;
+            //Logging.EventThreshold = LogSeverity.None;
+            //Logging.Event -= Logging_Event;
             base.OnClosing(e);
         }
 
         public SplashWindow() {
             InitializeComponent();
-            //Logging.LogEventSeverity = LogSeverity.Info;
-            //Logging.LogEvent += Logging_LogEvent;
+            //Logging.EventThreshold = LogSeverity.Info;
+            //Logging.Event += Logging_Event;
         }
     }
 }

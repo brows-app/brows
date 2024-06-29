@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,7 +13,7 @@ namespace Brows.Exports {
             return ClipboardData.PreferredDropEffect == DragDropEffects.Move;
         }
 
-        private static async Task<IReadOnlyList<string>> FileDropList(CancellationToken token) {
+        private async static Task<IReadOnlyList<string>> FileDropList(CancellationToken token) {
             var files = new List<string>();
             var filesDropped = Clipboard.ContainsFileDropList();
             if (filesDropped) {
@@ -27,8 +26,7 @@ namespace Brows.Exports {
                     }
                 }
             }
-            await Task.CompletedTask;
-            return files;
+            return await Task.FromResult(files);
         }
 
         public async Task<bool> Work(ICollection<IProvidedIO> collection, IClipboardGetIOData data, IOperationProgress progress, CancellationToken token) {

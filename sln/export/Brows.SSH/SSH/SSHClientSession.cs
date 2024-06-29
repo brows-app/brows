@@ -53,7 +53,7 @@ namespace Brows.SSH {
             var host = Uri.Host;
             switch (hostType) {
                 case UriHostNameType.Dns:
-                    var addresses = await Dns.GetHostAddressesAsync(host, token);
+                    var addresses = await Dns.GetHostAddressesAsync(host, token).ConfigureAwait(false);
                     var v4Address = addresses.FirstOrDefault(address => address.AddressFamily == AddressFamily.InterNetwork);
                     if (v4Address != null) {
                         HostAddress = v4Address.MapToIPv4();
@@ -91,20 +91,22 @@ namespace Brows.SSH {
             Connected = false;
             Connecting = true;
             try {
-                var (host, family) = await Host(token);
-                return await Task.Run(cancellationToken: token, function: () => {
-                    var conn = new Conn {
-                        Host = host,
-                        HostFamily = family,
-                        Port = Uri.Port,
-                        Username = Uri.UserInfo
-                    };
-                    conn.Connect();
-                    HostFingerprint = new SSHFingerprint(conn.FingerprintHashFunc, conn.Fingerprint);
-                    KnownHost = SSHKnownHost.Get(conn, HostName, Port);
-                    Connected = true;
-                    return conn;
-                });
+                var (host, family) = await Host(token).ConfigureAwait(false);
+                return await Task
+                    .Run(cancellationToken: token, function: () => {
+                        var conn = new Conn {
+                            Host = host,
+                            HostFamily = family,
+                            Port = Uri.Port,
+                            Username = Uri.UserInfo
+                        };
+                        conn.Connect();
+                        HostFingerprint = new SSHFingerprint(conn.FingerprintHashFunc, conn.Fingerprint);
+                        KnownHost = SSHKnownHost.Get(conn, HostName, Port);
+                        Connected = true;
+                        return conn;
+                    })
+                    .ConfigureAwait(false);
             }
             finally {
                 Connecting = false;
@@ -169,8 +171,8 @@ namespace Brows.SSH {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(SCPRecv), nameof(Lock), path));
             }
-            await Lock(token);
-            var conn = await Conn.Ready(token);
+            await Lock(token).ConfigureAwait(false);
+            var conn = await Conn.Ready(token).ConfigureAwait(false);
             var
             recv = new ScpRecv(conn, path);
             recv.Disposed += (s, e) => {
@@ -189,8 +191,8 @@ namespace Brows.SSH {
                     Log.Join(nameof(mode), mode),
                     Log.Join(nameof(size), size));
             }
-            await Lock(token);
-            var conn = await Conn.Ready(token);
+            await Lock(token).ConfigureAwait(false);
+            var conn = await Conn.Ready(token).ConfigureAwait(false);
             var
             send = new ScpSend(conn, path, mode, size);
             send.Disposed += (s, e) => {
@@ -202,54 +204,62 @@ namespace Brows.SSH {
             return send;
         }
 
-        public async Task Authenticate(SSHAuth auth, CancellationToken token) {
-            if (null == auth) throw new ArgumentNullException(nameof(auth));
-            await Lock(token: token, task: async t => {
-                var conn = await Conn.Ready(t);
+        public Task Authenticate(SSHAuth auth, CancellationToken token) {
+            ArgumentNullException.ThrowIfNull(auth);
+            return Lock(token: token, task: async t => {
+                var conn = await Conn.Ready(t).ConfigureAwait(false);
                 var cancel = BrowsCanceler.From(t);
                 var secret = auth.Secret;
                 var privateKeyFile = auth.PrivateKeyFile?.Trim() ?? "";
                 if (privateKeyFile == "") {
-                    await Task.Run(cancellationToken: t, action: () => {
-                        conn.AuthByPassword(secret, cancel);
-                    });
+                    await Task
+                        .Run(cancellationToken: t, action: () => {
+                            conn.AuthByPassword(secret, cancel);
+                        })
+                        .ConfigureAwait(false);
                 }
                 else {
-                    await Task.Run(cancellationToken: t, action: () => {
-                        conn.AuthByKeyFile(auth.PublicKeyFile, privateKeyFile, secret, cancel);
-                    });
+                    await Task
+                        .Run(cancellationToken: t, action: () => {
+                            conn.AuthByKeyFile(auth.PublicKeyFile, privateKeyFile, secret, cancel);
+                        })
+                        .ConfigureAwait(false);
                 }
                 return default(object);
             });
         }
 
-        public async Task<bool> Authenticated(CancellationToken token) {
-            return await Lock(token: token, task: async t => {
-                var conn = await Conn.Ready(t);
+        public Task<bool> Authenticated(CancellationToken token) {
+            return Lock(token: token, task: async t => {
+                var conn = await Conn.Ready(t).ConfigureAwait(false);
                 return conn.AuthSuccess();
             });
         }
 
-        public async Task<SSHServerResponse> Execute(SSHClientCommand command, CancellationToken token) {
-            if (null == command) throw new ArgumentNullException(nameof(command));
-            return await Lock(token: token, task: async t => {
-                var conn = await Conn.Ready(t);
-                return await Task.Run(cancellationToken: t, function: async () => {
-                    using (var chan = new Exec(conn)) {
-                        chan.Exec(command.Command, BrowsCanceler.From(token));
-                        var stdOut = SSHExecText.StdOut(chan);
-                        var stdErr = SSHExecText.StdErr(chan);
-                        var stdOutText = await stdOut.DecodeText(command.StdOutBuilder, command.StdOutText, token);
-                        var stdErrText = await stdErr.DecodeText(command.StdErrBuilder, command.StdErrText, token);
-                        var response = new SSHServerResponse(stdOutText, stdErrText);
-                        return response;
-                    }
-                });
+        public Task<SSHServerResponse> Execute(SSHClientCommand command, CancellationToken token) {
+            ArgumentNullException.ThrowIfNull(command);
+            return Lock(token: token, task: async t => {
+                var conn = await Conn
+                    .Ready(t)
+                    .ConfigureAwait(false);
+                return await Task
+                    .Run(cancellationToken: t, function: async () => {
+                        using (var chan = new Exec(conn)) {
+                            chan.Exec(command.Command, BrowsCanceler.From(token));
+                            var stdOut = SSHExecText.StdOut(chan);
+                            var stdErr = SSHExecText.StdErr(chan);
+                            var stdOutText = await stdOut.DecodeText(command.StdOutBuilder, command.StdOutText, token).ConfigureAwait(false);
+                            var stdErrText = await stdErr.DecodeText(command.StdErrBuilder, command.StdErrText, token).ConfigureAwait(false);
+                            var response = new SSHServerResponse(stdOutText, stdErrText);
+                            return response;
+                        }
+                    })
+                    .ConfigureAwait(false);
             });
         }
 
         public async Task<object> Connection(CancellationToken token) {
-            return await Lock(Conn.Ready, token);
+            return await Lock(Conn.Ready, token).ConfigureAwait(false);
         }
 
         async ValueTask IAsyncDisposable.DisposeAsync() {
@@ -257,7 +267,9 @@ namespace Brows.SSH {
                 await Lock(token: CancellationToken.None, task: async _ => {
                     var conn = Conn.Result;
                     if (conn != null) {
-                        await Task.Run(conn.Dispose, CancellationToken.None);
+                        await Task
+                            .Run(conn.Dispose, CancellationToken.None)
+                            .ConfigureAwait(false);
                     }
                     Conn.Refresh();
                     Connected = false;

@@ -1,7 +1,6 @@
 ﻿using Brows.SSH.Clients;
 using Brows.SSH.Native;
 using Domore.Logs;
-using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -27,7 +26,7 @@ namespace Brows.SSH {
                 StdErrBuilder = stdErrBuilder,
                 StdOutBuilder = stdOutBuilder
             };
-            await Session.Execute(clientCommand, token);
+            await Session.Execute(clientCommand, token).ConfigureAwait(false);
 
             await using var stdout = stdOutBuilder.Lines(token).GetAsyncEnumerator(token);
             await using var stderr = stdErrBuilder.Lines(token).GetAsyncEnumerator(token);
@@ -37,7 +36,7 @@ namespace Brows.SSH {
 
             for (; ; ) {
                 var moveComplete =
-                    moveOut != null && moveErr != null ? await Task.WhenAny(moveOut, moveErr) :
+                    moveOut != null && moveErr != null ? await Task.WhenAny(moveOut, moveErr).ConfigureAwait(false) :
                     moveOut != null ? moveOut :
                     moveErr != null ? moveErr :
                     null;
@@ -45,7 +44,7 @@ namespace Brows.SSH {
                     break;
                 }
                 if (moveComplete == moveOut) {
-                    var moved = await moveOut;
+                    var moved = await moveOut.ConfigureAwait(false);
                     if (moved) {
                         if (Log.Info()) {
                             Log.Info(Log.Join(nameof(stdout), stdout.Current));
@@ -58,7 +57,7 @@ namespace Brows.SSH {
                     }
                 }
                 if (moveComplete == moveErr) {
-                    var moved = await moveErr;
+                    var moved = await moveErr.ConfigureAwait(false);
                     if (moved) {
                         if (Log.Info()) {
                             Log.Info(Log.Join(nameof(stderr), stderr.Current));
@@ -99,17 +98,17 @@ namespace Brows.SSH {
         public abstract IAsyncEnumerable<SSHFileInfo> List(string path, CancellationToken token);
 
         public async IAsyncEnumerable<SSHFileInfo> List(Uri uri, [EnumeratorCancellation] CancellationToken token) {
-            if (null == uri) throw new ArgumentNullException(nameof(uri));
+            ArgumentNullException.ThrowIfNull(uri);
             var path = Uri.UnescapeDataString(uri.AbsolutePath);
             var list = List(path, token);
-            await foreach (var info in list) {
+            await foreach (var info in list.ConfigureAwait(false)) {
                 yield return info;
             }
         }
 
         public async IAsyncEnumerable<SSHFileInfo> ListRecursively(Uri uri, [EnumeratorCancellation] CancellationToken token) {
             var list = List(uri, token);
-            await foreach (var item in list) {
+            await foreach (var item in list.ConfigureAwait(false)) {
                 switch (item.Kind) {
                     case SSHEntryKind.File:
                         yield return item;
@@ -119,7 +118,7 @@ namespace Brows.SSH {
                         var
                         urib = new UriBuilder(uri);
                         urib.Path = item.Path;
-                        await foreach (var i in ListRecursively(urib.Uri, token)) {
+                        await foreach (var i in ListRecursively(urib.Uri, token).ConfigureAwait(false)) {
                             yield return i;
                         }
                         break;
@@ -142,24 +141,24 @@ namespace Brows.SSH {
             return --ProviderCount;
         }
 
-        public async Task<ScpRecv> SCPRecv(string path, CancellationToken token) {
-            return await Session.SCPRecv(path, token);
+        public Task<ScpRecv> SCPRecv(string path, CancellationToken token) {
+            return Session.SCPRecv(path, token);
         }
 
-        public async Task<ScpSend> SCPSend(string path, int mode, long size, CancellationToken token) {
-            return await Session.SCPSend(path, mode, size, token);
+        public Task<ScpSend> SCPSend(string path, int mode, long size, CancellationToken token) {
+            return Session.SCPSend(path, mode, size, token);
         }
 
-        public async Task Authenticate(SSHAuth auth, CancellationToken token) {
-            await Session.Authenticate(auth, token);
+        public Task Authenticate(SSHAuth auth, CancellationToken token) {
+            return Session.Authenticate(auth, token);
         }
 
-        public async Task<bool> Authenticated(CancellationToken token) {
-            return await Session.Authenticated(token);
+        public Task<bool> Authenticated(CancellationToken token) {
+            return Session.Authenticated(token);
         }
 
-        public async Task<object> Connection(CancellationToken token) {
-            return await Session.Connection(token);
+        public Task<object> Connection(CancellationToken token) {
+            return Session.Connection(token);
         }
 
         async ValueTask IAsyncDisposable.DisposeAsync() {

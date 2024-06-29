@@ -18,9 +18,7 @@ namespace Brows {
         private bool AddingChildren;
         private readonly ObservableCollection<ProviderNavigationNode> ChildCollection = new();
 
-        private TaskCache<object>.WithRefresh IconCache =>
-            _IconCache ?? (
-            _IconCache = new(GetIcon));
+        private TaskCache<object>.WithRefresh IconCache => _IconCache ??= new(GetIcon);
         private TaskCache<object>.WithRefresh _IconCache;
 
         private void Controller_Loaded(object sender, EventArgs e) {
@@ -140,7 +138,7 @@ namespace Brows {
                 if (_Icon == null) {
                     async void load() {
                         try {
-                            Icon = await IconCache.Ready(Token);
+                            Icon = await IconCache.Ready(Token).ConfigureAwait(false);
                         }
                         catch (Exception ex) {
                             if (Log.Warn()) {

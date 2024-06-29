@@ -33,7 +33,9 @@ namespace Brows.Zip {
         }
 
         public async Task<ArchiveLocked> Lock(CancellationToken cancellationToken) {
-            await Locker.WaitAsync(cancellationToken);
+            await Locker
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
             return new Locked(this);
         }
 
@@ -67,7 +69,7 @@ namespace Brows.Zip {
         }
 
         public static ArchiveLocker Get(FileInfo file) {
-            if (null == file) throw new ArgumentNullException(nameof(file));
+            ArgumentNullException.ThrowIfNull(file);
             var key = file.FullName;
             lock (Set) {
                 if (Set.TryGetValue(key, out var value) == false) {

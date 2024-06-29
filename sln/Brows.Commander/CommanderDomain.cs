@@ -56,24 +56,24 @@ namespace Brows {
         }
 
         private void Load(Commander commander) {
-            if (null == commander) throw new ArgumentNullException(nameof(commander));
+            ArgumentNullException.ThrowIfNull(commander);
             Loaded?.Invoke(this, new CommanderLoadedEventArgs(commander, commander.First));
         }
 
         private async Task Service(CancellationToken token) {
-            await Commands.Init(token);
-            var firstCommander = Commander(
+            await Commands
+                .Init(token)
+                .ConfigureAwait(false);
+            Load(Commander(
                 first: true,
-                load: (await Config.Load(token)).LoadFirst);
-            Load(firstCommander);
-            var messages = Messenger.Receive(token);
-            await foreach (var message in messages) {
+                load: (await Config.Load(token)).LoadFirst));
+            await foreach (var message in Messenger.Receive(token).ConfigureAwait(false)) {
                 var msg = message?.Trim() ?? "";
                 var nextCommander = Commander(
                     first: false,
                     load: msg != ""
                         ? new[] { msg }
-                        : (await Config.Load(token)).LoadFirst);
+                        : (await Config.Load(token).ConfigureAwait(false)).LoadFirst);
                 Load(nextCommander);
             }
         }
@@ -101,9 +101,9 @@ namespace Brows {
             }
             using (TokenSource) {
                 try {
-                    await Service(TokenSource.Token);
+                    await Service(TokenSource.Token).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException canceled) when (canceled.CancellationToken == TokenSource.Token) {
+                catch (OperationCanceledException canceled) when (TokenSource.Token.IsCancellationRequested) {
                     if (Log.Info()) {
                         Log.Info(nameof(canceled));
                     }
@@ -117,14 +117,14 @@ namespace Brows {
             Ended?.Invoke(this, new CommanderEndedEventArgs());
         }
 
-        public static async Task Post(string message, CancellationToken cancellationToken) {
+        public static Task Post(string message, CancellationToken cancellationToken) {
             var messenger = new CommanderMessenger();
-            await messenger.Send(message, cancellationToken);
+            return messenger.Send(message, cancellationToken);
         }
 
         async Task<bool> ICommanderDomain.AddCommander(IReadOnlyList<string> panels, CancellationToken token) {
             if (panels == null) {
-                var config = await Config.Load(token);
+                var config = await Config.Load(token).ConfigureAwait(false);
                 panels = config.LoadFirst;
             }
             var commander = Commander(first: false, load: panels);

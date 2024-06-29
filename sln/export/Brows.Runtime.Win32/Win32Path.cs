@@ -26,14 +26,14 @@ namespace Brows {
             return WIN32PATH.AreSame(path1, path2);
         }
 
-        public static async Task<bool> IsCaseSensitive(string path, CancellationToken token) {
-            return await Task.Run(cancellationToken: token, function: () => {
+        public static Task<bool> IsCaseSensitive(string path, CancellationToken token) {
+            return Task.Run(cancellationToken: token, function: () => {
                 return WIN32PATH.IsCaseSensitive(path);
             });
         }
 
-        public static async Task<string> GetCasing(string path, CancellationToken token) {
-            return await Task.Run(cancellationToken: token, function: () => {
+        public static Task<string> GetCasing(string path, CancellationToken token) {
+            return Task.Run(cancellationToken: token, function: () => {
                 return WIN32PATH.GetCasing(path);
             });
         }

@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Domore.Runtime.Win32;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Domore.Runtime {
-    using System.Collections.Generic;
-    using System.Linq;
-    using Win32;
-
     public static class Win32Path {
         public static bool AreSame(string path1, string path2) {
             using (var hFile1 = kernel32.CreateFileW(path1, FileAccess.Read, FileShare.ReadWrite, IntPtr.Zero, FileMode.Open, 0, IntPtr.Zero)) {

@@ -11,7 +11,7 @@ namespace Brows.IO.Compression {
             Path.AltDirectorySeparatorChar };
 
         public static bool IsDirectory(this ZipArchiveEntry zipArchiveEntry) {
-            if (null == zipArchiveEntry) throw new ArgumentNullException(nameof(zipArchiveEntry));
+            ArgumentNullException.ThrowIfNull(zipArchiveEntry);
             var fullName = zipArchiveEntry.FullName;
             if (fullName != null) {
                 var sepChars = DirectorySeparatorChars;

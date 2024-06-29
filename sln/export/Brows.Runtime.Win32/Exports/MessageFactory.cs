@@ -58,14 +58,22 @@ namespace Brows.Exports {
                     }
                 }
                 try {
-                    var unregistered = user32.UnregisterDeviceNotification(Hwnd);
+                    var unregistered = 1;
+                    try {
+                        unregistered = user32.UnregisterDeviceNotification(Hwnd);
+                    }
+                    catch (Exception ex) {
+                        if (Log.Warn()) {
+                            Log.Warn(ex?.Message);
+                        }
+                    }
                     if (unregistered == 0) {
                         try {
                             throw new Win32Exception();
                         }
                         catch (Exception ex) {
-                            if (Log.Error()) {
-                                Log.Error(ex);
+                            if (Log.Warn()) {
+                                Log.Warn(ex?.Message);
                             }
                         }
                     }

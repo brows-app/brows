@@ -23,13 +23,13 @@ namespace Brows.SSH {
         public DecodedTextBuilder StdErrBuilder { get; set; }
 
         public DecodedTextOptions StdOutText {
-            get => _StdOutText ?? (_StdOutText = DefaultTextOptions());
+            get => _StdOutText ??= DefaultTextOptions();
             set => _StdOutText = value;
         }
         private DecodedTextOptions _StdOutText;
 
         public DecodedTextOptions StdErrText {
-            get => _StdErrText ?? (_StdErrText = DefaultTextOptions());
+            get => _StdErrText ??= DefaultTextOptions();
             set => _StdErrText = value;
         }
         private DecodedTextOptions _StdErrText;

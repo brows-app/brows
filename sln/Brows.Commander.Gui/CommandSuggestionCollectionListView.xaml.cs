@@ -1,7 +1,7 @@
-namespace Brows {
-    using Gui;
+using Brows.Gui;
 
-    partial class CommandSuggestionCollectionListView {
+namespace Brows {
+    sealed partial class CommandSuggestionCollectionListView {
         public CommandSuggestionCollectionListView() {
             InitializeComponent();
             new CommandSuggestionCollectionController(this);

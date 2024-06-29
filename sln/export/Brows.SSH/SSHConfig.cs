@@ -24,7 +24,7 @@ namespace Brows {
         }
 
         public ScpConfig Scp {
-            get => _Scp ?? (_Scp = new());
+            get => _Scp ??= new();
             set => _Scp = value;
         }
         private ScpConfig _Scp;

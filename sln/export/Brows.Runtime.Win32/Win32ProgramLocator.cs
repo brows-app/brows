@@ -12,9 +12,10 @@ namespace Brows {
     public static class Win32ProgramLocator {
         private static readonly ILog Log = Logging.For(typeof(Win32ProgramLocator));
         private static readonly Dictionary<string, string> Cache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly SemaphoreSlim CacheLocker = new(1, 1);
 
         private static string LocateInDirectory(DirectoryInfo directory, string program) {
-            if (null == directory) throw new ArgumentNullException(nameof(directory));
+            ArgumentNullException.ThrowIfNull(directory);
             if (Log.Info()) {
                 Log.Info(nameof(LocateInDirectory) + " > " + directory.FullName);
             }
@@ -130,23 +131,18 @@ namespace Brows {
         }
 
         public static async Task<string> Locate(string file, CancellationToken token) {
-            lock (Cache) {
-                if (Cache.TryGetValue(file, out var value)) {
-                    return value;
-                }
-            }
-            var location = await Task.Run(cancellationToken: token, function: () => {
-                lock (Cache) {
-                    if (Cache.TryGetValue(file, out var location)) {
-                        return location;
+            if (Cache.TryGetValue(file, out var value) == false) {
+                await CacheLocker.WaitAsync(token).ConfigureAwait(false);
+                try {
+                    if (Cache.TryGetValue(file, out value) == false) {
+                        Cache[file] = value = await Task.Run(() => Locate(file), token).ConfigureAwait(false);
                     }
                 }
-                return Locate(file);
-            });
-            lock (Cache) {
-                Cache[file] = location;
+                finally {
+                    CacheLocker.Release();
+                }
             }
-            return location;
+            return value;
         }
     }
 }

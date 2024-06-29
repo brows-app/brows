@@ -21,11 +21,11 @@ namespace Brows {
             return Lock(async createdNew => {
                 if (createdNew) {
                     var instance = new WindowsProgramInstance(config, token);
-                    var instanceExitCode = await instance.Task;
+                    var instanceExitCode = await instance.Task.ConfigureAwait(false);
                     return instanceExitCode;
                 }
                 else {
-                    await Post(context, token);
+                    await Post(context, token).ConfigureAwait(false);
                     return 0;
                 }
             });

@@ -3,22 +3,20 @@ using System;
 
 namespace Brows {
     internal sealed class SSHEntry : Entry<SSHProvider> {
-        private Uri GetUri() {           
+        private Uri GetUri() {
             var
             uri = new UriBuilder(Provider.Uri);
             uri.Path = Info.Path;
             return uri.Uri;
         }
 
-        public Uri Uri =>
-            _Uri ?? (
-            _Uri = GetUri());
+        public Uri Uri => _Uri ??= GetUri();
         private Uri _Uri;
 
-        public sealed override string ID => _ID ?? (_ID = Uri.ToString());
+        public sealed override string ID => _ID ??= Uri.ToString();
         private string _ID;
 
-        public sealed override string Name => _Name ?? (_Name = Info.Name);
+        public sealed override string Name => _Name ??= Info.Name;
         private string _Name;
 
         public SSHFileInfo Info { get; }

@@ -14,9 +14,8 @@ namespace Brows.SSH {
 
         private readonly Dictionary<BigInteger, SSHClient> Agent = new();
 
-        private static async Task<BigInteger> ComputeKey(Uri uri, CancellationToken token) {
-            if (null == uri) throw new ArgumentNullException(nameof(uri));
-            return await Task.Run(cancellationToken: token, function: () => {
+        private static Task<BigInteger> ComputeKey(Uri uri, CancellationToken token) {
+            return Task.Run(cancellationToken: token, function: () => {
                 var keyUri = new UriBuilder(uri) { Fragment = null, Path = "/", Query = null }.Uri;
                 var keyUriBytes = Encoding.UTF8.GetBytes($"{keyUri}");
                 var hashBytes = keyUriBytes;
@@ -40,14 +39,17 @@ namespace Brows.SSH {
         }
 
         public async Task<SSHClient> GetOrAdd(Uri uri, CancellationToken token) {
-            if (null == uri) throw new ArgumentNullException(nameof(uri));
-            var key = await ComputeKey(uri, token);
+            var key = await ComputeKey(uri, token).ConfigureAwait(false);
             if (Agent.TryGetValue(key, out var value) == false) {
-                if (Log.Info()) {
-                    Log.Info($"{nameof(SSHClient.Create)} > {uri}");
+                lock (Agent) {
+                    if (Agent.TryGetValue(key, out value) == false) {
+                        if (Log.Info()) {
+                            Log.Info($"{nameof(SSHClient.Create)} > {uri}");
+                        }
+                        Agent[key] = value = SSHClient.Create(uri);
+                        Agent[key].Disposing += SSHClient_Disposing;
+                    }
                 }
-                Agent[key] = value = SSHClient.Create(uri);
-                Agent[key].Disposing += SSHClient_Disposing;
             }
             return value;
         }

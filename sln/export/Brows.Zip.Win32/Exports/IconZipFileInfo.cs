@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Brows.Exports {
     internal sealed class IconZipFileInfo : IIconZipFileInfo {
-        public async Task<object> Icon(FileInfo zipFileInfo, CancellationToken cancellationToken) {
-            return await Win32Icon.Load(SHSTOCKICONID.ZIPFILE, cancellationToken);
+        public Task<object> Icon(FileInfo zipFileInfo, CancellationToken cancellationToken) {
+            return Win32Icon.Load(SHSTOCKICONID.ZIPFILE, cancellationToken);
         }
     }
 }

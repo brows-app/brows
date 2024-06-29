@@ -7,21 +7,17 @@ using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class EntryDataView : IEntryDataView {
-        private List<string> KeyList =>
-            _KeyList ?? (
-            _KeyList = Config.Key.ToList());
+        private List<string> KeyList => _KeyList ??= Config.Key.ToList();
         private List<string> _KeyList;
 
-        private EntryDataViewConfig Config =>
-            _Config ?? (
-            _Config = new EntryDataViewConfig(Provider));
+        private EntryDataViewConfig Config => _Config ??= new(Provider);
         private EntryDataViewConfig _Config;
 
         public IReadOnlyList<string> Keys =>
             KeyList;
 
         public IEntrySorting Sorting {
-            get => _Sorting ?? (_Sorting = EntrySorting.From(Config.Sort));
+            get => _Sorting ??= EntrySorting.From(Config.Sort);
             private set => _Sorting = value;
         }
         private IEntrySorting _Sorting;

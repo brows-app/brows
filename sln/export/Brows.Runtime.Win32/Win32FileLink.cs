@@ -18,7 +18,7 @@ namespace Brows {
                 Log.Info(nameof(Resolve) + " > " + file);
             }
             try {
-                return await Win32ThreadPool.Common.Work(
+                var work = Win32ThreadPool.Common.Work(
                     name: nameof(Win32FileLink),
                     cancellationToken: cancellationToken,
                     work: () => {
@@ -31,6 +31,7 @@ namespace Brows {
                             return path;
                         }
                     });
+                return await work.ConfigureAwait(false);
             }
             catch (Exception ex) {
                 if (Log.Warn()) {

@@ -1,7 +1,7 @@
-namespace Brows {
-    using Gui;
+using Brows.Gui;
 
-    partial class CommanderControl {
+namespace Brows {
+    sealed partial class CommanderControl {
         public CommanderControl() {
             InitializeComponent();
             new CommanderController(this);

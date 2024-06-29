@@ -9,14 +9,12 @@ using System.Threading.Tasks;
 namespace Brows {
     internal sealed class EntryDataViewConfig {
         private EntryDataViewConfigData Data {
-            get => _Data ?? (_Data = new());
+            get => _Data ??= new();
             set => _Data = value;
         }
         private EntryDataViewConfigData _Data;
 
-        private ConfigClass Config =>
-            _Config ?? (
-            _Config = new(Provider.GetType()));
+        private ConfigClass Config => _Config ??= new(Provider.GetType());
         private ConfigClass _Config;
 
         private bool Default(IEnumerable<string> keys) {
@@ -103,9 +101,8 @@ namespace Brows {
         }
 
         private sealed class ConfigClass {
-            private IConfig<EntryDataViewConfigSet> Cache =>
-                _Cache ?? (
-                _Cache = Configure.Data<EntryDataViewConfigSet>(ProviderType.Name));
+            private IConfig<EntryDataViewConfigSet> Cache => _Cache ??=
+                Configure.Data<EntryDataViewConfigSet>(ProviderType.Name);
             private IConfig<EntryDataViewConfigSet> _Cache;
 
             public Type ProviderType { get; }

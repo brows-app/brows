@@ -1,42 +1,43 @@
 ﻿<UserControl x:Class="Brows.ProcessStreamControl"
              x:ClassModifier="internal"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:brows="http://schemas.brows.app/xaml"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Brows"
              xmlns:diagnostics="clr-namespace:Brows.Diagnostics;assembly=Brows.Commands.Process">
-    <Grid>
-        <Grid.Resources>
-            <DataTemplate DataType="{x:Type diagnostics:ProcessStreamOutput}" x:Key="ProcessStreamOutputDataTemplate">
-                <DataTemplate.Resources>
-                    <Style TargetType="local:ProcessStreamItemTextBlock">
-                        <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
-                        <Setter Property="FontSize" Value="12"/>
-                    </Style>
-                </DataTemplate.Resources>
-                <local:ProcessStreamItemTextBlock>
-                    <local:ProcessStreamItemTextBlock.Style>
-                        <Style TargetType="local:ProcessStreamItemTextBlock" BasedOn="{StaticResource {x:Type local:ProcessStreamItemTextBlock}}">
-                            <Setter Property="Foreground" Value="{DynamicResource Global_Info_Foreground_Brush}"/>
-                            <Setter Property="Text" Value="{Binding Line}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Kind}" Value="StandardError">
-                                    <Setter Property="Foreground" Value="{DynamicResource Global_Danger_Foreground_Brush}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </local:ProcessStreamItemTextBlock.Style>
-                </local:ProcessStreamItemTextBlock>
-            </DataTemplate>
-        </Grid.Resources>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
-            <ListView ItemsSource="{Binding Items}" ItemTemplate="{StaticResource ProcessStreamOutputDataTemplate}"/>
-        </Grid>
-        <Grid Grid.Row="1">
-            <ContentControl Content="{Binding CurrentItem}" ContentTemplate="{StaticResource ProcessStreamOutputDataTemplate}"/>
-        </Grid>
+  <Grid>
+    <Grid.Resources>
+      <DataTemplate DataType="{x:Type diagnostics:ProcessStreamOutput}" x:Key="ProcessStreamOutputDataTemplate">
+        <DataTemplate.Resources>
+          <Style TargetType="local:ProcessStreamItemTextBlock">
+            <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
+            <Setter Property="FontSize" Value="12"/>
+          </Style>
+        </DataTemplate.Resources>
+        <local:ProcessStreamItemTextBlock>
+          <local:ProcessStreamItemTextBlock.Style>
+            <Style TargetType="local:ProcessStreamItemTextBlock" BasedOn="{StaticResource {x:Type local:ProcessStreamItemTextBlock}}">
+              <Setter Property="Foreground" Value="{DynamicResource Global_Info_Foreground_Brush}"/>
+              <Setter Property="Text" Value="{Binding Line}"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding Kind}" Value="StandardError">
+                  <Setter Property="Foreground" Value="{DynamicResource Global_Danger_Foreground_Brush}"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </local:ProcessStreamItemTextBlock.Style>
+        </local:ProcessStreamItemTextBlock>
+      </DataTemplate>
+    </Grid.Resources>
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="0">
+      <brows:SyncedCollectionView ItemsSource="{Binding Items}" ItemTemplate="{StaticResource ProcessStreamOutputDataTemplate}"/>
     </Grid>
+    <Grid Grid.Row="1">
+      <ContentControl Content="{Binding CurrentItem}" ContentTemplate="{StaticResource ProcessStreamOutputDataTemplate}"/>
+    </Grid>
+  </Grid>
 </UserControl>

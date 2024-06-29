@@ -35,12 +35,14 @@ namespace Brows {
                 }
             }, token);
             try {
-                return await Definition.GetValue(
-                    entry: Entry,
-                    progress: value => Value = value,
-                    token: token);
+                return await Definition
+                    .GetValue(
+                        entry: Entry,
+                        progress: value => Value = value,
+                        token: token)
+                    .ConfigureAwait(false);
             }
-            catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
+            catch (OperationCanceledException canceled) when (token.IsCancellationRequested) {
                 if (Log.Info()) {
                     Log.Info(nameof(canceled));
                 }
@@ -63,9 +65,9 @@ namespace Brows {
 
         private async void ReadyInit() {
             try {
-                Value = await (ReadyTask = AccessValue(Token));
+                Value = await (ReadyTask = AccessValue(Token)).ConfigureAwait(false);
             }
-            catch (OperationCanceledException canceled) when (canceled.CancellationToken == Token) {
+            catch (OperationCanceledException canceled) when (Token.IsCancellationRequested) {
                 if (Log.Debug()) {
                     Log.Debug(Log.Join(nameof(ReadyInit), nameof(canceled)));
                 }

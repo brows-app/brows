@@ -8,7 +8,7 @@ namespace Brows.Exports {
             if (set == null) {
                 return false;
             }
-            var result = await Win32Path.IsCaseSensitive(directory, token);
+            var result = await Win32Path.IsCaseSensitive(directory, token).ConfigureAwait(false);
             set(result);
             return true;
         }

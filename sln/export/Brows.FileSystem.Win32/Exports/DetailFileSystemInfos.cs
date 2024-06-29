@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace Brows.Exports {
     internal sealed class DetailFileSystemInfos : IDetailFileSystemInfos {
-        public async Task<bool> Work(IEnumerable<FileSystemInfo> fileSystemInfos, IOperationProgress progress, CancellationToken token) {
+        public Task<bool> Work(IEnumerable<FileSystemInfo> fileSystemInfos, IOperationProgress progress, CancellationToken token) {
             if (fileSystemInfos != null) {
                 var list = fileSystemInfos.Where(info => info != null).ToList();
                 if (list.Count > 0) {
                     if (progress != null) {
                         progress.Change(setTarget: list.Count);
                     }
-                    await Task.Run(cancellationToken: token, action: () => {
+                    return Task.Run(cancellationToken: token, function: () => {
                         foreach (var item in list) {
                             if (token.IsCancellationRequested) {
                                 token.ThrowIfCancellationRequested();
@@ -26,11 +26,11 @@ namespace Brows.Exports {
                                 progress.Change(1);
                             }
                         }
+                        return true;
                     });
-                    return true;
                 }
             }
-            return false;
+            return Task.FromResult(false);
         }
     }
 }

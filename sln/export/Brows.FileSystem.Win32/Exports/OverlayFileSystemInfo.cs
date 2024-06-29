@@ -17,13 +17,13 @@ namespace Brows.Exports {
                 set(obj);
                 return true;
             }
-            var result = await Win32Overlay.Load(fileSystemInfo.FullName, token);
+            var result = await Win32Overlay.Load(fileSystemInfo.FullName, token).ConfigureAwait(false);
             if (result != null) {
                 return ret(result);
             }
             if (fileSystemInfo is DirectoryInfo directory) {
                 if (directory.Attributes.HasFlag(FileAttributes.ReparsePoint)) {
-                    return ret(await Win32Icon.Load(SHSTOCKICONID.LINK, token));
+                    return ret(await Win32Icon.Load(SHSTOCKICONID.LINK, token).ConfigureAwait(false));
                 }
             }
             return false;

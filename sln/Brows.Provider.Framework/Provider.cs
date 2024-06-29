@@ -44,14 +44,12 @@ namespace Brows {
         internal IImport Import { get; set; }
 
         internal EntryConfig Config {
-            get => _Config ?? (_Config = new());
+            get => _Config ??= new();
             set => _Config = value;
         }
         private EntryConfig _Config;
 
-        internal ProviderData Data =>
-            _Data ?? (
-            _Data = ProviderData.Get(Import, EntryType, DataDefinition));
+        internal ProviderData Data => _Data ??= ProviderData.Get(Import, EntryType, DataDefinition);
         private ProviderData _Data;
 
         internal IEnumerable Selection =>

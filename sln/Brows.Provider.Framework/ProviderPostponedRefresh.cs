@@ -24,7 +24,7 @@ namespace Brows {
             var refresh = final || Stopwatch.Elapsed > Provider.Config?.PostponedRefresh?.Interval;
             if (refresh) {
                 var provider = (IProvider)Provider;
-                await provider.Refresh(token);
+                await provider.Refresh(token).ConfigureAwait(false);
                 Stopwatch.Restart();
                 return Refreshed = true;
             }

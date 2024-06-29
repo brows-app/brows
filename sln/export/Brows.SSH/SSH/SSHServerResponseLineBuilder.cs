@@ -24,7 +24,6 @@ namespace Brows.SSH {
                 await LineChannel.Writer.WriteAsync(line, token).ConfigureAwait(false);
             }
             LineChannel.Writer.Complete();
-            await Task.CompletedTask;
         }
 
         protected sealed override async Task Add(ReadOnlyMemory<char> memory, CancellationToken token) {

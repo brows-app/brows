@@ -115,7 +115,7 @@ namespace Brows.Data {
                 if (task == null) {
                     return null;
                 }
-                var work = await task;
+                var work = await task.ConfigureAwait(false);
                 if (work == false) {
                     return null;
                 }

@@ -6,11 +6,12 @@ using System.Threading;
 using System.Windows;
 using COMMANDERTHEME = Brows.CommanderTheme;
 using REQUEST = Brows.Request;
+using TASK = System.Threading.Tasks.Task;
 using TRANSLATION = Brows.Translation;
 
 namespace Brows.Windows {
     internal sealed class AppExports {
-        private TaskCache<AppExports> Task => _Task ??= new(async token => {
+        private TaskCache<AppExports> Task => _Task ??= new(token => TASK.Run(cancellationToken: token, function: async () => {
             Import = await Imports.Ready(token);
             Components = AppComponentCollection.From(Import.List<IExportResource>());
             REQUEST.Factory = RequestFactory = new RequestFactory();
@@ -18,7 +19,7 @@ namespace Brows.Windows {
             COMMANDERTHEME.Service = CommanderTheme = new AppTheme.Service(App);
             FileSystemEvent.SynchronizationContext = SynchronizationContext;
             return this;
-        });
+        }));
         private TaskCache<AppExports> _Task;
 
         private async void App_Startup(object sender, StartupEventArgs e) {

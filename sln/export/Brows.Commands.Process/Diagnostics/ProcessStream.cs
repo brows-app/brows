@@ -1,26 +1,25 @@
-﻿using Domore.Notification;
+﻿using Brows.Gui.Collections;
+using Domore.Notification;
 using System;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using TASK = System.Threading.Tasks.Task;
 
 namespace Brows.Diagnostics {
     internal sealed class ProcessStream : Notifier, IDisposable {
         private readonly CancellationTokenSource TokenSource;
-        private readonly ObservableCollection<ProcessStreamItem> Collection = new();
+        private readonly SyncedCollection<ProcessStreamItem> Collection = [];
 
-        private async Task Read(StreamReader reader, ProcessOutputKind kind, CancellationToken token) {
-            if (null == reader) throw new ArgumentNullException(nameof(reader));
+        private async TASK Read(StreamReader reader, ProcessOutputKind kind, CancellationToken token) {
+            ArgumentNullException.ThrowIfNull(reader);
             var buffer = new char[1];
             for (; ; ) {
                 var r = default(int);
                 try {
-                    r = await reader.ReadAsync(buffer, token);
+                    r = await reader.ReadAsync(buffer, token).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
+                catch (OperationCanceledException) when (token.IsCancellationRequested) {
                     break;
                 }
                 if (r > 0) {
@@ -29,7 +28,9 @@ namespace Brows.Diagnostics {
                         case '\r':
                             continue;
                         case '\n':
-                            Collection.Add(CurrentItem);
+                            Collection.Sync(() => {
+                                Collection.Add(CurrentItem);
+                            });
                             CurrentItem = new ProcessStreamOutput(kind);
                             break;
                         default:
@@ -55,7 +56,7 @@ namespace Brows.Diagnostics {
         }
         private ProcessStreamItem _CurrentItem;
 
-        public Task Task { get; }
+        public TASK Task { get; }
         public Process Process { get; }
 
         public ProcessStream(Process process) {

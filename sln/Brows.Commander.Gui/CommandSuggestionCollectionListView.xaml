@@ -1,4 +1,4 @@
-<ListView x:Class="Brows.CommandSuggestionCollectionListView "
+<brows:SyncedCollectionView x:Class="Brows.CommandSuggestionCollectionListView "
           x:ClassModifier="internal"
           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -102,4 +102,4 @@
             </GroupStyle.ContainerStyle>
         </GroupStyle>
     </ListView.GroupStyle>
-</ListView>
+</brows:SyncedCollectionView>

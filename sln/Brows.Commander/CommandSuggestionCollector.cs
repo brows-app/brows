@@ -27,7 +27,7 @@ namespace Brows {
                 return default;
             }
             try {
-                return await t;
+                return await t.ConfigureAwait(false);
             }
             catch (Exception ex) {
                 if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
@@ -42,7 +42,7 @@ namespace Brows {
 
         private static Task Catch(Task t, CancellationToken token) {
             async Task<object> task() {
-                await t;
+                await t.ConfigureAwait(false);
                 return default;
             }
             return Catch(task(), token);
@@ -68,10 +68,10 @@ namespace Brows {
                         token.ThrowIfCancellationRequested();
                     }
                     if (tasks.Count == 0) break;
-                    var task = await Task.WhenAny(tasks);
+                    var task = await Task.WhenAny(tasks).ConfigureAwait(false);
                     var index = tasks.IndexOf(task);
                     var enumerator = enumerators[index];
-                    var result = await task;
+                    var result = await task.ConfigureAwait(false);
                     if (result) {
                         yield return enumerator.Current;
                         tasks[index] = Catch(Catch(() => enumerator.MoveNextAsync().AsTask()), token);
@@ -85,7 +85,7 @@ namespace Brows {
             }
             finally {
                 disposed.AddRange(enumerators.Select(e => Catch(Catch(() => e.DisposeAsync().AsTask()), token)));
-                await Task.WhenAll(disposed);
+                await Task.WhenAll(disposed).ConfigureAwait(false);
             }
         }
 
@@ -104,7 +104,7 @@ namespace Brows {
             InputSuggestionRelevance = int.MinValue;
             InputSuggestion = null;
             InputSuggestionChanged?.Invoke(this, EventArgs.Empty);
-            await foreach (var suggestion in Suggest(token)) {
+            await foreach (var suggestion in Suggest(token).ConfigureAwait(false)) {
                 if (token.IsCancellationRequested) {
                     token.ThrowIfCancellationRequested();
                 }

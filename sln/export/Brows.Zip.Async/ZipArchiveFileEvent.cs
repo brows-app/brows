@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Brows {
     public sealed class ZipArchiveFileEvent {
-        private readonly List<Func<Task>> Tasks = new();
+        private readonly List<Func<Task>> Tasks = [];
 
         internal void Clear() {
             lock (Tasks) {
@@ -14,7 +14,7 @@ namespace Brows {
         }
 
         public void Add(Func<Task> task) {
-            if (null == task) throw new ArgumentNullException(nameof(task));
+            ArgumentNullException.ThrowIfNull(task);
             lock (Tasks) {
                 Tasks.Add(task);
             }

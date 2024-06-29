@@ -6,9 +6,7 @@ namespace Brows {
     internal sealed class EntryDataDefinitionSet : IEntryDataDefinitionSet {
         private readonly IReadOnlyDictionary<string, IEntryDataDefinition> Set;
 
-        private EntryDataKeySet KeySet =>
-            _KeySet ?? (
-            _KeySet = new EntryDataKeySet(new HashSet<string>(Set.Keys)));
+        private EntryDataKeySet KeySet => _KeySet ??= new(new HashSet<string>(Set.Keys));
         private EntryDataKeySet _KeySet;
 
         private EntryDataDefinitionSet(IReadOnlyDictionary<string, IEntryDataDefinition> set) {

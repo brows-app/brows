@@ -27,8 +27,7 @@ namespace Brows.Exports {
                 fileLst.AddRange(fileArr);
                 Clipboard.SetFileDropList(fileLst);
             }
-            await Task.CompletedTask;
-            return true;
+            return await Task.FromResult(true);
         }
     }
 }

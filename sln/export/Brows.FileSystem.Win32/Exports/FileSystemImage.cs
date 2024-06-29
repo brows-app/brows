@@ -9,7 +9,7 @@ namespace Brows.Exports {
             if (set == null) return false;
             if (info == null) return false;
             var path = info.FullName;
-            var result = await Win32Thumbnail.GetImageSource(path, width, height, token);
+            var result = await Win32Thumbnail.GetImageSource(path, width, height, token).ConfigureAwait(false);
             if (result == null) {
                 return false;
             }

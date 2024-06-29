@@ -37,7 +37,7 @@ namespace Brows {
                 TaskSource.SetResult(exitCode);
             }
             catch (Exception ex) {
-                if (ex is OperationCanceledException canceled && canceled.CancellationToken == Token) {
+                if (ex is OperationCanceledException && Token.IsCancellationRequested) {
                     TaskSource.SetCanceled(Token);
                 }
                 else {

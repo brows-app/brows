@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -10,6 +11,10 @@ namespace Brows.Gui {
 
         private void Window_Closed(object sender, EventArgs e) {
             WindowClosed?.Invoke(this, e);
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e) {
+            WindowClosing?.Invoke(this, e);
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) {
@@ -54,12 +59,14 @@ namespace Brows.Gui {
             if (oldWindow != newWindow) {
                 if (oldWindow != null) {
                     oldWindow.Closed -= Window_Closed;
+                    oldWindow.Closing -= Window_Closing;
                     oldWindow.PreviewKeyDown -= Window_PreviewKeyDown;
                     oldWindow.PreviewTextInput -= Window_PreviewTextInput;
                     oldWindow.PreviewMouseDoubleClick -= Window_PreviewMouseDoubleClick;
                 }
                 if (newWindow != null) {
                     newWindow.Closed += Window_Closed;
+                    newWindow.Closing += Window_Closing;
                     newWindow.PreviewKeyDown += Window_PreviewKeyDown;
                     newWindow.PreviewTextInput += Window_PreviewTextInput;
                     newWindow.PreviewMouseDoubleClick += Window_PreviewMouseDoubleClick;
@@ -74,6 +81,7 @@ namespace Brows.Gui {
             var window = Window;
             if (window != null) {
                 window.Closed -= Window_Closed;
+                window.Closing -= Window_Closing;
                 window.PreviewKeyDown -= Window_PreviewKeyDown;
                 window.PreviewTextInput -= Window_PreviewTextInput;
                 window.PreviewMouseDoubleClick -= Window_PreviewMouseDoubleClick;
@@ -84,6 +92,7 @@ namespace Brows.Gui {
         }
 
         public event EventHandler WindowClosed;
+        public event EventHandler WindowClosing;
         public event InputEventHandler WindowInput;
         public event GestureEventHandler WindowGesture;
 

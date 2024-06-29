@@ -37,12 +37,10 @@ namespace Brows {
             }
         }
 
-        internal async Task<bool> Requested(ProviderNavigationNode node, CancellationToken token) {
-            if (null == node) throw new ArgumentNullException(nameof(node));
+        internal Task<bool> Requested(ProviderNavigationNode node, CancellationToken token) {
+            ArgumentNullException.ThrowIfNull(node);
             var task = Provider?.Change(node.ID, token);
-            return task == null
-                ? false
-                : await task;
+            return task ?? Task.FromResult(false);
         }
 
         protected ProviderNavigation(ProviderNavigationNode root) {

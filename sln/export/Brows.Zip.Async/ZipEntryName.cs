@@ -16,26 +16,18 @@ namespace Brows {
             Original = original ?? throw new ArgumentNullException(nameof(original));
         }
 
-        public IReadOnlyList<string> Parts =>
-            _Parts ?? (
-            _Parts = Original.Split(DirectorySeparatorChars, StringSplitOptions.RemoveEmptyEntries));
+        public IReadOnlyList<string> Parts => _Parts ??= Original.Split(DirectorySeparatorChars, StringSplitOptions.RemoveEmptyEntries);
         private IReadOnlyList<string> _Parts;
 
-        public string Normalized =>
-            _Normalized ?? (
-            _Normalized = string.Join(Path.DirectorySeparatorChar, Parts));
+        public string Normalized => _Normalized ??= string.Join(Path.DirectorySeparatorChar, Parts);
         private string _Normalized;
 
-        public string Top =>
-            _Top ?? (
-            _Top = Parts.LastOrDefault() ?? "");
+        public string Top => _Top ??= (Parts.LastOrDefault() ?? "");
         private string _Top;
 
-        public string Parent =>
-            _Parent ?? (
-            _Parent = Parts.Count == 0
-                ? ""
-                : string.Join(Path.DirectorySeparatorChar, Parts.Take(Parts.Count - 1)));
+        public string Parent => _Parent ??= (Parts.Count == 0
+            ? ""
+            : string.Join(Path.DirectorySeparatorChar, Parts.Take(Parts.Count - 1)));
         private string _Parent;
 
         public IReadOnlyList<string> Paths {

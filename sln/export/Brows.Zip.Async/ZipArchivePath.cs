@@ -37,22 +37,23 @@ namespace Brows {
             LastWriteTimeUtc = File.LastWriteTimeUtc;
         }
 
-        private async Task<ZipEntryInfoCollection> EntryInfoLoad(CancellationToken cancellationToken) {
+        private async Task<ZipEntryInfoCollection> EntryInfoLoad(CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(nameof(Read) + " > " + FullName);
             }
-            using (await Locker.Lock(cancellationToken)) {
-                return await Task.Run(cancellationToken: cancellationToken, function: () => {
-                    using (var archive = Archive.Open(this, ZipArchiveMode.Read, cancellationToken)) {
-                        if (cancellationToken.IsCancellationRequested) {
-                            cancellationToken.ThrowIfCancellationRequested();
+            var locked = Locker.Lock(token);
+            using (await locked.ConfigureAwait(false)) {
+                ZipEntryInfoCollection work() {
+                    using (var archive = Archive.Open(this, ZipArchiveMode.Read, token)) {
+                        if (token.IsCancellationRequested) {
+                            token.ThrowIfCancellationRequested();
                         }
                         var fileSet = new Dictionary<string, ZipEntryInfo>();
                         var pathSet = new Dictionary<string, ZipEntryInfo>();
                         var entries = archive.Zip.Entries;
                         foreach (var entry in entries) {
-                            if (cancellationToken.IsCancellationRequested) {
-                                cancellationToken.ThrowIfCancellationRequested();
+                            if (token.IsCancellationRequested) {
+                                token.ThrowIfCancellationRequested();
                             }
                             if (entry != null) {
                                 if (Log.Info()) {
@@ -69,12 +70,12 @@ namespace Brows {
                             }
                         }
                         foreach (var item in fileSet) {
-                            if (cancellationToken.IsCancellationRequested) {
-                                cancellationToken.ThrowIfCancellationRequested();
+                            if (token.IsCancellationRequested) {
+                                token.ThrowIfCancellationRequested();
                             }
                             foreach (var path in item.Value.Name.Paths) {
-                                if (cancellationToken.IsCancellationRequested) {
-                                    cancellationToken.ThrowIfCancellationRequested();
+                                if (token.IsCancellationRequested) {
+                                    token.ThrowIfCancellationRequested();
                                 }
                                 if (pathSet.TryGetValue(path, out _) == false) {
                                     pathSet[path] = ZipEntryInfo.Path(this, new ZipEntryName(path));
@@ -84,7 +85,8 @@ namespace Brows {
                         return new ZipEntryInfoCollection(
                             items: pathSet.Values.Concat(fileSet.Values));
                     }
-                });
+                }
+                return await Task.Run(work, token).ConfigureAwait(false);
             }
         }
 
@@ -126,14 +128,10 @@ namespace Brows {
             }
         }
 
-        public ZipArchiveFileEvent FileChanged =>
-            _FileChanged ?? (
-            _FileChanged = new());
+        public ZipArchiveFileEvent FileChanged => _FileChanged ??= new();
         private ZipArchiveFileEvent _FileChanged;
 
-        public ZipArchiveFileEvent FileDeleted =>
-            _FileDeleted ?? (
-            _FileDeleted = new());
+        public ZipArchiveFileEvent FileDeleted => _FileDeleted ??= new();
         private ZipArchiveFileEvent _FileDeleted;
 
         public string Parent => _Parent ??=
@@ -202,11 +200,11 @@ namespace Brows {
             return EntryInfoCache.Result;
         }
 
-        public Task<ZipEntryInfoCollection> EntryInfo(CancellationToken cancellationToken) {
-            return EntryInfoCache.Ready(cancellationToken);
+        public Task<ZipEntryInfoCollection> EntryInfo(CancellationToken token) {
+            return EntryInfoCache.Ready(token);
         }
 
-        public async Task Read(ZipArchiveRead info, IOperationProgress progress, CancellationToken cancellationToken) {
+        public async Task Read(ZipArchiveRead info, IOperationProgress progress, CancellationToken token) {
             ArgumentNullException.ThrowIfNull(info);
             if (Log.Info()) {
                 Log.Info(nameof(Read) + " > " + FullName);
@@ -218,12 +216,13 @@ namespace Brows {
             if (progress != null) {
                 progress.Change(setTarget: extract.Count);
             }
-            using (await Locker.Lock(cancellationToken)) {
-                await Task.Run(cancellationToken: cancellationToken, action: () => {
-                    using (var archive = Archive.Open(this, ZipArchiveMode.Read, cancellationToken)) {
+            var locked = Locker.Lock(token);
+            using (await locked.ConfigureAwait(false)) {
+                void work() {
+                    using (var archive = Archive.Open(this, ZipArchiveMode.Read, token)) {
                         foreach (var name in extract.Keys) {
-                            if (cancellationToken.IsCancellationRequested) {
-                                cancellationToken.ThrowIfCancellationRequested();
+                            if (token.IsCancellationRequested) {
+                                token.ThrowIfCancellationRequested();
                             }
                             if (progress != null) {
                                 progress.Change(data: name);
@@ -242,7 +241,8 @@ namespace Brows {
                             }
                         }
                     }
-                });
+                }
+                await Task.Run(work, token).ConfigureAwait(false);
             }
         }
 
@@ -260,8 +260,9 @@ namespace Brows {
             if (progress != null) {
                 progress.Change(addTarget: stream.Count + create.Count + delete.Count);
             }
-            using (await Locker.Lock(token)) {
-                await Task.Run(cancellationToken: token, action: () => {
+            var locked = Locker.Lock(token);
+            using (await locked.ConfigureAwait(false)) {
+                void work() {
                     using (var archive = Archive.Open(this, ZipArchiveMode.Update, token)) {
                         foreach (var name in delete) {
                             if (token.IsCancellationRequested) {
@@ -297,12 +298,14 @@ namespace Brows {
                             }
                         }
                     }
-                });
+                }
+                await Task.Run(work, token).ConfigureAwait(false);
             }
             foreach (var set in stream) {
-                await Task.Run(cancellationToken: token, function: async () => {
-                    await set.ConsumeFromMemory(progress: progress, token: token, consuming: async (source, stream, progress, token) => {
-                        using (await Locker.Lock(token)) {
+                async Task work() {
+                    var consume = set.ConsumeFromMemory(progress: progress, token: token, consuming: async (source, stream, progress, token) => {
+                        var locked = Locker.Lock(token);
+                        using (await locked.ConfigureAwait(false)) {
                             using (var archive = Archive.Open(this, ZipArchiveMode.Update, token)) {
                                 var name = source.RelativePath
                                     .Trim()
@@ -313,16 +316,18 @@ namespace Brows {
                                 if (stream != null) {
                                     var entry = archive.Zip.CreateEntry(name);
                                     await using var opened = entry.Open();
-                                    await stream.CopyToAsync(opened, token);
+                                    await stream.CopyToAsync(opened, token).ConfigureAwait(false);
                                 }
                             }
                         }
                     });
-                });
+                    await consume.ConfigureAwait(false);
+                }
+                await Task.Run(work, token).ConfigureAwait(false);
             }
         }
 
-        public async Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken cancellationToken) {
+        public async Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
             if (data == null) {
                 return false;
             }
@@ -332,11 +337,12 @@ namespace Brows {
             if (files.Count == 0) {
                 return false;
             }
-            await Update(token: cancellationToken, progress: progress, info: new() {
+            var update = Update(token: token, progress: progress, info: new() {
                 CreateEntriesFromFiles = files.ToDictionary(
                     file => Path.GetFileName(file),
                     file => file)
             });
+            await update.ConfigureAwait(false);
             return true;
         }
 
@@ -370,7 +376,7 @@ namespace Brows {
 
             protected sealed override async Task<IEntryStreamReady> StreamReady(CancellationToken token) {
                 if (EntryInfo.Kind == ZipEntryKind.File) {
-                    await Task.Run(cancellationToken: token, action: () => {
+                    var task = Task.Run(cancellationToken: token, action: () => {
                         Locked = EntryInfo.Archive.Locker.Lock();
                         Archive = Archive.Open(EntryInfo.Archive, ZipArchiveMode.Read, CancellationToken.None);
                         var entry = Archive.Zip.GetEntry(EntryInfo.Name.Original);
@@ -379,6 +385,7 @@ namespace Brows {
                         }
                         Stream = entry.Open();
                     });
+                    await task.ConfigureAwait(false);
                 }
                 return new Disposable(this);
             }

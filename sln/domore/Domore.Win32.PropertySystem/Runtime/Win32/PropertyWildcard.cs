@@ -3,9 +3,7 @@ using System.Collections.Generic;
 
 namespace Domore.Runtime.Win32 {
     public sealed class PropertyWildcard {
-        public IReadOnlyList<string> Parts =>
-            _Parts ?? (
-            _Parts = Name.Split('.'));
+        public IReadOnlyList<string> Parts => _Parts ??= Name.Split('.');
         private IReadOnlyList<string> _Parts;
 
         public string Name { get; }
@@ -15,7 +13,9 @@ namespace Domore.Runtime.Win32 {
         }
 
         public bool Matches(string name) {
-            if (name == null) return false;
+            if (name == null) {
+                return false;
+            }
             var other = name.Split('.');
             for (var i = 0; i < Parts.Count; i++) {
                 var part = Parts[i];

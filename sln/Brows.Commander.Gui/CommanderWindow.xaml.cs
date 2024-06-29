@@ -1,5 +1,5 @@
 namespace Brows {
-    partial class CommanderWindow {
+    sealed partial class CommanderWindow {
         public CommanderWindow() {
             InitializeComponent();
         }

@@ -45,8 +45,11 @@ namespace Brows {
 
         private void Controller_WindowClosed(object sender, EventArgs e) {
             PanelCollection.Clear();
-            MessageSet?.Dispose();
             Closed?.Invoke(this, e);
+        }
+
+        private void Controller_WindowClosing(object sender, EventArgs e) {
+            MessageSet?.Dispose();
         }
 
         private void Controller_WindowInput(object sender, InputEventArgs e) {
@@ -266,12 +269,14 @@ namespace Brows {
                         oldValue.Loaded -= Controller_Loaded;
                         oldValue.WindowInput -= Controller_WindowInput;
                         oldValue.WindowClosed -= Controller_WindowClosed;
+                        oldValue.WindowClosing -= Controller_WindowClosing;
                         oldValue.WindowGesture -= Controller_WindowGesture;
                     }
                     if (newValue != null) {
                         newValue.Loaded += Controller_Loaded;
                         newValue.WindowInput += Controller_WindowInput;
                         newValue.WindowClosed += Controller_WindowClosed;
+                        newValue.WindowClosing += Controller_WindowClosing;
                         newValue.WindowGesture += Controller_WindowGesture;
                     }
                 }

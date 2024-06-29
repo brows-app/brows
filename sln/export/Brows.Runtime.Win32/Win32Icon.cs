@@ -3,7 +3,7 @@ using Domore.Runtime.InteropServices;
 using Domore.Runtime.Win32;
 using Domore.Threading;
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
@@ -13,64 +13,61 @@ using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 
 namespace Brows {
-    public class Win32Icon {
+    public static class Win32Icon {
         private static readonly ILog Log = Logging.For(typeof(Win32Icon));
-
-        private static readonly ConcurrentDictionary<string, object> ExtensionCache = new ConcurrentDictionary<string, object>();
-        private static readonly ConcurrentDictionary<string, Task<object>> ExtensionTasks = new ConcurrentDictionary<string, Task<object>>();
-        private static readonly ConcurrentDictionary<SHSTOCKICONID, object> StockCache = new ConcurrentDictionary<SHSTOCKICONID, object>();
-        private static readonly ConcurrentDictionary<SHSTOCKICONID, Task<object>> StockTasks = new ConcurrentDictionary<SHSTOCKICONID, Task<object>>();
+        private static readonly Dictionary<string, object> ExtensionCache = [];
+        private static readonly Dictionary<string, Task<object>> ExtensionTasks = [];
+        private static readonly SemaphoreSlim ExtensionLock = new(1, 1);
+        private static readonly Dictionary<SHSTOCKICONID, object> StockCache = [];
+        private static readonly Dictionary<SHSTOCKICONID, Task<object>> StockTasks = [];
+        private static readonly SemaphoreSlim StockLock = new(1, 1);
 
         private static STAThreadPool ThreadPool =>
             Win32ThreadPool.Common;
 
-        private static async Task<object> Attempt<TArg>(TArg arg, CancellationToken cancellationToken, Func<TArg, CancellationToken, Task<object>> task) {
-            if (null == task) throw new ArgumentNullException(nameof(task));
+        private static async Task<object> Attempt<TArg>(TArg arg, Func<TArg, CancellationToken, Task<object>> task, CancellationToken token) {
+            ArgumentNullException.ThrowIfNull(task);
             var attempt = 1;
             for (; ; )
             {
                 try {
-                    return await task(arg, cancellationToken);
+                    return await task(arg, token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested) {
+                    throw;
                 }
                 catch (Exception ex) {
-                    if (ex is OperationCanceledException canceled) {
-                        if (canceled.CancellationToken == cancellationToken) {
-                            if (Log.Info()) {
-                                Log.Info(canceled.GetType().Name);
-                            }
-                            return null;
-                        }
-                    }
                     if (attempt++ >= Attempts) {
-                        if (Log.Error()) {
-                            Log.Error(ex);
+                        if (Log.Warn()) {
+                            Log.Warn(ex);
                         }
                         return null;
                     }
-                    if (Log.Warn()) {
-                        Log.Warn(ex);
+                    if (Log.Debug()) {
+                        Log.Debug(ex);
                     }
-                    await Task.Delay(AttemptDelay);
+                    await Task.Delay(AttemptDelay, token).ConfigureAwait(false);
                 }
             }
         }
 
-        private static async Task<object> GetPathIconAttempt(string path, CancellationToken cancellationToken) {
+        private static Task<object> GetPathIconAttempt(string path, CancellationToken cancellationToken) {
             const FILE_ATTRIBUTE dwFileAttributes = FILE_ATTRIBUTE.NORMAL;
             const SHGFI uFlags = SHGFI.USEFILEATTRIBUTES | SHGFI.ICON | SHGFI.SMALLICON;
-            return await ThreadPool.Work(nameof(GetPathIconAttempt), cancellationToken: cancellationToken, work: () => {
+            return ThreadPool.Work(nameof(GetPathIconAttempt), cancellationToken: cancellationToken, work: () => {
                 var pszPath = path;
                 var psfi = new SHFILEINFOW();
                 var cbFileInfo = SHFILEINFOW.Size;
                 try {
                     var returnValue = shell32.SHGetFileInfoW(pszPath, dwFileAttributes, ref psfi, cbFileInfo, uFlags);
-                    if (returnValue == IntPtr.Zero) throw new Win32Exception($"{nameof(shell32.SHGetFileInfoW)} error");
-
+                    if (returnValue == IntPtr.Zero) {
+                        throw new Win32Exception($"{nameof(shell32.SHGetFileInfoW)} error");
+                    }
                     var source = Imaging.CreateBitmapSourceFromHIcon(psfi.hIcon, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                     if (source.CanFreeze) {
                         source.Freeze();
                     }
-                    return source;
+                    return (object)source;
                 }
                 finally {
                     var hIcon = psfi.hIcon;
@@ -86,9 +83,9 @@ namespace Brows {
             });
         }
 
-        private static async Task<object> GetStockIconAttempt(SHSTOCKICONID siid, CancellationToken cancellationToken) {
+        private static Task<object> GetStockIconAttempt(SHSTOCKICONID siid, CancellationToken cancellationToken) {
             const SHGSI uFlags = SHGSI.ICON | SHGSI.SMALLICON;
-            return await ThreadPool.Work(nameof(GetStockIconAttempt), cancellationToken: cancellationToken, work: () => {
+            return ThreadPool.Work(nameof(GetStockIconAttempt), cancellationToken: cancellationToken, work: () => {
                 var psii = new SHSTOCKICONINFO();
                 psii.cbSize = SHSTOCKICONINFO.Size;
                 try {
@@ -100,7 +97,7 @@ namespace Brows {
                     if (source.CanFreeze) {
                         source.Freeze();
                     }
-                    return source;
+                    return (object)source;
                 }
                 finally {
                     var hIcon = psii.hIcon;
@@ -116,41 +113,66 @@ namespace Brows {
             });
         }
 
-        public static int Attempts { get; set; } = 5;
-        public static int AttemptDelay { get; set; } = 50;
-
-        public static async Task<object> Load(string path, CancellationToken cancellationToken) {
-            var ext = Path.GetExtension(path)?.Trim() ?? "";
-            if (ext == "") {
-                return await Load(SHSTOCKICONID.DOCNOASSOC, cancellationToken);
-            }
-            var key = ext.ToLower();
-            var exe = key == ".exe" && path.Length > ".exe".Length;
-            if (exe) {
-                return await Attempt(path, cancellationToken, GetPathIconAttempt);
-            }
-            var cache = ExtensionCache;
+        private static async Task<object> Get<TKey>(TKey key, Dictionary<TKey, object> cache, Dictionary<TKey, Task<object>> tasks, SemaphoreSlim locker, Func<CancellationToken, Task<object>> factory, CancellationToken token) {
+            ArgumentNullException.ThrowIfNull(cache);
+            ArgumentNullException.ThrowIfNull(tasks);
+            ArgumentNullException.ThrowIfNull(locker);
+            ArgumentNullException.ThrowIfNull(factory);
             if (cache.TryGetValue(key, out var value) == false) {
-                var tasks = ExtensionTasks;
-                if (tasks.TryGetValue(key, out var task) == false) {
-                    tasks[key] = task = Attempt(key, cancellationToken, GetPathIconAttempt);
+                await locker.WaitAsync(token).ConfigureAwait(false);
+                try {
+                    if (cache.TryGetValue(key, out value) == false) {
+                        if (tasks.TryGetValue(key, out _) == false) {
+                            tasks[key] = factory(token);
+                        }
+                        try {
+                            cache[key] = value = await tasks[key].ConfigureAwait(false);
+                        }
+                        catch (Exception ex) {
+                            if (Log.Debug()) {
+                                Log.Debug(ex);
+                            }
+                            tasks.Remove(key);
+                        }
+                    }
                 }
-                cache[key] = value = await task;
+                finally {
+                    locker.Release();
+                }
             }
             return value;
         }
 
-        public static async Task<object> Load(SHSTOCKICONID stock, CancellationToken cancellationToken) {
-            var key = stock;
-            var cache = StockCache;
-            if (cache.TryGetValue(key, out var value) == false) {
-                var tasks = StockTasks;
-                if (tasks.TryGetValue(key, out var task) == false) {
-                    tasks[key] = task = Attempt(stock, cancellationToken, GetStockIconAttempt);
-                }
-                cache[key] = value = await task;
+        public static int Attempts { get; set; } = 5;
+        public static int AttemptDelay { get; set; } = 50;
+
+        public static Task<object> Load(string path, CancellationToken token) {
+            var ext = Path.GetExtension(path)?.Trim() ?? "";
+            if (ext == "") {
+                return Load(SHSTOCKICONID.DOCNOASSOC, token);
             }
-            return value;
+            var key = ext.ToLower();
+            var exe = key == ".exe" && path.Length > ".exe".Length;
+            if (exe) {
+                return Attempt(path, GetPathIconAttempt, token);
+            }
+            return Get(
+                key: key,
+                cache: ExtensionCache,
+                tasks: ExtensionTasks,
+                locker: ExtensionLock,
+                factory: t => Attempt(key, GetPathIconAttempt, t),
+                token: token);
+        }
+
+        public static Task<object> Load(SHSTOCKICONID stock, CancellationToken token) {
+            return Get(
+                key: stock,
+                cache: StockCache,
+                tasks: StockTasks,
+                locker: StockLock,
+                factory: t => Attempt(stock, GetStockIconAttempt, t),
+                token: token);
         }
     }
 }

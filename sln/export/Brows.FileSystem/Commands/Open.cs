@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,10 +34,10 @@ namespace Brows.Commands {
                     if (file != null) {
                         var linkService = LinkFile;
                         if (linkService != null) {
-                            var link = new StringBuilder();
-                            var linked = await linkService.Link(file.FullName, link, token);
+                            var link = default(string);
+                            var linked = await linkService.Work(file.FullName, value => link = value, token);
                             if (linked) {
-                                var linkProvided = await context.Provide(id: link.ToString(), where, token);
+                                var linkProvided = await context.Provide(id: link, where, token);
                                 if (linkProvided) {
                                     return true;
                                 }

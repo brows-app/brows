@@ -26,7 +26,7 @@ namespace Brows.Zip {
         public ZipArchive Zip { get; }
 
         public static Archive Open(ZipArchivePath path, ZipArchiveMode mode, CancellationToken cancellationToken) {
-            if (null == path) throw new ArgumentNullException(nameof(path));
+            ArgumentNullException.ThrowIfNull(path);
             var file = path.FileName;
             var nesting = new Queue<string>(path.Nest);
             var disposable = new DisposableStack();

@@ -37,13 +37,9 @@ namespace Brows.Collections.Generic {
         public bool Disposed { get; private set; }
 
         public T Push<T>(T disposable) where T : IDisposable {
-            if (Disposed) {
-                throw new ObjectDisposedException(nameof(DisposableStack));
-            }
+            ObjectDisposedException.ThrowIf(Disposed, this);
             lock (Stack) {
-                if (Disposed) {
-                    throw new ObjectDisposedException(nameof(DisposableStack));
-                }
+                ObjectDisposedException.ThrowIf(Disposed, this);
                 Stack.Push(disposable);
             }
             return disposable;

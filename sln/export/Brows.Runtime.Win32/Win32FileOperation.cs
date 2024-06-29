@@ -21,13 +21,11 @@ namespace Brows {
         private IOperationProgress OperationProgress;
         private CancellationToken CancellationToken;
 
-        private ShellItemWrapper DirectoryWrap =>
-            _DirectoryWrap ?? (
-            _DirectoryWrap = new ShellItemWrapper(Directory));
+        private ShellItemWrapper DirectoryWrap => _DirectoryWrap ??= new ShellItemWrapper(Directory);
         private ShellItemWrapper _DirectoryWrap;
 
         private STAThreadPool ThreadPool {
-            get => _ThreadPool ?? (_ThreadPool = Win32ThreadPool.Common);
+            get => _ThreadPool ??= Win32ThreadPool.Common;
             set => _ThreadPool = value;
         }
         private STAThreadPool _ThreadPool;
@@ -181,31 +179,31 @@ namespace Brows {
         }
 
         public List<CopyFile> CopyFiles {
-            get => _CopyFiles ?? (_CopyFiles = new());
+            get => _CopyFiles ??= [];
             set => _CopyFiles = value;
         }
         private List<CopyFile> _CopyFiles;
 
         public List<MoveFile> MoveFiles {
-            get => _MoveFiles ?? (_MoveFiles = new());
+            get => _MoveFiles ??= [];
             set => _MoveFiles = value;
         }
         private List<MoveFile> _MoveFiles;
 
         public List<DeleteFile> DeleteFiles {
-            get => _DeleteFiles ?? (_DeleteFiles = new());
+            get => _DeleteFiles ??= [];
             set => _DeleteFiles = value;
         }
         private List<DeleteFile> _DeleteFiles;
 
         public List<CreateFile> CreateFiles {
-            get => _CreateFiles ?? (_CreateFiles = new());
+            get => _CreateFiles ??= [];
             set => _CreateFiles = value;
         }
         private List<CreateFile> _CreateFiles;
 
         public List<RenameFile> RenameFiles {
-            get => _RenameFiles ?? (_RenameFiles = new());
+            get => _RenameFiles ??= [];
             set => _RenameFiles = value;
         }
         private List<RenameFile> _RenameFiles;
@@ -246,11 +244,12 @@ namespace Brows {
                 Silent = Silent,
                 ThreadPool = ThreadPool
             };
-            try {
-                return await ThreadPool.Work(
+            var work = ThreadPool.Work(
                     name: nameof(Win32FileOperation),
                     work: agent.Work,
                     cancellationToken: token);
+            try {
+                return await work.ConfigureAwait(false);
             }
             finally {
                 var directoryWrap = agent._DirectoryWrap;

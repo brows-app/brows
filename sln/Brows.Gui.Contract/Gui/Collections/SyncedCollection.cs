@@ -6,7 +6,7 @@ namespace Brows.Gui.Collections {
     public sealed class SyncedCollection<T> : ObservableCollection<T>, ISyncedCollection {
         private readonly object Locker = new();
 
-        public T Sync<T>(Func<T> accessMethod, bool writeAccess = true) {
+        public TResult Sync<TResult>(Func<TResult> accessMethod, bool writeAccess = true) {
             ArgumentNullException.ThrowIfNull(accessMethod);
             lock (Locker) {
                 return accessMethod();

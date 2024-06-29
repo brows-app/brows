@@ -1,7 +1,7 @@
 ﻿namespace Brows.Diagnostics {
     internal class ProcessConfig {
         public Process Default {
-            get => _Default ?? (_Default = new Process());
+            get => _Default ??= new();
             set => _Default = value;
         }
         private Process _Default;

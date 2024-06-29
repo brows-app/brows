@@ -15,10 +15,10 @@ namespace Brows.Exports {
                     hint?.DirectoryOpen == true ? SHSTOCKICONID.FOLDEROPEN :
                     hint?.DirectoryOpen == false ? SHSTOCKICONID.FOLDERBACK :
                     SHSTOCKICONID.FOLDER;
-                result = await Win32Icon.Load(icon, token);
+                result = await Win32Icon.Load(icon, token).ConfigureAwait(false);
             }
             else {
-                result = await Win32Icon.Load(info.FullName, token);
+                result = await Win32Icon.Load(info.FullName, token).ConfigureAwait(false);
             }
             if (result == null) {
                 return false;

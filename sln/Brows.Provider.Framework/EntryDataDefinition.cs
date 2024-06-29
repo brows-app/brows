@@ -102,7 +102,7 @@ namespace Brows {
 
         public sealed override async Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken cancellationToken) {
             if (entry is TEntry tentry) {
-                return await GetValue(tentry, value => progress?.Invoke(value), cancellationToken);
+                return await GetValue(tentry, value => progress?.Invoke(value), cancellationToken).ConfigureAwait(false);
             }
             return null;
         }

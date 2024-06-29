@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace Domore.IO {
     public sealed class FileSystemEventTasks {
         private static readonly ILog Log = Logging.For(typeof(FileSystemEventTasks));
-        private static readonly Dictionary<string, FileSystemEventTasks> Set = new();
+        private static readonly Dictionary<string, FileSystemEventTasks> Set = [];
 
-        private readonly List<Func<FileSystemEventArgs, Task>> List = new();
+        private readonly List<Func<FileSystemEventArgs, Task>> List = [];
 
         private FileSystemEvent Event;
         private SemaphoreSlim EventLocker;
@@ -80,7 +80,7 @@ namespace Domore.IO {
         }
 
         public static FileSystemEventTask Add(string path, Func<FileSystemEventArgs, Task> task) {
-            if (task is null) throw new ArgumentNullException(nameof(task));
+            ArgumentNullException.ThrowIfNull(task);
             var inst = default(FileSystemEventTasks);
             lock (Set) {
                 if (Set.TryGetValue(path, out inst) == false) {

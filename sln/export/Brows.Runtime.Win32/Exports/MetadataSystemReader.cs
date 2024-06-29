@@ -22,7 +22,7 @@ namespace Brows.Exports {
                     list.Add(new MetadataDefinition(item));
                 }
                 return list;
-            });
+            }).ConfigureAwait(false);
             foreach (var item in list) {
                 definitions.Add(item);
             }

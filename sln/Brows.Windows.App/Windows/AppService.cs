@@ -1,27 +1,44 @@
 ﻿using System;
+using System.Threading;
 using System.Windows;
 
 namespace Brows.Windows {
     internal sealed class AppService {
         private void Service_Ended(object sender, CommanderEndedEventArgs e) {
-            var app = App;
-            var windows = app.Windows;
-            if (windows != null) {
-                foreach (var window in windows) {
-                    if (window is Window w) {
-                        w.Close();
+            void close() {
+                var app = App;
+                var windows = app.Windows;
+                if (windows != null) {
+                    foreach (var window in windows) {
+                        if (window is Window w) {
+                            w.Close();
+                        }
                     }
                 }
+                app.Shutdown();
             }
-            app.Shutdown();
+            if (App.Dispatcher.Thread != Thread.CurrentThread) {
+                App.Dispatcher.BeginInvoke(close);
+            }
+            else {
+                close();
+            }
         }
 
         private void Service_Loaded(object sender, CommanderLoadedEventArgs e) {
             if (e != null) {
-                var
-                window = new CommanderWindow { DataContext = e.Commander };
-                window.Show();
-                WindowShown?.Invoke(this, e);
+                void show() {
+                    var
+                    window = new CommanderWindow { DataContext = e.Commander };
+                    window.Show();
+                    WindowShown?.Invoke(this, e);
+                }
+                if (App.Dispatcher.Thread != Thread.CurrentThread) {
+                    App.Dispatcher.BeginInvoke(show);
+                }
+                else {
+                    show();
+                }
             }
         }
 

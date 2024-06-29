@@ -13,22 +13,18 @@ using System.Threading.Tasks;
 namespace Brows {
     public static class Win32Overlay {
         private static readonly ILog Log = Logging.For(typeof(Win32Overlay));
-
-        private static readonly Dictionary<string, object> OverlayCache = new Dictionary<string, object>();
-
-        private static readonly STAThreadPool ThreadPool = new STAThreadPool(nameof(Win32Overlay)) {
+        private static readonly Dictionary<string, object> OverlayCache = [];
+        private static readonly STAThreadPool ThreadPool = new(nameof(Win32Overlay)) {
             TryWorkDelay = 10,
             WorkerCountMax = 1
         };
 
-        private static TaskCache<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> IdentifierCache =>
-            _IdentifierCache ?? (
-            _IdentifierCache = new(IdentifiersLoad));
+        private static TaskCache<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> IdentifierCache => _IdentifierCache ??= new(IdentifiersLoad);
         private static TaskCache<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> _IdentifierCache;
 
-        private static async Task<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> IdentifiersLoad(CancellationToken token) {
+        private static Task<IReadOnlyList<ShellIconOverlayIdentifierWrapper>> IdentifiersLoad(CancellationToken token) {
             const string shellIconOverlayIdentifiers = @"Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers";
-            return await ThreadPool.Work(nameof(IdentifiersLoad), cancellationToken: token, work: () => {
+            return ThreadPool.Work(nameof(IdentifiersLoad), cancellationToken: token, work: () => {
                 var list = new List<ShellIconOverlayIdentifierWrapper>();
                 using (var hive = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default)) {
                     using (var subKey = hive.OpenSubKey(shellIconOverlayIdentifiers)) {
@@ -53,7 +49,7 @@ namespace Brows {
                         }
                     }
                 }
-                return list;
+                return (IReadOnlyList<ShellIconOverlayIdentifierWrapper>)list;
             });
         }
 
@@ -61,9 +57,9 @@ namespace Brows {
             if (Log.Info()) {
                 Log.Info($"{nameof(GetOverlayIcon)} > {path}");
             }
-            var identifier = await IdentifierCache.Ready(token);
+            var identifier = await IdentifierCache.Ready(token).ConfigureAwait(false);
             var allOptions = identifier.ToList();
-            var overlaySrc = await ThreadPool.Work(nameof(GetOverlayIcon), cancellationToken: token, work: () => {
+            var overlaySrc = ThreadPool.Work(nameof(GetOverlayIcon), cancellationToken: token, work: () => {
                 var members = new List<ShellIconOverlayIdentifierWrapper>();
                 foreach (var option in allOptions) {
                     if (token.IsCancellationRequested) {
@@ -105,18 +101,19 @@ namespace Brows {
                         break;
                 }
                 if (topMember != null) {
-                    lock (OverlayCache) {
-                        var key = topMember.Name;
-                        var cache = OverlayCache;
-                        if (cache.TryGetValue(key, out var value) == false) {
-                            cache[key] = value = topMember.GetOverlaySource();
+                    var key = topMember.Name;
+                    if (OverlayCache.TryGetValue(key, out var value) == false) {
+                        lock (OverlayCache) {
+                            if (OverlayCache.TryGetValue(key, out value) == false) {
+                                OverlayCache[key] = value = topMember.GetOverlaySource();
+                            }
                         }
-                        return value;
                     }
+                    return value;
                 }
                 return null;
             });
-            return overlaySrc;
+            return await overlaySrc.ConfigureAwait(false);
         }
 
         public static Task<object> Load(string path, CancellationToken token) {

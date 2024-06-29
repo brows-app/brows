@@ -128,7 +128,7 @@ namespace Brows.Diagnostics {
                         if (fix == null) {
                             throw;
                         }
-                        var fixd = await fix.Work(process.StartInfo, ex, token);
+                        var fixd = await fix.Work(process.StartInfo, ex, token).ConfigureAwait(false);
                         if (fixd == false) {
                             throw;
                         }
@@ -141,9 +141,9 @@ namespace Brows.Diagnostics {
                     using (var processStream = new ProcessStream(process)) {
                         Stream = processStream;
                         await
-                        process.WaitForExitAsync(token);
+                        process.WaitForExitAsync(token).ConfigureAwait(false);
                         processStream.Complete();
-                        await processStream.Task;
+                        await processStream.Task.ConfigureAwait(false);
                     }
                     try {
                         ExitCode = process.ExitCode;

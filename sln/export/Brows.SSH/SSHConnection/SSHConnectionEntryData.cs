@@ -12,7 +12,7 @@ namespace Brows.SSHConnection {
             }
 
             protected sealed override Task<T> GetValue(SSHConnectionEntry entry, Action<T> progress, CancellationToken token) {
-                if (null == entry) throw new ArgumentNullException(nameof(entry));
+                ArgumentNullException.ThrowIfNull(entry);
                 return Task.FromResult(Func(entry));
             }
         }

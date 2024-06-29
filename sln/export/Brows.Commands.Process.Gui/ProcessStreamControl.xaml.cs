@@ -1,5 +1,5 @@
 ﻿namespace Brows {
-    partial class ProcessStreamControl {
+    sealed partial class ProcessStreamControl {
         public ProcessStreamControl() {
             InitializeComponent();
         }
