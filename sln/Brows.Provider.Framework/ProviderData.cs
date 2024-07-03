@@ -28,14 +28,12 @@ namespace Brows {
         private EntryDataDefinitionSet _Definition;
 
         public static ProviderData Get(IImport import, Type entryType, IReadOnlyCollection<IEntryDataDefinition> entryData) {
-            if (Cache.TryGetValue(entryType, out var value) == false || value.Import != import || value.EntryData != entryData) {
-                lock (Cache) {
-                    if (Cache.TryGetValue(entryType, out value) == false || value.Import != import || value.EntryData != entryData) {
-                        Cache[entryType] = value = new(import, entryType, entryData);
-                    }
+            lock (Cache) {
+                if (Cache.TryGetValue(entryType, out var value) == false || value.Import != import || value.EntryData != entryData) {
+                    Cache[entryType] = value = new(import, entryType, entryData);
                 }
+                return value;
             }
-            return value;
         }
     }
 }

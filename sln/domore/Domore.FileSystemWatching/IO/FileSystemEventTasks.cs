@@ -31,13 +31,13 @@ namespace Domore.IO {
                 return;
             }
             try {
-                await eventLocker.WaitAsync().ConfigureAwait(false);
+                await eventLocker.WaitAsync();
             }
             catch (ObjectDisposedException) {
                 return;
             }
             try {
-                await Task.WhenAll(List.Select(task => task(e))).ConfigureAwait(false);
+                await Task.WhenAll(List.Select(task => task(e)));
             }
             catch (Exception ex) {
                 if (ex is OperationCanceledException canceled) {

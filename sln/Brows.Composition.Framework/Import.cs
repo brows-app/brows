@@ -13,60 +13,51 @@ namespace Brows {
         private readonly Dictionary<Type, Dictionary<PropertyInfo, object>> CachePopulate = [];
 
         private Import Of(Type type) {
-            if (CacheOf.TryGetValue(type, out var value) == false) {
-                lock (CacheOf) {
-                    if (CacheOf.TryGetValue(type, out value) == false) {
-                        CacheOf[type] = value = new Import(Export
-                            .Where(export => export.Implements(type))
-                            .ToList());
-                    }
+            lock (CacheOf) {
+                if (CacheOf.TryGetValue(type, out var value) == false) {
+                    CacheOf[type] = value = new Import(Export
+                        .Where(export => export.Implements(type))
+                        .ToList());
                 }
+                return value;
             }
-            return value;
         }
 
         private Import For(Type type) {
-            if (CacheFor.TryGetValue(type, out var value) == false) {
-                lock (CacheFor) {
-                    if (CacheFor.TryGetValue(type, out value) == false) {
-                        CacheFor[type] = value = new Import(Export
-                            .Where(export => export.Targets(type))
-                            .ToList());
-                    }
+            lock (CacheFor) {
+                if (CacheFor.TryGetValue(type, out var value) == false) {
+                    CacheFor[type] = value = new Import(Export
+                        .Where(export => export.Targets(type))
+                        .ToList());
                 }
+                return value;
             }
-            return value;
         }
 
         private object Get(Type type) {
-            var cache = CacheGet;
-            if (CacheGet.TryGetValue(type, out var value) == false) {
-                lock (CacheGet) {
-                    if (CacheGet.TryGetValue(type, out value) == false) {
-                        CacheGet[type] = value = Of(type)
-                            .Export
-                            .Select(export => export.Instance)
-                            .Where(instance => instance != null)
-                            .FirstOrDefault();
-                    }
+            lock (CacheGet) {
+                if (CacheGet.TryGetValue(type, out var value) == false) {
+                    CacheGet[type] = value = Of(type)
+                        .Export
+                        .Select(export => export.Instance)
+                        .Where(instance => instance != null)
+                        .FirstOrDefault();
                 }
+                return value;
             }
-            return value;
         }
 
         private IReadOnlyList<object> List(Type type) {
-            if (CacheList.TryGetValue(type, out var value) == false) {
-                lock (CacheList) {
-                    if (CacheList.TryGetValue(type, out value) == false) {
-                        CacheList[type] = value = Of(type)
-                            .Export
-                            .Select(export => export.Instance)
-                            .Where(instance => instance != null)
-                            .ToList();
-                    }
+            lock (CacheList) {
+                if (CacheList.TryGetValue(type, out var value) == false) {
+                    CacheList[type] = value = Of(type)
+                        .Export
+                        .Select(export => export.Instance)
+                        .Where(instance => instance != null)
+                        .ToList();
                 }
+                return value;
             }
-            return value;
         }
 
         public IReadOnlyList<Export> Export { get; }
@@ -78,9 +69,9 @@ namespace Brows {
         public void Populate(object obj) {
             var type = obj?.GetType();
             if (type != null) {
-                if (CachePopulate.TryGetValue(type, out var value) == false) {
+                Dictionary<PropertyInfo, object> dict() {
                     lock (CachePopulate) {
-                        if (CachePopulate.TryGetValue(type, out value) == false) {
+                        if (CachePopulate.TryGetValue(type, out var value) == false) {
                             CachePopulate[type] = value = type.GetProperties()
                                 .Where(p =>
                                     p.CanWrite &&
@@ -90,9 +81,10 @@ namespace Brows {
                                     p => p,
                                     p => For(type).Get(p.PropertyType) ?? Get(p.PropertyType));
                         }
+                        return value;
                     }
                 }
-                foreach (var item in value) {
+                foreach (var item in dict()) {
                     item.Key.SetValue(obj, item.Value);
                 }
             }

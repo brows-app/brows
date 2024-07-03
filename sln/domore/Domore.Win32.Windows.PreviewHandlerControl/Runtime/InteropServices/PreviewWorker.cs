@@ -12,12 +12,11 @@ namespace Domore.Runtime.InteropServices {
         private static long ID;
         private static readonly ILog Log = Logging.For(typeof(PreviewWorker));
 
-        private STAThreadPool ThreadPool =>
-            _ThreadPool ?? (
-            _ThreadPool = new STAThreadPool(nameof(PreviewWorker) + "-" + Interlocked.Increment(ref ID)) {
+        private STAThreadPool ThreadPool => _ThreadPool ??=
+            new(nameof(PreviewWorker) + "-" + Interlocked.Increment(ref ID)) {
                 WorkerCountMax = 1,
                 WorkerCountMin = 0
-            });
+            };
         private STAThreadPool _ThreadPool;
 
         private PreviewWorkerCLSID CLSID =>
@@ -25,9 +24,9 @@ namespace Domore.Runtime.InteropServices {
             _CLSID = new PreviewWorkerCLSID(ThreadPool));
         private PreviewWorkerCLSID _CLSID;
 
-        private object State;
-        private PreviewHandlerWrapper Handler;
-        private readonly object Locker = new object();
+        private volatile object State;
+        private volatile PreviewHandlerWrapper Handler;
+        private readonly object Locker = new();
 
         private void Unload() {
             Try(nameof(Handler.Unload), () => Handler?.Unload(), swallow: true);
@@ -67,15 +66,15 @@ namespace Domore.Runtime.InteropServices {
 
         public event PreviewWorkerCLSIDChangedEventHandler CLSIDChanged;
 
-        public async Task Change(RECT? rect, CancellationToken cancellationToken) {
+        public Task Change(RECT? rect, CancellationToken cancellationToken) {
             if (rect == null) {
-                return;
+                return Task.CompletedTask;
             }
             var handler = Handler;
             if (handler == null) {
-                return;
+                return Task.CompletedTask;
             }
-            await ThreadPool.Work(nameof(handler.SetRect), cancellationToken: cancellationToken, work: () => {
+            return ThreadPool.Work(nameof(handler.SetRect), cancellationToken: cancellationToken, work: () => {
                 if (handler != Handler) {
                     return;
                 }
@@ -88,8 +87,8 @@ namespace Domore.Runtime.InteropServices {
             });
         }
 
-        public async Task Unload(CancellationToken cancellationToken) {
-            await ThreadPool.Work(nameof(Unload), cancellationToken: cancellationToken, work: () => {
+        public Task Unload(CancellationToken cancellationToken) {
+            return ThreadPool.Work(nameof(Unload), cancellationToken: cancellationToken, work: () => {
                 lock (Locker) {
                     Unload();
                     ThreadPool.Empty();

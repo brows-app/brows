@@ -124,9 +124,6 @@ namespace Domore.IO {
         public bool EnumerateReparsePoints { get; set; }
 
         public IAsyncEnumerator<FileSystemInfo> GetAsyncEnumerator(CancellationToken cancellationToken) {
-            if (Locked) {
-                throw new LockedException();
-            }
             lock (Locker) {
                 if (Locked) {
                     throw new LockedException();

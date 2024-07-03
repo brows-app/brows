@@ -102,14 +102,12 @@ namespace Brows {
                 }
                 if (topMember != null) {
                     var key = topMember.Name;
-                    if (OverlayCache.TryGetValue(key, out var value) == false) {
-                        lock (OverlayCache) {
-                            if (OverlayCache.TryGetValue(key, out value) == false) {
-                                OverlayCache[key] = value = topMember.GetOverlaySource();
-                            }
+                    lock (OverlayCache) {
+                        if (OverlayCache.TryGetValue(key, out var value) == false) {
+                            OverlayCache[key] = value = topMember.GetOverlaySource();
                         }
+                        return value;
                     }
-                    return value;
                 }
                 return null;
             });

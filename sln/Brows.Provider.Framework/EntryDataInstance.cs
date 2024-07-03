@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Brows {
     internal sealed class EntryDataInstance {
-        private readonly Dictionary<string, IEntryData> Set = new();
+        private readonly Dictionary<string, IEntryData> Set = [];
 
         public IEntryData this[string key] {
             get {

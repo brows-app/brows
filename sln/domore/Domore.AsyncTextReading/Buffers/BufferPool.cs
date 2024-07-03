@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace Domore.Buffers {
     internal abstract class BufferPool {
-        private readonly List<BufferRental> Buffers = new();
+        private readonly List<BufferRental> Buffers = [];
 
         public bool Clear { get; set; }
 
         public BufferSize RentSize {
-            get => _RentSize ?? (_RentSize = new BufferSize());
+            get => _RentSize ??= new BufferSize();
             set => _RentSize = value;
         }
         private BufferSize _RentSize;
@@ -24,7 +24,7 @@ namespace Domore.Buffers {
 
         public abstract class Of<T> : BufferPool {
             public ArrayPool<T> Pool {
-                get => _Pool ?? (_Pool = ArrayPool<T>.Shared);
+                get => _Pool ??= ArrayPool<T>.Shared;
                 set => _Pool = value;
             }
             private ArrayPool<T> _Pool;

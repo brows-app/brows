@@ -8,35 +8,31 @@ namespace Brows {
         private bool Shown;
 
         public bool Show() {
-            if (Shown == false) {
-                lock (Locker) {
-                    if (Shown == false) {
-                        Shown = true;
-                        Alloc = kernel32.AttachConsole(-1)
-                            ? false
-                            : kernel32.AllocConsole();
-                        return true;
-                    }
+            lock (Locker) {
+                if (Shown == false) {
+                    Shown = true;
+                    Alloc = kernel32.AttachConsole(-1)
+                        ? false
+                        : kernel32.AllocConsole();
+                    return true;
                 }
             }
             return false;
         }
 
         public bool Hide() {
-            if (Shown) {
-                lock (Locker) {
-                    if (Shown) {
-                        Shown = false;
-                        if (Alloc) {
-                            Alloc = false;
-                            try {
-                                kernel32.FreeConsole();
-                            }
-                            catch {
-                            }
+            lock (Locker) {
+                if (Shown) {
+                    Shown = false;
+                    if (Alloc) {
+                        Alloc = false;
+                        try {
+                            kernel32.FreeConsole();
                         }
-                        return true;
+                        catch {
+                        }
                     }
+                    return true;
                 }
             }
             return false;

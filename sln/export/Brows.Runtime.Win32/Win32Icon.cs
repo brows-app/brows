@@ -3,6 +3,7 @@ using Domore.Runtime.InteropServices;
 using Domore.Runtime.Win32;
 using Domore.Threading;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -15,12 +16,12 @@ using System.Windows.Media.Imaging;
 namespace Brows {
     public static class Win32Icon {
         private static readonly ILog Log = Logging.For(typeof(Win32Icon));
-        private static readonly Dictionary<string, object> ExtensionCache = [];
-        private static readonly Dictionary<string, Task<object>> ExtensionTasks = [];
         private static readonly SemaphoreSlim ExtensionLock = new(1, 1);
-        private static readonly Dictionary<SHSTOCKICONID, object> StockCache = [];
-        private static readonly Dictionary<SHSTOCKICONID, Task<object>> StockTasks = [];
+        private static readonly Dictionary<string, Task<object>> ExtensionTasks = [];
+        private static readonly ConcurrentDictionary<string, object> ExtensionCache = [];
         private static readonly SemaphoreSlim StockLock = new(1, 1);
+        private static readonly Dictionary<SHSTOCKICONID, Task<object>> StockTasks = [];
+        private static readonly ConcurrentDictionary<SHSTOCKICONID, object> StockCache = [];
 
         private static STAThreadPool ThreadPool =>
             Win32ThreadPool.Common;
@@ -113,7 +114,7 @@ namespace Brows {
             });
         }
 
-        private static async Task<object> Get<TKey>(TKey key, Dictionary<TKey, object> cache, Dictionary<TKey, Task<object>> tasks, SemaphoreSlim locker, Func<CancellationToken, Task<object>> factory, CancellationToken token) {
+        private static async Task<object> Get<TKey>(TKey key, ConcurrentDictionary<TKey, object> cache, Dictionary<TKey, Task<object>> tasks, SemaphoreSlim locker, Func<CancellationToken, Task<object>> factory, CancellationToken token) {
             ArgumentNullException.ThrowIfNull(cache);
             ArgumentNullException.ThrowIfNull(tasks);
             ArgumentNullException.ThrowIfNull(locker);
@@ -122,11 +123,11 @@ namespace Brows {
                 await locker.WaitAsync(token).ConfigureAwait(false);
                 try {
                     if (cache.TryGetValue(key, out value) == false) {
-                        if (tasks.TryGetValue(key, out _) == false) {
-                            tasks[key] = factory(token);
+                        if (tasks.TryGetValue(key, out var task) == false) {
+                            tasks[key] = task = factory(token);
                         }
                         try {
-                            cache[key] = value = await tasks[key].ConfigureAwait(false);
+                            cache[key] = value = await task.ConfigureAwait(false);
                         }
                         catch (Exception ex) {
                             if (Log.Debug()) {

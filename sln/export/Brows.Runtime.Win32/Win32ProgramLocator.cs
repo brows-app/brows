@@ -1,6 +1,6 @@
 ﻿using Domore.Logs;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 namespace Brows {
     public static class Win32ProgramLocator {
         private static readonly ILog Log = Logging.For(typeof(Win32ProgramLocator));
-        private static readonly Dictionary<string, string> Cache = new(StringComparer.OrdinalIgnoreCase);
         private static readonly SemaphoreSlim CacheLocker = new(1, 1);
+        private static readonly ConcurrentDictionary<string, string> Cache = new(StringComparer.OrdinalIgnoreCase);
 
         private static string LocateInDirectory(DirectoryInfo directory, string program) {
             ArgumentNullException.ThrowIfNull(directory);

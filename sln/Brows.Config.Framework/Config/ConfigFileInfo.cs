@@ -21,11 +21,14 @@ namespace Brows.Config {
 
         private Task<TConfig> Configure<TConfig>(CancellationToken token) where TConfig : new() {
             var file = File;
-            if (Locker.TryGetValue(file, out var locker) == false) {
-                Locker[file] = locker = new();
+            var fileLock = default(object);
+            lock (Locker) {
+                if (Locker.TryGetValue(file, out fileLock) == false) {
+                    Locker[file] = fileLock = new();
+                }
             }
             return Task.Run(cancellationToken: token, function: () => {
-                lock (locker) {
+                lock (fileLock) {
                     TConfig config(TConfig target, string file) {
                         for (var i = 0; ; i++) {
                             var err = default(Exception);

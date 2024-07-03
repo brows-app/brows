@@ -79,9 +79,6 @@ namespace Domore.IO {
         }
 
         public async Task<Exception> Run(CancellationToken cancellationToken) {
-            if (Running) {
-                throw new FileSystemNotifierRunningException();
-            }
             lock (Locker) {
                 if (Running) {
                     throw new FileSystemNotifierRunningException();
@@ -111,12 +108,10 @@ namespace Domore.IO {
         }
 
         public bool TryRun(CancellationToken cancellationToken, out Task<Exception> running) {
-            if (Running == false) {
-                lock (Locker) {
-                    if (Running == false) {
-                        running = Run(cancellationToken);
-                        return true;
-                    }
+            lock (Locker) {
+                if (Running == false) {
+                    running = Run(cancellationToken);
+                    return true;
                 }
             }
             running = null;

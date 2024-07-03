@@ -14,7 +14,7 @@ namespace Brows {
         private static readonly ILog Log = Logging.For(typeof(Provider));
 
         private readonly object TokenLocker = new();
-        private CancellationTokenSource TokenSource = new();
+        private volatile CancellationTokenSource TokenSource = new();
 
         private Type EntryType { get; }
         private EntryObservation EntryObservation { get; }

@@ -15,7 +15,7 @@ namespace Domore.IO {
         private static readonly char[] FileSystemTrimChars = [PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar];
 
         private static string Key(string path) {
-            if (null == path) throw new ArgumentNullException(nameof(path));
+            ArgumentNullException.ThrowIfNull(path);
             lock (Keys) {
                 if (Keys.TryGetValue(path, out var key) == false) {
                     Keys[path] = key =
@@ -33,8 +33,9 @@ namespace Domore.IO {
             var key = Key(path);
             lock (Cache) {
                 if (Cache.TryGetValue(key, out var item) == false) {
-                    Cache[key] = item =
-                        new FileSystemEventPath(path) { SynchronizationContext = SynchronizationContext };
+                    Cache[key] = item = new FileSystemEventPath(path) {
+                        SynchronizationContext = SynchronizationContext
+                    };
                     if (Log.Info()) {
                         Log.Info($"{nameof(Add)}[{path}]");
                     }
@@ -85,7 +86,7 @@ namespace Domore.IO {
                 }
             }
         }
-        private static SynchronizationContext _SynchronizationContext;
+        private static volatile SynchronizationContext _SynchronizationContext;
 
         public string Path { get; }
 

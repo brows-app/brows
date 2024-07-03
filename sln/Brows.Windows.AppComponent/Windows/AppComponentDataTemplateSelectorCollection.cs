@@ -7,14 +7,12 @@ namespace Brows.Windows {
 
         public DataTemplateSelector this[string kind] {
             get {
-                if (Dictionary.TryGetValue(kind, out var value) == false) {
-                    lock (Dictionary) {
-                        if (Dictionary.TryGetValue(kind, out value) == false) {
-                            Dictionary[kind] = value = new AppComponentDataTemplateSelector(kind);
-                        }
+                lock (Dictionary) {
+                    if (Dictionary.TryGetValue(kind, out var value) == false) {
+                        Dictionary[kind] = value = new AppComponentDataTemplateSelector(kind);
                     }
+                    return value;
                 }
-                return value;
             }
         }
     }

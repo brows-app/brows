@@ -12,7 +12,7 @@ namespace Brows.SSH {
     internal sealed class SSHClientCache {
         private static readonly ILog Log = Logging.For(typeof(SSHClientCache));
 
-        private readonly Dictionary<BigInteger, SSHClient> Agent = new();
+        private readonly Dictionary<BigInteger, SSHClient> Agent = [];
 
         private static Task<BigInteger> ComputeKey(Uri uri, CancellationToken token) {
             return Task.Run(cancellationToken: token, function: () => {
@@ -28,30 +28,30 @@ namespace Brows.SSH {
         }
 
         private void SSHClient_Disposing(object sender, EventArgs e) {
-            var keys = Agent.Keys.Where(key => Agent[key] == sender).ToList();
-            foreach (var key in keys) {
-                if (Log.Info()) {
-                    Log.Info($"{nameof(Agent.Remove)} > {Agent[key].Uri}");
+            lock (Agent) {
+                var keys = Agent.Keys.Where(key => Agent[key] == sender).ToList();
+                foreach (var key in keys) {
+                    if (Log.Info()) {
+                        Log.Info($"{nameof(Agent.Remove)} > {Agent[key].Uri}");
+                    }
+                    Agent[key].Disposing -= SSHClient_Disposing;
+                    Agent.Remove(key);
                 }
-                Agent[key].Disposing -= SSHClient_Disposing;
-                Agent.Remove(key);
             }
         }
 
         public async Task<SSHClient> GetOrAdd(Uri uri, CancellationToken token) {
             var key = await ComputeKey(uri, token).ConfigureAwait(false);
-            if (Agent.TryGetValue(key, out var value) == false) {
-                lock (Agent) {
-                    if (Agent.TryGetValue(key, out value) == false) {
-                        if (Log.Info()) {
-                            Log.Info($"{nameof(SSHClient.Create)} > {uri}");
-                        }
-                        Agent[key] = value = SSHClient.Create(uri);
-                        Agent[key].Disposing += SSHClient_Disposing;
+            lock (Agent) {
+                if (Agent.TryGetValue(key, out var value) == false) {
+                    if (Log.Info()) {
+                        Log.Info($"{nameof(SSHClient.Create)} > {uri}");
                     }
+                    Agent[key] = value = SSHClient.Create(uri);
+                    Agent[key].Disposing += SSHClient_Disposing;
                 }
+                return value;
             }
-            return value;
         }
     }
 }
