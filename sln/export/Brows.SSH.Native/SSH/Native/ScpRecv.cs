@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Brows.Native;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -19,10 +20,8 @@ namespace Brows.SSH.Native {
         [DllImport(SSHNative.Dll, CallingConvention = SSHNative.Call)]
         private static extern int brows_ssh_ScpRecv_read(IntPtr p, IntPtr buf, nuint buf_len, ref nuint result, ref BrowsCanceler cancel);
 
-        private ConnString PathAlloc =>
-            _PathAlloc ?? (
-            _PathAlloc = Conn.Alloc(Path));
-        private ConnString _PathAlloc;
+        private NativeString PathAlloc => _PathAlloc ??= Conn.Alloc(Path);
+        private NativeString _PathAlloc;
 
         protected sealed override IntPtr Create() {
             return brows_ssh_ScpRecv_create(Conn.GetHandle(), PathAlloc.Handle);
@@ -30,7 +29,8 @@ namespace Brows.SSH.Native {
 
         protected sealed override void Dispose(bool disposing) {
             if (disposing) {
-                PathAlloc.Dispose();
+                using (_PathAlloc) {
+                }
             }
             base.Dispose(disposing);
         }

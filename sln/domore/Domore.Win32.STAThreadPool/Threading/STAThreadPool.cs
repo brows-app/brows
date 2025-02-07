@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.Threading {
-    using Logs;
-
     public sealed class STAThreadPool {
         private static readonly ILog Log = Logging.For(typeof(STAThreadPool));
 

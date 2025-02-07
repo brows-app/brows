@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Domore.Async.TaskCaching" Version="8.2.2.102" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-windows</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Runtime.Win32\Brows.Runtime.Win32.csproj" />
+    <ProjectReference Include="..\Brows.Ftp\Brows.Ftp.csproj" />
+  </ItemGroup>
+</Project>

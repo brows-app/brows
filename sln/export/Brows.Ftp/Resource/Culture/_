@@ -1,0 +1,11 @@
+FtpEntry_Extension                      = Ext
+FtpEntry_Kind                           = Type
+FtpEntry_Length                         = Size
+FtpEntry_Name                           = Name
+FtpEntry_Target                         = Link
+FtpEntry_Time                           = Date
+
+Command_Group_FtpEntryData              = File System
+Command_Group_FtpListingData            = File System
+
+FtpProvider_Prompt_Password             = Enter a password for {0}:

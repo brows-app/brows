@@ -11,7 +11,24 @@ namespace Brows {
 
         private bool Refreshing;
 
-        public Task RefreshComplete { get; set; } = Task.CompletedTask;
+        internal Task RefreshComplete { get; set; } = Task.CompletedTask;
+
+        internal async Task RefreshInternal(CancellationToken token) {
+            if (RefreshComplete == null) {
+                RefreshComplete = Task.Run(cancellationToken: token, action: () => {
+                    if (Log.Debug()) {
+                        Log.Debug(nameof(Refreshing) + " > " + Info);
+                    }
+                    Refreshing = true;
+                    try {
+                    }
+                    finally {
+                        Refreshing = false;
+                    }
+                });
+            }
+            await RefreshComplete;
+        }
 
         public sealed override string ID { get; }
         public sealed override string Name { get; }
@@ -28,23 +45,6 @@ namespace Brows {
             Info = info ?? throw new ArgumentNullException(nameof(info));
             Kind = Info.DriveType;
             Name = ID = Info.Name;
-        }
-
-        public async Task Refresh(CancellationToken token) {
-            if (RefreshComplete == null) {
-                RefreshComplete = Task.Run(cancellationToken: token, action: () => {
-                    if (Log.Debug()) {
-                        Log.Debug(nameof(Refreshing) + " > " + Info);
-                    }
-                    Refreshing = true;
-                    try {
-                    }
-                    finally {
-                        Refreshing = false;
-                    }
-                });
-            }
-            await RefreshComplete;
         }
 
         FileSystemInfo IFileSystemInfo.Info => Info.IsReady

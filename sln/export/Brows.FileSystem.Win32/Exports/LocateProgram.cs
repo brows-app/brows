@@ -8,7 +8,7 @@ namespace Brows.Exports {
             if (set == null) {
                 return false;
             }
-            var result = await Win32ProgramLocator.Locate(program, token).ConfigureAwait(false);
+            var result = await Win32ProgramLocator.Locate(program, token);
             if (result == null) {
                 return false;
             }

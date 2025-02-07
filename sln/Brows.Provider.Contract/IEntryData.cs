@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
@@ -5,7 +6,7 @@ namespace Brows {
         string Key { get; }
         object Value { get; }
         Task Ready { get; }
-        void Refresh();
+        Task Refresh(CancellationToken token);
         int Compare(IEntryData other);
     }
 }

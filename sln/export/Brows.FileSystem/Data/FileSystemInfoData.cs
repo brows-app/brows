@@ -186,12 +186,11 @@ namespace Brows.Data {
                 Func = func ?? throw new ArgumentNullException(nameof(func));
             }
 
-            protected sealed override void RefreshValue(FileSystemEntry entry) {
-                if (entry != null) {
-                    if (entry.FileSystemCache.Result != null) {
-                        entry.FileSystemCache.Refresh();
-                    }
-                }
+            protected sealed override Task RefreshValue(FileSystemEntry entry, CancellationToken token) {
+                return
+                    token.IsCancellationRequested ? Task.FromCanceled(token) :
+                    entry?.FileSystemCache?.Result != null ? entry.FileSystemCache.Refresh(token) :
+                    Task.CompletedTask;
             }
 
             protected sealed override async Task<T> GetValue(FileSystemEntry entry, Action<T> progress, CancellationToken token) {

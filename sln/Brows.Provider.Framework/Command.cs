@@ -240,9 +240,7 @@ namespace Brows {
             return new Context(context, this);
         }
 
-        public override string HelpLine =>
-            _HelpLine ?? (
-            _HelpLine = Cli.Display(new TParameter()).Split([' '], 2).LastOrDefault());
+        public sealed override string HelpLine => _HelpLine ??= Cli.Display(new TParameter()).Split([' '], 2).LastOrDefault();
         private string _HelpLine;
 
         protected virtual TParameter ParameterFactory(string parameter, string conf) {

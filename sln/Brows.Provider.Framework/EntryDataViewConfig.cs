@@ -67,7 +67,7 @@ namespace Brows {
         }
 
         public async Task Init(CancellationToken token) {
-            Data = await Config.Get(Provider.ID, token) ?? new EntryDataViewConfigData {
+            Data = await Config.Get(Provider.ID, token).ConfigureAwait(false) ?? new EntryDataViewConfigData {
                 Keys = Provider.Config.DefaultKeys.ToList(),
                 Sort = Provider.Config.DefaultSorting.ToDictionary(pair => pair.Key, pair => pair.Value)
             };
@@ -112,7 +112,7 @@ namespace Brows {
             }
 
             public async Task<EntryDataViewConfigData> Get(string id, CancellationToken token) {
-                var data = await Cache.Load(token);
+                var data = await Cache.Load(token).ConfigureAwait(false);
                 var dict = data.Set;
                 if (dict.TryGetValue(id, out var value)) {
                     return value;

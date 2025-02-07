@@ -82,11 +82,6 @@ namespace Brows.Native {
             }
         }
 
-        protected SecureString GetSecureString(Func<IntPtr, IntPtr> get) {
-            ArgumentNullException.ThrowIfNull(get);
-            return new SecureString();
-        }
-
         protected void SetSecureString(Func<IntPtr, IntPtr, int> set, SecureString value) {
             ArgumentNullException.ThrowIfNull(set);
             var p = value == null ? IntPtr.Zero : Marshal.SecureStringToGlobalAllocAnsi(value);

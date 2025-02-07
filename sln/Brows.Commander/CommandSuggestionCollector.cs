@@ -27,10 +27,10 @@ namespace Brows {
                 return default;
             }
             try {
-                return await t.ConfigureAwait(false);
+                return await t;
             }
             catch (Exception ex) {
-                if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
+                if (ex is OperationCanceledException && token.IsCancellationRequested) {
                     throw;
                 }
                 if (Log.Warn()) {
@@ -42,7 +42,7 @@ namespace Brows {
 
         private static Task Catch(Task t, CancellationToken token) {
             async Task<object> task() {
-                await t.ConfigureAwait(false);
+                await t;
                 return default;
             }
             return Catch(task(), token);
@@ -68,10 +68,10 @@ namespace Brows {
                         token.ThrowIfCancellationRequested();
                     }
                     if (tasks.Count == 0) break;
-                    var task = await Task.WhenAny(tasks).ConfigureAwait(false);
+                    var task = await Task.WhenAny(tasks);
                     var index = tasks.IndexOf(task);
                     var enumerator = enumerators[index];
-                    var result = await task.ConfigureAwait(false);
+                    var result = await task;
                     if (result) {
                         yield return enumerator.Current;
                         tasks[index] = Catch(Catch(() => enumerator.MoveNextAsync().AsTask()), token);
@@ -85,7 +85,7 @@ namespace Brows {
             }
             finally {
                 disposed.AddRange(enumerators.Select(e => Catch(Catch(() => e.DisposeAsync().AsTask()), token)));
-                await Task.WhenAll(disposed).ConfigureAwait(false);
+                await Task.WhenAll(disposed);
             }
         }
 
@@ -104,7 +104,7 @@ namespace Brows {
             InputSuggestionRelevance = int.MinValue;
             InputSuggestion = null;
             InputSuggestionChanged?.Invoke(this, EventArgs.Empty);
-            await foreach (var suggestion in Suggest(token).ConfigureAwait(false)) {
+            await foreach (var suggestion in Suggest(token)) {
                 if (token.IsCancellationRequested) {
                     token.ThrowIfCancellationRequested();
                 }

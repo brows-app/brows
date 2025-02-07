@@ -45,14 +45,10 @@ namespace Brows {
         public object Stream =>
             new FileSystemStreamGui(this);
 
-        public TaskCache<FileSystemInfo>.WithRefresh FileSystemCache =>
-            _FileSystemCache ?? (
-            _FileSystemCache = new(FileSystemWork));
+        public TaskCache<FileSystemInfo>.WithRefresh FileSystemCache => _FileSystemCache ??= new(FileSystemWork);
         private TaskCache<FileSystemInfo>.WithRefresh _FileSystemCache;
 
-        public TaskCache<IReadOnlyDictionary<string, IMetadataValue>>.WithRefresh MetadataCache =>
-            _MetadataCache ?? (
-            _MetadataCache = new(MetadataWork));
+        public TaskCache<IReadOnlyDictionary<string, IMetadataValue>>.WithRefresh MetadataCache => _MetadataCache ??= new(MetadataWork);
         private TaskCache<IReadOnlyDictionary<string, IMetadataValue>>.WithRefresh _MetadataCache;
 
         public string Extension { get; }
@@ -90,14 +86,14 @@ namespace Brows {
             }
         }
 
-        public void Refresh(bool delayed) {
+        public async Task Refresh(bool delayed, CancellationToken token) {
             if (Log.Debug()) {
                 Log.Debug(Log.Join(nameof(Refresh), nameof(delayed), delayed, ID));
             }
             if (delayed) {
                 try {
                     var lastWriteTime = Info.LastWriteTimeUtc;
-                    var currentWriteTime = File.GetLastWriteTimeUtc(Info.FullName);
+                    var currentWriteTime = await Task.Run(() => File.GetLastWriteTimeUtc(Info.FullName), token);
                     if (currentWriteTime == lastWriteTime) {
                         if (Log.Debug()) {
                             Log.Debug(Log.Join(nameof(currentWriteTime), ID));
@@ -116,7 +112,7 @@ namespace Brows {
             else {
                 NotifyPropertyChanged(nameof(Stream));
             }
-            Refresh();
+            await Refresh(token);
         }
     }
 }

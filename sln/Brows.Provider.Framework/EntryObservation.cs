@@ -15,7 +15,7 @@ namespace Brows {
         private static readonly PropertyChangedEventArgs ObservedEvent = new(nameof(Observed));
         private static readonly PropertyChangedEventArgs SelectedEvent = new(nameof(Selected));
 
-        private readonly List<IEntry> SortingList = new();
+        private readonly List<IEntry> SortingList = [];
 
         private void Controller_CurrentEntryChanged(object sender, EventArgs e) {
             CurrentChanged?.Invoke(this, e);
@@ -70,7 +70,7 @@ namespace Brows {
 
         private EntryObservationSource _Collection;
 
-        protected async Task Add(IEnumerable<IEntry> items, int count) {
+        protected async Task Add(IEnumerable<IEntry> items, int count, CancellationToken token) {
             if (items == null) return;
             if (count == 0) return;
             var chunkSize = Provider.Config.Observe.Add.Size;
@@ -83,7 +83,7 @@ namespace Brows {
                 }
                 else {
                     if (chunkDelay > 0) {
-                        await Task.Delay(chunkDelay, Provider.Token);
+                        await Task.Delay(chunkDelay, token);
                     }
                 }
                 var sorted = default(IEnumerable<Task>);
@@ -112,7 +112,7 @@ namespace Brows {
             }
         }
 
-        protected async Task Remove(IEnumerable<IEntry> items, int count) {
+        protected async Task Remove(IEnumerable<IEntry> items, int count, CancellationToken token) {
             if (items == null) return;
             if (count == 0) return;
             var current = Controller?.CurrentEntry();
@@ -132,7 +132,7 @@ namespace Brows {
                     }
                 }
                 if (chunkDelay > 0) {
-                    await Task.Delay(chunkDelay, Provider.Token);
+                    await Task.Delay(chunkDelay, token);
                 }
                 ObservedChanged?.Invoke(this, EventArgs.Empty);
             }
@@ -224,8 +224,8 @@ namespace Brows {
             Collection.End();
         }
 
-        public async Task Init(CancellationToken token) {
-            await DataView.Init(token);
+        public Task Init(CancellationToken token) {
+            return DataView.Init(token);
         }
 
         bool IProviderFocus.Set() {
@@ -327,9 +327,9 @@ namespace Brows {
             SetName.Clear();
         }
 
-        public async Task Add(IReadOnlyCollection<TEntry> items) {
-            if (items == null) return;
-            if (items.Count == 0) return;
+        public Task Add(IReadOnlyCollection<TEntry> items, CancellationToken token) {
+            if (items == null) return Task.CompletedTask;
+            if (items.Count == 0) return Task.CompletedTask;
             foreach (var item in items) {
                 if (item is not null) {
                     List.Add(item);
@@ -337,12 +337,12 @@ namespace Brows {
                     SetName[item.Name] = item;
                 }
             }
-            await Add(items.Cast<IEntry>(), items.Count);
+            return Add(items.Cast<IEntry>(), items.Count, token);
         }
 
-        public async Task Remove(IReadOnlyCollection<TEntry> items) {
-            if (items == null) return;
-            if (items.Count == 0) return;
+        public Task Remove(IReadOnlyCollection<TEntry> items, CancellationToken token) {
+            if (items == null) return Task.CompletedTask;
+            if (items.Count == 0) return Task.CompletedTask;
             if (items == List) {
                 items = new List<TEntry>(items);
                 List.Clear();
@@ -358,7 +358,7 @@ namespace Brows {
                     }
                 }
             }
-            await Remove(items.Cast<IEntry>(), items.Count);
+            return Remove(items.Cast<IEntry>(), items.Count, token);
         }
 
         public TEntry LookupID(string value) {

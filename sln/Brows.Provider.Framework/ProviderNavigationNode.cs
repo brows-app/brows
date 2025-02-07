@@ -18,8 +18,8 @@ namespace Brows {
         private bool AddingChildren;
         private readonly ObservableCollection<ProviderNavigationNode> ChildCollection = new();
 
-        private TaskCache<object>.WithRefresh IconCache => _IconCache ??= new(GetIcon);
-        private TaskCache<object>.WithRefresh _IconCache;
+        private TaskCache<object> IconCache => _IconCache ??= new(GetIcon);
+        private TaskCache<object> _IconCache;
 
         private void Controller_Loaded(object sender, EventArgs e) {
             if (AddedChildren) {
@@ -64,14 +64,14 @@ namespace Brows {
         }
 
         private void Collapsed(bool @private) {
-            IconCache.Refresh();
-            Icon = null;
+            _IconCache = null;
+            _Icon = null;
             Collapsed();
         }
 
         private void Expanded(bool @private) {
-            IconCache.Refresh();
-            Icon = null;
+            _IconCache = null;
+            _Icon = null;
             if (AddedChildren == false && AddingChildren == false) {
                 AddChildren();
             }
@@ -138,7 +138,8 @@ namespace Brows {
                 if (_Icon == null) {
                     async void load() {
                         try {
-                            Icon = await IconCache.Ready(Token).ConfigureAwait(false);
+                            _Icon = await IconCache.Ready(Token).ConfigureAwait(false);
+                            NotifyPropertyChanged(nameof(Icon));
                         }
                         catch (Exception ex) {
                             if (Log.Warn()) {
@@ -149,9 +150,6 @@ namespace Brows {
                     load();
                 }
                 return _Icon;
-            }
-            private set {
-                Change(ref _Icon, value, nameof(Icon));
             }
         }
         private object _Icon;

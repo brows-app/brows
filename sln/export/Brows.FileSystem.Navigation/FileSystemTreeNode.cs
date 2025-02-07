@@ -37,10 +37,10 @@ namespace Brows {
             }
         }
 
-        protected override void Expanded() {
+        protected sealed override void Expanded() {
             if (Info is DirectoryInfo directory) {
                 try {
-                    FileSystemEvent = FileSystemEvent ?? FileSystemEventTasks.Add(directory.FullName, async e => {
+                    FileSystemEvent = FileSystemEvent ?? FileSystemEventTasks.Add(directory.FullName, token: Token, task: (e, t) => {
                         switch (e?.ChangeType) {
                             case WatcherChangeTypes.Created:
                             case WatcherChangeTypes.Deleted:
@@ -48,7 +48,7 @@ namespace Brows {
                                 Refresh();
                                 break;
                         }
-                        await Task.CompletedTask;
+                        return Task.CompletedTask;
                     });
                 }
                 catch (Exception ex) {
@@ -59,7 +59,7 @@ namespace Brows {
             }
         }
 
-        protected override bool PartOf(string id) {
+        protected sealed override bool PartOf(string id) {
             if (Info == null) {
                 return true;
             }

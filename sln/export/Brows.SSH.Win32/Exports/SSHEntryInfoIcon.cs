@@ -7,20 +7,15 @@ using System.Threading.Tasks;
 
 namespace Brows.Exports {
     internal sealed class SSHEntryInfoIcon : ISSHEntryInfoIcon {
-        public async Task<bool> Work(SSHFileInfo sshEntryInfo, Action<object> set, CancellationToken token) {
-            if (null == sshEntryInfo) return false;
+        public async Task<bool> Work(SSHFileInfo info, Action<object> set, CancellationToken token) {
+            if (null == info) return false;
             if (null == set) return false;
-            switch (sshEntryInfo.Kind) {
-                case SSHEntryKind.File:
-                    set(await Win32Icon.Load(Path.GetExtension(sshEntryInfo.Name), token));
-                    break;
-                case SSHEntryKind.Directory:
-                    set(await Win32Icon.Load(SHSTOCKICONID.FOLDER, token));
-                    break;
-                default:
-                    set(await Win32Icon.Load(SHSTOCKICONID.DOCNOASSOC, token));
-                    break;
-            }
+            var task = info.Kind switch {
+                SSHEntryKind.File => Win32Icon.Load(Path.GetExtension(info.Name), token),
+                SSHEntryKind.Directory => Win32Icon.Load(SHSTOCKICONID.FOLDER, token),
+                _ => Win32Icon.Load(SHSTOCKICONID.DOCNOASSOC, token)
+            };
+            set(await task.ConfigureAwait(false));
             return true;
         }
     }

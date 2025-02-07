@@ -3,12 +3,12 @@ using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Brows.SSH.Native {
-    public sealed class ConnString : CriticalFinalizerObject, IDisposable {
-        private byte[] Bytes => _Bytes ?? (_Bytes = Encoding.GetBytes(String));
+namespace Brows.Native {
+    public sealed class NativeString : CriticalFinalizerObject, IDisposable {
+        private byte[] Bytes => _Bytes ??= Encoding.GetBytes(String + '\0');
         private byte[] _Bytes;
 
-        private GCHandle Pin => _Pin ?? (_Pin = GCHandle.Alloc(Bytes, GCHandleType.Pinned)).Value;
+        private GCHandle Pin => _Pin ??= GCHandle.Alloc(Bytes, GCHandleType.Pinned);
         private GCHandle? _Pin;
 
         private void Dispose(bool disposing) {
@@ -17,13 +17,13 @@ namespace Brows.SSH.Native {
             }
         }
 
-        public IntPtr Handle => _Handle ?? (_Handle = Pin.AddrOfPinnedObject()).Value;
+        public IntPtr Handle => _Handle ??= Pin.AddrOfPinnedObject();
         private IntPtr? _Handle;
 
-        public Encoding Encoding { get; }
         public string String { get; }
+        public Encoding Encoding { get; }
 
-        public ConnString(Encoding encoding, string @string) {
+        public NativeString(Encoding encoding, string @string) {
             Encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
             String = @string;
         }
@@ -33,7 +33,7 @@ namespace Brows.SSH.Native {
             GC.SuppressFinalize(this);
         }
 
-        ~ConnString() {
+        ~NativeString() {
             Dispose(false);
         }
     }

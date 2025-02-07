@@ -24,16 +24,14 @@ namespace Brows.Data {
                 var value = 0L;
                 progress(value);
                 try {
-                    return await Task
-                        .Run(cancellationToken: token, function: () => {
-                            var items = directory.EnumerateFileSystemInfos(SearchPattern, EnumerationOptions);
-                            foreach (var item in items) {
-                                token.ThrowIfCancellationRequested();
-                                progress(value += Data(item));
-                            }
-                            return value;
-                        })
-                        .ConfigureAwait(false);
+                    return await Task.Run(cancellationToken: token, function: () => {
+                        var items = directory.EnumerateFileSystemInfos(SearchPattern, EnumerationOptions);
+                        foreach (var item in items) {
+                            token.ThrowIfCancellationRequested();
+                            progress(value += Data(item));
+                        }
+                        return value;
+                    });
                 }
                 catch {
                     progress(null);

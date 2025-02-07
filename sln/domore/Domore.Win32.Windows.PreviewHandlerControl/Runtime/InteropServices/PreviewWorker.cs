@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Domore.Logs;
+using Domore.Runtime.Win32;
+using Domore.Threading;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.Runtime.InteropServices {
-    using Logs;
-    using Threading;
-    using Win32;
-
-    internal class PreviewWorker {
+    internal sealed class PreviewWorker {
         private static long ID;
         private static readonly ILog Log = Logging.For(typeof(PreviewWorker));
 

@@ -107,7 +107,7 @@ namespace Brows.Commands {
         private async Task Read(ChannelReader<FoundInInfo[]> reader, IOperationProgress progress, CancellationToken token) {
             ArgumentNullException.ThrowIfNull(reader);
             var read = reader.ReadAllAsync(token);
-            await foreach (var item in read.ConfigureAwait(false)) {
+            await foreach (var item in read) {
                 if (token.IsCancellationRequested) {
                     token.ThrowIfCancellationRequested();
                 }
@@ -140,10 +140,10 @@ namespace Brows.Commands {
 
         public async Task Done(IOperationProgress progress, CancellationToken token) {
             try {
-                await Work(progress, token).ConfigureAwait(false);
+                await Work(progress, token);
             }
             catch (Exception ex) {
-                if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
+                if (ex is OperationCanceledException && token.IsCancellationRequested) {
                     Result.Canceled = true;
                 }
                 else {

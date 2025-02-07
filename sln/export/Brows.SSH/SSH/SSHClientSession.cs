@@ -16,9 +16,7 @@ namespace Brows.SSH {
 
         private readonly SemaphoreSlim Locker = new(1, 1);
 
-        private TaskCache<Conn>.WithRefresh Conn =>
-            _Conn ?? (
-            _Conn = new TaskCache<Conn>.WithRefresh(Connect));
+        private TaskCache<Conn>.WithRefresh Conn => _Conn ??= new TaskCache<Conn>.WithRefresh(Connect);
         private TaskCache<Conn>.WithRefresh _Conn;
 
         private async Task Lock(CancellationToken token) {
@@ -271,7 +269,7 @@ namespace Brows.SSH {
                             .Run(conn.Dispose, CancellationToken.None)
                             .ConfigureAwait(false);
                     }
-                    Conn.Refresh();
+                    await Conn.Refresh(CancellationToken.None).ConfigureAwait(false);
                     Connected = false;
                     return Disposed = true;
                 });

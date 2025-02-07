@@ -27,7 +27,7 @@ namespace Brows.Exports {
                     dict[item.Description] = item;
                 }
                 return dict;
-            }).ConfigureAwait(false);
+            });
             foreach (var key in metadata) {
                 if (dict.TryGetValue(key.PropertyDescription, out var value)) {
                     values[key] = new MetadataValue {

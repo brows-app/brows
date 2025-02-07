@@ -51,7 +51,7 @@ brows_ERROR brows_ssh_KnownHost_init(brows_ssh_KnownHost* p, struct libssh2_know
             }
             errno_t err = strncpy_s(p->key_base64, len + 1, s->key, len);
             if (err) {
-                brows_LOG_ERROR("strncpy_s (key) > %d", err);
+                brows_LOG_ERROR("strncpy_s (key) > %" PRId32, err);
                 brows_ssh_KnownHost_destroy(p);
                 return brows_ssh_ERROR_STRNCPY_S;
             }
@@ -66,7 +66,7 @@ brows_ERROR brows_ssh_KnownHost_init(brows_ssh_KnownHost* p, struct libssh2_know
             }
             errno_t err = strncpy_s(p->name_plain, len + 1, s->name, len);
             if (err) {
-                brows_LOG_ERROR("strncpy_s (name) > %d", err);
+                brows_LOG_ERROR("strncpy_s (name) > %" PRId32, err);
                 brows_ssh_KnownHost_destroy(p);
                 return brows_ssh_ERROR_STRNCPY_S;
             }

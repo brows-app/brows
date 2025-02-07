@@ -45,7 +45,7 @@ namespace Domore.IO {
                     await writer.WriteAsync(e, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex) {
-                    if (ex is OperationCanceledException canceled && canceled.CancellationToken == cancellationToken) {
+                    if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested) {
                         writer.TryComplete();
                     }
                     else {

@@ -3,6 +3,6 @@
         <NoWarn>CS8981</NoWarn>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Domore.Logs" Version="8.2.1.101" />
+      <PackageReference Include="Domore.Logs" Version="9.7.0" />
     </ItemGroup>
 </Project>

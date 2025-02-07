@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Domore.Threading {
-    using Logs;
-
-    internal class STAThreadContext {
+    internal sealed class STAThreadContext {
         private static readonly ILog Log = Logging.For(typeof(STAThreadContext));
 
         private SynchronizationContext Sync;
@@ -90,7 +89,7 @@ namespace Domore.Threading {
             }
         }
 
-        public override string ToString() {
+        public sealed override string ToString() {
             return Name;
         }
     }

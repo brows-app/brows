@@ -25,14 +25,14 @@ namespace Brows {
 
         protected sealed override async Task Begin(CancellationToken token) {
             await foreach (var item in List(token)) {
-                await Provide(item);
+                await Provide(item, token);
             }
         }
 
         protected sealed override async Task Refresh(CancellationToken token) {
-            await Revoke(Provided);
+            await Revoke(Provided, token);
             await foreach (var item in List(token)) {
-                await Provide(item);
+                await Provide(item, token);
             }
         }
 

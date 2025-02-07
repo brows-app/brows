@@ -1,6 +1,6 @@
-﻿namespace Brows.Commands {
-    using Exports;
+﻿using Brows.Exports;
 
+namespace Brows.Commands {
     public abstract class MoveIO : WorkIO<IMoveProvidedIO> {
     }
 }

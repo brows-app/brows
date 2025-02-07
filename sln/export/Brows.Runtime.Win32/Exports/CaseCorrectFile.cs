@@ -8,7 +8,7 @@ namespace Brows.Exports {
             if (set == null) {
                 return false;
             }
-            var result = await Win32Path.GetCasing(file, token).ConfigureAwait(false);
+            var result = await Win32Path.GetCasing(file, token);
             set(result);
             return true;
         }

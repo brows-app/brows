@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class PanelCollection : Notifier, IPanelCollection, IControlled<IPanelCollectionController> {
-        private readonly List<Panel> List = new();
+        private readonly List<Panel> List = [];
         private readonly PanelHistoryShared SharedHistory = new();
 
         private void Activating(Panel panel) {
@@ -167,6 +167,10 @@ namespace Brows {
                 List[i].Column = i;
             }
             return await Task.FromResult(true);
+        }
+
+        public IList<Panel> ToList() {
+            return List.ToList();
         }
 
         public IEnumerator<Panel> GetEnumerator() {

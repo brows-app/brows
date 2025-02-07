@@ -20,12 +20,12 @@ namespace Brows {
         }
 
         protected sealed override async Task Begin(CancellationToken token) {
-            await Provide(await List(token));
+            await Provide(await List(token), token);
         }
 
         protected sealed override async Task Refresh(CancellationToken token) {
-            await Revoke(Provided);
-            await Provide(await List(token));
+            await Revoke(Provided, token);
+            await Provide(await List(token), token);
         }
 
         protected sealed override async Task<bool> Take(IMessage message, CancellationToken token) {
@@ -46,13 +46,13 @@ namespace Brows {
                                         }
                                     }
                                     if (info != null) {
-                                        await Provide(new DriveEntry(this, info));
+                                        await Provide(new DriveEntry(this, info), token);
                                     }
                                     break;
                                 case DeviceChangeKind.RemovalComplete:
                                     var entry = Provided.FirstOrDefault(e => e.Char == drive);
                                     if (entry != null) {
-                                        await Revoke(entry);
+                                        await Revoke(entry, token);
                                     }
                                     break;
                             }

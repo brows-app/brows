@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Domore.Logs;
+using Domore.Text;
+using System;
 using System.Buffers;
 using System.Text;
 
 namespace Domore.IO {
-    using Logs;
-    using Text;
-
     internal class StreamTextReader {
         private static readonly ILog Log = Logging.For(typeof(StreamTextReader));
 
@@ -72,8 +71,8 @@ namespace Domore.IO {
                             Decoder.Convert(span, writer, flush: false, out var charsUsed, out var complete);
                             CharsUsed += charsUsed;
                             BytesUsed += spanLength;
-                            if (Log.Info()) {
-                                Log.Info($"{EncodingName} {nameof(BytesUsed)}[{BytesUsed}]{nameof(CharsUsed)}[{CharsUsed}]{nameof(complete)}[{complete}]");
+                            if (Log.Debug()) {
+                                Log.Debug($"{EncodingName} {nameof(BytesUsed)}[{BytesUsed}]{nameof(CharsUsed)}[{CharsUsed}]{nameof(complete)}[{complete}]");
                             }
                         }
                     }

@@ -91,7 +91,7 @@ namespace Domore.IO {
                     if (error is null) {
                         return null;
                     }
-                    if (error is OperationCanceledException canceled && canceled.CancellationToken == cancellationToken) {
+                    if (error is OperationCanceledException && cancellationToken.IsCancellationRequested) {
                         if (Log.Info()) {
                             Log.Info($"{nameof(OperationCanceledException)}[{Path}]");
                         }

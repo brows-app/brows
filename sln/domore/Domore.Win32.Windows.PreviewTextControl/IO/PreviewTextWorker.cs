@@ -31,7 +31,7 @@ namespace Domore.IO {
                 });
             }
             catch (Exception ex) {
-                if (ex is OperationCanceledException canceled && canceled.CancellationToken == cancellationToken) {
+                if (ex is OperationCanceledException canceled && cancellationToken.IsCancellationRequested) {
                     if (Log.Info()) {
                         Log.Info($"{nameof(canceled)}[{source}]");
                     }

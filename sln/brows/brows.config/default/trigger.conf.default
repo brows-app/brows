@@ -86,3 +86,6 @@ cmd[FileSystem_NativeDetail]        .press[ALT+ENTER]           = *
 cmd[FileSystem_Rename]              .input                      = rename
 cmd[FileSystem_Rename]              .press[F2]                  = *
 cmd[FileSystem_Zip]                 .input                      = zip
+
+cmd[Ftp_ViewRaw]                    .input                      = raw|r
+cmd[Ftp_ViewRaw]                    .press[ALT+V]               = *

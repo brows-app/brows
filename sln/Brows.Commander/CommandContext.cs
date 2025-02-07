@@ -249,19 +249,19 @@ namespace Brows {
                 : HasGesture(out var gesture)
                     ? gesture.Display()
                     : nameof(Operate);
-            @operator.Operate(name, async (operationProgress, cancellationToken) => {
+            @operator.Operate(name, async (progress, token) => {
                 var w = false;
-                var t = task?.Invoke(operationProgress, cancellationToken);
+                var t = task?.Invoke(progress, token);
                 if (t != null) {
-                    w = await t;
+                    w = await t.ConfigureAwait(false);
                 }
             });
             return true;
         }
 
         public bool ShowPalette(ICommandPaletteConfig config) {
-            return Operate(async (progress, token) => {
-                return await Commander.ShowPalette(Source, config, token);
+            return Operate((progress, token) => {
+                return Commander.ShowPalette(Source, config, token);
             });
 
         }

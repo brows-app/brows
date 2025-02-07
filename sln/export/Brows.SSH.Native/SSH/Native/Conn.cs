@@ -173,7 +173,7 @@ namespace Brows.SSH.Native {
         }
 
         public Encoding Encoding {
-            get => _Encoding ?? (_Encoding = Encoding.UTF8);
+            get => _Encoding ??= Encoding.UTF8;
             set => _Encoding = value;
         }
         private Encoding _Encoding;
@@ -214,8 +214,8 @@ namespace Brows.SSH.Native {
             })));
         }
 
-        public ConnString Alloc(string s) {
-            return new ConnString(Encoding, s);
+        public NativeString Alloc(string s) {
+            return new NativeString(Encoding, s);
         }
 
         public bool AuthSuccess() {

@@ -14,7 +14,7 @@ namespace Brows {
         IExportResourceKey ResourceKey { get; }
         Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken token);
         int CompareValue(IEntry x, IEntry y);
-        void RefreshValue(IEntry entry);
+        Task RefreshValue(IEntry entry, CancellationToken token);
         Task<bool> SuggestKey(ICommandContext context, CancellationToken token);
     }
 }

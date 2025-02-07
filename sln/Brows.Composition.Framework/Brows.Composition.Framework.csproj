@@ -2,8 +2,8 @@
     <PropertyGroup>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Domore.Async.TaskCaching" Version="8.2.1.101" />
-        <PackageReference Include="Domore.Logs" Version="8.2.1.101" />
+        <PackageReference Include="Domore.Async.TaskCaching" Version="9.7.0" />
+        <PackageReference Include="Domore.Logs" Version="9.7.0" />
         <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
         <PackageReference Include="System.ComponentModel.Composition.Registration" Version="8.0.0" />
     </ItemGroup>

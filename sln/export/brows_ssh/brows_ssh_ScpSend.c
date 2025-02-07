@@ -33,7 +33,7 @@ static brows_ERROR brows_ssh_ScpSend_channel_factory(brows_ssh_Chan* p, LIBSSH2_
             }
             continue;
         }
-        brows_LOG_ERROR("libssh2_scp_send > %d", err_num);
+        brows_LOG_ERROR("libssh2_scp_send > %" PRId32, err_num);
 
         char* err_msg = NULL;
         libssh2_session_last_error(session, &err_msg, NULL, 0);
@@ -82,10 +82,10 @@ brows_ERROR brows_ssh_ScpSend_write(brows_ssh_ScpSend* p, const char* buf, size_
                 }
                 continue;
             }
-            brows_LOG_ERROR("libssh2_channel_write > %d", written);
+            brows_LOG_ERROR("libssh2_channel_write > %" PRIdPTR, written);
             return brows_ERROR_libssh2_channel_write;
         }
-        brows_LOG_DEBUG("libssh2_channel_write > %d", written);
+        brows_LOG_DEBUG("libssh2_channel_write > %" PRIdPTR, written);
         p->writ = written + p->writ;
         *result = written;
         return brows_ERROR_NONE;

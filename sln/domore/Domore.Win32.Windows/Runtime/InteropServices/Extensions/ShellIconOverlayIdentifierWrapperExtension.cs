@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Domore.Logs;
+using Domore.Runtime.Win32;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 
 namespace Domore.Runtime.InteropServices.Extensions {
-    using Logs;
-    using Win32;
-
     public static class ShellIconOverlayIdentifierWrapperExtension {
         private static readonly ILog Log = Logging.For(typeof(ShellIconOverlayIdentifierWrapperExtension));
 

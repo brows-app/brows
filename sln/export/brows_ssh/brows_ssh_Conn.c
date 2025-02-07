@@ -70,7 +70,7 @@ static brows_ERROR brows_ssh_Conn_set_fingerprint(brows_ssh_Conn* p, brows_ssh_F
     }
     errno_t err = memcpy_s(fingerprint, size, v, size);
     if (err) {
-        brows_LOG_ERROR("memcpy_s > %d", err);
+        brows_LOG_ERROR("memcpy_s > %" PRId32, err);
         return brows_ERROR_SSH_MEMCPY_S;
     }
     p->fingerprint = fingerprint;
@@ -121,7 +121,7 @@ brows_ERROR brows_ssh_Conn_wait_socket(brows_ssh_Conn* p, brows_Canceler* cancel
     for (;;) {
         int result = select((int)(socket + 1), fd_read, fd_write, NULL, &timeout);
         if (result == SOCKET_ERROR) {
-            brows_LOG_ERROR("brows_ssh_Conn_wait_socket select error > %d", WSAGetLastError());
+            brows_LOG_ERROR("brows_ssh_Conn_wait_socket select error > %" PRId32, WSAGetLastError());
             return brows_ERROR_brows_ssh_Conn_wait_socket_error;
         }
         if (result != 0) {
@@ -146,10 +146,10 @@ void brows_ssh_Conn_destroy(brows_ssh_Conn* p) {
                 int session_free_err = libssh2_session_free(p->session);
                 if (0 > session_free_err) {
                     if (LIBSSH2_ERROR_EAGAIN == session_free_err) {
-                        brows_LOG_DEBUG("libssh2_session_free > %d", session_free_err);
+                        brows_LOG_DEBUG("libssh2_session_free > %" PRId32, session_free_err);
                         continue;
                     }
-                    brows_LOG_ERROR("libssh2_session_free > %d", session_free_err);
+                    brows_LOG_ERROR("libssh2_session_free > %" PRId32, session_free_err);
                 }
                 break;
             }
@@ -187,13 +187,13 @@ brows_ERROR brows_ssh_Conn_connect(brows_ssh_Conn* p, brows_Canceler* cancel) {
     WSADATA wsadata;
     int wsastartup_err = WSAStartup(MAKEWORD(2, 0), &wsadata);
     if (wsastartup_err) {
-        brows_LOG_ERROR("WSAStartup > %d", wsastartup_err);
+        brows_LOG_ERROR("WSAStartup > %" PRId32, wsastartup_err);
         return brows_ERROR_WSASTARTUP;
     }
 
     p->socket = socket(p->host_family, SOCK_STREAM, 0);
     if (INVALID_SOCKET == p->socket) {
-        brows_LOG_ERROR("socket > %d", WSAGetLastError());
+        brows_LOG_ERROR("socket > %" PRId32, WSAGetLastError());
         brows_ssh_Conn_close(p, cancel);
         return brows_ERROR_SOCKET;
     }
@@ -205,7 +205,7 @@ brows_ERROR brows_ssh_Conn_connect(brows_ssh_Conn* p, brows_Canceler* cancel) {
 
     int connected = connect(p->socket, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in));
     if (connected == SOCKET_ERROR) {
-        brows_LOG_ERROR("connect > %d", WSAGetLastError());
+        brows_LOG_ERROR("connect > %" PRId32, WSAGetLastError());
         brows_ssh_Conn_close(p, cancel);
         return brows_ERROR_CONNECT;
     }
@@ -274,13 +274,13 @@ brows_ERROR brows_ssh_Conn_close(brows_ssh_Conn* p, brows_Canceler* cancel) {
                     if (LIBSSH2_ERROR_EAGAIN == session_disconnect_err) {
                         brows_ERROR wait_socket_err = brows_ssh_Conn_wait_socket(p, cancel);
                         if (wait_socket_err) {
-                            brows_LOG_ERROR("brows_ssh_Conn_wait_socket > %d", wait_socket_err);
+                            brows_LOG_ERROR("brows_ssh_Conn_wait_socket > %" PRId32, wait_socket_err);
                             break;
                         }
-                        brows_LOG_DEBUG("libssh2_session_disconnect > %d", session_disconnect_err);
+                        brows_LOG_DEBUG("libssh2_session_disconnect > %" PRId32, session_disconnect_err);
                         continue;
                     }
-                    brows_LOG_ERROR("libssh2_session_disconnect > %d", session_disconnect_err);
+                    brows_LOG_ERROR("libssh2_session_disconnect > %" PRId32, session_disconnect_err);
                 }
                 break;
             }
@@ -290,13 +290,13 @@ brows_ERROR brows_ssh_Conn_close(brows_ssh_Conn* p, brows_Canceler* cancel) {
                     if (LIBSSH2_ERROR_EAGAIN == session_free_err) {
                         brows_ERROR wait_socket_err = brows_ssh_Conn_wait_socket(p, cancel);
                         if (wait_socket_err) {
-                            brows_LOG_ERROR("brows_ssh_Conn_wait_socket > %d", wait_socket_err);
+                            brows_LOG_ERROR("brows_ssh_Conn_wait_socket > %" PRId32, wait_socket_err);
                             break;
                         }
-                        brows_LOG_DEBUG("libssh2_session_free > %d", session_free_err);
+                        brows_LOG_DEBUG("libssh2_session_free > %" PRId32, session_free_err);
                         continue;
                     }
-                    brows_LOG_ERROR("libssh2_session_free > %d", session_free_err);
+                    brows_LOG_ERROR("libssh2_session_free > %" PRId32, session_free_err);
                 }
                 break;
             }
@@ -304,12 +304,12 @@ brows_ERROR brows_ssh_Conn_close(brows_ssh_Conn* p, brows_Canceler* cancel) {
         if (p->socket != INVALID_SOCKET) {
             int closesocket_err = closesocket(p->socket);
             if (closesocket_err == SOCKET_ERROR) {
-                brows_LOG_ERROR("closesocket > %d", WSAGetLastError());
+                brows_LOG_ERROR("closesocket > %" PRId32, WSAGetLastError());
             }
         }
         int cleanup_err = WSACleanup();
         if (cleanup_err == SOCKET_ERROR) {
-            brows_LOG_ERROR("WSACleanup > %d", WSAGetLastError());
+            brows_LOG_ERROR("WSACleanup > %" PRId32, WSAGetLastError());
         }
         p->socket = INVALID_SOCKET;
         p->session = NULL;

@@ -31,7 +31,7 @@ namespace Brows {
                             return path;
                         }
                     });
-                return await work.ConfigureAwait(false);
+                return await work;
             }
             catch (Exception ex) {
                 if (Log.Warn()) {

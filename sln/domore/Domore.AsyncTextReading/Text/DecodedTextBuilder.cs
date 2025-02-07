@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,11 +41,41 @@ namespace Domore.Text {
             return Complete(cancellationToken);
         }
 
+        internal static DecodedTextBuilder Combine(IEnumerable<DecodedTextBuilder> builders) {
+            return new Aggregate(builders);
+        }
+
         protected abstract Task Clear(CancellationToken cancellationToken);
         protected abstract Task Add(ReadOnlyMemory<char> memory, CancellationToken cancellationToken);
 
         protected virtual Task Complete(CancellationToken cancellationToken) {
             return Task.CompletedTask;
+        }
+
+        private sealed class Aggregate : DecodedTextBuilder {
+            private Task All(Func<DecodedTextBuilder, CancellationToken, Task> task, CancellationToken cancellationToken) {
+                if (null == task) throw new ArgumentNullException(nameof(task));
+                return Task.WhenAll(List.Select(item => task(item, cancellationToken)));
+            }
+
+            protected sealed override Task Clear(CancellationToken cancellationToken) {
+                return All((i, ct) => i.Clear(ct), cancellationToken);
+            }
+
+            protected sealed override Task Add(ReadOnlyMemory<char> memory, CancellationToken cancellationToken) {
+                return All((i, ct) => i.Add(memory, ct), cancellationToken);
+            }
+
+            protected sealed override Task Complete(CancellationToken cancellationToken) {
+                return All((i, ct) => i.Complete(ct), cancellationToken);
+            }
+
+            public IReadOnlyList<DecodedTextBuilder> List { get; }
+
+            public Aggregate(IEnumerable<DecodedTextBuilder> items) {
+                if (null == items) throw new ArgumentNullException(nameof(items));
+                List = items.Where(item => item != null).ToList();
+            }
         }
     }
 }

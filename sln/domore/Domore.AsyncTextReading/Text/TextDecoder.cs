@@ -27,8 +27,8 @@ namespace Domore.Text {
         }
 
         private TextDecoderStates Complete(TextDecoderStates state, Exception exception = null) {
-            if (Log.Info()) {
-                Log.Info($"{nameof(Complete)}[{EncodingName}][{state}]");
+            if (Log.Debug()) {
+                Log.Debug($"{nameof(Complete)}[{EncodingName}][{state}]");
             }
             Event = null;
             Exception = exception;

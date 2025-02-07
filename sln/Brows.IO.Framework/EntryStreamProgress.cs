@@ -30,24 +30,17 @@ namespace Brows {
                 kind: OperationProgressKind.FileSize);
             try {
                 for (; ; ) {
-                    if (token.IsCancellationRequested) {
-                        token.ThrowIfCancellationRequested();
-                    }
-                    var read = await source.ReadAsync(buffer, 0, buffer.Length, token);
+                    var read = await source.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
                     if (read == 0) {
                         break;
                     }
-                    if (token.IsCancellationRequested) {
-                        token.ThrowIfCancellationRequested();
-                    }
-                    await destination.WriteAsync(buffer, 0, read, token);
+                    await destination.WriteAsync(buffer, 0, read, token).ConfigureAwait(false);
                     progress.Change(read);
                 }
             }
             finally {
                 pool.Return(buffer);
             }
-            await Task.CompletedTask;
         }
     }
 }

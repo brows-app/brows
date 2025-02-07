@@ -101,21 +101,23 @@ namespace Brows {
             Ready = ready;
         }
 
-        protected sealed override void RefreshValue(DriveEntry entry) {
+        protected sealed override Task RefreshValue(DriveEntry entry, CancellationToken token) {
+            if (token.IsCancellationRequested) {
+                return Task.FromCanceled(token);
+            }
             entry.RefreshComplete = null;
+            return Task.CompletedTask;
         }
 
         protected override async Task<T> GetValue(DriveEntry entry, Action<T> progress, CancellationToken token) {
-            await entry.Refresh(token).ConfigureAwait(false);
-            return await Task
-                .Run(cancellationToken: token, function: () => {
-                    var info = entry.Info;
-                    if (info.IsReady || Ready == false) {
-                        return Func(info);
-                    }
-                    return default;
-                })
-                .ConfigureAwait(false);
+            await entry.RefreshInternal(token).ConfigureAwait(false);
+            return await Task.Run(cancellationToken: token, function: () => {
+                var info = entry.Info;
+                if (info.IsReady || Ready == false) {
+                    return Func(info);
+                }
+                return default;
+            });
         }
     }
 }

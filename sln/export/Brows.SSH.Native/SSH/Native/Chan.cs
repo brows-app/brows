@@ -21,7 +21,7 @@ namespace Brows.SSH.Native {
         private static extern int brows_ssh_Chan_ready(IntPtr p, ref BrowsCanceler cancel);
 
         public Encoding Encoding {
-            get => _Encoding ?? (_Encoding = Encoding.UTF8);
+            get => _Encoding ??= Encoding.UTF8;
             set => _Encoding = value;
         }
         private Encoding _Encoding;

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Brows.Provider.Gui\Brows.Provider.Gui.csproj" />
+    <ProjectReference Include="..\Brows.Ftp\Brows.Ftp.csproj" />
+  </ItemGroup>
+</Project>

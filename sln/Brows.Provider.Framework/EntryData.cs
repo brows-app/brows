@@ -158,8 +158,8 @@ namespace Brows {
             }
         }
 
-        void IEntryData.Refresh() {
-            Definition.RefreshValue(Entry);
+        async Task IEntryData.Refresh(CancellationToken token) {
+            await Definition.RefreshValue(Entry, token);
             ReadyTask = null;
             Ready = false;
         }

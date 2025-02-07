@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Brows.Exports;
+using System;
+using System.Collections;
+using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Data {
-    using Brows;
-    using Exports;
-    using System.Collections;
-    using System.Globalization;
-    using System.Linq;
-
     internal sealed class FileSystemMetaData : EntryDataDefinition<FileSystemEntry, FileSystemMetaData.MetadataValue> {
         public sealed override string Name =>
             Definition.Name;
@@ -31,12 +29,11 @@ namespace Brows.Data {
             return null;
         }
 
-        protected sealed override void RefreshValue(FileSystemEntry entry) {
-            if (entry != null) {
-                if (entry.MetadataCache.Result != null) {
-                    entry.MetadataCache.Refresh();
-                }
-            }
+        protected sealed override Task RefreshValue(FileSystemEntry entry, CancellationToken token) {
+            return
+                token.IsCancellationRequested ? Task.FromCanceled(token) :
+                entry?.MetadataCache?.Result != null ? entry.MetadataCache.Refresh(token) :
+                Task.CompletedTask;
         }
 
         public IMetadataDefinition Definition { get; }

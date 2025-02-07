@@ -30,7 +30,7 @@ namespace Brows {
                 return image != null;
             }
             catch (Exception ex) {
-                if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
+                if (ex is OperationCanceledException && token.IsCancellationRequested) {
                     if (Log.Debug()) {
                         Log.Debug(nameof(OperationCanceledException));
                     }

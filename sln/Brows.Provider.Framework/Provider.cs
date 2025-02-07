@@ -26,11 +26,14 @@ namespace Brows {
             EntryObservation.Provider = this;
         }
 
-        private async Task Begin(CancellationToken token, bool begun) {
+        private Task Begin(CancellationToken token, bool begun) {
+            if (token.IsCancellationRequested) {
+                return Task.FromCanceled(token);
+            }
             if (begun) {
                 Navigation?.Provided(this);
             }
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         private void End(bool ended) {
@@ -40,12 +43,28 @@ namespace Brows {
             }
         }
 
+        private CancellationTokenSource LinkedTokenSource(CancellationToken other, out CancellationToken token) {
+            var t = Token;
+            if (t == other) {
+                token = t;
+                return null;
+            }
+            if (CancellationToken.None == other) {
+                token = t;
+                return null;
+            }
+            var
+            source = CancellationTokenSource.CreateLinkedTokenSource(t, other);
+            token = source.Token;
+            return source;
+        }
+
         internal IPanel Panel { get; set; }
         internal IImport Import { get; set; }
 
         internal EntryConfig Config {
-            get => _Config ??= new();
-            set => _Config = value;
+            get => _Config ?? throw new InvalidOperationException("Entry config is null.");
+            private set => _Config = value;
         }
         private EntryConfig _Config;
 
@@ -55,20 +74,25 @@ namespace Brows {
         internal IEnumerable Selection =>
             EntryObservation.Selected;
 
-        internal virtual async Task Init(CancellationToken token) {
-            if (Panel.HasProvider(out Provider previous)) {
-                var navigation = previous.Navigation;
-                if (navigation != null) {
-                    Navigation = navigation.For(this);
+        internal virtual Task Init(CancellationToken token) {
+            using (LinkedTokenSource(token, out var t)) {
+                if (t.IsCancellationRequested) {
+                    return Task.FromCanceled(t);
                 }
-                var detail = previous.Detail;
-                if (detail != null) {
-                    foreach (var key in detail.Keys) {
-                        Detail[key] = detail[key]?.For(this);
+                if (Panel.HasProvider(out Provider previous)) {
+                    var navigation = previous.Navigation;
+                    if (navigation != null) {
+                        Navigation = navigation.For(this);
+                    }
+                    var detail = previous.Detail;
+                    if (detail != null) {
+                        foreach (var key in detail.Keys) {
+                            Detail[key] = detail[key]?.For(this);
+                        }
                     }
                 }
             }
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         protected virtual IReadOnlyCollection<IEntryDataDefinition> DataDefinition =>
@@ -125,7 +149,7 @@ namespace Brows {
             if (panel == null) {
                 return null;
             }
-            return await panel.GetSecret(promptFormat, promptArgs, token);
+            return await panel.GetSecret(promptFormat, promptArgs, token).ConfigureAwait(false);
         }
 
         public string ID { get; }
@@ -148,7 +172,7 @@ namespace Brows {
         public async Task<bool> Change(string id, CancellationToken token) {
             var panel = Panel;
             if (panel == null) return false;
-            return await panel.Provide(id, token);
+            return await panel.Provide(id, token).ConfigureAwait(false);
         }
 
         public void Dispose() {
@@ -166,19 +190,36 @@ namespace Brows {
         IEntryDataDefinitionSet IProvider.Data =>
             Data.Definition;
 
-        Task IProvider.Refresh(CancellationToken token) {
-            return Refresh(token);
+        async Task IProvider.Refresh(CancellationToken token) {
+            using (LinkedTokenSource(token, out var t)) {
+                var task = Refresh(t);
+                if (task != null) {
+                    await task.ConfigureAwait(false);
+                }
+            }
         }
 
-        Task<bool> IProvider.Take(IMessage message, CancellationToken token) {
-            return Take(message, token);
+        async Task<bool> IProvider.Take(IMessage message, CancellationToken token) {
+            using (LinkedTokenSource(token, out var t)) {
+                var task = Take(message, t);
+                if (task != null) {
+                    return await task.ConfigureAwait(false);
+                }
+                return false;
+            }
         }
 
-        Task<bool> IProvider.Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
+        async Task<bool> IProvider.Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(Drop), ID));
             }
-            return Drop(data, progress, token);
+            using (LinkedTokenSource(token, out var t)) {
+                var task = Drop(data, progress, t);
+                if (task != null) {
+                    return await task.ConfigureAwait(false);
+                }
+                return false;
+            }
         }
 
         TExport IProvider.Import<TExport>() {
@@ -202,16 +243,14 @@ namespace Brows {
                 await Begin(token);
                 await Begin(token, begun: true);
             }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) {
+                if (Log.Debug()) {
+                    Log.Debug(Log.Join(nameof(Begin), nameof(OperationCanceledException), ID));
+                }
+            }
             catch (Exception ex) {
-                if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
-                    if (Log.Debug()) {
-                        Log.Debug(Log.Join(nameof(Begin), nameof(OperationCanceledException), ID));
-                    }
-                    else {
-                        if (Log.Error()) {
-                            Log.Error(nameof(Begin), ID, ex);
-                        }
-                    }
+                if (Log.Error()) {
+                    Log.Error(nameof(Begin), ID, ex);
                 }
             }
         }
@@ -232,28 +271,6 @@ namespace Brows {
             End(ended: false);
             End();
             End(ended: true);
-        }
-
-        async void IProvider.Refresh() {
-            if (Log.Info()) {
-                Log.Info(Log.Join(nameof(Refresh), ID));
-            }
-            var token = Token;
-            try {
-                await Refresh(Token);
-            }
-            catch (Exception ex) {
-                if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
-                    if (Log.Debug()) {
-                        Log.Debug(Log.Join(nameof(Refresh), nameof(OperationCanceledException), ID));
-                    }
-                }
-                else {
-                    if (Log.Error()) {
-                        Log.Error(nameof(Refresh), ID, ex);
-                    }
-                }
-            }
         }
 
         public abstract class Of<TEntry> : Provider where TEntry : Entry {
@@ -281,28 +298,36 @@ namespace Brows {
             protected virtual void Removing(IReadOnlyCollection<TEntry> entries) {
             }
 
-            protected async Task Provide(IReadOnlyCollection<TEntry> entries) {
+            protected async Task Provide(IReadOnlyCollection<TEntry> entries, CancellationToken token) {
                 if (entries == null) throw new ArgumentNullException(nameof(entries));
                 if (entries.Count > 0) {
                     Adding(entries);
-                    await EntryObservation.Add(entries);
+                    using (LinkedTokenSource(token, out var t)) {
+                        await EntryObservation.Add(entries, t);
+                    }
                 }
             }
 
-            protected async Task Provide(TEntry entry) {
-                await Provide(new[] { entry });
+            protected async Task Provide(TEntry entry, CancellationToken token) {
+                using (LinkedTokenSource(token, out var t)) {
+                    await Provide([entry], t);
+                }
             }
 
-            protected async Task Revoke(IReadOnlyCollection<TEntry> entries) {
+            protected async Task Revoke(IReadOnlyCollection<TEntry> entries, CancellationToken token) {
                 if (entries == null) throw new ArgumentNullException(nameof(entries));
                 if (entries.Count > 0) {
                     Removing(entries);
-                    await EntryObservation.Remove(entries);
+                    using (LinkedTokenSource(token, out var t)) {
+                        await EntryObservation.Remove(entries, t);
+                    }
                 }
             }
 
-            protected async Task Revoke(TEntry entry) {
-                await Revoke(new[] { entry });
+            protected async Task Revoke(TEntry entry, CancellationToken token) {
+                using (LinkedTokenSource(token, out var t)) {
+                    await Revoke([entry], t);
+                }
             }
 
             protected TEntry Lookup(string id = null, string name = null) {
@@ -325,26 +350,31 @@ namespace Brows {
             }
 
             public abstract class With<TConfig> : Of<TEntry> where TConfig : EntryConfig, new() {
+                private readonly IConfig<TConfig> ConfigFile;
+
+                private protected With(string id, int initialCapacity, IEqualityComparer<string> compareID, IEqualityComparer<string> compareName) : base(id, initialCapacity, compareID, compareName) {
+                    ConfigFile = Configure.File<TConfig>();
+                    base.Config = Config = ConfigFile.Loaded;
+                }
+
                 internal sealed override async Task Init(CancellationToken token) {
-                    await
-                    base.Init(token);
-                    base.Config = Config = await Configure.File<TConfig>().Load(token);
-                    await EntryObservation.Init(token);
+                    await base.Init(token).ConfigureAwait(false);
+                    using (LinkedTokenSource(token, out var t)) {
+                        base.Config = (Config ??= await ConfigFile.Load(t).ConfigureAwait(false));
+                        await EntryObservation.Init(t).ConfigureAwait(false);
+                    }
                 }
 
                 protected new TConfig Config { get; private set; }
-
-                protected With(string id, int initialCapacity, IEqualityComparer<string> compareID, IEqualityComparer<string> compareName) : base(id, initialCapacity, compareID, compareName) {
-                }
             }
         }
     }
 
     public abstract class Provider<TEntry, TConfig> : Provider.Of<TEntry>.With<TConfig> where TEntry : Entry where TConfig : EntryConfig, new() {
-        public Provider(string id, int initialCapacity, IEqualityComparer<string> compareID, IEqualityComparer<string> compareName) : base(id, initialCapacity, compareID, compareName) {
+        protected Provider(string id, int initialCapacity, IEqualityComparer<string> compareID, IEqualityComparer<string> compareName) : base(id, initialCapacity, compareID, compareName) {
         }
 
-        public Provider(string id) : this(id, 0, null, null) {
+        protected Provider(string id) : this(id, 0, null, null) {
         }
     }
 }

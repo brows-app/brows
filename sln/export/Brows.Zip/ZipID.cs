@@ -34,9 +34,7 @@ namespace Brows {
         }
         private string _Parent;
 
-        public string FullName =>
-            _FullName ?? (
-            _FullName = $"{ArchivePath.FullName}>{RelativePath.Normalized}");
+        public string FullName => _FullName ??= $"{ArchivePath.FullName}>{RelativePath.Normalized}";
         private string _FullName;
 
         public ZipArchivePath ArchivePath { get; }

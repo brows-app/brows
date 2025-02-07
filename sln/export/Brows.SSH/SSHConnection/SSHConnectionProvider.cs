@@ -120,11 +120,11 @@ namespace Brows.SSHConnection {
         private async Task Authenticate(CancellationToken token) {
             var auth = await Auth(token);
             if (auth == null) {
-                await Provide(new SSHConnectionEntry(this, order: EntryOrder++, kind: nameof(UserCanceled), data: null, task: UserCanceled));
+                await Provide(new SSHConnectionEntry(this, order: EntryOrder++, kind: nameof(UserCanceled), data: null, task: UserCanceled), token);
                 return;
             }
             if (auth == false) {
-                await Provide(new SSHConnectionEntry(this, order: EntryOrder++, kind: nameof(BadCredential), data: null, task: BadCredential));
+                await Provide(new SSHConnectionEntry(this, order: EntryOrder++, kind: nameof(BadCredential), data: null, task: BadCredential), token);
                 return;
             }
             await Task.Delay(500, token);
@@ -132,7 +132,7 @@ namespace Brows.SSHConnection {
         }
 
         private async Task<bool> UserCanceled(CancellationToken token) {
-            await Revoke(Provided);
+            await Revoke(Provided, token);
             await Authenticate(token);
             return true;
         }
@@ -143,13 +143,13 @@ namespace Brows.SSHConnection {
         }
 
         private async Task<bool> BadCredential(CancellationToken token) {
-            await Revoke(Provided);
+            await Revoke(Provided, token);
             await Authenticate(token);
             return true;
         }
 
         private async Task<bool> AcceptFingerprintTemporarily(CancellationToken token) {
-            await Revoke(Provided);
+            await Revoke(Provided, token);
             await Authenticate(token);
             return true;
         }
@@ -180,7 +180,7 @@ namespace Brows.SSHConnection {
                         new SSHConnectionEntry(this, order: EntryOrder++, kind: nameof(client.HostFingerprint), data: client, task: null),
                         //new SSHConnectionEntry(this, order: EntryOrder++, kind: nameof(AcceptFingerprintPermanently), data: null, task: AcceptFingerprintPermanently),
                         new SSHConnectionEntry(this, order: EntryOrder++, kind: nameof(AcceptFingerprintTemporarily), data: null, task: AcceptFingerprintTemporarily)
-                    });
+                    }, token);
                     return;
                 default:
                     throw new InvalidOperationException($"Not implemented [{nameof(SSHKnownHostStatus)}.{knownHost.Status}]");

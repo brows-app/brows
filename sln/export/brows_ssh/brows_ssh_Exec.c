@@ -22,14 +22,14 @@ static brows_ERROR brows_ssh_Exec_channel_factory(brows_ssh_Chan* p, LIBSSH2_CHA
         }
         int open_session_err = libssh2_session_last_errno(session);
         if (open_session_err == LIBSSH2_ERROR_EAGAIN) {
-            brows_LOG_DEBUG("libssh2_channel_open_session > %d", open_session_err);
+            brows_LOG_DEBUG("libssh2_channel_open_session > %" PRId32, open_session_err);
             brows_ERROR wait_socket_err = brows_ssh_Conn_wait_socket(p->conn, cancel);
             if (wait_socket_err) {
                 return wait_socket_err;
             }
             continue;
         }
-        brows_LOG_ERROR("libssh2_channel_open_session > %d", open_session_err);
+        brows_LOG_ERROR("libssh2_channel_open_session > %" PRId32, open_session_err);
 
         char* open_session_err_msg = NULL;
         libssh2_session_last_error(session, &open_session_err_msg, NULL, 0);
@@ -67,7 +67,7 @@ brows_ERROR brows_ssh_Exec_read(brows_ssh_Exec* p, int stream_id, char* buf, siz
                 }
                 continue;
             }
-            brows_LOG_ERROR("libssh2_channel_read_ex > %d", read);
+            brows_LOG_ERROR("libssh2_channel_read_ex > %" PRIdPTR, read);
             return brows_ERROR_libssh2_channel_read_ex;
         }
         *result = (size_t)read;

@@ -1,9 +1,10 @@
 #include "brows_ssh_internal.h"
+#include <inttypes.h>
 
 brows_ERROR brows_ssh_init(void) {
     int rc = libssh2_init(0);
     if (rc) {
-        brows_LOG_ERROR("libssh2_init error > %d", rc);
+        brows_LOG_ERROR("libssh2_init error > %" PRId32, rc);
         return brows_ssh_ERROR_LIBSSH2_INIT;
     }
     return brows_ERROR_NONE;

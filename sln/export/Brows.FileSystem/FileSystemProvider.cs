@@ -30,7 +30,7 @@ namespace Brows {
             return null;
         }
 
-        private async Task ThisEventTask(FileSystemEventArgs e) {
+        private async Task ThisEventTask(FileSystemEventArgs e, CancellationToken token) {
             if (Log.Debug()) {
                 Log.Debug(nameof(ThisEventTask), ID, e?.ChangeType, e?.FullPath);
             }
@@ -53,7 +53,7 @@ namespace Brows {
                     if (createdEntry == null) {
                         var createdInfo = await FileSystemTask.Existing(createdID, Token);
                         if (createdInfo != null) {
-                            await Provide(new FileSystemEntry(this, createdInfo));
+                            await Provide(new FileSystemEntry(this, createdInfo), token);
                         }
                     }
                     break;
@@ -63,7 +63,7 @@ namespace Brows {
                     }
                     var deletedEntry = Lookup(name: e.Name);
                     if (deletedEntry != null) {
-                        await Revoke(deletedEntry);
+                        await Revoke(deletedEntry, token);
                     }
                     break;
                 case WatcherChangeTypes.Renamed:
@@ -74,14 +74,14 @@ namespace Brows {
                     if (r != null) {
                         var oldEntry = Lookup(name: r.OldName);
                         if (oldEntry != null) {
-                            await Revoke(oldEntry);
+                            await Revoke(oldEntry, token);
                         }
                         var newID = e.FullPath;
                         var newEntry = Lookup(id: newID);
                         if (newEntry == null) {
                             var newInfo = await FileSystemTask.Existing(newID, Token);
                             if (newInfo != null) {
-                                await Provide(new FileSystemEntry(this, newInfo));
+                                await Provide(new FileSystemEntry(this, newInfo), token);
                             }
                         }
                     }
@@ -89,7 +89,7 @@ namespace Brows {
             }
         }
 
-        private async Task ParentEventTask(FileSystemEventArgs e) {
+        private async Task ParentEventTask(FileSystemEventArgs e, CancellationToken token) {
             if (Log.Debug()) {
                 Log.Debug(nameof(ParentEventTask), ID, e?.ChangeType, e?.FullPath);
             }
@@ -103,7 +103,7 @@ namespace Brows {
                         var isThisDir = Directory.Name.Equals(oldName, CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
                         if (isThisDir) {
                             var newPath = PATH.Combine(Parent, e.Name);
-                            await Change(newPath, Token);
+                            await Change(newPath, token);
                             return;
                         }
                     }
@@ -113,7 +113,7 @@ namespace Brows {
                     if (name != null) {
                         var isThisDir = Directory.Name.Equals(name, CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
                         if (isThisDir) {
-                            var exists = await FileSystemTask.ExistingDirectory(Directory.FullName, Token);
+                            var exists = await FileSystemTask.ExistingDirectory(Directory.FullName, token);
                             if (exists != null) {
                                 return;
                             }
@@ -231,16 +231,16 @@ namespace Brows {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(Begin), ID));
             }
-            ThisEvent = FileSystemEventTasks.Add(ID, ThisEventTask);
+            ThisEvent = FileSystemEventTasks.Add(ID, ThisEventTask, token);
             ParentEvent = Parent != null && Parent != Drives.ID && (await FileSystemTask.ExistingDirectory(Parent, token) != null)
-                ? FileSystemEventTasks.Add(Parent, ParentEventTask)
+                ? FileSystemEventTasks.Add(Parent, ParentEventTask, token)
                 : null;
             var delay = Math.Max(0, Config.ProvideDelay);
             var reader = FileSystemReader.Read(Directory, info => new FileSystemEntry(this, info), token);
             await reader.Wait(delay, token);
-            await Provide(reader.Existing());
+            await Provide(reader.Existing(), token);
             await foreach (var item in reader.Remaining(token)) {
-                await Provide(item);
+                await Provide(item, token);
             }
         }
 
@@ -254,13 +254,13 @@ namespace Brows {
                 var id = info.FullName;
                 if (ids.TryGetValue(id, out var entry)) {
                     ids.Remove(id);
-                    entry.Refresh(delayed: false);
+                    await entry.Refresh(delayed: false, token);
                 }
                 else {
-                    await Provide(new FileSystemEntry(this, info));
+                    await Provide(new FileSystemEntry(this, info), token);
                 }
             }
-            await Revoke(ids.Values);
+            await Revoke(ids.Values, token);
         }
 
         public object Entry =>

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
     public sealed class ZipArchiveFileEvent {
-        private readonly List<Func<Task>> Tasks = [];
+        private readonly List<Func<CancellationToken, Task>> Tasks = [];
 
         internal void Clear() {
             lock (Tasks) {
@@ -13,25 +14,25 @@ namespace Brows {
             }
         }
 
-        public void Add(Func<Task> task) {
+        public void Add(Func<CancellationToken, Task> task) {
             ArgumentNullException.ThrowIfNull(task);
             lock (Tasks) {
                 Tasks.Add(task);
             }
         }
 
-        public bool Remove(Func<Task> task) {
+        public bool Remove(Func<CancellationToken, Task> task) {
             lock (Tasks) {
                 return Tasks.Remove(task);
             }
         }
 
-        public async Task All() {
-            var tasks = new List<Func<Task>>();
+        public Task All(CancellationToken token) {
+            var tasks = new List<Func<CancellationToken, Task>>();
             lock (Tasks) {
                 tasks.AddRange(Tasks);
             }
-            await Task.WhenAll(tasks.Select(task => task()));
+            return Task.WhenAll(tasks.Select(task => task(token)));
         }
     }
 }

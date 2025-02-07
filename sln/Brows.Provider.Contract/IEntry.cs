@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Brows {
     public interface IEntry {
         event EntryDropEventHandler Drop;
@@ -10,6 +13,6 @@ namespace Brows {
         string Name { get; }
         bool Select { get; set; }
 
-        void Refresh();
+        Task Refresh(CancellationToken token);
     }
 }

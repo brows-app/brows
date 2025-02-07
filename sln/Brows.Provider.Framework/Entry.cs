@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     public abstract class Entry : Notifier, IEntry, ICommandSourceObject {
@@ -35,7 +36,10 @@ namespace Brows {
         protected virtual void Selected(bool select) {
         }
 
-        protected virtual void Refreshed() {
+        protected virtual Task Refreshed(CancellationToken token) {
+            return token.IsCancellationRequested
+                ? Task.FromCanceled(token)
+                : Task.CompletedTask;
         }
 
         public IEntryData this[string key] =>
@@ -55,9 +59,9 @@ namespace Brows {
         }
         private bool _Select;
 
-        public void Refresh() {
-            DataInstance.Refresh();
-            Refreshed();
+        public async Task Refresh(CancellationToken token) {
+            await DataInstance.Refresh(token);
+            await Refreshed(token);
             RefreshedEvent?.Invoke(this, new EntryRefreshedEventArgs());
         }
 

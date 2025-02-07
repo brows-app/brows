@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows">
+  <DataTemplate x:Key="FtpEntry_Name">
+    <brows:EntryNameGrid Text="{Binding Item[Name]}" Icon="{Binding Item[Icon]}"/>
+  </DataTemplate>
+
+  <DataTemplate x:Key="PanelProvider_FtpProvider">
+    <local:FtpProviderControl/>
+  </DataTemplate>
+</ResourceDictionary>

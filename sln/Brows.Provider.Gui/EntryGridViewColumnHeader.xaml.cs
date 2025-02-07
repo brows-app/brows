@@ -3,9 +3,7 @@ using System.Windows;
 
 namespace Brows {
     partial class EntryGridViewColumnHeader {
-        private static ITranslation Translate =>
-            _Translate ?? (
-            _Translate = Translation.Global);
+        private static ITranslation Translate => _Translate ??= Translation.Global;
         private static ITranslation _Translate;
 
         private IEnumerable<string> ResourceKeys() {

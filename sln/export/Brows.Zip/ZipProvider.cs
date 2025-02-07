@@ -1,4 +1,5 @@
-﻿using Domore.IO;
+﻿using Brows.Exports;
+using Domore.IO;
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
@@ -7,40 +8,38 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows {
-    using Exports;
-
     internal sealed class ZipProvider : Provider<ZipEntry, ZipConfig> {
         private static readonly ILog Log = Logging.For(typeof(ZipProvider));
 
-        private async Task ZipFileDeleted() {
+        private async Task ZipFileDeleted(CancellationToken token) {
             var directory = Zip.File.Directory;
             for (; ; ) {
                 if (directory == null) {
-                    await Change(Drives.ID, Token);
+                    await Change(Drives.ID, token);
                     return;
                 }
-                var existing = await FileSystemTask.ExistingDirectory(directory.FullName, Token);
+                var existing = await FileSystemTask.ExistingDirectory(directory.FullName, token);
                 if (existing != null) {
-                    await Change(existing.FullName, Token);
+                    await Change(existing.FullName, token);
                     return;
                 }
                 directory = directory.Parent;
             }
         }
 
-        private async Task ZipFileChanged() {
-            await Refresh(Token);
+        private Task ZipFileChanged(CancellationToken token) {
+            return Refresh(token);
         }
 
-        private async Task<IReadOnlyList<ZipEntry>> List(CancellationToken cancellationToken) {
-            var entryInfo = await Zip.EntryInfo(cancellationToken);
+        private async Task<IReadOnlyList<ZipEntry>> List(CancellationToken token) {
+            var entryInfo = await Zip.EntryInfo(token);
             return entryInfo
                 .Select(info => new ZipEntry(this, info))
                 .ToList();
         }
 
-        protected sealed override async Task Begin(CancellationToken cancellationToken) {
-            await Provide(await List(cancellationToken));
+        protected sealed override async Task Begin(CancellationToken token) {
+            await Provide(await List(token), token);
             Zip.FileChanged.Add(ZipFileChanged);
             Zip.FileDeleted.Add(ZipFileDeleted);
         }
@@ -51,14 +50,14 @@ namespace Brows {
             Zip.Release();
         }
 
-        protected sealed override async Task Refresh(CancellationToken cancellationToken) {
-            var entries = await List(cancellationToken);
-            await Revoke(Provided);
-            await Provide(entries);
+        protected sealed override async Task Refresh(CancellationToken token) {
+            var entries = await List(token);
+            await Revoke(Provided, token);
+            await Provide(entries, token);
         }
 
-        protected sealed override async Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken cancellationToken) {
-            return await Zip.ArchivePath.Drop(data, progress, cancellationToken);
+        protected sealed override Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
+            return Zip.ArchivePath.Drop(data, progress, token);
         }
 
         public ZipID Zip { get; }

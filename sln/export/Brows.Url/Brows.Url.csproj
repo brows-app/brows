@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\..\Brows.Security.Framework\Brows.Security.Framework.csproj" />
+      <ProjectReference Include="..\..\domore\Domore.AsyncTextReading\Domore.AsyncTextReading.csproj" />
+      <ProjectReference Include="..\Brows.Url.Native\Brows.Url.Native.csproj" />
+    </ItemGroup>
+</Project>

@@ -8,8 +8,9 @@ namespace Brows.Commands {
             if (active is not Panel panel) {
                 return false;
             }
-            panel.Refresh();
-            return true;
+            return context.Operate((progress, token) => {
+                return panel.Refresh(token);
+            });
         }
     }
 }

@@ -28,14 +28,14 @@ static brows_ERROR brows_ssh_ScpRecv_channel_factory(brows_ssh_Chan* p, LIBSSH2_
         }
         int err_num = libssh2_session_last_errno(session);
         if (err_num == LIBSSH2_ERROR_EAGAIN) {
-            brows_LOG_DEBUG("libssh2_scp_recv2 > %d", err_num);
+            brows_LOG_DEBUG("libssh2_scp_recv2 > %" PRId32, err_num);
             brows_ERROR wait_socket_err = brows_ssh_Conn_wait_socket(p->conn, cancel);
             if (wait_socket_err) {
                 return wait_socket_err;
             }
             continue;
         }
-        brows_LOG_ERROR("libssh2_scp_recv2 > %d", err_num);
+        brows_LOG_ERROR("libssh2_scp_recv2 > %" PRId32, err_num);
 
         char* err_msg = NULL;
         libssh2_session_last_error(session, &err_msg, NULL, 0);

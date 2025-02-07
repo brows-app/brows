@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Domore.Logs;
+using Domore.Runtime.InteropServices;
+using Domore.Runtime.Win32;
+using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Domore.Windows.Controls {
-    using Logs;
-    using Runtime.InteropServices;
-    using Runtime.Win32;
-    using System.Threading.Tasks;
-
     partial class PreviewHandlerControl {
         private static readonly ILog Log = Logging.For(typeof(PreviewHandlerControl));
 

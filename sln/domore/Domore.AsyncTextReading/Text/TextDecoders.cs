@@ -10,8 +10,8 @@ namespace Domore.Text {
         private static readonly ILog Log = Logging.For(typeof(TextDecoders));
 
         private List<TextDecoder> Encoders(SequenceUpdater<byte> byteSequence) {
-            if (Log.Info()) {
-                Log.Info($"{nameof(Encoders)}[{string.Join(",", Encoding)}]");
+            if (Log.Debug()) {
+                Log.Debug($"{nameof(Encoders)}[{string.Join(",", Encoding)}]");
             }
             return Encoding
                 .Select(e => new TextDecoder(
@@ -40,8 +40,8 @@ namespace Domore.Text {
         private IReadOnlyDictionary<string, string> _EncodingFallback;
 
         public async Task<DecodedText> Decode(SequenceUpdater<byte> byteSequence, CancellationToken cancellationToken) {
-            if (Log.Info()) {
-                Log.Info(nameof(Decode));
+            if (Log.Debug()) {
+                Log.Debug(nameof(Decode));
             }
             var running = Encoders(byteSequence);
             var success = new List<DecodedText>(running.Count);
@@ -49,8 +49,8 @@ namespace Domore.Text {
             for (; ; ) {
                 if (running.Count == 0) {
                     if (success.Count == 0) {
-                        if (Log.Info()) {
-                            Log.Info($"{nameof(success.Count)}[{success.Count}]");
+                        if (Log.Debug()) {
+                            Log.Debug($"{nameof(success.Count)}[{success.Count}]");
                         }
                         return null;
                     }
@@ -69,14 +69,14 @@ namespace Domore.Text {
                 var task = await Task.WhenAny(tasks).ConfigureAwait(false);
                 var decoded = await task.ConfigureAwait(false);
                 if (decoded.Complete) {
-                    if (Log.Info()) {
-                        Log.Info($"{nameof(running.Remove)}[{decoded.Encoding}]");
+                    if (Log.Debug()) {
+                        Log.Debug($"{nameof(running.Remove)}[{decoded.Encoding}]");
                     }
                     running.Remove(decoded.Decoder);
                 }
                 if (decoded.Success) {
-                    if (Log.Info()) {
-                        Log.Info($"{nameof(TextDecoderStates.Success)}[{decoded.Encoding}]");
+                    if (Log.Debug()) {
+                        Log.Debug($"{nameof(TextDecoderStates.Success)}[{decoded.Encoding}]");
                     }
                     success.Add(decoded);
                 }

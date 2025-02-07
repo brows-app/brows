@@ -163,9 +163,9 @@ namespace Brows {
                     await TASK.WhenAll(ChildCollection.Select(child => child.Completion));
                 }
                 catch (Exception ex) {
-                    if (ex is OperationCanceledException canceled && canceled.CancellationToken == token) {
+                    if (ex is OperationCanceledException && token.IsCancellationRequested) {
                         if (Log.Info()) {
-                            Log.Info(canceled.GetType());
+                            Log.Info(ex.GetType());
                         }
                     }
                     else {

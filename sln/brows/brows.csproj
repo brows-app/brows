@@ -54,9 +54,18 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Domore.Conf.Cli" Version="8.2.1.101" />
-    <PackageReference Include="Domore.Logs" Version="8.2.1.101" />
-    <PackageReference Include="Domore.Logs.Conf" Version="8.2.1.101" />
+    <None Remove="brows.config\default\ftp.conf.default" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Conf.Cli" Version="9.7.0" />
+    <PackageReference Include="Domore.Logs" Version="9.7.0" />
+    <PackageReference Include="Domore.Logs.Conf" Version="9.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="brows.config\default\ftp.conf.default">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
   <Target Name="GetTargetPath" Returns="@(Brows_SetupOutputPath)">
     <ItemGroup Condition="'$(OutputType)' == 'Library'">

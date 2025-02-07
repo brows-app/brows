@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Brows {
     internal sealed class EntryDataInstance {
@@ -28,12 +30,14 @@ namespace Brows {
             Definition = definition ?? throw new ArgumentNullException(nameof(definition));
         }
 
-        public void Refresh() {
+        public Task Refresh(CancellationToken token) {
+            var tasks = default(Task[]);
             lock (Set) {
-                foreach (var value in Set.Values) {
-                    value.Refresh();
-                }
+                tasks = Set.Values
+                    .Select(value => value.Refresh(token))
+                    .ToArray();
             }
+            return Task.WhenAll(tasks);
         }
     }
 }

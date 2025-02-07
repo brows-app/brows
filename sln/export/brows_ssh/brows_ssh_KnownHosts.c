@@ -50,7 +50,7 @@ brows_ERROR brows_ssh_KnownHosts_check(brows_ssh_KnownHosts* p, const char* file
     LIBSSH2_KNOWNHOSTS* knownhosts = brows_ssh_KnownHosts_get_agent(p);
     int readfile = libssh2_knownhost_readfile(knownhosts, file, LIBSSH2_KNOWNHOST_FILE_OPENSSH);
     if (0 > readfile) {
-        brows_LOG_ERROR("libssh2_knownhost_readfile > %d", readfile);
+        brows_LOG_ERROR("libssh2_knownhost_readfile > %" PRId32, readfile);
         return brows_ssh_ERROR_LIBSSH2_KNOWNHOST_READFILE;
     }
     struct libssh2_knownhost* knownhost = NULL;
@@ -63,7 +63,7 @@ brows_ERROR brows_ssh_KnownHosts_check(brows_ssh_KnownHosts* p, const char* file
         LIBSSH2_KNOWNHOST_TYPE_PLAIN | LIBSSH2_KNOWNHOST_KEYENC_RAW,
         &knownhost);
     if (LIBSSH2_KNOWNHOST_CHECK_FAILURE == result) {
-        brows_LOG_ERROR("libssh2_knownhost_checkp > %d", result);
+        brows_LOG_ERROR("libssh2_knownhost_checkp > %" PRId32, result);
         return brows_ssh_ERROR_LIBSSH2_KNOWNHOST_CHECKP;
     }
     if (known_host) {

@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Domore.Logs;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Domore.Threading {
-    using Logs;
-
-    internal class STAThreadWorker {
+    internal sealed class STAThreadWorker {
         private static readonly ILog Log = Logging.For(typeof(STAThreadWorker));
 
         private Stopwatch Stopwatch;
@@ -55,7 +54,7 @@ namespace Domore.Threading {
                             : await item.Invoke(cancellationToken));
                     }
                     catch (Exception ex) {
-                        if (ex is OperationCanceledException canceled && canceled.CancellationToken.Equals(cancellationToken)) {
+                        if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested) {
                             taskSource.SetCanceled(cancellationToken);
                         }
                         else {
@@ -70,7 +69,7 @@ namespace Domore.Threading {
             }
         }
 
-        public override string ToString() {
+        public sealed override string ToString() {
             return Pool + "." + ID.ToString("00") + (Working ? " [work]" : " [idle]");
         }
     }

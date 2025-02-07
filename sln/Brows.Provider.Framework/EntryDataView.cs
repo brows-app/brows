@@ -41,8 +41,8 @@ namespace Brows {
             Source = source ?? throw new ArgumentNullException(nameof(source));
         }
 
-        public async Task Init(CancellationToken token) {
-            await Config.Init(token);
+        public Task Init(CancellationToken token) {
+            return Config.Init(token);
         }
 
         public string[] Sort(IEntrySorting sorting) {

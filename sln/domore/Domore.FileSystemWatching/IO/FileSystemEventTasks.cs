@@ -11,7 +11,7 @@ namespace Domore.IO {
         private static readonly ILog Log = Logging.For(typeof(FileSystemEventTasks));
         private static readonly Dictionary<string, FileSystemEventTasks> Set = [];
 
-        private readonly List<Func<FileSystemEventArgs, Task>> List = [];
+        private readonly List<Item> List = [];
 
         private FileSystemEvent Event;
         private SemaphoreSlim EventLocker;
@@ -36,19 +36,30 @@ namespace Domore.IO {
             catch (ObjectDisposedException) {
                 return;
             }
-            try {
-                await Task.WhenAll(List.Select(task => task(e)));
-            }
-            catch (Exception ex) {
-                if (ex is OperationCanceledException canceled) {
-                    if (Log.Debug()) {
-                        Log.Debug(nameof(OperationCanceledException));
+            var tasks = List.Select(async item => {
+                try {
+                    var task = item.Task(e);
+                    if (task != null) {
+                        await task.ConfigureAwait(false);
                     }
                 }
-                else {
+                catch (OperationCanceledException) when (item.Canceled) {
+                    if (Log.Debug()) {
+                        Log.Debug("Canceled");
+                    }
+                }
+                catch (Exception ex) {
                     if (Log.Error()) {
                         Log.Error(ex);
                     }
+                }
+            });
+            try {
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex) {
+                if (Log.Error()) {
+                    Log.Error(ex);
                 }
             }
             finally {
@@ -60,11 +71,11 @@ namespace Domore.IO {
             }
         }
 
-        private void Remove(Func<FileSystemEventArgs, Task> task) {
+        private void Remove(Item item) {
             var list = List;
             var listCount = List.Count;
             lock (Set) {
-                list.Remove(task);
+                list.Remove(item);
                 listCount = List.Count;
                 if (listCount == 0) {
                     Set.Remove(Path);
@@ -79,32 +90,53 @@ namespace Domore.IO {
             }
         }
 
-        public static FileSystemEventTask Add(string path, Func<FileSystemEventArgs, Task> task) {
+        public static FileSystemEventTask Add(string path, Func<FileSystemEventArgs, CancellationToken, Task> task, CancellationToken token) {
             ArgumentNullException.ThrowIfNull(task);
             var inst = default(FileSystemEventTasks);
+            var item = Item.Create(task, token);
             lock (Set) {
                 if (Set.TryGetValue(path, out inst) == false) {
                     Set[path] = inst = new FileSystemEventTasks(path);
                 }
-                inst.List.Add(task);
+                inst.List.Add(item);
             }
-            return new Disposable(inst, task);
+            return new Disposable(inst, item);
         }
 
         private sealed class Disposable : FileSystemEventTask {
-            public Func<FileSystemEventArgs, Task> Task { get; }
-            public FileSystemEventTasks Instance { get; }
+            public Item Item { get; }
+            public FileSystemEventTasks Collection { get; }
 
-            public Disposable(FileSystemEventTasks instance, Func<FileSystemEventArgs, Task> task) {
-                Instance = instance ?? throw new ArgumentNullException(nameof(instance));
-                Task = task;
+            public Disposable(FileSystemEventTasks collection, Item item) {
+                Collection = collection ?? throw new ArgumentNullException(nameof(collection));
+                Item = item;
             }
 
             protected sealed override void Dispose(bool disposing) {
                 if (disposing) {
-                    Instance.Remove(Task);
+                    Collection.Remove(Item);
                 }
                 base.Dispose(disposing);
+            }
+        }
+
+        private sealed class Item {
+            private CancellationToken CancellationToken { get; }
+            private Func<FileSystemEventArgs, CancellationToken, Task> Factory { get; }
+
+            private Item(Func<FileSystemEventArgs, CancellationToken, Task> factory, CancellationToken cancellationToken) {
+                Factory = factory ?? throw new ArgumentNullException(nameof(factory));
+                CancellationToken = cancellationToken;
+            }
+
+            public bool Canceled => CancellationToken.IsCancellationRequested;
+
+            public Task Task(FileSystemEventArgs e) {
+                return Factory(e, CancellationToken);
+            }
+
+            public static Item Create(Func<FileSystemEventArgs, CancellationToken, Task> factory, CancellationToken cancellationToken) {
+                return new Item(factory, cancellationToken);
             }
         }
     }

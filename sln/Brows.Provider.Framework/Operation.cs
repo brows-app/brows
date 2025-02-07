@@ -12,16 +12,13 @@ namespace Brows {
             owner: this,
             execute: _ => Cancel(),
             canExecute: _ => Progressing && !Canceling,
-            dependencies: new[] {
-                nameof(Progressing),
-                nameof(Canceling) });
+            dependencies: [nameof(Progressing), nameof(Canceling)]);
 
         public object RemoveCommand => Request.Create(
             owner: this,
             execute: _ => Remove(),
             canExecute: _ => !Progressing,
-            dependencies: new[] {
-                nameof(Progressing) });
+            dependencies: [nameof(Progressing)]);
 
         public Operation(string name, OperationDelegate task) : base(name, null, task) {
         }

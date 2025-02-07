@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Composition.Framework\Brows.Composition.Framework.csproj" />
+    <ProjectReference Include="..\Brows.Security.Contract\Brows.Security.Contract.csproj" />
+  </ItemGroup>
+</Project>

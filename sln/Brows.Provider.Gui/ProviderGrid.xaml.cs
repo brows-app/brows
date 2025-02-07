@@ -1,6 +1,4 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 
 namespace Brows {
     partial class ProviderGrid {
@@ -9,6 +7,9 @@ namespace Brows {
 
         public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(object), typeof(ProviderGrid));
         public static readonly DependencyProperty TextTemplateProperty = DependencyProperty.Register(nameof(TextTemplate), typeof(DataTemplate), typeof(ProviderGrid));
+
+        public static readonly DependencyProperty ContentProperty = DependencyProperty.Register(nameof(Content), typeof(object), typeof(ProviderGrid));
+        public static readonly DependencyProperty ContentTemplateProperty = DependencyProperty.Register(nameof(ContentTemplate), typeof(DataTemplate), typeof(ProviderGrid));
 
         public object Icon {
             get => GetValue(IconProperty);
@@ -30,28 +31,18 @@ namespace Brows {
             set => SetValue(TextTemplateProperty, value);
         }
 
-        public ProviderGrid() {
-            InitializeComponent();
-            EntryNameGrid.DataContext = this;
-            DetailContentControl.ContentTemplateSelector = new DetailTemplateSelectorDefault(this);
+        public object Content {
+            get => GetValue(ContentProperty);
+            set => SetValue(ContentProperty, value);
         }
 
-        private sealed class DetailTemplateSelectorDefault : DataTemplateSelector {
-            public ProviderGrid Element { get; }
+        public DataTemplate ContentTemplate {
+            get => GetValue(ContentTemplateProperty) as DataTemplate;
+            set => SetValue(ContentTemplateProperty, value);
+        }
 
-            public DetailTemplateSelectorDefault(ProviderGrid element) {
-                Element = element ?? throw new ArgumentNullException(nameof(element));
-            }
-
-            public sealed override DataTemplate SelectTemplate(object item, DependencyObject container) {
-                if (item == null) {
-                    return null;
-                }
-                var key = item.GetType();
-                var resource = Element.FindResource(key);
-                var template = resource as DataTemplate;
-                return template;
-            }
+        public ProviderGrid() {
+            InitializeComponent();
         }
     }
 }

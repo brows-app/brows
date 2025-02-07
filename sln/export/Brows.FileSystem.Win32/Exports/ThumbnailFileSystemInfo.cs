@@ -11,7 +11,7 @@ namespace Brows.Exports {
                 return false;
             }
             var path = fileSystemInfo.FullName;
-            var result = await Win32Thumbnail.GetImageSource(path, width, height, token).ConfigureAwait(false);
+            var result = await Win32Thumbnail.GetImageSource(path, width, height, token);
             if (result == null) {
                 return false;
             }

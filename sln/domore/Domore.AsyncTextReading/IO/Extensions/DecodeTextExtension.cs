@@ -1,5 +1,6 @@
 ﻿using Domore.Text;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,12 +34,20 @@ namespace Domore.IO.Extensions {
             return DecodeText(source, options, opt => opt.ForStream(builder), cancellationToken);
         }
 
+        public static Task<DecodedText> DecodeText(this IStreamText source, IEnumerable<DecodedTextBuilder> builders, DecodedTextOptions options, CancellationToken cancellationToken) {
+            return DecodeText(source, DecodedTextBuilder.Combine(builders), options, cancellationToken);
+        }
+
         public static Task<DecodedText> DecodeText(this FileInfo fileInfo, DecodedTextDelegate decoded, DecodedTextOptions options, CancellationToken cancellationToken) {
             return DecodeText(new StreamTextSourceFile(fileInfo), options, opt => opt.ForStream(decoded, null), cancellationToken);
         }
 
         public static Task<DecodedText> DecodeText(this FileInfo fileInfo, DecodedTextBuilder builder, DecodedTextOptions options, CancellationToken cancellationToken) {
             return DecodeText(new StreamTextSourceFile(fileInfo), options, opt => opt.ForStream(builder), cancellationToken);
+        }
+
+        public static Task<DecodedText> DecodeText(this FileInfo fileInfo, IEnumerable<DecodedTextBuilder> builders, DecodedTextOptions options, CancellationToken cancellationToken) {
+            return DecodeText(fileInfo, DecodedTextBuilder.Combine(builders), options, cancellationToken);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Brows.Diagnostics {
             for (; ; ) {
                 var r = default(int);
                 try {
-                    r = await reader.ReadAsync(buffer, token).ConfigureAwait(false);
+                    r = await reader.ReadAsync(buffer, token);
                 }
                 catch (OperationCanceledException) when (token.IsCancellationRequested) {
                     break;

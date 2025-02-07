@@ -31,7 +31,7 @@ namespace Brows {
         private ZipArchivePath(FileInfo file, ZipArchiveNest nest, string fullName) {
             Nest = nest ?? throw new ArgumentNullException(nameof(nest));
             File = file ?? throw new ArgumentNullException(nameof(file));
-            FileEvent = FileSystemEventTasks.Add(File.DirectoryName, FileEventTask);
+            FileEvent = FileSystemEventTasks.Add(File.DirectoryName, FileEventTask, CancellationToken.None);
             Locker = ArchiveLocker.Get(file);
             FullName = fullName;
             LastWriteTimeUtc = File.LastWriteTimeUtc;
@@ -104,7 +104,7 @@ namespace Brows {
             return string.Join(">", nest.Prepend(file.FullName));
         }
 
-        private async Task FileEventTask(FileSystemEventArgs e) {
+        private async Task FileEventTask(FileSystemEventArgs e, CancellationToken token) {
             if (e != null) {
                 var name = File.Name;
                 var names = e is RenamedEventArgs r
@@ -112,16 +112,16 @@ namespace Brows {
                     : new[] { e.Name };
                 if (names.Contains(name, StringComparer.OrdinalIgnoreCase)) {
                     var file = File.FullName;
-                    var update = await FileSystemTask.ExistingFile(file, CancellationToken.None);
+                    var update = await FileSystemTask.ExistingFile(file, token);
                     if (update == null) {
                         EntryInfoCache = null;
-                        await FileDeleted.All();
+                        await FileDeleted.All(token);
                     }
                     else {
                         if (LastWriteTimeUtc != update.LastWriteTimeUtc) {
                             LastWriteTimeUtc = update.LastWriteTimeUtc;
                             EntryInfoCache = null;
-                            await FileChanged.All();
+                            await FileChanged.All(token);
                         }
                     }
                 }

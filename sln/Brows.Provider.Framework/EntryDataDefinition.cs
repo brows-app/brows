@@ -59,7 +59,8 @@ namespace Brows {
         public abstract Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken token);
         public abstract int CompareValue(IEntry x, IEntry y);
 
-        public virtual void RefreshValue(IEntry entry) {
+        public virtual Task RefreshValue(IEntry entry, CancellationToken token) {
+            return Task.CompletedTask;
         }
 
         public virtual Task<bool> SuggestKey(ICommandContext context, CancellationToken token) {
@@ -92,12 +93,13 @@ namespace Brows {
 
         protected abstract Task<TValue> GetValue(TEntry entry, Action<TValue> progress, CancellationToken cancellationToken);
 
-        protected virtual void RefreshValue(TEntry entry) {
+        protected virtual Task RefreshValue(TEntry entry, CancellationToken token) {
+            return token.IsCancellationRequested
+                ? Task.FromCanceled(token)
+                : Task.CompletedTask;
         }
 
-        public sealed override IExportResourceKey ResourceKey =>
-            _ResourceKey ?? (
-            _ResourceKey = new ComponentResourceKey());
+        public sealed override IExportResourceKey ResourceKey => _ResourceKey ??= new ComponentResourceKey();
         private IExportResourceKey _ResourceKey;
 
         public sealed override async Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken cancellationToken) {
@@ -111,10 +113,11 @@ namespace Brows {
             return Comparer.Default.Compare(x?[Key]?.Value, y?[Key]?.Value);
         }
 
-        public sealed override void RefreshValue(IEntry entry) {
-            if (entry is TEntry tentry) {
-                RefreshValue(tentry);
-            }
+        public sealed override Task RefreshValue(IEntry entry, CancellationToken token) {
+            return
+                token.IsCancellationRequested ? Task.FromCanceled(token) :
+                entry is TEntry e ? RefreshValue(e, token) :
+                Task.CompletedTask;
         }
     }
 }

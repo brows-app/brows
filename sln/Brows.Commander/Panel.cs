@@ -142,11 +142,11 @@ namespace Brows {
             Provider.Begin();
         }
 
-        private async Task<bool> TryStart(string id, CancellationToken cancellationToken) {
+        private async Task<bool> TryStart(string id, CancellationToken token) {
             if (Log.Info()) {
                 Log.Info(nameof(TryStart) + " > " + id);
             }
-            var provider = await Providers.CreateFor(id, this, cancellationToken);
+            var provider = await Providers.CreateFor(id, this, token);
             if (provider == null) {
                 return false;
             }
@@ -292,8 +292,16 @@ namespace Brows {
             Provider?.Observation?.DataView?.Reset();
         }
 
-        public void Refresh() {
-            Provider?.Refresh();
+        public async Task<bool> Refresh(CancellationToken token) {
+            var provider = Provider;
+            if (provider != null) {
+                var task = provider.Refresh(token);
+                if (task != null) {
+                    await task;
+                }
+                return true;
+            }
+            return false;
         }
 
         public IReadOnlyList<IEntry> Entries =>

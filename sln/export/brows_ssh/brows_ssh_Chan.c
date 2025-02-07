@@ -49,10 +49,10 @@ brows_ERROR brows_ssh_Chan_free(brows_ssh_Chan* p) {
                 int channel_free_err = libssh2_channel_free(p->channel);
                 if (0 > channel_free_err) {
                     if (LIBSSH2_ERROR_EAGAIN == channel_free_err) {
-                        brows_LOG_DEBUG("libssh2_channel_free > %d", channel_free_err);
+                        brows_LOG_DEBUG("libssh2_channel_free > %" PRId32, channel_free_err);
                         continue;
                     }
-                    brows_LOG_ERROR("libssh2_channel_free > %d", channel_free_err);
+                    brows_LOG_ERROR("libssh2_channel_free > %" PRId32, channel_free_err);
                     return brows_ERROR_LIBSSH2_CHANNEL_FREE;
                 }
                 break;
@@ -83,7 +83,7 @@ brows_ERROR brows_ssh_Chan_eof(brows_ssh_Chan* p, int32_t* result, brows_Cancele
     }
     int eof = libssh2_channel_eof(channel);
     if (0 > eof) {
-        brows_LOG_ERROR("libssh2_channel_eof > %d", eof);
+        brows_LOG_ERROR("libssh2_channel_eof > %" PRId32, eof);
         return brows_ERROR_libssh2_channel_eof;
     }
     *result = eof;

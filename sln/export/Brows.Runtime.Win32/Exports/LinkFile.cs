@@ -8,7 +8,7 @@ namespace Brows.Exports {
             if (set == null) {
                 return false;
             }
-            var resolve = await Win32FileLink.Resolve(file, token).ConfigureAwait(false);
+            var resolve = await Win32FileLink.Resolve(file, token);
             if (resolve == null) {
                 return false;
             }
