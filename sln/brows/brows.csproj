@@ -19,6 +19,8 @@
     <ProjectReference Include="..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
     <ProjectReference Include="..\Brows.Provider.Gui\Brows.Provider.Gui.csproj" />
     <ProjectReference Include="..\Brows.Gui.Contract\Brows.Gui.Contract.csproj" />
+    <ProjectReference Include="..\Brows.Security.Contract\Brows.Security.Contract.csproj" />
+    <ProjectReference Include="..\Brows.Security.Framework\Brows.Security.Framework.csproj" />
     <ProjectReference Include="..\Brows.Windows.AppComponent\Brows.Windows.AppComponent.csproj" />
     <ProjectReference Include="..\Brows.Windows.App\Brows.Windows.App.csproj" />
     <ProjectReference Include="..\Brows.Gui.Framework\Brows.Gui.Framework.csproj" />
