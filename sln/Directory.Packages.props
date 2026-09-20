@@ -28,5 +28,6 @@
     <PackageVersion Include="NUnit" Version="4.6.1" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.15.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
+    <PackageVersion Include="WixToolset.UI.wixext" Version="4.0.6" />
   </ItemGroup>
 </Project>
