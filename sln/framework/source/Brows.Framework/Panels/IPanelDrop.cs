@@ -1,0 +1,9 @@
+﻿using System.Collections.Generic;
+
+namespace Brows.Panels;
+
+public interface IPanelDrop {
+    object Target { get; }
+    IReadOnlyList<string> CopyFiles { get; }
+    IReadOnlyList<string> MoveFiles { get; }
+}

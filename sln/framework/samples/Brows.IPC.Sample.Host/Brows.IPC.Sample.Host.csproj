@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.IPC.Host\Brows.IPC.Host.csproj" />
+    <ProjectReference Include="..\Brows.IPC.Sample.Common\Brows.IPC.Sample.Common.csproj" />
+  </ItemGroup>
+</Project>

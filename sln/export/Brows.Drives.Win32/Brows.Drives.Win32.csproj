@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>net8.0-windows</TargetFrameworks>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Brows.Drives\Brows.Drives.csproj" />
-        <ProjectReference Include="..\Brows.Runtime.Win32\Brows.Runtime.Win32.csproj" />
-    </ItemGroup>
-</Project>

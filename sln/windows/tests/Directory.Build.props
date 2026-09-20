@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="$(SolutionDir)/props/root.build.props"/>
+  <Import Project="$(SolutionDir)/props/tests.build.props" />
+  <Import Project="$(SolutionDir)/props/windows.build.props" />
+  <PropertyGroup>
+  </PropertyGroup>
+</Project>

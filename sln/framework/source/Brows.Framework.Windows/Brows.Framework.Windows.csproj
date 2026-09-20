@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)/props/windows.build.props" />
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\framework\source\Brows.Framework\Brows.Framework.csproj" />
+    <ProjectReference Include="..\..\..\windows\source\Brows.Win32.PropertySystem\Brows.Win32.PropertySystem.csproj" />
+    <ProjectReference Include="..\..\..\windows\source\Brows.Win32.Windows.PreviewHandlerControl\Brows.Win32.Windows.PreviewHandlerControl.csproj" />
+    <ProjectReference Include="..\..\..\windows\source\Brows.Win32.Windows.PreviewTextControl\Brows.Win32.Windows.PreviewTextControl.csproj" />
+    <ProjectReference Include="..\..\..\windows\source\Brows.Win32.Windows\Brows.Win32.Windows.csproj" />
+  </ItemGroup>
+</Project>

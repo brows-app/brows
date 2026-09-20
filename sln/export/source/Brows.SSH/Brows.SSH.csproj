@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+    <EmbeddedResource Include="Resource\Culture\_.alias" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.SSH.Commands.SSH\Brows.SSH.Commands.SSH.csproj" />
+    <ProjectReference Include="..\Brows.SSH.Native\Brows.SSH.Native.csproj" />
+  </ItemGroup>
+</Project>

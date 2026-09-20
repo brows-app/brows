@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "start": {
+      "commandName": "Project",
+      "commandLineArgs": "start ipcsampledelegate post=true postport=8123"
+    },
+    "about": {
+      "commandName": "Project",
+      "commandLineArgs": ""
+    },
+    "help": {
+      "commandName": "Project",
+      "commandLineArgs": "help"
+    }
+  }
+}

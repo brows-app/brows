@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Brows.Commands.Bookmark\Brows.Commands.Bookmark.csproj" />
+  </ItemGroup>
+</Project>

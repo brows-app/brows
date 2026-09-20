@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Async.TextReading" />
+    <PackageReference Include="Domore.Async.FileSystemWatching" />
+    <PackageReference Include="Domore.Logs" />
+  </ItemGroup>
+</Project>

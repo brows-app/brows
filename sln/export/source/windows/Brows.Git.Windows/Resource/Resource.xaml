@@ -1,0 +1,31 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DataTemplate x:Key="IFileSystemEntry_GitRepoHead">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <brows:EntryDataControl DataContext="{Binding Item[GitRepoHead]}"/>
+      <TextBlock Grid.Column="1" Foreground="White" Text="Foo"/>
+    </Grid>
+    <!--<Grid>
+      <ContentControl DataContext="{Binding Item[GitRepoHead]}">
+        <ContentControl.Style>
+          <Style TargetType="ContentControl">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Ready}" Value="True">
+                <Setter Property="Content">
+                  <Setter.Value>
+                    <brows:EntryDataTextBlock Text="{Binding Display}"/>
+                  </Setter.Value>
+                </Setter>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </ContentControl.Style>
+      </ContentControl>
+    </Grid>-->
+  </DataTemplate>
+</ResourceDictionary>

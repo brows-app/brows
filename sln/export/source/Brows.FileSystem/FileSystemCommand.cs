@@ -1,0 +1,13 @@
+﻿using System.Collections.Generic;
+
+namespace Brows;
+
+public abstract class FileSystemCommand<TParameter> : Command<TParameter> where TParameter : new() {
+    protected sealed override Type Provider =>
+        typeof(FileSystemProvider);
+
+    protected override IEnumerable<Type> Source => new[] {
+        typeof(IEntryObservation),
+        typeof(FileSystemEntry)
+    };
+}

@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
+    <ProjectReference Include="..\Brows.Git.Native\Brows.Git.Native.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Composition\Brows.Composition.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Remove="Brows.Commands" />
+    <Using Remove="Brows.Composition" />
+    <Using Remove="Brows.Config" />
+    <Using Remove="Brows.Entries" />
+    <Using Remove="Brows.Operations" />
+    <Using Remove="Brows.Providers" />
+    <Using Remove="Brows.Triggers" />
+  </ItemGroup>
+</Project>

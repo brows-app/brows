@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Version>67.78.89.90</Version>
+    <VersionPrefix>67.78.89.90</VersionPrefix>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.Composition.Testing\Brows.Composition.Testing.csproj" />
+    <ProjectReference Include="..\..\source\Brows.IPC\Brows.IPC.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Version>99.98.97.96</Version>
+    <VersionPrefix>99.98.97.96</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.CLI.About\Brows.CLI.About.csproj" />
+    <ProjectReference Include="..\..\source\Brows.CLI.Help\Brows.CLI.Help.csproj" />
+  </ItemGroup>
+</Project>

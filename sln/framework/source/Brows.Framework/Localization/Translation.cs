@@ -1,0 +1,5 @@
+﻿namespace Brows.Localization;
+
+public static class Translation {
+    public static ITranslation Global { get; set; }
+}

@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.FileSystem\Brows.FileSystem.csproj" />
+    <ProjectReference Include="..\..\..\framework\source\Brows.Abstractions.IO.Testing\Brows.Abstractions.IO.Testing.csproj" />
+    <ProjectReference Include="..\..\..\framework\source\Brows.Framework.Testing\Brows.Framework.Testing.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,70 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:entries="clr-namespace:Brows.Entries"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resource/Style/EntryDataTextBlockStyle.xaml"/>
+    <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resource/Style/ProviderTreeIconImageStyle.xaml"/>
+    <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resource/Style/ProviderTreeNodeLabelStyle.xaml"/>
+    <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resource/Style/ProviderTreeViewItemStyle.xaml"/>
+    <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resource/Style/ProviderTreeViewStyle.xaml"/>
+    <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resource/Style/ProviderGridSplitterStyle.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+  <SolidColorBrush x:Key="OperationButton_Default_Background" Color="Transparent"/>
+  <SolidColorBrush x:Key="OperationButton_Default_BorderBrush" Color="Transparent"/>
+  <SolidColorBrush x:Key="OperationButton_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".9"/>
+  <SolidColorBrush x:Key="OperationButton_IsMouseOver_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity=".2"/>
+  <SolidColorBrush x:Key="OperationButton_IsMouseOver_BorderBrush" Color="{DynamicResource Global_Default_Foreground}" Opacity=".2"/>
+  <SolidColorBrush x:Key="OperationButton_IsPressed_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity=".3"/>
+  <SolidColorBrush x:Key="OperationButton_IsPressed_BorderBrush" Color="{DynamicResource Global_Default_Foreground}" Opacity=".3"/>
+
+  <SolidColorBrush x:Key="OperationCollectionControl_Default_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity=".2"/>
+  <SolidColorBrush x:Key="OperationCollectionControl_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".9"/>
+
+  <SolidColorBrush x:Key="OperationControl_Default_Background" Color="Transparent"/>
+  <SolidColorBrush x:Key="OperationControl_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".9"/>
+  <SolidColorBrush x:Key="OperationControl_Error_Background" Color="{DynamicResource Global_Danger_Background}" Opacity=".9"/>
+
+  <SolidColorBrush x:Key="OperationProgressBar_Default_Background" Color="{DynamicResource Global_Default_Foreground}" Opacity=".1"/>
+  <SolidColorBrush x:Key="OperationProgressBar_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity=".9"/>
+
+  <FontFamily x:Key="OperationButton_Default_FontFamily"></FontFamily>
+  <s:Double x:Key="OperationButton_Default_FontSize">12</s:Double>
+  <FontWeight x:Key="OperationButton_Default_FontWeight">Bold</FontWeight>
+
+  <FontFamily x:Key="OperationControl_Default_FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="OperationControl_Default_FontSize">12</s:Double>
+  <FontWeight x:Key="OperationControl_Default_FontWeight">Normal</FontWeight>
+
+  <Style TargetType="{x:Type Image}" x:Key="EntryIconImageStyle">
+    <Setter Property="Height" Value="16"/>
+    <Setter Property="Width" Value="16"/>
+  </Style>
+  <Style TargetType="{x:Type entries:EntryIconImage}" BasedOn="{StaticResource EntryIconImageStyle}"/>
+
+  <Style TargetType="{x:Type Image}" x:Key="EntryThumbnailImageStyle">
+    <Setter Property="Margin" Value="2,0,4,0"/>
+  </Style>
+  <Style TargetType="{x:Type entries:EntryThumbnailImage}" BasedOn="{StaticResource EntryThumbnailImageStyle}"/>
+
+
+
+  <SolidColorBrush x:Key="PreviewText_Default_Background" Color="Transparent"/>
+  <FontFamily x:Key="PreviewText_Default_FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="PreviewText_Default_FontSize">14</s:Double>
+  <FontWeight x:Key="PreviewText_Default_FontWeight">Normal</FontWeight>
+  <SolidColorBrush x:Key="PreviewText_Default_Foreground" Color="{DynamicResource Global_Default_Foreground}" Opacity="0.9"/>
+
+  <Style TargetType="{x:Type brows:PreviewTextControl}" x:Key="PreviewTextControlStyle">
+    <Setter Property="Background" Value="{DynamicResource PreviewText_Default_Background}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="FontFamily" Value="{DynamicResource PreviewText_Default_FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource PreviewText_Default_FontSize}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource PreviewText_Default_FontWeight}"/>
+    <Setter Property="Foreground" Value="{DynamicResource PreviewText_Default_Foreground}"/>
+  </Style>
+  <Style TargetType="{x:Type brows:PreviewTextControl}" BasedOn="{StaticResource PreviewTextControlStyle}">
+  </Style>
+</ResourceDictionary>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Conf" />
+    <PackageReference Include="Domore.Logs" />
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Composition\Brows.Composition.csproj" />
+    <ProjectReference Include="..\Brows.Config.Json\Brows.Config.Json.csproj" />
+  </ItemGroup>
+</Project>

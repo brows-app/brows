@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.IPC.Host\Brows.IPC.Host.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.IPC.Sample.Common\Brows.IPC.Sample.Common.csproj" />
+    <ProjectReference Include="..\Brows.IPC.Sample.Host\Brows.IPC.Sample.Host.csproj" />
+  </ItemGroup>
+</Project>

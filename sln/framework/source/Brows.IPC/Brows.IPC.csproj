@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Logs" />
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="System.Threading.Channels" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Composition\Brows.Composition.csproj" />
+    <ProjectReference Include="..\Brows.Config.Json\Brows.Config.Json.csproj" />
+  </ItemGroup>
+</Project>

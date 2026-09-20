@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Abstractions.IO\Brows.Abstractions.IO.csproj" />
+    <ProjectReference Include="..\Brows.Composition\Brows.Composition.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Notification" />
+    <PackageReference Include="Domore.Async.TaskCaching" />
+    <PackageReference Include="Domore.Async.TextReading" />
+    <PackageReference Include="Domore.Async.FileSystemWatching" />
+    <PackageReference Include="Domore.Logs" />
+    <PackageReference Include="Domore.Conf" />
+    <PackageReference Include="Domore.Conf.Cli" />
+  </ItemGroup>
+</Project>

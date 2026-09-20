@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <OutputPath>$(SolutionDir)/out/$(Configuration)/brows.export/</OutputPath>
+    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)/framework/source/Brows.Framework/Brows.Framework.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Brows.Commands"/>
+    <Using Include="Brows.Composition"/>
+    <Using Include="Brows.Config"/>
+    <Using Include="Brows.Entries"/>
+    <Using Include="Brows.Gui"/>
+    <Using Include="Brows.IO"/>
+    <Using Include="Brows.IO.Helpers"/>
+    <Using Include="Brows.Localization"/>
+    <Using Include="Brows.Matching"/>
+    <Using Include="Brows.Matching.MatchAlgorithms"/>
+    <Using Include="Brows.Messaging"/>
+    <Using Include="Brows.Messaging.Messages"/>
+    <Using Include="Brows.Native"/>
+    <Using Include="Brows.Operations"/>
+    <Using Include="Brows.Panels"/>
+    <Using Include="Brows.Programs"/>
+    <Using Include="Brows.Providers"/>
+    <Using Include="Brows.Requests"/>
+    <Using Include="Brows.Security"/>
+    <Using Include="Brows.Triggers"/>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Conf.Cli" />
+    <PackageReference Include="Domore.Logs.Conf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.CLI.About\Brows.CLI.About.csproj" />
+    <ProjectReference Include="..\Brows.CLI.Help\Brows.CLI.Help.csproj" />
+    <ProjectReference Include="..\Brows.CLI\Brows.CLI.csproj" />
+    <ProjectReference Include="..\Brows.Composition\Brows.Composition.csproj" />
+    <ProjectReference Include="..\Brows.Config\Brows.Config.csproj" />
+    <ProjectReference Include="..\Brows.IPC\Brows.IPC.csproj" />
+  </ItemGroup>
+</Project>

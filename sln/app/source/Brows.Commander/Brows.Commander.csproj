@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resource\Culture\_" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Theme" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Theme" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\framework\source\Brows.Framework\Brows.Framework.csproj" />
+    <ProjectReference Include="..\..\..\framework\source\Brows.IPC.Host\Brows.IPC.Host.csproj" />
+  </ItemGroup>
+</Project>

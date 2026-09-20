@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+      <EmbeddedResource Include="Resource\Culture\_" />
+      <EmbeddedResource Include="Resource\Culture\_.alias" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Brows.FileSystem.Navigation\Brows.FileSystem.Navigation.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-    </PropertyGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\..\Brows.IO.Framework\Brows.IO.Framework.csproj" />
-      <ProjectReference Include="..\..\Brows.Provider.Framework\Brows.Provider.Framework.csproj" />
-      <ProjectReference Include="..\..\domore\Domore.FileSystemWatching\Domore.FileSystemWatching.csproj" />
-    </ItemGroup>
-</Project>
