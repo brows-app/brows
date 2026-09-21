@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Ken Yourek</Authors>
     <Copyright>Copyright © Ken Yourek 2023</Copyright>
-    <VersionPrefix>0.3.0.2</VersionPrefix>
+    <VersionPrefix>0.100.0.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/brows-app/brows.git</RepositoryUrl>
