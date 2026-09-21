@@ -43,7 +43,7 @@
   <PreprocessorDefinitions>brows_git_EXPORT;BROWSGIT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 </ClCompile>  
     <Link>
-      <AdditionalDependencies>$(SolutionDir)..\lib\x64-windows\debug\lib\git2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>git2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -51,7 +51,7 @@
   <PreprocessorDefinitions>brows_git_EXPORT;BROWSGIT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 </ClCompile>    
     <Link>
-      <AdditionalDependencies>$(SolutionDir)..\lib\x64-windows\lib\git2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>git2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
