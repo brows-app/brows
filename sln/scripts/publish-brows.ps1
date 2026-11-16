@@ -1,6 +1,9 @@
 ﻿<#
 .SYNOPSIS
-  Builds and publishes Brows as a self-contained .NET Windows application.
+  Builds and publishes Brows as a framework-dependent .NET Windows application.
+
+  The published application requires the .NET Desktop Runtime and the Microsoft Visual C++
+  Redistributable for the target platform to be installed.
 
 .DESCRIPTION
   Builds the complete solution with Visual Studio MSBuild so native projects are included,
@@ -181,7 +184,7 @@ try {
         '--runtime',
         "win-$Platform",
         '--self-contained',
-        'true',
+        'false',
         "-p:SolutionDir=$solutionDirectory\",
         "-p:OutputPath=$publishBuildDirectory\",
         '-p:Deterministic=true',
