@@ -48,19 +48,19 @@
 # SVG files should have LF line endings
 *.svg           text eol=lf
 
-*.ico           filter=lfs diff=lfs merge=lfs -text
-*.rtf           filter=lfs diff=lfs merge=lfs -text
-*.ocx           filter=lfs diff=lfs merge=lfs -text
-*.eps           filter=lfs diff=lfs merge=lfs -text
-*.bmp           filter=lfs diff=lfs merge=lfs -text
-*.jpg           filter=lfs diff=lfs merge=lfs -text
-*.jpeg          filter=lfs diff=lfs merge=lfs -text
-*.png           filter=lfs diff=lfs merge=lfs -text
-*.gif           filter=lfs diff=lfs merge=lfs -text
-*.chm           filter=lfs diff=lfs merge=lfs -text
-*.docx          filter=lfs diff=lfs merge=lfs -text
-*.xlsx          filter=lfs diff=lfs merge=lfs -text
-*.dll           filter=lfs diff=lfs merge=lfs -text
-*.exe           filter=lfs diff=lfs merge=lfs -text
-*.pdb           filter=lfs diff=lfs merge=lfs -text
-*.lib           filter=lfs diff=lfs merge=lfs -text
+*.ico           binary
+*.rtf           binary
+*.ocx           binary
+*.eps           binary
+*.bmp           binary
+*.jpg           binary
+*.jpeg          binary
+*.png           binary
+*.gif           binary
+*.chm           binary
+*.docx          binary
+*.xlsx          binary
+*.dll           binary
+*.exe           binary
+*.pdb           binary
+*.lib           binary
