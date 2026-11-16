@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Brows.Url;
+﻿namespace Brows.Url;
 
 public delegate void UrlClientTextEventHandler(object sender, UrlClientTextEventArgs e);
 

@@ -1,10 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resource\Culture\_" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_FileSystem_View" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_FileSystem_TerminalOpen" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_FileSystem_TerminalRelease" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_FileSystem_TerminalClose" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resource\Culture\_" />
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Open" />
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_View" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_TerminalOpen" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_TerminalRelease" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_TerminalClose" />
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Delete" />
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Move" />
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_FileSystem_Copy" />

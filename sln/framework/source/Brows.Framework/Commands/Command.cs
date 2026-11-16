@@ -28,6 +28,9 @@ public abstract class Command : ICommand {
         if (Sourced(context) == false) {
             return false;
         }
+        if (Observed(context) == false) {
+            return false;
+        }
         return true;
     }
 
@@ -66,6 +69,17 @@ public abstract class Command : ICommand {
             return false;
         }
         return true;
+    }
+
+    private bool Observed(ICommandContext context) {
+        if (RequiresEntries == false) {
+            return true;
+        }
+        if (context == null) return false;
+        if (context.HasPanel(out var active) == false) {
+            return false;
+        }
+        return active.HasProvider(out IEntryProvider _);
     }
 
     private protected CliProvider CliProvider => field ??=
@@ -110,6 +124,16 @@ public abstract class Command : ICommand {
 
     protected virtual IEnumerable<Type> Source =>
         null;
+
+    /// <summary>
+    /// Gets whether the command works only in a panel whose provider provides entries.
+    /// </summary>
+    /// <value>
+    /// True if the command is neither triggered nor suggested when the provider of the active panel
+    /// provides no entries. The default is false.
+    /// </value>
+    protected virtual bool RequiresEntries =>
+        false;
 
     protected ICommandSuggestion Suggestion(ICommandContext context,
                                             string input,
@@ -165,7 +189,9 @@ public abstract class Command : ICommand {
                         if (trigger.Defined != null) {
                             yield return Suggestion(
                                 alias: string.Join(",", trigger.Aliases?.AsEnumerable() ?? Array.Empty<string>()),
-                                press: string.Join(",", Trigger.Gestures?.Where(g => g.Defined == trigger.Defined).Select(g => g.Display) ?? Array.Empty<string>()),
+                                press: string.Join(",", Trigger.Gestures
+                                    ?.Where(g => g.Defined == trigger.Defined)
+                                    ?.Select(g => g.Display) ?? Array.Empty<string>()),
                                 context: context,
                                 description: trigger.Defined,
                                 help: trigger.Input + " " + HelpLine,
@@ -294,7 +320,8 @@ public abstract class Command<TParameter> : Command where TParameter : new() {
     protected sealed override bool TriggeredWork(ICommandContext context) =>
         context is not null && Work(Proxy(context));
 
-    protected sealed override IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, CancellationToken token) =>
+    protected sealed override IAsyncEnumerable<ICommandSuggestion>
+    Suggest(ICommandContext context, CancellationToken token) =>
         context is null
             ? CommandSuggestions.Empty()
             : Suggest(Proxy(context), token);

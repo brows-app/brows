@@ -1,37 +1,47 @@
 ﻿using Brows.Composition;
-using Brows.Config;
 using Brows.Entries;
-using Brows.Messaging;
+using Brows.Gui;
 using Brows.Operations;
 using Brows.Panels;
+using Brows.Sys;
 using Domore.Logs;
 using Domore.Notification;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Providers;
 
-public abstract class Provider : Notifier, IProvider, IDisposable {
+public abstract class Provider : Notifier,
+                                 IProvider,
+                                 IControlled<IProviderController>,
+                                 IDisposable,
+                                 IAsyncDisposable {
     private static readonly ILog Log = Logging.For(typeof(Provider));
 
     private readonly ConcurrentDictionary<Type, IExport> Imports = [];
+    private readonly Lock LifecycleLocker = new();
     private readonly Lock TokenLocker = new();
     private volatile CancellationTokenSource TokenSource = new();
+    private IProviderController Controller;
 
-    private Type EntryType { get; }
-    private EntryObservation EntryObservation { get; }
+    private Task LifecycleTask;
+    private int EndStarted;
+    private bool DisposeRequested;
+    private bool LifetimeDisposed;
 
-    private Provider(string id, Type entryType, EntryObservation entryObservation) {
-        ID = id;
-        EntryType = entryType;
-        EntryObservation = entryObservation ?? throw new ArgumentNullException(nameof(entryObservation));
-        EntryObservation.Provider = this;
+    private event EventHandler ControllerChangedEvent;
+
+    private void SetController(IProviderController value) {
+        if (ReferenceEquals(Controller, value)) {
+            return;
+        }
+        Controller = value;
+        ControllerChangedEvent?.Invoke(this, EventArgs.Empty);
     }
 
     private Task Begin(CancellationToken token, bool begun) {
@@ -45,13 +55,28 @@ public abstract class Provider : Notifier, IProvider, IDisposable {
     }
 
     private void End(bool ended) {
-        if (ended == false) {
+        if (ended) {
+            return;
+        }
+        Exception error = null;
+        try {
             Navigation?.Provided(null);
-            EntryObservation.End();
+        }
+        catch (Exception ex) {
+            error = ex;
+        }
+        try {
+            EndProvided();
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
         }
     }
 
-    private CancellationTokenSource LinkedTokenSource(CancellationToken other, out CancellationToken token) {
+    private protected CancellationTokenSource LinkedTokenSource(CancellationToken other, out CancellationToken token) {
         var t = Token;
         if (t == other) {
             token = t;
@@ -67,164 +92,149 @@ public abstract class Provider : Notifier, IProvider, IDisposable {
         return source;
     }
 
-    internal IPanel Panel { get; set; }
-    internal IImportAgent Import { get; set; }
+    private Task EnsureLifetime(bool dispose) {
+        TaskCompletionSource completion;
+        lock (LifecycleLocker) {
+            if (dispose) {
+                DisposeRequested = true;
+            }
 
-    internal EntryConfig Config {
-        get => field ?? throw new InvalidOperationException("Entry config is null.");
-        private set;
+            var current = LifecycleTask;
+            var currentCanBeReused = current is not null &&
+                                     current.IsFaulted == false &&
+                                     current.IsCanceled == false;
+            var disposalIsPending = current is not null &&
+                                    current.IsCompletedSuccessfully &&
+                                    DisposeRequested &&
+                                    LifetimeDisposed == false;
+            var lifetimeTaskCanBeReused = currentCanBeReused && disposalIsPending == false;
+            if (lifetimeTaskCanBeReused) {
+                return current;
+            }
+
+            completion = new TaskCompletionSource(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            LifecycleTask = completion.Task;
+        }
+
+        _ = CompleteLifetime(completion);
+        _ = completion.Task.ContinueWith(
+            continuationAction: completed => {
+                var error = completed.Exception?.GetBaseException();
+                var errorShouldBeLogged = error is not null && Log.Error();
+                if (errorShouldBeLogged) {
+                    Log.Error(nameof(DisposeAsync), ID, error);
+                }
+            },
+            cancellationToken: CancellationToken.None,
+            continuationOptions: TaskContinuationOptions.OnlyOnFaulted |
+                                 TaskContinuationOptions.ExecuteSynchronously,
+            scheduler: TaskScheduler.Default);
+        return completion.Task;
     }
 
-    internal ProviderData Data => field ??=
-        ProviderData.Get(Import, EntryType, DataDefinition);
+    private static void RethrowCompletedFailure(Task lifetime) {
+        /*
+         * Preserve synchronous End/Dispose failures when cleanup completed inline.
+         * Pending asynchronous cleanup is retained and observed without blocking.
+         */
+        if (lifetime.IsFaulted) {
+            ExceptionDispatchInfo.Capture(lifetime.Exception.InnerException).Throw();
+        }
+    }
 
-    internal IEnumerable Selection =>
-        EntryObservation.Selected;
-
-    internal virtual Task Init(CancellationToken token) {
-        using (LinkedTokenSource(token, out var t)) {
-            if (t.IsCancellationRequested) {
-                return Task.FromCanceled(t);
+    private async Task CompleteLifetime(TaskCompletionSource completion) {
+        try {
+            await Detail.ShutdownAsync();
+            Exception error = null;
+            try {
+                EndProvider();
             }
-            if (Panel.HasProvider(out Provider previous)) {
-                var navigation = previous.Navigation;
-                if (navigation != null) {
-                    Navigation = navigation.For(this);
+            catch (Exception ex) {
+                error = ex;
+            }
+
+            bool shouldDispose;
+            lock (LifecycleLocker) {
+                shouldDispose = DisposeRequested && LifetimeDisposed == false;
+                if (shouldDispose == false) {
+                    if (error is null) {
+                        completion.TrySetResult();
+                    }
+                    else {
+                        completion.TrySetException(error);
+                    }
+                    return;
                 }
-                var detail = previous.Detail;
-                if (detail != null) {
-                    foreach (var key in detail.Keys) {
-                        Detail[key] = detail[key]?.For(this);
+            }
+            if (shouldDispose) {
+                try {
+                    Dispose(true);
+                    GC.SuppressFinalize(this);
+                    lock (LifecycleLocker) {
+                        LifetimeDisposed = true;
                     }
                 }
+                catch (Exception ex) {
+                    error ??= ex;
+                }
             }
+            if (error is not null) {
+                ExceptionDispatchInfo.Capture(error).Throw();
+            }
+            completion.TrySetResult();
         }
-        return Task.CompletedTask;
+        catch (Exception ex) {
+            lock (LifecycleLocker) {
+                if (ReferenceEquals(LifecycleTask, completion.Task)) {
+                    LifecycleTask = null;
+                }
+            }
+            completion.TrySetException(ex);
+        }
     }
-
-    protected virtual IReadOnlyCollection<IEntryDataDefinition> DataDefinition =>
-        null;
-
-    protected IEnumerable<string> ObservedKeys =>
-        EntryObservation.Keys;
-
-    protected internal CancellationToken Token {
-        get {
+    private void EndProvider() {
+        if (Interlocked.Exchange(ref EndStarted, 1) != 0) {
+            return;
+        }
+        if (Log.Info()) {
+            Log.Info(Log.Join(nameof(End), ID));
+        }
+        Exception error = null;
+        try {
             if (TokenSource != null) {
                 lock (TokenLocker) {
                     if (TokenSource != null) {
-                        return TokenSource.Token;
-                    }
-                }
-            }
-            return new CancellationToken(canceled: true);
-        }
-    }
-
-    protected virtual void Dispose(bool disposing) {
-        if (disposing) {
-            if (TokenSource != null) {
-                lock (TokenLocker) {
-                    var tokenSource = TokenSource;
-                    if (tokenSource != null) {
-                        TokenSource = null;
-                        tokenSource.Dispose();
+                        TokenSource.Cancel();
                     }
                 }
             }
         }
-    }
-
-    protected internal virtual void DragSelected(object source) {
-    }
-
-    protected virtual Task<bool> Take(IMessage message, CancellationToken token) {
-        return Task.FromResult(false);
-    }
-
-    protected virtual Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
-        return Task.FromResult(false);
-    }
-
-    protected virtual Task Refresh(CancellationToken token) => Task.CompletedTask;
-    protected virtual Task Begin(CancellationToken token) => Task.CompletedTask;
-    protected virtual void End() {
-    }
-
-    protected async Task<SecureString> GetSecret(string promptFormat,
-                                                 IEnumerable<string> promptArgs,
-                                                 CancellationToken token) {
-        var panel = Panel;
-        if (panel == null) {
-            return null;
+        catch (Exception ex) {
+            error = ex;
         }
-        return await panel.GetSecret(promptFormat, promptArgs, token);
-    }
-
-    public string ID { get; }
-    public virtual string Parent { get; }
-
-    public ProviderDetailSet Detail => field ??=
-        new();
-
-    public ProviderNavigation Navigation {
-        get;
-        set => Change(ref field, value);
-    }
-
-    public object Observation =>
-        EntryObservation;
-
-    public async Task<bool> Change(string id, CancellationToken token) {
-        var panel = Panel;
-        if (panel == null) return false;
-        return await panel.Provide(id, token);
-    }
-
-    public void Dispose() {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~Provider() {
-        Dispose(false);
-    }
-
-    IEntryObservation IProvider.Observation =>
-        EntryObservation;
-
-    IEntryDataDefinitionSet IProvider.Data =>
-        Data.Definition;
-
-    async Task IProvider.Refresh(CancellationToken token) {
-        using (LinkedTokenSource(token, out var t)) {
-            var task = Refresh(t);
-            if (task != null) {
-                await task;
-            }
+        Panel = null;
+        Import = null;
+        try {
+            End(ended: false);
         }
-    }
-
-    async Task<bool> IProvider.Take(IMessage message, CancellationToken token) {
-        using (LinkedTokenSource(token, out var t)) {
-            var task = Take(message, t);
-            if (task != null) {
-                return await task;
-            }
-            return false;
+        catch (Exception ex) {
+            error ??= ex;
         }
-    }
-
-    async Task<bool> IProvider.Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
-        if (Log.Info()) {
-            Log.Info(Log.Join(nameof(Drop), ID));
+        try {
+            End();
         }
-        using (LinkedTokenSource(token, out var t)) {
-            var task = Drop(data, progress, t);
-            if (task != null) {
-                return await task;
-            }
-            return false;
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        try {
+            End(ended: true);
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
         }
     }
 
@@ -264,130 +274,197 @@ public abstract class Provider : Notifier, IProvider, IDisposable {
         }
     }
 
-    void IProvider.End() {
-        if (Log.Info()) {
-            Log.Info(Log.Join(nameof(End), ID));
-        }
-        if (TokenSource != null) {
-            lock (TokenLocker) {
-                if (TokenSource != null) {
-                    TokenSource.Cancel();
+    internal IPanel Panel { get; set; }
+    internal IImportAgent Import { get; set; }
+
+    internal virtual Task Init(CancellationToken token) {
+        using (LinkedTokenSource(token, out var t)) {
+            if (t.IsCancellationRequested) {
+                return Task.FromCanceled(t);
+            }
+            var panel = Panel;
+            var panelIsNotNull = panel is not null;
+            Provider previous = null;
+            var panelHasProvider = panelIsNotNull && panel.HasProvider(out previous);
+            if (panelHasProvider) {
+                var navigation = previous.Navigation;
+                if (navigation != null) {
+                    Navigation = navigation.For(this);
                 }
+                Detail.Inherit(previous);
             }
         }
-        Panel = null;
-        Import = null;
-        End(ended: false);
-        End();
-        End(ended: true);
+        return Task.CompletedTask;
     }
 
-    public abstract class Of<TEntry> : Provider where TEntry : Entry {
-        private new EntryObservation<TEntry> EntryObservation { get; }
-
-        private Of(string id, EntryObservation<TEntry> entryObservation) : base(id, typeof(TEntry), entryObservation) {
-            EntryObservation = entryObservation ?? throw new ArgumentNullException(nameof(entryObservation));
+    internal void DetachController(IProviderController expected) {
+        if (ReferenceEquals(Controller, expected)) {
+            SetController(null);
         }
+    }
 
-        private Of(string id,
-                   int initialCapacity,
-                   IEqualityComparer<string> compareID,
-                   IEqualityComparer<string> compareName)
-        : this(id, new(initialCapacity, compareID, compareName)) {
-        }
+    /*
+     * A provider is shown by the view attached as its controller, and the
+     * provider of entries overrides this to focus its entries instead.
+     */
+    private protected virtual bool Focus() {
+        return Controller?.Focus() ?? false;
+    }
 
-        protected IReadOnlyList<TEntry> Provided =>
-            EntryObservation.Items;
+    private protected virtual void EndProvided() {
+    }
 
-        protected IEnumerable<TEntry> Selected =>
-            EntryObservation.Selected.Cast<TEntry>();
-
-        protected IEntrySorting Sorting =>
-            EntryObservation.DataView.Sorting;
-
-        protected virtual void Adding(IReadOnlyCollection<TEntry> entries) {
-        }
-
-        protected virtual void Removing(IReadOnlyCollection<TEntry> entries) {
-        }
-
-        protected async Task Provide(IReadOnlyCollection<TEntry> entries, CancellationToken token) {
-            if (entries == null) throw new ArgumentNullException(nameof(entries));
-            if (entries.Count > 0) {
-                Adding(entries);
-                using (LinkedTokenSource(token, out var t)) {
-                    await EntryObservation.Add(entries, t);
-                }
-            }
-        }
-
-        protected async Task Provide(TEntry entry, CancellationToken token) {
-            using (LinkedTokenSource(token, out var t)) {
-                await Provide([entry], t);
-            }
-        }
-
-        protected async Task Revoke(IReadOnlyCollection<TEntry> entries, CancellationToken token) {
-            if (entries == null) throw new ArgumentNullException(nameof(entries));
-            if (entries.Count > 0) {
-                Removing(entries);
-                using (LinkedTokenSource(token, out var t)) {
-                    await EntryObservation.Remove(entries, t);
-                }
-            }
-        }
-
-        protected async Task Revoke(TEntry entry, CancellationToken token) {
-            using (LinkedTokenSource(token, out var t)) {
-                await Revoke([entry], t);
-            }
-        }
-
-        protected TEntry Lookup(string id = null, string name = null) {
-            if (id != null) {
-                var entry = EntryObservation.LookupID(id);
-                if (entry != null) {
-                    if (name == null || (name == entry.Name)) {
-                        return entry;
+    protected internal CancellationToken Token {
+        get {
+            if (TokenSource != null) {
+                lock (TokenLocker) {
+                    if (TokenSource != null) {
+                        return TokenSource.Token;
                     }
                 }
-                return null;
             }
-            if (name != null) {
-                var entry = EntryObservation.LookupName(name);
-                if (entry != null) {
-                    return entry;
+            return new CancellationToken(canceled: true);
+        }
+    }
+
+    /// <summary>
+    /// Initializes a provider.
+    /// </summary>
+    /// <param name="id">
+    /// The ID of the provider.
+    /// </param>
+    /// <remarks>
+    /// A provider that derives directly from <see cref="Provider"/> provides no entries, and is shown
+    /// by a view of its own. A view whose template hosts the provider in a <c>ProviderGrid</c>
+    /// receives keyboard focus when the panel of the provider is activated. A provider of entries
+    /// derives from <see cref="Provider{TEntry, TConfig}"/>.
+    /// </remarks>
+    protected Provider(string id) {
+        ID = id;
+    }
+
+    protected virtual void Dispose(bool disposing) {
+        if (disposing) {
+            if (TokenSource != null) {
+                lock (TokenLocker) {
+                    var tokenSource = TokenSource;
+                    if (tokenSource != null) {
+                        TokenSource = null;
+                        tokenSource.Dispose();
+                    }
                 }
             }
+        }
+    }
+
+    protected virtual Task<bool> Take(ISystemMessage message, CancellationToken token) {
+        return Task.FromResult(false);
+    }
+
+    protected virtual Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
+        return Task.FromResult(false);
+    }
+
+    protected virtual Task Refresh(CancellationToken token) => Task.CompletedTask;
+    protected virtual Task Begin(CancellationToken token) => Task.CompletedTask;
+    protected virtual void End() {
+    }
+
+    protected async Task<TSecret> GetSecret<TSecret>(string key,
+                                                     string promptFormat,
+                                                     IEnumerable<string> promptArgs,
+                                                     CancellationToken token)
+    where TSecret : class, IPanelSecret {
+        var panel = Panel;
+        if (panel == null) {
             return null;
         }
+        return await panel.GetSecret<TSecret>(key, promptFormat, promptArgs, token);
+    }
 
-        public abstract class With<TConfig> : Of<TEntry> where TConfig : EntryConfig, new() {
-            private readonly IConfig<TConfig> ConfigFile;
+    public string ID { get; }
+    public virtual string Parent { get; }
 
-            private protected With(string id,
-                                   int initialCapacity,
-                                   IEqualityComparer<string> compareID,
-                                   IEqualityComparer<string> compareName)
-            : base(id, initialCapacity, compareID, compareName) {
-                ConfigFile = Configure.File<TConfig>();
-                base.Config = Config = ConfigFile.Loaded;
+    public ProviderDetailSet Detail => field ??=
+        new(this);
+
+    public ProviderNavigation Navigation {
+        get;
+        set => Change(ref field, value);
+    }
+
+    public async Task<bool> Change(string id, CancellationToken token) {
+        var panel = Panel;
+        if (panel == null) return false;
+        return await panel.Provide(id, token);
+    }
+
+    public void Dispose() {
+        RethrowCompletedFailure(EnsureLifetime(dispose: true));
+    }
+
+    /// <summary>
+    /// Asynchronously closes provider details before ending and disposing the provider.
+    /// </summary>
+    public async ValueTask DisposeAsync() {
+        await EnsureLifetime(dispose: true);
+    }
+
+    ~Provider() {
+        Dispose(false);
+    }
+
+    event EventHandler IProvider.ControllerChanged {
+        add => ControllerChangedEvent += value;
+        remove => ControllerChangedEvent -= value;
+    }
+
+    bool IProvider.Focus() {
+        return Focus();
+    }
+
+    IProviderController IControlled<IProviderController>.Controller {
+        set => SetController(value);
+    }
+
+    async Task IProvider.Refresh(CancellationToken token) {
+        using (LinkedTokenSource(token, out var t)) {
+            var task = Refresh(t);
+            if (task != null) {
+                await task;
             }
-
-            internal sealed override async Task Init(CancellationToken token) {
-                await base.Init(token);
-                using (LinkedTokenSource(token, out var t)) {
-                    base.Config = (Config ??= await ConfigFile.Load(t));
-                    await EntryObservation.Init(t);
-                }
-            }
-
-            protected new TConfig Config { get; private set; }
         }
+    }
+
+    async Task<bool> IProvider.Take(ISystemMessage message, CancellationToken token) {
+        using (LinkedTokenSource(token, out var t)) {
+            var task = Take(message, t);
+            if (task != null) {
+                return await task;
+            }
+            return false;
+        }
+    }
+
+    async Task<bool> IProvider.Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
+        if (Log.Info()) {
+            Log.Info(Log.Join(nameof(Drop), ID));
+        }
+        using (LinkedTokenSource(token, out var t)) {
+            var task = Drop(data, progress, t);
+            if (task != null) {
+                return await task;
+            }
+            return false;
+        }
+    }
+
+    void IProvider.End() {
+        RethrowCompletedFailure(EnsureLifetime(dispose: false));
     }
 }
 
-public abstract class Provider<TEntry, TConfig> : Provider.Of<TEntry>.With<TConfig>
+public abstract class Provider<TEntry, TConfig> : EntryProvider.Of<TEntry>.With<TConfig>
 where TEntry : Entry
 where TConfig : EntryConfig, new() {
     protected Provider(string id,

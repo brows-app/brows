@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+    <EmbeddedResource Include="Resource\Culture\_.alias" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Drives\Brows.Drives.csproj" />
+    <ProjectReference Include="..\Brows.SevenZip.Native\Brows.SevenZip.Native.csproj" />
+  </ItemGroup>
+  <Import Project="..\..\..\shared\Brows.Shared.Archives\Brows.Shared.Archives.projitems" Label="Shared" />
+</Project>

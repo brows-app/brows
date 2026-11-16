@@ -3,7 +3,8 @@ using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Brows.Native; 
+namespace Brows.Native;
+
 public sealed class NativeString : CriticalFinalizerObject, IDisposable {
     private byte[] Bytes => _Bytes ??= Encoding.GetBytes(String + '\0');
     private byte[] _Bytes;

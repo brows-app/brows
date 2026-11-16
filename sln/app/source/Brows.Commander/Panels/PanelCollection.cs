@@ -1,14 +1,27 @@
 ﻿using Brows.Gui;
 using Brows.Providers;
 using Domore.Notification;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Panels;
 
 internal sealed class PanelCollection : Notifier, IPanelCollection, IControlled<IPanelCollectionController> {
+    private readonly SemaphoreSlim LifecycleGate = new(1, 1);
+    private readonly Lock ClearLocker = new();
+    private readonly CancellationTokenSource Shutdown = new();
+    private readonly CancellationToken ShutdownToken;
+    private Task ClearTask;
+    private volatile bool Ending;
     private readonly List<Panel> List = [];
+    /*
+     * Startup leaves this set only after admission or successful cleanup. Failed
+     * unadmitted panels remain owned here so shutdown can retry their disposal.
+     */
+    private readonly Dictionary<Panel, Task> Starting = [];
     private readonly PanelHistoryShared SharedHistory = new();
 
     private void Activating(Panel panel) {
@@ -18,10 +31,10 @@ internal sealed class PanelCollection : Notifier, IPanelCollection, IControlled<
         Active = panel;
     }
 
-    private bool Closed(Panel panel) {
+    private async Task<bool> Closed(Panel panel) {
         if (panel != null) {
+            await panel.CloseAsync();
             panel.Activating = null;
-            panel.Close();
             return true;
         }
         return false;
@@ -33,6 +46,69 @@ internal sealed class PanelCollection : Notifier, IPanelCollection, IControlled<
             Column = column,
             SharedHistory = SharedHistory
         };
+    }
+
+    private async Task<bool> RemoveCoreAsync(IPanel item) {
+        if (item is not Panel panel) {
+            return false;
+        }
+        if (List.Contains(panel) == false) {
+            return false;
+        }
+        var closed = await Closed(panel);
+        if (closed == false) {
+            return false;
+        }
+        var removed = List.Remove(panel);
+        if (removed == false) {
+            return false;
+        }
+        for (var column = 0; column < List.Count; column++) {
+            List[column].Column = column;
+        }
+        var replacement = List.Count == 0 ? null : List[Math.Min(panel.Column, List.Count - 1)];
+        if (Active == panel) {
+            Active = null;
+            replacement?.Activate();
+        }
+        var passiveWasRemoved = Passive == panel;
+        var passiveIsStale = Passive is not null && List.Contains(Passive) == false;
+        var passiveNeedsReplacement = passiveWasRemoved || passiveIsStale;
+        if (passiveNeedsReplacement) {
+            Passive = replacement == Active ? null : replacement;
+        }
+        Controller?.RemovePanel(panel);
+        return true;
+    }
+
+    private async Task ClearCoreAsync() {
+        await Task.Yield();
+        Shutdown.Cancel();
+        Task[] starting;
+        lock (ClearLocker) {
+            starting = Starting.Values.ToArray();
+        }
+        await Task.WhenAll(starting);
+        await LifecycleGate.WaitAsync();
+        try {
+            Panel[] pending;
+            lock (ClearLocker) {
+                pending = Starting.Keys.ToArray();
+            }
+            foreach (var panel in pending) {
+                await panel.CloseAsync();
+                lock (ClearLocker) {
+                    Starting.Remove(panel);
+                }
+            }
+            foreach (var item in List.ToList()) {
+                await RemoveCoreAsync(item);
+            }
+            Shutdown.Dispose();
+        }
+        finally {
+            LifecycleGate.Release();
+        }
     }
 
     public Panel this[int index] =>
@@ -58,73 +134,81 @@ internal sealed class PanelCollection : Notifier, IPanelCollection, IControlled<
     public ProviderFactorySet Providers { get; }
 
     public PanelCollection(ProviderFactorySet providers, Commander commander) {
+        ShutdownToken = Shutdown.Token;
         Providers = providers;
         Commander = commander;
     }
 
     public async Task<IPanel> Add(string id, CancellationToken token) {
-        var panel = Panel(column: List.Count);
-        var opened = await panel.Provide(id, token);
-        if (opened) {
-            List.Add(panel);
-            panel.Activate();
-            Controller?.AddPanel(panel);
-            return panel;
+        Panel panel;
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        lock (ClearLocker) {
+            if (Ending) {
+                return null;
+            }
+            panel = Panel(column: 0);
+            Starting.Add(panel, completion.Task);
         }
-        return null;
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(token, ShutdownToken);
+        var admitted = false;
+        var cleanupSucceeded = false;
+        try {
+            var opened = await panel.Provide(id, linked.Token);
+            await LifecycleGate.WaitAsync(linked.Token);
+            try {
+                var canAdd = opened && Ending == false;
+                if (canAdd == false) {
+                    return null;
+                }
+                panel.Column = List.Count;
+                List.Add(panel);
+                admitted = true;
+                panel.Activate();
+                Controller?.AddPanel(panel);
+                return panel;
+            }
+            finally {
+                LifecycleGate.Release();
+            }
+        }
+        finally {
+            try {
+                if (admitted == false) {
+                    await panel.CloseAsync();
+                    cleanupSucceeded = true;
+                }
+            }
+            finally {
+                lock (ClearLocker) {
+                    var startupIsSettled = admitted || cleanupSucceeded;
+                    if (startupIsSettled) {
+                        Starting.Remove(panel);
+                    }
+                    completion.TrySetResult();
+                }
+            }
+        }
     }
-
     public async Task<bool> Remove(IPanel item) {
-        if (item is not Panel panel) {
-            return false;
+        await LifecycleGate.WaitAsync();
+        try {
+            return await RemoveCoreAsync(item);
         }
-        var closed = Closed(panel);
-        if (closed == false) {
-            return false;
+        finally {
+            LifecycleGate.Release();
         }
-        var removed = List.Remove(panel);
-        if (removed == false) {
-            return false;
-        }
-        var active = default(Panel);
-        var passive = default(Panel);
-        var column = 0;
-        var panels = List.ToList();
-        foreach (var p in panels) {
-            p.Column = column++;
-            if (Active == item && (p.Column == item.Column)) {
-                active = p;
-            }
-            if (Passive == item && (p.Column == item.Column)) {
-                passive = p;
-            }
-        }
-        if (Active == item) {
-            Active = null;
-            if (active == null) {
-                active = panels.LastOrDefault();
-            }
-        }
-        if (Passive == item) {
-            Passive = passive;
-        }
-        if (active != null) {
-            active.Activate();
-        }
-        Controller?.RemovePanel(panel);
-        return await Task.FromResult(true);
     }
 
-    public void Clear() {
-        foreach (var item in List) {
-            var closed = Closed(item);
-            if (closed) {
-                Controller?.RemovePanel(item);
+    public Task ClearAsync() {
+        lock (ClearLocker) {
+            var canRetry = ClearTask is null || ClearTask.IsFaulted || ClearTask.IsCanceled;
+            if (canRetry) {
+                Ending = true;
+                ClearTask = ClearCoreAsync();
             }
+            return ClearTask;
         }
-        List.Clear();
     }
-
     public async Task<bool> Shift(IPanel item, int column) {
         if (item.Column == column) {
             return false;

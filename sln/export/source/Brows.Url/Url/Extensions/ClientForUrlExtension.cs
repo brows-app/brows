@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Brows.Url.Extensions;
+﻿namespace Brows.Url.Extensions;
 
 internal static class ClientForUrlExtension {
     public static Exception Try(this ClientForUrl clientForUrl) {

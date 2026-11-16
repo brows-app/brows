@@ -10,6 +10,12 @@ public sealed class WindowsProgram : Program<WindowsProgramConfig> {
     private static readonly string LockName = LockNameFactory();
 
     private static string LockNameFactory() {
+#if DEBUG
+        /*
+         * An unnamed semaphore lets each debug process run its own application instance.
+         */
+        return null;
+#else
         using (var identity = WindowsIdentity.GetCurrent()) {
             var sid = identity.User?.Value ?? identity.Name.Replace('\\', '.');
             /*
@@ -19,6 +25,7 @@ public sealed class WindowsProgram : Program<WindowsProgramConfig> {
              */
             return $"Global\\Brows.WindowsProgram.{sid}";
         }
+#endif
     }
 
     private static async Task<T> Lock<T>(Func<bool, Task<T>> func) {

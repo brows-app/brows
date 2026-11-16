@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Compile Include="..\ProtocolTestSupport\ProtocolTestServer.cs" Link="ProtocolTestSupport\ProtocolTestServer.cs" />
+    <ProjectReference Include="..\..\source\Brows.FTP.Client\Brows.FTP.Client.csproj" />
+    <ProjectReference Include="..\..\source\Brows.FTP\Brows.FTP.csproj" />
+    <ProjectReference Include="..\..\source\Brows.FileSystem\Brows.FileSystem.csproj" />
+    <Compile Include="..\ProtocolTestSupport\FileSystemTestDestination.cs" Link="ProtocolTestSupport\FileSystemTestDestination.cs" />
+    <ProjectReference Include="..\..\source\Brows.FTPS\Brows.FTPS.csproj" />
+    <ProjectReference Include="..\..\..\framework\source\Brows.Framework.Testing\Brows.Framework.Testing.csproj" />
+    <Compile
+      Include="..\ProtocolTestSupport\ProtocolTestServerInfrastructure.cs"
+      Link="ProtocolTestSupport\ProtocolTestServerInfrastructure.cs" />
+  </ItemGroup>
+  <Target Name="CopyFtpNativeBinaries" AfterTargets="Build">
+    <PropertyGroup>
+      <FtpNativeDirectory>$(MSBuildThisFileDirectory)..\..\..\out\$(Configuration)\brows.native\x64-windows\</FtpNativeDirectory>
+    </PropertyGroup>
+    <ItemGroup Condition="Exists('$(FtpNativeDirectory)brows_url.dll')">
+      <FtpNativeBinary Include="$(FtpNativeDirectory)*.dll" />
+    </ItemGroup>
+    <MakeDir Directories="$(OutDir)brows.native\x64-windows\" Condition="'@(FtpNativeBinary)' != ''" />
+    <Copy SourceFiles="@(FtpNativeBinary)"
+          DestinationFolder="$(OutDir)brows.native\x64-windows\"
+          Condition="'@(FtpNativeBinary)' != ''" />
+  </Target>
+</Project>

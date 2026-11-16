@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands.DataKey; 
 internal abstract class DataKeyCommand<T> : Command<T> where T : DataKeyCommandParameter, new() {
-    private async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, IProvider provider, T parameter, [EnumeratorCancellation] CancellationToken token) {
+    private async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, IEntryProvider provider, T parameter, [EnumeratorCancellation] CancellationToken token) {
         if (null == context) throw new ArgumentNullException(nameof(context));
         if (null == provider) throw new ArgumentNullException(nameof(provider));
         await foreach (var suggestion in base.Suggest(context, token)) {
@@ -56,6 +56,9 @@ internal abstract class DataKeyCommand<T> : Command<T> where T : DataKeyCommandP
         }
     }
 
+    protected sealed override bool RequiresEntries =>
+        true;
+
     protected virtual string Parse(string input) {
         return input;
     }
@@ -79,7 +82,7 @@ internal abstract class DataKeyCommand<T> : Command<T> where T : DataKeyCommandP
         if (context == null) return false;
         if (context.HasPanel(out var active) == false) return false;
         if (context.HasParameter(out var parameter) == false) return false;
-        if (active.HasProvider(out IProvider provider) == false) {
+        if (active.HasProvider(out IEntryProvider provider) == false) {
             return false;
         }
         return Validate(provider.Data.Key, parameter.Args);
@@ -89,7 +92,7 @@ internal abstract class DataKeyCommand<T> : Command<T> where T : DataKeyCommandP
         if (null == context) throw new ArgumentNullException(nameof(context));
         if (context.DidTrigger(this)) {
             if (context.HasPanel(out var active)) {
-                if (active.HasProvider(out IProvider provider)) {
+                if (active.HasProvider(out IEntryProvider provider)) {
                     if (context.GetParameter(out var parameter)) {
                         return Suggest(context, provider, parameter, cancellationToken);
                     }

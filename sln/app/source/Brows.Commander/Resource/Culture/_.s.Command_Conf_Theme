@@ -1,16 +1,11 @@
 ﻿# example:
-# {input} light bg=lightgreen fg=darkred
+# {input} FileExplorer light
+# {input} FileExplorer dark
 
-# The name of the theme to load. Options
-# include "light" and "dark".
-Base = 
+# The name of the color theme to load.
+# Available themes: FileExplorer.
+Name =
 
-# Set the background color. Leave this
-# blank to use the default background
-# color of the base theme.
-BG = 
-
-# Set the foreground color. Leave this
-# blank to use the default foreground
-# color of the base theme.
-FG = 
+# The color mode: light or dark.
+# Fonts are independent of the color theme.
+Mode =

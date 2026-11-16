@@ -1,0 +1,31 @@
+MBoxEntry_Subject                     = Subject
+MBoxEntry_From                        = From
+MBoxEntry_Date                        = Date
+MBoxEntry_To                          = To
+MBoxEntry_MessageId                   = Message ID
+MBoxEntry_Labels                      = Labels
+MBoxEntry_ThreadId                    = Thread ID
+MBoxEntry_Size                        = Size
+
+MBoxEntry_NoSubject                   = (no subject)
+
+MBoxProvider_Status_Empty             = The mailbox holds no messages.
+MBoxProvider_Status_Partial           = Only some of the messages are listed, because a limit was reached.
+MBoxProvider_Status_Loading           = The mailbox is being read.
+MBoxProvider_Status_Cancelled         = The read of the mailbox was cancelled.
+MBoxProvider_Status_Failed            = The mailbox could not be read.
+
+MBoxProvider_Error_Invalid            = The file is not a valid mailbox.
+
+MBoxPreview_Status_Loading            = The message is being read.
+MBoxPreview_Status_NotRead            = The message has no body.
+MBoxPreview_Status_Truncated          = The message is longer than the preview limit, so it is cut short.
+MBoxPreview_Status_Unavailable        = The message cannot be shown.
+MBoxPreview_Status_Malformed          = The message is malformed.
+MBoxPreview_Status_HtmlOnly           = The message holds no plain text. Use MBox_Open or MBox_Export to read it.
+MBoxPreview_Status_NoSelection        = No message is selected.
+
+Command_Description_MBox_Open         = Open the selected messages of the mailbox
+Command_Description_MBox_View         = Show a preview of the current message
+Command_Description_MBox_Export       = Extract the selected messages of the mailbox
+Command_Description_MBox_PreviewFocus = Move the focus between the message list and its preview

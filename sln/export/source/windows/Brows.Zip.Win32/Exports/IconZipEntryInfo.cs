@@ -1,19 +1,27 @@
-﻿using Brows.Runtime.Win32;
+﻿using Brows.Win32;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace Brows.Exports;
 
 internal sealed class IconZipEntryInfo : IIconZipEntryInfo {
-    public Task<object> Icon(ZipEntryInfo zipEntryInfo, CancellationToken token) {
+    [ImportRequired]
+    internal IWin32WindowsServices Services { get; set; }
+
+    public async Task<object> Icon(ZipEntryInfo zipEntryInfo, CancellationToken token) {
         ArgumentNullException.ThrowIfNull(zipEntryInfo);
         if (token.IsCancellationRequested) {
-            return Task.FromCanceled<object>(token);
+            token.ThrowIfCancellationRequested();
         }
         return zipEntryInfo.Kind switch {
-            ZipEntryKind.File => Win32Icon.Load(Path.GetExtension(zipEntryInfo.Name.Original), token),
-            ZipEntryKind.Path => Win32Icon.Load(SHSTOCKICONID.FOLDER, token),
-            _ => Task.FromResult<object>(null),
+            ZipEntryKind.File => await Services.GetIconSource(
+                Path.GetExtension(zipEntryInfo.Name.Original),
+                FileAttributes.None,
+                token),
+            ZipEntryKind.Path => await Services.GetIconSource(
+                Win32StockIcon.Folder,
+                token),
+            _ => null,
         };
     }
 }

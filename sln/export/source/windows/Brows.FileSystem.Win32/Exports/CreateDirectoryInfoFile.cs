@@ -1,13 +1,20 @@
-﻿using System.IO;
-using System.Threading;
+﻿using Brows.Win32;
+using System.IO;
 using System.Threading.Tasks;
 
-namespace Brows.Exports; 
+namespace Brows.Exports;
+
 internal sealed class CreateDirectoryInfoFile : ICreateDirectoryInfoFile {
-    public Task<bool> Work(DirectoryInfo directoryInfo, string file, IOperationProgress progress, CancellationToken token) {
+    [ImportRequired]
+    internal IWin32InteropServices Service { get; set; }
+
+    public Task<bool> Work(DirectoryInfo directoryInfo,
+                           string file,
+                           IOperationProgress progress,
+                           CancellationToken token) {
         if (directoryInfo != null) {
             var
-            op = new Win32FileOperation(directoryInfo.FullName);
+            op = Service.FileOperation(directoryInfo.FullName);
             op.CreateFiles.Add(new() {
                 Name = file,
                 Attributes = FileAttributes.Normal

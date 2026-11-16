@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.Conf\Brows.Conf.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Brows.Composition" />
+  </ItemGroup>
+</Project>

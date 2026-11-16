@@ -2,8 +2,9 @@
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace Brows.Native; 
-public struct NativeGlobalAlloc : IDisposable {
+namespace Brows.Native;
+
+public readonly struct NativeGlobalAlloc : IDisposable {
     private NativeGlobalAlloc(IntPtr hGlobal) {
         HGlobal = hGlobal;
     }
@@ -14,9 +15,9 @@ public struct NativeGlobalAlloc : IDisposable {
         }
     }
 
-    public IntPtr HGlobal { get; }
+    public readonly IntPtr HGlobal { get; }
 
-    public struct OfSecureString : IDisposable {
+    public readonly struct OfSecureString : IDisposable {
         private bool Unicode { get; }
 
         private OfSecureString(IntPtr hGlobal, bool unicode) {
@@ -39,7 +40,7 @@ public struct NativeGlobalAlloc : IDisposable {
             }
         }
 
-        public IntPtr HGlobal { get; }
+        public readonly IntPtr HGlobal { get; }
 
         void IDisposable.Dispose() {
             if (HGlobal != IntPtr.Zero) {

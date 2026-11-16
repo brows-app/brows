@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -25,9 +24,15 @@ public static class EntrySorting {
         public int Count => Agent.Count;
         public IEnumerable<string> Keys => Agent.Keys;
         public IEnumerable<EntrySortDirection?> Values => Agent.Values;
+
         public bool ContainsKey(string key) => Agent.ContainsKey(key);
-        public bool TryGetValue(string key, [MaybeNullWhen(false)] out EntrySortDirection? value) => Agent.TryGetValue(key, out value);
-        public IEnumerator<KeyValuePair<string, EntrySortDirection?>> GetEnumerator() => ((IEnumerable<KeyValuePair<string, EntrySortDirection?>>)Agent).GetEnumerator();
+
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out EntrySortDirection? value) =>
+            Agent.TryGetValue(key, out value);
+
+        public IEnumerator<KeyValuePair<string, EntrySortDirection?>> GetEnumerator() =>
+            ((IEnumerable<KeyValuePair<string, EntrySortDirection?>>)Agent).GetEnumerator();
+
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Agent).GetEnumerator();
     }
 

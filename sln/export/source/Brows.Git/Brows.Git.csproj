@@ -2,6 +2,9 @@
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
     <ProjectReference Include="..\Brows.Git.Native\Brows.Git.Native.csproj" />
   </ItemGroup>

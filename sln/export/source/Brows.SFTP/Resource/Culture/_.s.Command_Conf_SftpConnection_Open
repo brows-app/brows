@@ -1,0 +1,2 @@
+# A new or changed host key must be trusted explicitly before SFTP authentication.
+# Open the relevant connection row after checking the displayed fingerprint.

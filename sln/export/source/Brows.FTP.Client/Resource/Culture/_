@@ -1,0 +1,31 @@
+FtpEntry_Extension                      = Ext
+FtpEntry_Kind                           = Type
+FtpEntry_Length                         = Size
+FtpEntry_Name                           = Name
+FtpEntry_Target                         = Link
+FtpEntry_Time                           = Date
+
+Command_Group_FtpEntryData              = File System
+Command_Group_FtpListingData            = File System
+
+FtpProvider_Prompt_UsernameAndPassword = Enter a username and password for {0}:
+
+Command_Description_Ftp_Open              = Open FTP files and directories
+Command_Description_Ftps_Open             = Open FTPS files and directories
+Command_Description_Ftp_View               = Toggle the FTP entry preview
+Command_Description_Ftps_View              = Toggle the FTPS entry preview
+Command_Description_Ftp_Copy              = Copy selected FTP entries to the other panel
+Command_Description_Ftps_Copy             = Copy selected FTPS entries to the other panel
+Command_Description_Ftp_ViewRaw           = Toggle raw FTP listing output
+Command_Description_Ftps_ViewRaw          = Toggle raw FTPS listing output
+Command_Description_Ftp_Delete            = Delete selected FTP entries
+Command_Description_Ftps_Delete           = Delete selected FTPS entries
+Command_Description_Ftp_Rename            = Rename selected FTP entries
+Command_Description_Ftps_Rename           = Rename selected FTPS entries
+Command_Description_Ftp_Move              = Move selected entries to the other panel or an FTP directory
+Command_Description_Ftps_Move             = Move selected entries to the other panel or an FTPS directory
+Command_Description_Ftp_CreateDirectory    = Create an FTP directory
+Command_Description_Ftps_CreateDirectory   = Create an FTPS directory
+Command_Description_Ftp_CreateFile         = Create an empty FTP file
+Command_Description_Ftps_CreateFile        = Create an empty FTPS file
+Command_Description_Ftp                   = Open an FTP or FTPS URL

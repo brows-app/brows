@@ -1,0 +1,14 @@
+Command_Description_Sftp_Open                    = Open files and directories over SFTP
+Command_Description_Sftp_View                    = Toggle the SFTP entry preview
+Command_Description_Sftp_Copy                    = Copy selected SFTP entries to another panel
+Command_Description_Sftp_Move                    = Move selected SFTP entries to another panel
+Command_Description_Sftp_Delete                  = Delete selected SFTP entries
+Command_Description_Sftp_Rename                  = Rename an SFTP entry
+Command_Description_Sftp_CreateDirectory          = Create a directory on the SFTP server
+Command_Description_Sftp_CreateFile               = Create an empty file on the SFTP server
+Command_Description_Sftp                          = Open an SFTP server
+Command_Description_SftpConnection_Open          = Trust the host key or retry SFTP authentication
+Command_Group_SftpEntryData                      = SFTP
+Command_Group_SftpConnectionEntryData            = SFTP connection
+SftpConnection_Prompt_Password                   = Enter a password for {0}:
+SftpConnection_Prompt_PrivateKeyPassphrase       = Enter the passphrase for SFTP private key {0} on host {1}:

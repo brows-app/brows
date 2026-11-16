@@ -1,7 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
-namespace Brows; 
+namespace Brows;
+
 internal sealed class FoundInFileError : FoundInInfo {
     public Exception Exception { get; }
 

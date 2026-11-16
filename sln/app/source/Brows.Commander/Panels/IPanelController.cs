@@ -1,9 +1,8 @@
-﻿using Brows.Gui;
-using System;
+﻿using System;
 
 namespace Brows.Panels;
 
-public interface IPanelController : IController {
+public interface IPanelController {
     event EventHandler FocusedChanged;
     event EventHandler SizeChanged;
     event EventHandler Activated;

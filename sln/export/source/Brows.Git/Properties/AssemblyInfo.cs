@@ -1,5 +1,3 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
-[assembly: ComVisible(false)]
-[assembly: InternalsVisibleTo("Brows.Git.Gui")]
+﻿[assembly: ComVisible(false)]
+[assembly: InternalsVisibleTo("Brows.Git.Tests")]
+[assembly: InternalsVisibleTo("Brows.Git.Windows")]

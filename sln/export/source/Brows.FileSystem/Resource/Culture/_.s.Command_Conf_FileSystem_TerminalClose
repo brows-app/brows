@@ -1,0 +1,3 @@
+# Stop the terminal session and remove it from the lower view.
+# Processes owned by this terminal session are stopped.
+# Run FileSystem_TerminalOpen to start a fresh session.

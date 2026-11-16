@@ -1,0 +1,67 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+  <FontFamily x:Key="Brows.Font.FileSystemTerminal.FontFamily">Cascadia Mono, Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.FileSystemTerminal.FontSize">14</s:Double>
+
+  <FontFamily x:Key="Brows.Font.LogsProvider.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.LogsProvider.FontSize">12</s:Double>
+
+  <FontFamily x:Key="Brows.Font.ProcessProxy.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.ProcessProxy.FontSize">12</s:Double>
+  <s:Double x:Key="Brows.Font.ProcessProxy.Status.FontSize">11</s:Double>
+
+  <FontFamily x:Key="Brows.Font.Monospace">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.Monospace.Size">12</s:Double>
+  <FontWeight x:Key="Brows.Font.Monospace.Weight">Normal</FontWeight>
+  <FontWeight x:Key="Brows.Font.Weight.Bold">Bold</FontWeight>
+  <s:Double x:Key="Brows.Font.OperatorControl.Header.FontSize">11</s:Double>
+  <s:Double x:Key="Brows.Font.OperatorControl.DepthHeader.FontSize">10</s:Double>
+  <s:Double x:Key="Brows.Font.OperatorControl.Button.FontSize">11</s:Double>
+  <s:Double x:Key="Brows.Font.OperatorControl.Name.FontSize">13</s:Double>
+  <s:Double x:Key="Brows.Font.OperatorControl.ProgressRate.FontSize">11</s:Double>
+  <FontFamily x:Key="Brows.Font.CommandPaletteConf.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.CommandPaletteConf.FontSize">12</s:Double>
+  <FontFamily x:Key="Brows.Font.CommandPaletteInput.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.CommandPaletteInput.FontSize">16</s:Double>
+  <FontWeight x:Key="Brows.Font.CommandPaletteInput.FontWeight">Normal</FontWeight>
+  <FontFamily x:Key="Brows.Font.CommandSuggestionCollection.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.CommandSuggestionCollection.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.CommandSuggestionCollection.Group.FontWeight">Bold</FontWeight>
+  <s:Double x:Key="Brows.Font.CommandSuggestionCollection.Suggestion.FontSize">16</s:Double>
+  <FontFamily x:Key="Brows.Font.PanelState.FontFamily">Segoe UI</FontFamily>
+  <s:Double   x:Key="Brows.Font.PanelState.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.PanelState.FontWeight">Normal</FontWeight>
+  <FontFamily x:Key="Brows.Font.EntryDataTextBlock.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.EntryDataTextBlock.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.EntryDataTextBlock.FontWeight">Normal</FontWeight>
+  <FontFamily x:Key="Brows.Font.EntryGridViewColumnHeader.FontFamily">Segoe UI</FontFamily>
+  <s:Double x:Key="Brows.Font.EntryGridViewColumnHeader.FontSize">12</s:Double>
+  <FontFamily x:Key="Brows.Font.EntryListViewItem.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.EntryListViewItem.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.EntryListViewItem.FontWeight">Normal</FontWeight>
+  <FontFamily x:Key="Brows.Font.EntryStreamViewLoadingControl.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.EntryStreamViewLoadingControl.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.EntryStreamViewLoadingControl.FontWeight">Normal</FontWeight>
+  <FontFamily x:Key="Brows.Font.EntryStreamViewUnavailableControl.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.EntryStreamViewUnavailableControl.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.EntryStreamViewUnavailableControl.FontWeight">Normal</FontWeight>
+  <FontFamily x:Key="Brows.Font.GridViewColumnHeader.FontFamily">Segoe UI</FontFamily>
+  <s:Double x:Key="Brows.Font.GridViewColumnHeader.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.KeyboardKey.FontWeight">Bold</FontWeight>
+  <s:Double x:Key="Brows.Font.PanelSecretControl.Hint.FontSize">11</s:Double>
+  <FontWeight x:Key="Brows.Font.PanelSecretControl.HintKey.FontWeight">SemiBold</FontWeight>
+  <s:Double x:Key="Brows.Font.PanelSecretControl.Input.FontSize">13</s:Double>
+  <s:Double x:Key="Brows.Font.PanelSecretControl.Label.FontSize">12</s:Double>
+  <s:Double x:Key="Brows.Font.PanelSecretControl.Prompt.FontSize">14</s:Double>
+  <FontWeight x:Key="Brows.Font.PanelSecretControl.Prompt.FontWeight">SemiBold</FontWeight>
+  <FontFamily x:Key="Brows.Font.OperatorControl.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.OperatorControl.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.OperatorControl.FontWeight">Normal</FontWeight>
+  <FontWeight x:Key="Brows.Font.OperatorControl.FontWeight.Bold">Bold</FontWeight>
+  <FontWeight x:Key="Brows.Font.OperatorControl.FontWeight.SemiBold">SemiBold</FontWeight>
+  <FontFamily x:Key="Brows.Font.TextReader.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.TextReader.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.TextReader.FontWeight">Normal</FontWeight>
+</ResourceDictionary>

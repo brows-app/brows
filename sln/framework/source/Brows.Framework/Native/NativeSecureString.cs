@@ -4,7 +4,8 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 
-namespace Brows.Native; 
+namespace Brows.Native;
+
 public sealed class NativeSecureString : CriticalFinalizerObject, IDisposable {
     private byte[] GetBytes() {
         var bstr = Marshal.SecureStringToBSTR(SecureString);

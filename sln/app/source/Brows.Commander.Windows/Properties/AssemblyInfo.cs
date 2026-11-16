@@ -1,7 +1,9 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows.Markup;
 
 [assembly: ComVisible(false)]
+[assembly: InternalsVisibleTo("Brows.App.Windows")]
+[assembly: InternalsVisibleTo("Brows.App.Windows.Tests")]
 
-[assembly: XmlnsDefinition("http://schemas.brows.app/xaml", "Brows")]
-[assembly: XmlnsPrefix("http://schemas.brows.app/xaml", "brows")]
+[assembly: XmlnsDefinition("http://schemas.brows.app/winfx/2026/xaml/presentation", "Brows")]
+[assembly: XmlnsPrefix("http://schemas.brows.app/winfx/2026/xaml/presentation", "brows")]

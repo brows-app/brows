@@ -1,6 +1,6 @@
 ﻿namespace Brows;
 
-partial class DriveProviderControl {
+internal sealed partial class DriveProviderControl {
     public DriveProviderControl() {
         InitializeComponent();
     }

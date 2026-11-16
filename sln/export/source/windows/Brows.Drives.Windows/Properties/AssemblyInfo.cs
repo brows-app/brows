@@ -1,3 +1,1 @@
-﻿using System.Runtime.InteropServices;
-
-[assembly: ComVisible(false)]
+﻿[assembly: ComVisible(false)]

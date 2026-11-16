@@ -1,153 +1,222 @@
-﻿using Domore.IO;
-using Domore.Logs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace Brows.Commands; 
+namespace Brows.Commands;
+
 internal sealed class FindWork {
-    private static readonly ILog Log = Logging.For(typeof(FindWork));
-
-    private async Task Write(ChannelWriter<FoundInInfo[]> writer, IOperationProgress progress, CancellationToken token) {
-        if (null == writer) throw new ArgumentNullException(nameof(writer));
-        var param = Parameter;
-        var @in = param.In;
-        var findIn = new FindInInfo(Root, param);
-        var exclude = param.ExcludeFilter().Matchers().ToList();
-        var include = param.IncludeFilter().Matchers().ToList();
-        await Task
-            .Run(cancellationToken: token, function: async () => {
-                var findTasks = new List<Task>();
-                var opts = new EnumerationOptions {
-                    AttributesToSkip = 0,
-                    ReturnSpecialDirectories = false,
-                    RecurseSubdirectories = !@in.HasFlag(FindIn.TopDirectoryOnly)
-                };
-                var
-                enumerable = Root.EnumerateFileSystemInfosAsync("*", opts);
-                enumerable.Enumerating += (s, e) => {
-                    var info = e?.FileSystemInfo;
-                    if (info == null) {
-                        e.Ignore = true;
-                        return;
-                    }
-                    if (exclude.Count > 0) {
-                        var name = info.FullName;
-                        if (exclude.Any(x => x.Matches(name))) {
-                            e.Ignore = true;
-                        }
-                    }
-                };
-                enumerable.Ready += (s, e) => {
-                    if (progress != null) {
-                        progress.Change(setTarget: enumerable.FileCount + enumerable.DirectoryCount);
-                    }
-                };
-                await foreach (var item in enumerable.WithCancellation(token)) {
-                    if (token.IsCancellationRequested) {
-                        token.ThrowIfCancellationRequested();
-                    }
-                    if (include.Count > 0) {
-                        var name = item.FullName;
-                        if (include.Any(i => i.Matches(name)) == false) {
-                            continue;
-                        }
-                    }
-                    var tasks = findIn.Tasks(item, token).ToList();
-                    if (tasks.Count > 0) {
-                        var progressed = false;
-                        async Task findTask() {
-                            for (; ; ) {
-                                if (token.IsCancellationRequested) {
-                                    token.ThrowIfCancellationRequested();
-                                }
-                                if (tasks.Count == 0) {
-                                    break;
-                                }
-                                var task = await Task.WhenAny(tasks);
-                                var result = await task;
-                                await writer.WriteAsync(result, token);
-                                if (progressed == false && progress != null) {
-                                    progressed = true;
-                                    progress.Change(1);
-                                    progress.Change(addProgress: 1, data: item.Name);
-                                }
-                                tasks.Remove(task);
-                            }
-                        }
-                        findTasks.Add(findTask());
-                    }
-                    else {
-                        if (progress != null) {
-                            progress.Change(addProgress: 1, data: item.Name);
-                        }
-                    }
-                }
-                await Task.WhenAll(findTasks);
-            });
-    }
-
-    private async void BeginWrite(ChannelWriter<FoundInInfo[]> writer, IOperationProgress progress, CancellationToken token) {
-        ArgumentNullException.ThrowIfNull(writer);
-        var error = default(Exception);
-        try {
-            await Write(writer, progress, token);
-        }
-        catch (Exception ex) {
-            error = ex;
-        }
-        writer.Complete(error);
-    }
-
-    private async Task Read(ChannelReader<FoundInInfo[]> reader, IOperationProgress progress, CancellationToken token) {
-        ArgumentNullException.ThrowIfNull(reader);
-        var read = reader.ReadAllAsync(token);
-        await foreach (var item in read) {
-            if (token.IsCancellationRequested) {
-                token.ThrowIfCancellationRequested();
-            }
-            if (item != null) {
-                Result.MatchMatched++;
-                Result.Add(item);
-            }
-            Result.MatchTried++;
-        }
-    }
+    private readonly Func<FileSystemInfo, CancellationToken, Task<FindEntryResult>> ProcessEntry;
 
     private async Task Work(IOperationProgress progress, CancellationToken token) {
-        var channel = Channel.CreateUnbounded<FoundInInfo[]>(new UnboundedChannelOptions {
-            SingleReader = true,
-            SingleWriter = true
+        var settings = new FindSettings(Parameter);
+        var findIn = new FindInInfo(Root, settings);
+        var process = ProcessEntry ?? findIn.Process;
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
+        var pipelineToken = cancellation.Token;
+        var entries = Channel.CreateBounded<FileSystemInfo>(new BoundedChannelOptions(settings.Workers * 2) {
+            SingleReader = settings.Workers == 1,
+            SingleWriter = true,
+            FullMode = BoundedChannelFullMode.Wait
         });
-        BeginWrite(channel.Writer, progress, token);
-        await Read(channel.Reader, progress, token);
-    }
+        var outcomes = Channel.CreateBounded<FindEntryResult>(new BoundedChannelOptions(settings.Workers * 2) {
+            SingleReader = true,
+            SingleWriter = settings.Workers == 1,
+            FullMode = BoundedChannelFullMode.Wait
+        });
+        Exception failure = null;
+        long discovered = 0;
+        long traversalErrors = 0;
 
-    public DirectoryInfo Root { get; }
-    public FindParameter Parameter { get; }
-    public FileSystemFindResult Result { get; }
+        void Fail(Exception ex) {
+            var expectedCancellation = ex is OperationCanceledException && pipelineToken.IsCancellationRequested;
+            var recordFailure = !expectedCancellation && !token.IsCancellationRequested;
+            if (recordFailure) {
+                Interlocked.CompareExchange(ref failure, ex, null);
+            }
+            cancellation.Cancel();
+        }
 
-    public FindWork(FileSystemFindResult result) {
-        Result = result ?? throw new ArgumentNullException(nameof(result));
-        Root = Result.Root ?? throw new ArgumentException();
-        Parameter = Result.Parameter ?? throw new ArgumentException();
-    }
+        async Task Produce() {
+            try {
+                var recurse = !settings.In.HasFlag(FindIn.TopDirectoryOnly);
+                await foreach (var entry in FindTraversal.Enumerate(
+                    Root,
+                    recurse,
+                    settings.Exclude,
+                    () => Interlocked.Increment(ref traversalErrors),
+                    pipelineToken)
+                    .ConfigureAwait(false)) {
+                    Interlocked.Increment(ref discovered);
+                    await entries.Writer.WriteAsync(entry, pipelineToken).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex) {
+                Fail(ex);
+            }
+            finally {
+                entries.Writer.TryComplete();
+            }
+        }
 
-    public async Task Done(IOperationProgress progress, CancellationToken token) {
+        async Task Worker() {
+            try {
+                await foreach (var entry in entries.Reader.ReadAllAsync(pipelineToken).ConfigureAwait(false)) {
+                    FindEntryResult outcome;
+                    try {
+                        outcome = await process(entry, pipelineToken).ConfigureAwait(false);
+                    }
+                    catch (RegexMatchTimeoutException ex) {
+                        FoundInInfo[] rows = entry is FileInfo file ? [new FoundInFileError(file, Root, ex)] : [];
+                        outcome = new FindEntryResult(entry, rows, Tried: true, Errors: 1);
+                    }
+                    await outcomes.Writer.WriteAsync(outcome, pipelineToken).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex) {
+                Fail(ex);
+            }
+        }
+
+        var producer = Task.Run(Produce, CancellationToken.None);
+        var workers = new Task[settings.Workers];
+        for (var i = 0; i < workers.Length; i++) {
+            workers[i] = Task.Run(Worker, CancellationToken.None);
+        }
+        async Task FinishWorkers() {
+            try {
+                await Task.WhenAll(workers).ConfigureAwait(false);
+            }
+            finally {
+                outcomes.Writer.TryComplete();
+            }
+        }
+        var finishing = FinishWorkers();
+        var rows = new List<FoundInInfo>(64);
+        long processed = 0;
+        long tried = 0;
+        long matched = 0;
+        long errors = 0;
+        long skipped = 0;
+        var retained = 0;
+        string name = null;
+
+        void Flush() {
+            if (rows.Count > 0) {
+                var batch = rows.ToArray();
+                rows.Clear();
+                Result.Add(batch);
+            }
+            Result.MatchTried = tried;
+            Result.MatchMatched = matched;
+            Result.ErrorCount = errors + Interlocked.Read(ref traversalErrors);
+            Result.SkippedCount = skipped;
+            progress?.Change(setProgress: processed, setTarget: Interlocked.Read(ref discovered), data: name);
+        }
+
+        void Receive(FindEntryResult outcome) {
+            pipelineToken.ThrowIfCancellationRequested();
+            processed++;
+            tried += outcome.Tried ? 1 : 0;
+            matched += outcome.Matched ? 1 : 0;
+            errors += outcome.Errors;
+            skipped += outcome.Skipped;
+            Result.Truncated |= outcome.Truncated;
+            name = outcome.Info.Name;
+            foreach (var row in outcome.Rows) {
+                if (retained == settings.MaximumResults) {
+                    Result.Truncated = true;
+                    break;
+                }
+                rows.Add(row);
+                retained++;
+                if (rows.Count == 64) {
+                    var batch = rows.ToArray();
+                    rows.Clear();
+                    Result.Add(batch);
+                }
+            }
+        }
+
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+        var ready = outcomes.Reader.WaitToReadAsync(pipelineToken).AsTask();
+        var tick = timer.WaitForNextTickAsync(pipelineToken).AsTask();
         try {
-            await Work(progress, token);
+            for (; ; ) {
+                await Task.WhenAny(ready, tick).ConfigureAwait(false);
+                if (tick.IsCompleted) {
+                    await tick.ConfigureAwait(false);
+                    Flush();
+                    tick = timer.WaitForNextTickAsync(pipelineToken).AsTask();
+                }
+                if (ready.IsCompleted) {
+                    if (!await ready.ConfigureAwait(false)) {
+                        break;
+                    }
+                    /*
+                     * Bound each drain so the timer can flush a partial batch even when
+                     * other workers are slow or the outcome channel stays continuously ready.
+                     */
+                    for (var i = 0; i < 16; i++) {
+                        if (!outcomes.Reader.TryRead(out var outcome)) {
+                            break;
+                        }
+                        Receive(outcome);
+                    }
+                    ready = outcomes.Reader.WaitToReadAsync(pipelineToken).AsTask();
+                }
+            }
         }
         catch (Exception ex) {
-            if (ex is OperationCanceledException && token.IsCancellationRequested) {
-                Result.Canceled = true;
+            Fail(ex);
+        }
+        finally {
+            timer.Dispose();
+            /*
+             * Always join every producer/worker before publishing terminal state or releasing
+             * resources. A failed consumer cancels writers blocked by backpressure.
+             */
+            await Task.WhenAll(producer, finishing).ConfigureAwait(false);
+            try {
+                Flush();
             }
-            else {
-                Result.Exception = ex;
+            catch (Exception ex) {
+                Fail(ex);
             }
+        }
+        if (failure is not null) {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
+        token.ThrowIfCancellationRequested();
+    }
+
+    internal DirectoryInfo Root { get; }
+    internal FindParameter Parameter { get; }
+    internal FileSystemFindResult Result { get; }
+
+    internal FindWork(FileSystemFindResult result,
+        Func<FileSystemInfo, CancellationToken, Task<FindEntryResult>> processEntry = null) {
+        Result = result ?? throw new ArgumentNullException(nameof(result));
+        Root = Result.Root ?? throw new ArgumentException(nameof(result));
+        Parameter = Result.Parameter ?? throw new ArgumentException(nameof(result));
+        ProcessEntry = processEntry;
+    }
+
+    internal async Task Done(IOperationProgress progress, CancellationToken token) {
+        try {
+            await Work(progress, token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) {
+            Result.Canceled = true;
+            throw;
+        }
+        catch (Exception ex) {
+            Result.Exception = ex;
+            throw;
         }
         finally {
             Result.Complete = true;

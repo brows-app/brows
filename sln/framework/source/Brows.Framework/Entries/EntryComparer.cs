@@ -1,12 +1,19 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 namespace Brows.Entries;
 
 public sealed class EntryComparer : IComparer<IEntry>, IComparer {
     private static int Compare(IEntryData x, IEntryData y) {
-        return x?.Compare(y) ?? 0;
+        /*
+         * Null compares lower than any non-null value, so comparisons over a
+         * mixed list keep a consistent order. Treating null as equal to
+         * everything breaks the sort's ordering contract.
+         */
+        if (x is null) {
+            return y is null ? 0 : -1;
+        }
+        return y is null ? 1 : x.Compare(y);
     }
 
     private static int Compare(IEntryData x, IEntryData y, EntrySortDirection? direction) {

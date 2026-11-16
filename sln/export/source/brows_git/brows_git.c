@@ -12,6 +12,11 @@ brows_ERROR brows_git_exit(void) {
     return brows_ERROR_NONE;
 }
 
+const char* brows_git_last_error_message(void) {
+    const git_error* error = git_error_last();
+    return error ? error->message : NULL;
+}
+
 void brows_git_log_last_error(void) {
     const git_error* error = git_error_last();
     if (error) {

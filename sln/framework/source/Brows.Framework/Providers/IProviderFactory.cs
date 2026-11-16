@@ -1,6 +1,5 @@
-using Brows.Composition;
+﻿using Brows.Composition;
 using Brows.Panels;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Providers;

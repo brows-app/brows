@@ -2,9 +2,14 @@
 # {input}
 # {input} compressed-archive.zip compression=SmallestSize
 
-# Optionally set the target path of extraction, or the
-# target file name of compression. If this parameter is
-# blank, a value will be inferred from the selection.
+# Optionally set the target directory for extraction or
+# target archive path for compression. If this parameter
+# is blank, a value will be inferred from the selection.
+# For compression, absolute paths (including UNC shares)
+# are preserved. Relative paths use the active directory.
+# Root-relative paths use its drive or share root. A
+# drive-relative path uses the active directory on that
+# drive, or the specified drive root for a different drive.
 Output = 
 
 # Force compression or extraction of the active selection.
@@ -15,6 +20,11 @@ Output =
 #     then each file will be extracted to its own directory.
 #  2. If rule (1.) does not apply, then the selected items
 #     will be compressed to a single ZIP archive.
+# Compression stores a single selected directory's contents
+# at the archive root, preserving all paths below it. An
+# empty selected directory retains its own name. Multiple
+# selected items use their common parent as the archive
+# root, retaining selected directory names and subtrees.
 Force = 
 
 # Set the compression level to use during compression.

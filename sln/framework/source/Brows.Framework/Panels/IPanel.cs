@@ -1,7 +1,6 @@
 ﻿using Brows.Entries;
 using Brows.Providers;
 using System.Collections.Generic;
-using System.Security;
 using System.Threading.Tasks;
 
 namespace Brows.Panels;
@@ -19,5 +18,9 @@ public interface IPanel {
     bool HasProviderService<TService>(out IProvider provider, out TService service) where TService : class, IProviderExport;
     bool HasWindow(out object native);
     Task<bool> Provide(string id, CancellationToken token);
-    Task<SecureString> GetSecret(string promptFormat, IEnumerable<string> promptArgs, CancellationToken token);
+    Task<TSecret> GetSecret<TSecret>(string key,
+                                     string promptFormat,
+                                     IEnumerable<string> promptArgs,
+                                     CancellationToken token)
+    where TSecret : IPanelSecret;
 }

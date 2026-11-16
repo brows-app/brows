@@ -1,6 +1,5 @@
-﻿using Brows.Entries;
-using Brows.IO.Compression;
-using Brows.Panels;
+﻿using Brows.IO.Compression;
+using Brows.Shared.Archives;
 using Brows.Zip;
 using Domore.IO;
 using Domore.Logs;
@@ -20,16 +19,23 @@ public sealed class ZipArchivePath {
     private static readonly Dictionary<string, ZipArchivePath> Set = new();
 
     private int ReferenceCount;
-    private DateTime LastWriteTimeUtc;
 
     private readonly ArchiveLocker Locker;
     private readonly IDisposable FileEvent;
+    private readonly Lock EntryInfoCacheLocker = new();
 
     private TaskCache<ZipEntryInfoCollection> EntryInfoCache {
-        get => _EntryInfoCache ??= new(EntryInfoLoad);
-        set => _EntryInfoCache = value;
+        get {
+            lock (EntryInfoCacheLocker) {
+                return field ??= new(EntryInfoLoad);
+            }
+        }
+        set {
+            lock (EntryInfoCacheLocker) {
+                field = value;
+            }
+        }
     }
-    private TaskCache<ZipEntryInfoCollection> _EntryInfoCache;
 
     private ZipArchivePath(FileInfo file, ZipArchiveNest nest, string fullName) {
         Nest = nest ?? throw new ArgumentNullException(nameof(nest));
@@ -37,7 +43,6 @@ public sealed class ZipArchivePath {
         FileEvent = FileSystemEventTasks.Add(File.DirectoryName, FileEventTask);
         Locker = ArchiveLocker.Get(file);
         FullName = fullName;
-        LastWriteTimeUtc = File.LastWriteTimeUtc;
     }
 
     private async Task<ZipEntryInfoCollection> EntryInfoLoad(CancellationToken token) {
@@ -65,18 +70,23 @@ public sealed class ZipArchivePath {
                             var key = new ZipEntryName(entry.FullName);
                             var dir = entry.IsDirectory();
                             if (dir) {
-                                pathSet[key.Normalized] = ZipEntryInfo.Path(this, key);
+                                pathSet.TryAdd(key.Normalized, ZipEntryInfo.Path(this, key));
                             }
                             else {
-                                fileSet[key.Normalized] = ZipEntryInfo.File(this, key, entry);
+                                /*
+                                 * Name lookup reads the first member. Keep its metadata and original
+                                 * spelling when duplicate or separator-equivalent names are present.
+                                 */
+                                fileSet.TryAdd(key.Normalized, ZipEntryInfo.File(this, key, entry));
                             }
                         }
                     }
-                    foreach (var item in fileSet) {
+                    var namedEntries = fileSet.Values.Concat(pathSet.Values).ToArray();
+                    foreach (var item in namedEntries) {
                         if (token.IsCancellationRequested) {
                             token.ThrowIfCancellationRequested();
                         }
-                        foreach (var path in item.Value.Name.Paths) {
+                        foreach (var path in item.Name.Paths) {
                             if (token.IsCancellationRequested) {
                                 token.ThrowIfCancellationRequested();
                             }
@@ -101,34 +111,162 @@ public sealed class ZipArchivePath {
         return this;
     }
 
+    private sealed class Reference : IDisposable {
+        private ZipArchivePath Path;
+
+        public Reference(ZipArchivePath path) {
+            Path = path ?? throw new ArgumentNullException(nameof(path));
+        }
+
+        public void Dispose() {
+            var path = Interlocked.Exchange(ref Path, null);
+            if (path is not null) {
+                path.Release();
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        ~Reference() {
+            try {
+                Dispose();
+            }
+            catch (Exception ex) {
+                LogCleanupException(ex);
+            }
+        }
+    }
+
+    private Reference Retain() {
+        lock (Set) {
+            var isCurrent = Set.TryGetValue(FullName, out var current) && ReferenceEquals(current, this);
+            var isUnreferenced = ReferenceCount <= 0;
+            var cannotRetain = isCurrent == false || isUnreferenced;
+            if (cannotRetain) {
+                throw new ObjectDisposedException(nameof(ZipArchivePath));
+            }
+            Referenced();
+            return new Reference(this);
+        }
+    }
+
     private static string MakeFullName(FileInfo file, ZipArchiveNest nest) {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(nest);
-        return string.Join(">", nest.Prepend(file.FullName));
+        var archiveRoot = new ArchiveProviderID(
+            ArchiveProviderIDFormat.Zip,
+            file.FullName,
+            nest,
+            "");
+        return ArchiveProviderIDCodec.Format(archiveRoot);
     }
 
-    private async Task FileEventTask(FileSystemEventArgs e, CancellationToken token) {
-        if (e != null) {
-            var name = File.Name;
-            var names = e is RenamedEventArgs r
-                ? new[] { e.Name, r.OldName }
-                : new[] { e.Name };
-            if (names.Contains(name, StringComparer.OrdinalIgnoreCase)) {
-                var file = File.FullName;
-                var update = await FileSystemTask.ExistingFile(file, token);
-                if (update == null) {
-                    EntryInfoCache = null;
-                    await FileDeleted.All(token);
-                }
-                else {
-                    if (LastWriteTimeUtc != update.LastWriteTimeUtc) {
-                        LastWriteTimeUtc = update.LastWriteTimeUtc;
-                        EntryInfoCache = null;
-                        await FileChanged.All(token);
-                    }
+    private static void LogCleanupException(Exception ex) {
+        try {
+            if (Log.Error()) {
+                Log.Error(ex);
+            }
+        }
+        catch {
+        }
+    }
+
+    private static string NormalizeArchiveEntryName(string name, bool directory) {
+        ArgumentNullException.ThrowIfNull(name);
+        var normalized = name
+            .Replace('\\', '/')
+            .Trim('/');
+        if (normalized.Length == 0) {
+            throw new InvalidDataException("A ZIP entry must have a non-empty relative name.");
+        }
+        var needsDirectorySeparator = directory && normalized.EndsWith('/') == false;
+        if (needsDirectorySeparator) {
+            normalized += "/";
+        }
+        return normalized;
+    }
+
+    private static string NormalizeArchiveDirectory(string directory) {
+        if (string.IsNullOrEmpty(directory)) {
+            return null;
+        }
+        return directory
+            .Replace('\\', '/')
+            .Trim('/');
+    }
+
+    private static string CombineArchiveEntryName(string directory, string name) {
+        if (string.IsNullOrEmpty(directory)) {
+            return name;
+        }
+        return directory + "/" + name;
+    }
+
+    private void InvalidateRelatedEntryInfo() {
+        /*
+         * A commit replaces the physical archive, so every cached view of that archive must be discarded.
+         */
+        lock (Set) {
+            foreach (var path in Set.Values) {
+                var sharesArchive = ReferenceEquals(path.Locker, Locker);
+                if (sharesArchive) {
+                    path.EntryInfoCache = null;
                 }
             }
         }
+    }
+
+    private async Task FileEventTask(FileSystemEventArgs e, CancellationToken token) {
+        if (e is null) {
+            return;
+        }
+        var names = e is RenamedEventArgs renamed
+            ? new[] { e.Name, renamed.OldName }
+            : new[] { e.Name };
+        var concernsArchive = names.Contains(File.Name, StringComparer.OrdinalIgnoreCase);
+        if (concernsArchive == false) {
+            return;
+        }
+        var update = await FileSystemTask.ExistingFile(FileName, token);
+        InvalidateEntryInfo();
+        if (update is null) {
+            await FileDeleted.All(token);
+            return;
+        }
+        await FileChanged.All(token);
+    }
+
+    internal void InvalidateEntryInfo() {
+        /*
+         * Each path has its own watcher subscription and refresh callback. Invalidating another path here could
+         * discard metadata that its callback has already reloaded for the same filesystem event.
+         */
+        EntryInfoCache = null;
+    }
+
+    internal async Task<bool> Drop(
+        IPanelDrop data,
+        string targetDirectory,
+        IOperationProgress progress,
+        CancellationToken token) {
+        if (data == null) {
+            return false;
+        }
+        var copy = data.CopyFiles ?? Array.Empty<string>();
+        var move = data.MoveFiles ?? Array.Empty<string>();
+        var files = new HashSet<string>(copy.Concat(move));
+        if (files.Count == 0) {
+            return false;
+        }
+        var directory = NormalizeArchiveDirectory(targetDirectory);
+        var update = Update(token: token, progress: progress, info: new() {
+            CreateEntriesFromFiles = files.ToDictionary(
+                file => CombineArchiveEntryName(
+                    directory,
+                    NormalizeArchiveEntryName(Path.GetFileName(file), directory: false)),
+                file => file)
+        });
+        await update;
+        return true;
     }
 
     public ZipArchiveFileEvent FileChanged => _FileChanged ??= new();
@@ -137,24 +275,27 @@ public sealed class ZipArchivePath {
     public ZipArchiveFileEvent FileDeleted => _FileDeleted ??= new();
     private ZipArchiveFileEvent _FileDeleted;
 
-    public string Parent => _Parent ??=
-        Nest.Count == 0
-            ? File.DirectoryName
-            : string.Join(">", Nest
-                .Select((s, i) => {
-                    var last = i == Nest.Count - 1;
-                    if (last == false) {
-                        return s;
-                    }
-                    var name = new ZipEntryName(s);
-                    var parent = name.Parent?.Trim() ?? "";
-                    if (parent != "") {
-                        return parent;
-                    }
-                    return null;
-                })
-                .Where(s => s != null)
-                .Prepend(File.FullName));
+    public string Parent {
+        get {
+            if (_Parent is null) {
+                if (Nest.Count == 0) {
+                    _Parent = File.DirectoryName;
+                }
+                else {
+                    var parentNest = Nest.Take(Nest.Count - 1).ToArray();
+                    var nestedArchiveName = Nest.Last();
+                    var parentDirectory = new ZipEntryName(nestedArchiveName).Parent;
+                    var parentLocation = new ArchiveProviderID(
+                        ArchiveProviderIDFormat.Zip,
+                        File.FullName,
+                        parentNest,
+                        parentDirectory);
+                    _Parent = ArchiveProviderIDCodec.Format(parentLocation);
+                }
+            }
+            return _Parent;
+        }
+    }
     private string _Parent;
 
     public string FullName { get; }
@@ -209,6 +350,7 @@ public sealed class ZipArchivePath {
 
     public async Task Read(ZipArchiveRead info, IOperationProgress progress, CancellationToken token) {
         ArgumentNullException.ThrowIfNull(info);
+        progress?.Change(kind: OperationProgressKind.FileSize);
         if (Log.Info()) {
             Log.Info(nameof(Read) + " > " + FullName);
         }
@@ -216,36 +358,42 @@ public sealed class ZipArchivePath {
         if (extract.Count == 0) {
             return;
         }
-        if (progress != null) {
-            progress.Change(setTarget: extract.Count);
-        }
         var locked = Locker.Lock(token);
         using (await locked) {
-            void work() {
-                using (var archive = Archive.Open(this, ZipArchiveMode.Read, token)) {
-                    foreach (var name in extract.Keys) {
-                        if (token.IsCancellationRequested) {
-                            token.ThrowIfCancellationRequested();
+            async Task WorkAsync() {
+                using (var archive = Archive.Open(this, ZipArchiveMode.Read, progress, token)) {
+                    /*
+                     * Resolve the entire request before publishing output, including when a later name is stale.
+                     */
+                    var entries = new List<(ZipArchiveEntry Entry, string Destination)>(extract.Count);
+                    foreach (var extraction in extract) {
+                        token.ThrowIfCancellationRequested();
+                        var entry = archive.Zip.GetEntry(extraction.Key);
+                        if (entry is null) {
+                            throw new FileNotFoundException(
+                                $"The ZIP entry '{extraction.Key}' was not found in archive '{FullName}'.",
+                                extraction.Key);
                         }
+                        entries.Add((entry, extraction.Value));
+                    }
+                    foreach (var (entry, destination) in entries) {
+                        token.ThrowIfCancellationRequested();
                         if (progress != null) {
-                            progress.Change(data: name);
+                            progress.Change(data: entry.FullName);
                         }
-                        var entry = archive.Zip.GetEntry(name);
-                        if (entry != null) {
-                            if (Log.Info()) {
-                                Log.Info(nameof(ZipFileExtensions.ExtractToFile) + " > " + entry.FullName);
-                            }
-                            entry.ExtractToFile(
-                                destinationFileName: extract[name],
-                                overwrite: info.ExtractOverwrites);
+                        if (Log.Info()) {
+                            Log.Info(nameof(ZipEntryExtraction.ExtractAsync) + " > " + entry.FullName);
                         }
-                        if (progress != null) {
-                            progress.Change(1);
-                        }
+                        await ZipEntryExtraction.ExtractAsync(
+                            entry,
+                            destination,
+                            info.ExtractOverwrites,
+                            progress,
+                            token);
                     }
                 }
             }
-            await Task.Run(work, token);
+            await Task.Run(WorkAsync, token);
         }
     }
 
@@ -254,143 +402,231 @@ public sealed class ZipArchivePath {
         if (Log.Info()) {
             Log.Info(nameof(Update) + " > " + FullName);
         }
-        var delete = new HashSet<string>(info.DeleteEntries.Where(i => i != null));
-        var create = new Dictionary<string, string>(info.CreateEntriesFromFiles);
+        var delete = new HashSet<string>(info.DeleteEntries.Where(i => i != null), StringComparer.Ordinal);
+        var additions = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var entry in info.CreateEntriesFromFiles) {
+            var name = NormalizeArchiveEntryName(entry.Key, entry.Value is null);
+            additions[name] = entry.Value;
+        }
         var stream = new List<IEntryStreamSet>(info.CopyStreamSets.Where(i => i != null));
-        if (stream.Count == 0 && create.Count == 0 && delete.Count == 0) {
+        var hasNoUpdates = stream.Count == 0 && additions.Count == 0 && delete.Count == 0;
+        if (hasNoUpdates) {
             return;
         }
-        if (progress != null) {
-            progress.Change(addTarget: stream.Count + create.Count + delete.Count);
+        progress?.Change(kind: OperationProgressKind.FileSize);
+        using var staging = new ArchiveUpdateStaging();
+        var targetDirectory = NormalizeArchiveDirectory(info.CopyStreamTargetDirectory);
+        foreach (var set in stream) {
+            await set.Consume(
+                consuming: async (source, sourceStream, progress, token) => {
+                    token.ThrowIfCancellationRequested();
+                    var isDirectory = sourceStream is null && source.SourceDirectory is not null;
+                    var name = NormalizeArchiveEntryName(source.RelativePath, isDirectory);
+                    name = CombineArchiveEntryName(targetDirectory, name);
+                    if (sourceStream is null) {
+                        if (isDirectory) {
+                            additions[name] = null;
+                        }
+                        return;
+                    }
+
+                    var stagedSource = staging.CreateSourceFile();
+                    var stagedSourceFileName = stagedSource.Name;
+                    await using (stagedSource) {
+                        var streamLength = source.StreamLength;
+                        var streamLengthIsKnown = streamLength > 0;
+                        if (progress is not null && streamLengthIsKnown) {
+                            progress.Change(addTarget: streamLength, data: name);
+                        }
+                        await ZipArchiveUpdateRewriter.CopyBytesAsync(
+                            sourceStream,
+                            stagedSource,
+                            progress,
+                            streamLengthIsKnown == false,
+                            token);
+                        await stagedSource.FlushAsync(token);
+                    }
+                    additions[name] = stagedSourceFileName;
+                },
+                progress: progress,
+                token: token);
         }
+
         var locked = Locker.Lock(token);
         using (await locked) {
-            void work() {
-                using (var archive = Archive.Open(this, ZipArchiveMode.Update, token)) {
-                    foreach (var name in delete) {
-                        if (token.IsCancellationRequested) {
-                            token.ThrowIfCancellationRequested();
-                        }
-                        if (progress != null) {
-                            progress.Change(data: name);
-                        }
-                        if (Log.Info()) {
-                            Log.Info(nameof(delete) + " > " + name);
-                        }
-                        archive.Zip.Delete(name);
-                        if (progress != null) {
-                            progress.Change(1);
-                        }
-                    }
-                    foreach (var entry in create) {
-                        if (token.IsCancellationRequested) {
-                            token.ThrowIfCancellationRequested();
-                        }
-                        if (progress != null) {
-                            progress.Change(data: entry.Key);
-                        }
-                        if (Log.Info()) {
-                            Log.Info(nameof(ZipFileExtensions.CreateEntryFromFile) + " > " + entry.Key + " > " + entry.Value);
-                        }
-                        archive.Zip.Delete(entry.Key);
-                        archive.Zip.CreateEntryFromFile(
-                            entryName: entry.Key,
-                            sourceFileName: entry.Value);
-                        if (progress != null) {
-                            progress.Change(1);
-                        }
-                    }
-                }
+            token.ThrowIfCancellationRequested();
+            var removedNames = new HashSet<string>(delete, StringComparer.Ordinal);
+            foreach (var name in additions.Keys) {
+                removedNames.Add(name);
             }
-            await Task.Run(work, token);
-        }
-        foreach (var set in stream) {
-            async Task work() {
-                var consume = set.ConsumeFromMemory(progress: progress, token: token, consuming: async (source, stream, progress, token) => {
-                    var locked = Locker.Lock(token);
-                    using (await locked) {
-                        using (var archive = Archive.Open(this, ZipArchiveMode.Update, token)) {
-                            var name = source.RelativePath
-                                .Trim()
-                                .Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                                .Replace(Path.DirectorySeparatorChar, '/')
-                                .Replace(Path.AltDirectorySeparatorChar, '/');
-                            archive.Zip.Delete(name);
-                            if (stream != null) {
-                                var entry = archive.Zip.CreateEntry(name);
-                                await using var opened = entry.Open();
-                                await stream.CopyToAsync(opened, token);
-                            }
-                        }
-                    }
-                });
-                await consume;
-            }
-            await Task.Run(work, token);
+            var rewriter = new ZipArchiveUpdateRewriter(staging, progress);
+            /* Keep external writers from changing the source until the staged replacement is ready. */
+            await using var originalArchive = new FileStream(
+                FileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                81920,
+                FileOptions.Asynchronous | FileOptions.SequentialScan);
+            await rewriter.RewriteAsync(FileName, Nest, additions, removedNames, token);
+            await originalArchive.DisposeAsync();
+            token.ThrowIfCancellationRequested();
+            staging.CommitArchive(FileName);
+            InvalidateRelatedEntryInfo();
         }
     }
 
-    public async Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
-        if (data == null) {
-            return false;
-        }
-        var copy = data.CopyFiles ?? Array.Empty<string>();
-        var move = data.MoveFiles ?? Array.Empty<string>();
-        var files = new HashSet<string>(copy.Concat(move));
-        if (files.Count == 0) {
-            return false;
-        }
-        var update = Update(token: token, progress: progress, info: new() {
-            CreateEntriesFromFiles = files.ToDictionary(
-                file => Path.GetFileName(file),
-                file => file)
-        });
-        await update;
-        return true;
+    public Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
+        return Drop(data, null, progress, token);
     }
 
     public abstract class StreamSource<TEntry> : EntryStreamSource<TEntry> where TEntry : IEntry {
         private Archive Archive;
         private ArchiveLocked Locked;
+        private IDisposable ArchivePathReference;
 
-        private class EntryNotFoundException : Exception {
+        private sealed class EntryNotFoundException : Exception {
         }
 
         private sealed class Disposable : IEntryStreamReady {
+            private readonly Reference PathReference;
+            private int Disposed;
+
+            private void DisposeResources() {
+                var alreadyDisposed = Interlocked.Exchange(ref Disposed, 1) != 0;
+                if (alreadyDisposed) {
+                    return;
+                }
+                var archive = Source.Archive;
+                Source.Archive = null;
+                var locked = Source.Locked;
+                Source.Locked = null;
+                Source.Stream = null;
+                try {
+                    archive?.Dispose();
+                }
+                finally {
+                    try {
+                        locked?.Dispose();
+                    }
+                    finally {
+                        try {
+                            PathReference?.Dispose();
+                        }
+                        finally {
+                            Source.ReleaseArchivePathReference();
+                        }
+                    }
+                }
+            }
+
             public StreamSource<TEntry> Source { get; }
 
-            public Disposable(StreamSource<TEntry> source) {
+            public Disposable(StreamSource<TEntry> source, Reference pathReference) {
                 Source = source ?? throw new ArgumentNullException(nameof(source));
+                PathReference = pathReference;
             }
 
             void IDisposable.Dispose() {
-                Source.Archive?.Dispose();
-                Source.Archive = null;
-                Source.Locked?.Dispose();
-                Source.Locked = null;
+                try {
+                    DisposeResources();
+                }
+                finally {
+                    GC.SuppressFinalize(this);
+                }
             }
+
+            ~Disposable() {
+                try {
+                    DisposeResources();
+                }
+                catch (Exception ex) {
+                    LogCleanupException(ex);
+                }
+            }
+        }
+
+        internal void ReleaseArchivePathReference() {
+            Interlocked.Exchange(ref ArchivePathReference, null)?.Dispose();
         }
 
         protected ZipEntryInfo EntryInfo { get; }
 
         protected StreamSource(TEntry entry, ZipEntryInfo entryInfo) : base(entry) {
             EntryInfo = entryInfo ?? throw new ArgumentNullException(nameof(entryInfo));
+            if (EntryInfo.Kind == ZipEntryKind.File) {
+                ArchivePathReference = EntryInfo.Archive.Retain();
+            }
         }
 
         protected sealed override async Task<IEntryStreamReady> StreamReady(CancellationToken token) {
-            if (EntryInfo.Kind == ZipEntryKind.File) {
-                var task = Task.Run(cancellationToken: token, action: () => {
-                    Locked = EntryInfo.Archive.Locker.Lock();
-                    Archive = Archive.Open(EntryInfo.Archive, ZipArchiveMode.Read, CancellationToken.None);
-                    var entry = Archive.Zip.GetEntry(EntryInfo.Name.Original);
-                    if (entry == null) {
+            ZipArchivePath openedPath = null;
+            Reference openedPathReference = null;
+            ArchiveLocked locked = null;
+            Archive archive = null;
+            try {
+                if (EntryInfo.Kind == ZipEntryKind.File) {
+                    openedPath = Get(EntryInfo.Archive.File, EntryInfo.Archive.Nest);
+                    openedPathReference = new Reference(openedPath);
+                    locked = await openedPath.Locker.Lock(token);
+                    archive = await Task.Run(
+                        () => Archive.Open(openedPath, ZipArchiveMode.Read, token),
+                        token);
+                    token.ThrowIfCancellationRequested();
+                    var entry = archive.Zip.GetEntry(EntryInfo.Name.Original);
+                    if (entry is null) {
                         throw new EntryNotFoundException();
                     }
-                    Stream = entry.Open();
-                });
-                await task;
+                    token.ThrowIfCancellationRequested();
+                    var entryStream = entry.Open();
+                    ZipEntryValidationStream validationStream;
+                    try {
+                        token.ThrowIfCancellationRequested();
+                        validationStream = new ZipEntryValidationStream(
+                            entryStream,
+                            entry.Length,
+                            unchecked((uint)entry.Crc32));
+                        token.ThrowIfCancellationRequested();
+                    }
+                    catch {
+                        entryStream.Dispose();
+                        throw;
+                    }
+                    Archive = archive;
+                    Locked = locked;
+                    Stream = validationStream;
+                    archive = null;
+                    locked = null;
+                }
+                var ready = new Disposable(this, openedPathReference);
+                openedPathReference = null;
+                openedPath = null;
+                return ready;
             }
-            return new Disposable(this);
+            catch {
+                try {
+                    archive?.Dispose();
+                }
+                finally {
+                    try {
+                        locked?.Dispose();
+                    }
+                    finally {
+                        try {
+                            if (openedPathReference is not null) {
+                                openedPathReference.Dispose();
+                            }
+                            else {
+                                openedPath?.Release();
+                            }
+                        }
+                        finally {
+                            ReleaseArchivePathReference();
+                        }
+                    }
+                }
+                throw;
+            }
         }
 
         public sealed override long StreamLength =>

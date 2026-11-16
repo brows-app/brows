@@ -5,13 +5,15 @@
   <ListView.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resource/Style/EntryDataTextBlockStyle.xaml"/>
-        <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resource/Style/EntryListViewStyle.xaml"/>
+        <ResourceDictionary
+                Source="pack://application:,,,/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.EntryDataTextBlock.xaml"/>
+        <ResourceDictionary
+                Source="pack://application:,,,/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.EntryListView.xaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </ListView.Resources>
   <ListView.Style>
-    <Style TargetType="ListView" BasedOn="{StaticResource EntryListViewStyle}">
+    <Style TargetType="ListView" BasedOn="{StaticResource Brows.Style.EntryListView}">
       <Setter Property="Grid.IsSharedSizeScope" Value="True"/>
       <Setter Property="ItemsSource" Value="{Binding Source}"/>
       <Setter Property="ItemTemplate">
@@ -19,7 +21,7 @@
           <DataTemplate>
             <Grid>
               <Grid.Resources>
-                <Style TargetType="TextBlock" BasedOn="{StaticResource EntryDataTextBlockStyle}"/>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource Brows.Style.EntryDataTextBlock}"/>
               </Grid.Resources>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Time"/>

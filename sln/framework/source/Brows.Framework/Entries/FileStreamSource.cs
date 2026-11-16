@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
@@ -7,8 +6,7 @@ namespace Brows.Entries;
 internal sealed class FileStreamSource : IEntryStreamSource {
     private Stream Stream;
 
-    private FileInfo Info => _Info ??= new(Path);
-    private FileInfo _Info;
+    private FileInfo Info => field ??= new(Path);
 
     public string Path { get; }
 

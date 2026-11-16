@@ -6,18 +6,33 @@ using System.Linq;
 namespace Brows.Url;
 
 public abstract class UrlClientCache<TClient> where TClient : UrlClient, new() {
-    private readonly ConcurrentDictionary<Uri, TClient> Agent = [];
+    private static readonly UriEqualityComparer CacheUriComparer = new();
+
+    private readonly ConcurrentDictionary<Uri, TClient> Agent = new(CacheUriComparer);
+
+    private static bool SameUserInfo(Uri first, Uri second) {
+        return StringComparer.Ordinal.Equals(first.UserInfo, second.UserInfo);
+    }
+
+    private static bool SameAuthority(Uri first, Uri second) {
+        return StringComparer.OrdinalIgnoreCase.Equals(first.Scheme, second.Scheme) &&
+            StringComparer.OrdinalIgnoreCase.Equals(first.IdnHost, second.IdnHost) &&
+            first.Port == second.Port &&
+            SameUserInfo(first, second);
+    }
 
     private static bool Extends(Uri ancestor, Uri descendant, out int? order) {
         ArgumentNullException.ThrowIfNull(ancestor);
         ArgumentNullException.ThrowIfNull(descendant);
-        if (ancestor == descendant || ancestor.Equals(descendant)) {
+        if (!SameUserInfo(ancestor, descendant)) {
+            order = null;
+            return false;
+        }
+        if (CacheUriComparer.Equals(ancestor, descendant)) {
             order = 0;
             return true;
         }
-        else {
-            order = null;
-        }
+        order = null;
         var aPath = ancestor.GetLeftPart(UriPartial.Path);
         var dPath = descendant.GetLeftPart(UriPartial.Path);
         var aParts = aPath.Split('/');
@@ -54,16 +69,40 @@ public abstract class UrlClientCache<TClient> where TClient : UrlClient, new() {
             .Select(item => item.client)
             .FirstOrDefault();
         if (match == null) {
-            match = clients.FirstOrDefault(client => client.Uri?.GetLeftPart(UriPartial.Authority) == uri.GetLeftPart(UriPartial.Authority));
+            match = clients.FirstOrDefault(client => SameAuthority(client.Uri, uri));
         }
         return match;
     }
 
     private TClient Extend(TClient client, Uri uri) {
+        if (!SameAuthority(client.Uri, uri)) {
+            return new() { Uri = uri };
+        }
         var
         other = (TClient)client.Clone();
         other.Uri = uri;
         return other;
+    }
+
+    private sealed class UriEqualityComparer : IEqualityComparer<Uri> {
+        public bool Equals(Uri first, Uri second) {
+            if (ReferenceEquals(first, second)) {
+                return true;
+            }
+            var eitherUriIsNull = first is null || second is null;
+            if (eitherUriIsNull) {
+                return false;
+            }
+            return first.Equals(second) && SameUserInfo(first, second);
+        }
+
+        public int GetHashCode(Uri uri) {
+            ArgumentNullException.ThrowIfNull(uri);
+            var hash = new HashCode();
+            hash.Add(uri.GetHashCode());
+            hash.Add(uri.UserInfo, StringComparer.Ordinal);
+            return hash.ToHashCode();
+        }
     }
 
     public TClient Get(Uri uri, IEnumerable<TClient> existing = null) {

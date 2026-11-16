@@ -1,5 +1,6 @@
-﻿#
+#
 # WARNING: This file will be overwritten when a new version of the application is installed.
-# To customize the application's configuration, copy this file to its directory's parent and
-# remove the .default extension.
+# To customize the application's configuration, create a file named commands.conf in this
+# directory's parent that contains only the settings you want to change. This file is
+# loaded first, and the settings in that file override the ones here.
 #

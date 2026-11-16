@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Windows;
 
-namespace Brows.Gui; 
-public class Controller {
+namespace Brows.Gui;
+
+public abstract class Controller {
     private void UserControl_Loaded(object sender, RoutedEventArgs e) {
         OnLoaded(e);
     }
@@ -26,7 +27,7 @@ public class Controller {
     }
 }
 
-public class Controller<TController> : Controller where TController : class {
+public abstract class Controller<TController> : Controller where TController : class {
     private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) {
         var oldValue = e.OldValue;
         if (oldValue is IControlled<TController> oldHave) {
@@ -58,7 +59,9 @@ public class Controller<TController> : Controller where TController : class {
     }
 
     public Controller(FrameworkElement element) : base(element) {
-        if (null == element) throw new ArgumentNullException(nameof(element));
+        if (element is null) {
+            throw new ArgumentNullException(nameof(element));
+        }
         element.DataContextChanged += UserControl_DataContextChanged;
     }
 }

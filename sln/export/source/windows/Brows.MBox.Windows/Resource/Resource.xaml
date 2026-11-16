@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
+                    xmlns:local="clr-namespace:Brows">
+    <DataTemplate x:Key="MBoxEntry_Subject">
+        <brows:EntryNameGrid Text="{Binding Item[Subject]}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PanelProvider_MBoxProvider">
+        <local:MBoxProviderControl/>
+    </DataTemplate>
+</ResourceDictionary>

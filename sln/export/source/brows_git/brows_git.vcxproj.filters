@@ -35,5 +35,8 @@
     <ClCompile Include="brows_gitref.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="brows_gitrepostatus.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

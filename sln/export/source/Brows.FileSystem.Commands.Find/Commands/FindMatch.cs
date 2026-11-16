@@ -1,66 +1,172 @@
-﻿using Brows.Matching;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Brows.Commands; 
+namespace Brows.Commands;
+
 internal sealed class FindMatch {
-    private readonly StringBuilder StringBuilder = new();
-    private bool Building = true;
+    private const int DefaultPreviewLength = 512;
 
-    private IMatch Match { get; }
+    private string Preview { get; }
 
-    private FindMatch(IMatch match) {
-        Match = match ?? throw new ArgumentNullException(nameof(match));
+    private FindMatch(string text, int index, int length, int line, int lineIndex, int maxPreviewLength) {
+        var indexIsInvalid = index < 0 || index > text.Length;
+        if (indexIsInvalid) {
+            throw new ArgumentOutOfRangeException(nameof(index));
+        }
+        var lengthIsInvalid = length < 0 || length > text.Length - index;
+        if (lengthIsInvalid) {
+            throw new ArgumentOutOfRangeException(nameof(length));
+        }
+        if (line < 0) {
+            throw new ArgumentOutOfRangeException(nameof(line));
+        }
+        if (lineIndex < 0) {
+            throw new ArgumentOutOfRangeException(nameof(lineIndex));
+        }
+        if (maxPreviewLength < 0) {
+            throw new ArgumentOutOfRangeException(nameof(maxPreviewLength));
+        }
+
+        Index = index;
+        MatchLength = length;
+        Line = line;
+        LineIndex = lineIndex;
+        var previewLength = Math.Min(length, maxPreviewLength);
+        Preview = previewLength == 0 ? string.Empty : new string(text.AsSpan(index, previewLength));
     }
 
-    public int MatchLength => Match.Length;
-    public int TotalLength => StringBuilder.Length;
-    public int Line { get; private set; }
-    public int LineIndex { get; private set; }
+    private readonly record struct MatchSpan(int Index, int Length, int Order);
 
-    public sealed override string ToString() {
-        return StringBuilder.ToString();
+    internal static FindMatch Create(string text,
+                                     int index,
+                                     int length,
+                                     int line,
+                                     int lineIndex,
+                                     int maxPreviewLength) {
+        if (text is null) {
+            throw new ArgumentNullException(nameof(text));
+        }
+        return new FindMatch(text, index, length, line, lineIndex, maxPreviewLength);
     }
 
-    public static IEnumerable<FindMatch> In(string s, IMatched matched) {
-        if (null == s) throw new ArgumentNullException(nameof(s));
-        if (null == matched) throw new ArgumentNullException(nameof(matched));
+    public int Index { get; }
+    public int MatchLength { get; }
+    public int TotalLength => Preview.Length;
+    public int Line { get; }
+    public int LineIndex { get; }
+
+    public override string ToString() {
+        return Preview;
+    }
+
+    public static IEnumerable<FindMatch> In(string text, IMatched matched, CancellationToken token = default) {
+        return In(text, matched, DefaultPreviewLength, token);
+    }
+
+    public static IEnumerable<FindMatch> In(string text,
+                                            IMatched matched,
+                                            int maxPreviewLength,
+                                            CancellationToken token = default) {
+        if (text is null) {
+            throw new ArgumentNullException(nameof(text));
+        }
+        if (matched is null) {
+            throw new ArgumentNullException(nameof(matched));
+        }
+        if (maxPreviewLength < 0) {
+            throw new ArgumentOutOfRangeException(nameof(maxPreviewLength));
+        }
+
         var matches = matched.Matches;
-        if (matches == null) {
+        if (matches is null) {
             return Array.Empty<FindMatch>();
         }
-        var lookup = matches.ToLookup(m => m.Index, m => new FindMatch(m));
-        var building = new List<FindMatch>();
-        var line = 0;
-        var lineIndex = 0;
-        var pad = 0;
-        for (var i = -pad; i < s.Length; i++) {
-            foreach (var group in lookup.Where(group => group.Key - pad == i)) {
-                foreach (var findMatch in group) {
-                    findMatch.Line = line;
-                    findMatch.LineIndex = lineIndex;
-                    building.Add(findMatch);
-                }
+
+        var spans = new List<MatchSpan>();
+        var ordered = true;
+        var previousIndex = -1;
+        var order = 0;
+        var checkedMatches = 0;
+        foreach (var match in matches) {
+            if ((checkedMatches++ & 0x3FF) == 0) {
+                token.ThrowIfCancellationRequested();
             }
-            if (i < 0) {
+            if (match is null) {
                 continue;
             }
-            var c = s[i];
-            if (c == '\n') {
-                line++;
-                lineIndex = 0;
+
+            var index = match.Index;
+            var length = match.Length;
+            var spanIsInvalid = index < 0 || index > text.Length || length < 0 || length > text.Length - index;
+            if (spanIsInvalid) {
+                continue;
             }
-            foreach (var b in building) {
-                b.StringBuilder.Append(c);
-                if (b.StringBuilder.Length > b.MatchLength + pad) {
-                    b.Building = false;
+            if (index < previousIndex) {
+                ordered = false;
+            }
+            previousIndex = index;
+            spans.Add(new MatchSpan(index, length, order++));
+        }
+
+        token.ThrowIfCancellationRequested();
+        if (ordered == false) {
+            spans.Sort(static (left, right) => {
+                var indexOrder = left.Index.CompareTo(right.Index);
+                if (indexOrder != 0) {
+                    return indexOrder;
+                }
+                return left.Order.CompareTo(right.Order);
+            });
+            token.ThrowIfCancellationRequested();
+        }
+        if (spans.Count == 0) {
+            return Array.Empty<FindMatch>();
+        }
+
+        var result = new List<FindMatch>(spans.Count);
+        var line = 0;
+        var lineStart = 0;
+        var scan = 0;
+        var checkedCharacters = 0;
+        foreach (var span in spans) {
+            while (scan < span.Index) {
+                if ((checkedCharacters++ & 0x3FF) == 0) {
+                    token.ThrowIfCancellationRequested();
+                }
+
+                var current = text[scan];
+                var scanAtCarriageReturnLineFeed = current == '\r' &&
+                    scan + 1 < text.Length &&
+                    text[scan + 1] == '\n';
+                if (scanAtCarriageReturnLineFeed) {
+                    if (scan + 1 == span.Index) {
+                        scan++;
+                    }
+                    else {
+                        scan += 2;
+                        line++;
+                        lineStart = scan;
+                    }
+                }
+                else if (current is '\r' or '\n') {
+                    scan++;
+                    line++;
+                    lineStart = scan;
+                }
+                else {
+                    scan++;
                 }
             }
-            building.RemoveAll(b => b.Building == false);
-            lineIndex++;
+
+            token.ThrowIfCancellationRequested();
+            result.Add(new FindMatch(text,
+                                     span.Index,
+                                     span.Length,
+                                     line,
+                                     span.Index - lineStart,
+                                     maxPreviewLength));
         }
-        return lookup.SelectMany(m => m);
+
+        return result;
     }
 }

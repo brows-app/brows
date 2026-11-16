@@ -1,0 +1,197 @@
+﻿<ResourceDictionary
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Brows">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.Common.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Thickness x:Key="Brows.Style.CommandPalette.BorderThickness">1</Thickness>
+  <Style x:Key="Brows.Style.CommandPalette" TargetType="local:CommandPaletteControl">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brows.Theme.CommandPalette.BorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Brows.Style.CommandPalette.BorderThickness}" />
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.CommandPalette.Foreground}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:CommandPaletteControl}">
+          <Grid Background="{TemplateBinding Background}"
+                DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition />
+              <ColumnDefinition Width="4*" />
+              <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="1">
+              <Grid>
+                <Grid.RowDefinitions>
+                  <RowDefinition />
+                  <RowDefinition Height="2*" />
+                  <RowDefinition />
+                </Grid.RowDefinitions>
+                <Border Grid.Row="1"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        SnapsToDevicePixels="True">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition />
+                      <RowDefinition>
+                        <RowDefinition.Style>
+                          <Style TargetType="RowDefinition">
+                            <Setter Property="Height" Value="*" />
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding ViewModel.SuggestionData}" Value="{x:Null}">
+                                <Setter Property="Height" Value="0" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </RowDefinition.Style>
+                      </RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                      <local:CommandPaletteInputControl ViewModel="{Binding ViewModel.Input}" />
+                    </Grid>
+                    <Grid Grid.Row="1">
+                      <Grid.Style>
+                        <Style TargetType="Grid">
+                          <Setter Property="Visibility" Value="Visible" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding ViewModel.SuggestionData}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Grid.Style>
+                      <Grid.RowDefinitions>
+                        <RowDefinition Height="5" />
+                        <RowDefinition />
+                      </Grid.RowDefinitions>
+                      <Grid Grid.Row="1">
+                        <Grid.Style>
+                          <Style TargetType="Grid">
+                            <Setter
+                                Property="Background"
+                                Value="{DynamicResource Brows.Theme.CommandPalette.Background}"/>
+                          </Style>
+                        </Grid.Style>
+                        <local:CommandContextDataControl
+                                x:Name="PART_SuggestionDataControl"
+                                ViewModel="{Binding ViewModel.SuggestionData}" />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Border>
+                <Grid Grid.Row="2">
+                  <Grid.Style>
+                    <Style TargetType="Grid">
+                      <Setter Property="Visibility" Value="Visible" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding ViewModel.SuggestionHint}" Value="{x:Null}">
+                          <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Grid.Style>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="0.05*" />
+                    <RowDefinition />
+                  </Grid.RowDefinitions>
+                  <Grid Grid.Row="1">
+                    <local:CommandContextHintControl ViewModel="{Binding ViewModel.SuggestionHint}" />
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="local:CommandPaletteControl"
+         BasedOn="{StaticResource Brows.Style.CommandPalette}" />
+  <Style
+          x:Key="Brows.Style.CommandPalette.ListView"
+          TargetType="ListView"
+          BasedOn="{StaticResource Brows.Style.ListView}">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.CommandPalette.Background}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.CommandPalette.Foreground}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="ItemContainerStyle" Value="{DynamicResource Brows.Style.CommandPalette.ListViewItem}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="SelectionMode" Value="Single" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListView">
+          <Border Background="{TemplateBinding Background}">
+            <ScrollViewer x:Name="PART_ScrollViewer"
+                          Focusable="False"
+                          Padding="0"
+                          CanContentScroll="{TemplateBinding ScrollViewer.CanContentScroll}"
+                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+              <ItemsPresenter x:Name="ItemsPresenter" />
+            </ScrollViewer>
+          </Border>
+          <ControlTemplate.Triggers>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsGrouping" Value="True" />
+                <Condition Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="False" />
+              </MultiTrigger.Conditions>
+              <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+            </MultiTrigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style
+          x:Key="Brows.Style.CommandPalette.ListViewItem"
+          TargetType="ListViewItem"
+          BasedOn="{StaticResource {x:Type ListBoxItem}}">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.CommandPalette.Background}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.CommandPalette.Foreground}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type ListViewItem}">
+          <Border x:Name="CommandPalette_ListViewItem_Border" Background="{TemplateBinding Background}">
+            <Border.Style>
+              <Style TargetType="Border">
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Padding" Value="5 0 0 2" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+              </Style>
+            </Border.Style>
+            <ContentPresenter HorizontalAlignment="Stretch" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Brows.Theme.CommandPalette.Background.Hover}" />
+      </Trigger>
+      <Trigger Property="IsSelected" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Brows.Theme.CommandPalette.Background.Selection}" />
+      </Trigger>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.CommandPalette.Foreground.Muted}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+</ResourceDictionary>

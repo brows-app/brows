@@ -1,6 +1,5 @@
-﻿using Brows.Providers;
+﻿namespace Brows.Providers;
 
-namespace Brows.Gui; 
 public interface IProviderNavigationController {
     bool Focused { get; }
     bool Focus();

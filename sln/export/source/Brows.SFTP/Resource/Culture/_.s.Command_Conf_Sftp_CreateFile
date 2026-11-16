@@ -1,0 +1,2 @@
+# Create a new empty file on the SFTP server.
+# Creation fails if an entry with that name already exists.

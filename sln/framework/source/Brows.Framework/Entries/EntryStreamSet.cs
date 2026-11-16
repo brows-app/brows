@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
@@ -20,7 +18,8 @@ public abstract class EntryStreamSet : IEntryStreamSet {
     IEntryStreamReady IEntryStreamSet.StreamSourceReady() => StreamSourceReady();
     IEnumerable<string> IEntryStreamSet.FileSource() => FileSource();
 
-    async IAsyncEnumerable<IEntryStreamSource> IEntryStreamSet.StreamSource([EnumeratorCancellation] CancellationToken token) {
+    async IAsyncEnumerable<IEntryStreamSource>
+    IEntryStreamSet.StreamSource([EnumeratorCancellation] CancellationToken token) {
         var streamSource = StreamSource();
         if (streamSource == null) {
             yield break;

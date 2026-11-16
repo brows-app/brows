@@ -1,52 +1,80 @@
-﻿<UserControl x:Class="Brows.FileSystemFindResultControl"
-             x:ClassModifier="internal"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:brows="http://schemas.brows.app/xaml"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Brows"
-             xmlns:find="clr-namespace:Brows;assembly=Brows.FileSystem.Commands.Find">
-  <UserControl.Style>
-    <Style TargetType="UserControl">
-      <Setter Property="Foreground" Value="{DynamicResource Global_Default_Foreground_Brush}"/>
+﻿<Grid x:Class="Brows.FileSystemFindResultControl"
+      x:ClassModifier="internal"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="clr-namespace:Brows"
+      xmlns:find="clr-namespace:Brows;assembly=Brows.FileSystem.Commands.Find">
+  <Grid.Style>
+    <Style TargetType="Grid">
+      <Setter Property="Control.Foreground" Value="{DynamicResource Brows.Theme.Foreground}"/>
     </Style>
-  </UserControl.Style>
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition/>
-    </Grid.RowDefinitions>
-    <Grid Grid.Row="0">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition/>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="Auto"/>
-      </Grid.ColumnDefinitions>
-      <TextBlock Grid.Column="0" Style="{DynamicResource FileSystemFindResult_TextBlock_Root}"/>
-      <TextBlock Grid.Column="1" Style="{DynamicResource FileSystemFindResult_TextBlock_MatchTried}"/>
-      <TextBlock Grid.Column="2" Style="{DynamicResource FileSystemFindResult_TextBlock_MatchMatched}"/>
-    </Grid>
-    <Grid Grid.Row="1">
-      <Grid.Style>
-        <Style TargetType="Grid">
-          <Setter Property="Margin" Value="5 0 0 0"/>
-        </Style>
-      </Grid.Style>
-      <brows:SyncedCollectionView x:Name="ListView" ItemsSource="{Binding Source}">
-        <brows:SyncedCollectionView.Resources>
-          <DataTemplate DataType="{x:Type find:FoundInDirectoryName}">
-            <local:FoundInDirectoryNameGrid/>
-          </DataTemplate>
-          <DataTemplate DataType="{x:Type find:FoundInFileError}">
-            <local:FoundInFileErrorGrid/>
-          </DataTemplate>
-          <DataTemplate DataType="{x:Type find:FoundInFileName}">
-            <local:FoundInFileNameGrid/>
-          </DataTemplate>
-          <DataTemplate DataType="{x:Type find:FoundInFileText}">
-            <local:FoundInFileTextGrid/>
-          </DataTemplate>
-        </brows:SyncedCollectionView.Resources>
-      </brows:SyncedCollectionView>
-    </Grid>
+  </Grid.Style>
+  <Grid.RowDefinitions>
+    <RowDefinition Height="Auto"/>
+    <RowDefinition Height="Auto"/>
+    <RowDefinition/>
+  </Grid.RowDefinitions>
+  <Grid Grid.Row="0">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition Width="Auto"/>
+      <ColumnDefinition Width="Auto"/>
+    </Grid.ColumnDefinitions>
+    <StackPanel Grid.Column="0" Orientation="Horizontal">
+      <TextBlock
+          Style="{DynamicResource Brows.Style.Find.TextBlock}"
+          Text="{DynamicResource FileSystemFindResult_Root}"/>
+      <TextBlock Style="{DynamicResource Brows.Style.Find.TextBlock.Root}"/>
+    </StackPanel>
+    <TextBlock Grid.Column="1" Style="{DynamicResource Brows.Style.Find.TextBlock.MatchTried}"/>
+    <TextBlock Grid.Column="2" Style="{DynamicResource Brows.Style.Find.TextBlock.MatchMatched}"/>
   </Grid>
-</UserControl>
+  <WrapPanel Grid.Row="1" Margin="5 0 0 0">
+    <TextBlock Style="{DynamicResource Brows.Style.Find.TextBlock.Status}"/>
+    <TextBlock
+        Style="{DynamicResource Brows.Style.Find.TextBlock.FailedMessage}"
+        Text="{Binding Exception.Message}"/>
+    <TextBlock
+        Style="{DynamicResource Brows.Style.Find.TextBlock.Truncated}"
+        Text="{DynamicResource FileSystemFindResult_Status_Truncated}"/>
+    <StackPanel
+        Margin="5 0"
+        Orientation="Horizontal"
+        Style="{DynamicResource Brows.Style.Find.Skipped}">
+      <TextBlock Text="{DynamicResource FileSystemFindResult_Status_Skipped}"/>
+      <TextBlock Text="{Binding SkippedCount}"/>
+    </StackPanel>
+    <StackPanel
+        Margin="5 0"
+        Orientation="Horizontal"
+        Style="{DynamicResource Brows.Style.Find.Errors}">
+      <TextBlock Text="{DynamicResource FileSystemFindResult_Status_Errors}"/>
+      <TextBlock Text="{Binding ErrorCount}"/>
+    </StackPanel>
+  </WrapPanel>
+  <Grid Grid.Row="2">
+    <Grid.Style>
+      <Style TargetType="Grid">
+        <Setter Property="Margin" Value="5 0 0 0"/>
+      </Style>
+    </Grid.Style>
+    <local:FileSystemFindResultListView x:Name="ItemsControl"
+                                        ItemsSource="{Binding Source}"
+                                        Style="{DynamicResource Brows.Style.CommandPalette.ListView}">
+      <local:FileSystemFindResultListView.Resources>
+        <DataTemplate DataType="{x:Type find:FoundInDirectoryName}">
+          <local:FoundInDirectoryNameGrid/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type find:FoundInFileError}">
+          <local:FoundInFileErrorGrid/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type find:FoundInFileName}">
+          <local:FoundInFileNameGrid/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type find:FoundInFileText}">
+          <local:FoundInFileTextGrid/>
+        </DataTemplate>
+      </local:FileSystemFindResultListView.Resources>
+    </local:FileSystemFindResultListView>
+  </Grid>
+</Grid>

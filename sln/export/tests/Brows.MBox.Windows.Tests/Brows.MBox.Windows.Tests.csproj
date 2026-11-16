@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Brows.Composition.Testing" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\windows\Brows.MBox.Windows\Brows.MBox.Windows.csproj" />
+    <ProjectReference Include="..\..\source\Brows.MBox\Brows.MBox.csproj" />
+    <ProjectReference Include="..\..\..\framework\source\Brows.Framework.Testing\Brows.Framework.Testing.csproj" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)/props/windows.build.props" />
+</Project>

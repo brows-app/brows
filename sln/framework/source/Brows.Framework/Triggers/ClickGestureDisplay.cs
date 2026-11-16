@@ -3,7 +3,7 @@
 namespace Brows.Triggers;
 
 internal sealed class ClickGestureDisplay {
-    private string BuildDisplay() {
+    private string DisplayFactory() {
         var s = "";
         var d = Translation.Delimiter;
         var b = Gesture.Button;
@@ -24,13 +24,8 @@ internal sealed class ClickGestureDisplay {
         return s;
     }
 
-    public string Display =>
-        _Display ?? (
-        _Display = BuildDisplay());
-    private string _Display;
-
-    public char Delimiter =>
-        Translation.Delimiter;
+    public string Display => field ??= DisplayFactory();
+    public char Delimiter => Translation.Delimiter;
 
     public ClickGesture Gesture { get; }
     public ClickGestureTranslation Translation { get; }

@@ -2,22 +2,22 @@
              x:ClassModifier="internal"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:brows="http://schemas.brows.app/xaml"
+             xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
              xmlns:local="clr-namespace:Brows">
     <UserControl.Style>
         <Style TargetType="UserControl">
             <Style.Resources>
                 <ControlTemplate x:Key="TextControl">
-                    <brows:EntryStreamTextControl EntryStreamGui="{Binding}"/>
+                    <brows:EntryStreamTextControl ViewModel="{Binding}"/>
                 </ControlTemplate>
                 <ControlTemplate x:Key="ImageControl">
                     <local:FileSystemStreamGuiImage/>
                 </ControlTemplate>
                 <ControlTemplate x:Key="MediaControl">
-                    <brows:EntryStreamMediaControl EntryStreamGui="{Binding}"/>
+                    <brows:EntryStreamMediaControl ViewModel="{Binding}"/>
                 </ControlTemplate>
                 <ControlTemplate x:Key="PreviewControl">
-                    <brows:EntryStreamPreviewControl EntryStreamGui="{Binding}"/>
+                    <brows:EntryStreamPreviewControl ViewModel="{Binding}"/>
                 </ControlTemplate>
             </Style.Resources>
             <Setter Property="Template" Value="{x:Null}"/>

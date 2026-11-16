@@ -15,6 +15,16 @@ public sealed class AppComponentCollection : IEnumerable<AppComponent> {
         Agent = [.. collection.Where(item => item is not null)];
     }
 
+    internal IEnumerable<ResourceDictionary> ApplicationResourceDictionaries {
+        get {
+            foreach (var component in Agent) {
+                foreach (var dictionary in component.ApplicationResourceDictionaries) {
+                    yield return dictionary;
+                }
+            }
+        }
+    }
+
     public static AppComponentCollection From(IImport imported) {
         ArgumentNullException.ThrowIfNull(imported);
         return new AppComponentCollection(imported

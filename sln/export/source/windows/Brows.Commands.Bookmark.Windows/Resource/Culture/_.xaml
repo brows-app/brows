@@ -1,5 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:commands="clr-namespace:Brows.Commands;assembly=Brows.Framework"
                     xmlns:s="clr-namespace:System;assembly=mscorlib">

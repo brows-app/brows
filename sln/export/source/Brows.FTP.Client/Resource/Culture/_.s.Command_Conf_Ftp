@@ -1,0 +1,5 @@
+# Open an FTP or FTPS URL in the active panel.
+#   An ftp:// URL connects with plain FTP and an ftps:// URL connects with implicit FTPS.
+#   When explicit is set, the ftp:// URL is opened with required explicit FTPS.
+url =
+#explicit = true

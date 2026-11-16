@@ -1,0 +1,25 @@
+﻿<ResourceDictionary
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="Styles/Brows.Style.PanelSplitter.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.PanelControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.PanelProviderControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.PanelSecretControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.SecretPassword.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.SecretConfirmPassword.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.SecretUsernameAndPassword.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.KeyboardKey.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.CommandPalette.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.CommandSuggestionCollection.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.CommandContextDataControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.CommandContextHint.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.PanelCollectionControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.CommandPaletteInput.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.CommandPaletteConf.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.PanelState.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.OperatorControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.CommanderControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.CommanderWindow.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

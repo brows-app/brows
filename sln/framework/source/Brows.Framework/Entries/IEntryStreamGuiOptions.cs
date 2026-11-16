@@ -1,5 +1,4 @@
 ﻿using Domore.Text;
-using System;
 using System.Collections.Generic;
 
 namespace Brows.Entries;

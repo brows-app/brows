@@ -1,14 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resource\Culture\_" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Brows.Abstractions.IO\Brows.Abstractions.IO.csproj" />
-    <ProjectReference Include="..\Brows.Composition\Brows.Composition.csproj" />
+    <ProjectReference Include="..\..\..\config\source\Brows.Conf\Brows.Conf.csproj" />
+    <ProjectReference Include="..\..\..\config\source\Brows.Conf.Composition\Brows.Conf.Composition.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Brows.DirectoryListing" />
+    <PackageReference Include="Brows.IO.Abstractions" />
+    <PackageReference Include="Brows.IO.Helpers" />
+    <PackageReference Include="Brows.Composition" />
+    <PackageReference Include="Brows.Operations" />
+    <PackageReference Include="Brows.ProcessAgent" />
+    <PackageReference Include="Brows.Sys" />
     <PackageReference Include="Domore.Notification" />
     <PackageReference Include="Domore.Async.TaskCaching" />
     <PackageReference Include="Domore.Async.TextReading" />

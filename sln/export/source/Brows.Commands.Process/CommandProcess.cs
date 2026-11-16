@@ -1,8 +1,10 @@
 ﻿using Brows.Diagnostics;
+using Brows.Diagnostics.Windows;
+using Domore.Logs;
 using Domore.Notification;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using ENVIRONMENT = System.Environment;
 using Process = System.Diagnostics.Process;
@@ -10,49 +12,66 @@ using Process = System.Diagnostics.Process;
 namespace Brows;
 
 internal sealed class CommandProcess : Notifier {
-    private IConfig<ProcessConfig> Config =>
-        _Config ?? (
-        _Config = Configure.File<ProcessConfig>());
-    private IConfig<ProcessConfig> _Config;
+    private static readonly ILog Log = Logging.For(typeof(CommandProcess));
+
+    private IConfiguration<ProcessConfig> Config => field ??=
+        ConfigFile.File<ProcessConfig>();
 
     private async Task Start(string workingDirectory, CancellationToken token) {
         var config = await Config.Load(token);
         var procDef = config?.Default;
         var procFile = procDef?.FileName?.Trim() ?? "";
         if (procFile != "") {
-            var process = new Process();
-            try {
+            using (var process = new Process()) {
                 process.StartInfo.Arguments = procDef.Arguments;
                 process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.ErrorDialog = false;
                 process.StartInfo.FileName = procFile;
                 process.StartInfo.UseShellExecute = true;
-                process.StartInfo.WorkingDirectory = workingDirectory ?? ENVIRONMENT.GetFolderPath(ENVIRONMENT.SpecialFolder.UserProfile);
-                await Task.Run(cancellationToken: token, function: process.Start);
-            }
-            finally {
-                await Task.Run(process.Dispose);
+                process.StartInfo.WorkingDirectory = workingDirectory ??
+                    ENVIRONMENT.GetFolderPath(ENVIRONMENT.SpecialFolder.UserProfile);
+                process.Start();
             }
         }
     }
 
-    public IFixProcessStartInfoError Fix { get; set; }
-    public IList<ProcessWrapper> List { get; } = new List<ProcessWrapper>();
+    internal IConfigurationFile ConfigFile { get; set; }
+
+    public IList<IProcessProxy> List { get; } = [];
     public IDictionary<string, string> Environment { get; set; }
 
-    public Task Start(string input, string workingDirectory, IReadOnlyDictionary<string, string> environment, CancellationToken token) {
+    public Task Start(string input,
+                      string workingDirectory,
+                      IReadOnlyDictionary<string, string> environment,
+                      CancellationToken token) {
         var i = input?.Trim() ?? "";
         if (i == "") {
             return Start(workingDirectory, token);
         }
         var env = Environment?.ToDictionary() ?? [];
-        if (environment != null) {
+        if (environment is not null) {
             foreach (var variable in environment) {
                 env[variable.Key] = variable.Value;
             }
         }
-        var process = new ProcessWrapper(i, workingDirectory, env, Fix);
-        List.Insert(0, process);
-        return process.Start(token);
+        var inpParts = i.Split(Array.Empty<char>(), 2, StringSplitOptions.None);
+        var fileName = inpParts[0];
+        var arguments = inpParts.Length > 1 ? inpParts[1] : "";
+        var processor = new ProcessAgent {
+            Arguments = arguments,
+            Environment = env,
+            FileName = fileName,
+            OnErrorCaught = ex => {
+                if (Log.Warn()) {
+                    Log.Warn(ex);
+                }
+            },
+            OnProxyCreated = proxy => {
+                List.Insert(0, proxy);
+            },
+            StartInfoFixer = new WindowsCmdFixer(),
+            WorkingDirectory = workingDirectory,
+        };
+        return processor.Start(token);
     }
 }

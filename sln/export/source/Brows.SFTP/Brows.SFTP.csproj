@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resource\Culture\_" />
+    <None Remove="Resource\Culture\_.alias" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Sftp_Open" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Sftp_Copy" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Sftp_Move" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Sftp_Delete" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Sftp_Rename" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Sftp_CreateDirectory" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Sftp_CreateFile" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_SftpConnection_Open" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Sftp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+    <EmbeddedResource Include="Resource\Culture\_.alias" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Sftp_Open" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Sftp_Copy" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Sftp_Move" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Sftp_Delete" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Sftp_Rename" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Sftp_CreateDirectory" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Sftp_CreateFile" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_SftpConnection_Open" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Sftp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.FileProtocol\Brows.FileProtocol.csproj" />
+    <ProjectReference Include="..\Brows.SFTP.Native\Brows.SFTP.Native.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\windows\Brows.FTP.Windows\Brows.FTP.Windows.csproj" />
+    <ProjectReference Include="..\..\source\windows\Brows.FTPS.Windows\Brows.FTPS.Windows.csproj" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)/props/windows.build.props" />
+</Project>

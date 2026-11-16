@@ -1,0 +1,38 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.Common.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style x:Key="Brows.Style.CommandPaletteConf" TargetType="local:CommandPaletteConfControl">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:CommandPaletteConfControl}">
+          <Grid DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+            <TextBox x:Name="PART_Text">
+              <TextBox.Style>
+                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                  <Setter Property="AcceptsReturn" Value="True" />
+                  <Setter Property="AcceptsTab" Value="True" />
+                  <Setter Property="VerticalAlignment" Value="Stretch" />
+                  <Setter Property="VerticalContentAlignment" Value="Top" />
+                  <Setter Property="FontSize" Value="{DynamicResource Brows.Font.CommandPaletteConf.FontSize}" />
+                  <Setter Property="Text" Value="{Binding ViewModel.Text}" />
+                  <Setter Property="BorderThickness" Value="0" />
+                  <Setter Property="Background" Value="{DynamicResource Brows.Theme.CommandPaletteConf.Background}" />
+                  <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.CommandPaletteConf.Foreground}" />
+                  <Setter Property="CaretBrush" Value="{DynamicResource Brows.Theme.CommandPaletteConf.CaretBrush}" />
+                  <Setter Property="SelectionBrush"
+                          Value="{DynamicResource Brows.Theme.CommandPaletteConf.SelectionBrush}" />
+                  <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.CommandPaletteConf.FontFamily}" />
+                </Style>
+              </TextBox.Style>
+            </TextBox>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="local:CommandPaletteConfControl"
+         BasedOn="{StaticResource Brows.Style.CommandPaletteConf}" />
+</ResourceDictionary>

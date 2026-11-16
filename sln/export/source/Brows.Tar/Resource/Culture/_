@@ -1,0 +1,10 @@
+TarEntry_RelativeName                   = Name
+TarEntry_SizeOriginal                   = Size
+TarEntry_LastWriteTime                  = Date modified
+
+Command_Description_Tar_ClipboardCopy   = Copys items from the archive to the clipboard
+Command_Description_Tar_ClipboardPaste  = Add items from clipboard to archive
+Command_Description_Tar_Copy            = Extract selection
+Command_Description_Tar_Delete          = Delete the selection from the current archive
+Command_Description_Tar_Open            = Open entries in this archive
+Command_Description_Tar_View            = Show a preview of the item

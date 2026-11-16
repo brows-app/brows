@@ -1,11 +1,11 @@
-﻿# example:
+# example:
 # {input} '*some text to find*' in=filetext exclude=*\bin\*;*\.* include=*.txt
 
 # Search for this pattern.
 # The wildcards ? and * can be used to substitute
 # single- and multi-character strings, respectively.
 # This value is required.
-pattern = 
+pattern =
 
 # Flags that define where to look for the pattern.
 # The options are:
@@ -22,7 +22,7 @@ case = none
 # List of locations, separated by a semicolon, to
 # exclude during the search. Items may use wildcards
 # as specified above.
-exclude = 
+exclude =
 
 # Whether or not to ignore case in the exclusion list.
 # The default is case-insensitive.
@@ -36,3 +36,24 @@ include =
 # Whether or not to ignore case in the inclusion list.
 # The default is case-insensitive.
 include-case = none
+
+# Maximum simultaneous file searches (1 through 32).
+# The default is up to 4, depending on the available processors.
+workers = 4
+
+# Skip content checks of files larger than this many bytes.
+# Name checks still run; the result shows the skipped content count.
+# Reads are bounded even if a file grows during the search.
+max-content-bytes = 8388608
+
+# Maximum matching text lines retained per file.
+max-matches-per-file = 256
+
+# Maximum displayed result rows across the entire search.
+# The search continues counting items after this limit is reached.
+max-results = 10000
+
+# Maximum characters copied into a text result preview.
+# Limits must be positive. Truncated results are marked in the view.
+# Increasing these limits or the worker count increases memory use.
+max-preview-length = 512

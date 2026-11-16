@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(SolutionDir)props/native.export.build.props" />
   <ItemGroup Label="ProjectConfigurations">
@@ -60,6 +60,7 @@
     <ClCompile Include="brows_ssh_KnownHosts.c" />
     <ClCompile Include="brows_ssh_ScpRecv.c" />
     <ClCompile Include="brows_ssh_ScpSend.c" />
+    <ClCompile Include="brows_ssh_Sftp.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brows_ssh.h" />
@@ -71,6 +72,7 @@
     <None Include="zlib.license" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(SolutionDir)props/native.root.build.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>

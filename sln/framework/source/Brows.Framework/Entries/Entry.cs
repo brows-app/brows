@@ -1,4 +1,4 @@
-using Brows.Commands;
+﻿using Brows.Commands;
 using Brows.Panels;
 using Brows.Providers;
 using Domore.Logs;
@@ -6,7 +6,6 @@ using Domore.Notification;
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
@@ -32,9 +31,9 @@ public abstract class Entry : Notifier, IEntry, ICommandSourceObject {
     protected internal CancellationToken Token =>
         Provider.Token;
 
-    protected internal Provider Provider { get; }
+    protected internal EntryProvider Provider { get; }
 
-    protected Entry(Provider provider) {
+    protected Entry(EntryProvider provider) {
         Provider = provider ?? throw new ArgumentNullException(nameof(provider));
     }
 
@@ -100,7 +99,7 @@ public abstract class Entry : Notifier, IEntry, ICommandSourceObject {
         Provider.Selection;
 }
 
-public abstract class Entry<TProvider> : Entry where TProvider : Provider {
+public abstract class Entry<TProvider> : Entry where TProvider : EntryProvider {
     protected new TProvider Provider { get; }
 
     protected Entry(TProvider provider) : base(provider) {

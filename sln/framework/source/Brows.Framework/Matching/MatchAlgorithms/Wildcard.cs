@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Brows.Matching.MatchAlgorithms;
 
@@ -13,6 +12,6 @@ internal sealed class Wildcard : RegularExpression {
             .Escape(pattern)
             .Replace("\\?", ".")
             .Replace("\\*", ".*") + "$";
-        return new Regex(p, Options());
+        return new Regex(p, Options(), MatchTimeout);
     }
 }

@@ -10,7 +10,7 @@
   <ItemGroup>
     <Using Include="Brows.Commands"/>
     <Using Include="Brows.Composition"/>
-    <Using Include="Brows.Config"/>
+    <Using Include="Brows.Conf"/>
     <Using Include="Brows.Entries"/>
     <Using Include="Brows.Gui"/>
     <Using Include="Brows.IO"/>
@@ -18,8 +18,6 @@
     <Using Include="Brows.Localization"/>
     <Using Include="Brows.Matching"/>
     <Using Include="Brows.Matching.MatchAlgorithms"/>
-    <Using Include="Brows.Messaging"/>
-    <Using Include="Brows.Messaging.Messages"/>
     <Using Include="Brows.Native"/>
     <Using Include="Brows.Operations"/>
     <Using Include="Brows.Panels"/>

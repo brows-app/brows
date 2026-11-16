@@ -122,7 +122,7 @@ internal sealed class DirectoryFound : Command {
                                 bag.Add(dir);
                             }
                         }
-                        catch (OperationCanceledException canceled) when (canceled?.CancellationToken == token) {
+                        catch (OperationCanceledException) when (token.IsCancellationRequested) {
                             throw;
                         }
                         catch (Exception ex) {

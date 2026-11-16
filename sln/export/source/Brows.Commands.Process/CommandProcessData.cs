@@ -1,22 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using Brows.Diagnostics;
+using System.Collections.Generic;
 
 namespace Brows;
 
-using Brows.Commands;
-using Diagnostics;
-
-internal class CommandProcessData : CommandContextData<ProcessWrapper>, ICommandContextHint {
-    protected override CommandContextData<ProcessWrapper> Create(int index, IList<ProcessWrapper> list) {
+internal sealed class CommandProcessData : CommandContextData<IProcessProxy>, ICommandContextHint {
+    protected sealed override CommandContextData<IProcessProxy> Create(int index, IList<IProcessProxy> list) {
         return new CommandProcessData(Command, index, list);
     }
 
-    protected override void Removed(ProcessWrapper item) {
+    protected sealed override void Removed(IProcessProxy item) {
         if (item != null) {
             item.Kill();
         }
     }
 
-    protected override void Cleared(IEnumerable<ProcessWrapper> items) {
+    protected sealed override void Cleared(IEnumerable<IProcessProxy> items) {
         if (items != null) {
             foreach (var item in items) {
                 item.Kill();
@@ -24,6 +22,6 @@ internal class CommandProcessData : CommandContextData<ProcessWrapper>, ICommand
         }
     }
 
-    public CommandProcessData(ICommand command, int index, IList<ProcessWrapper> list) : base(command, index, list) {
+    public CommandProcessData(ICommand command, int index, IList<IProcessProxy> list) : base(command, index, list) {
     }
 }

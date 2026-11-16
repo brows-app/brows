@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿namespace Brows;
 
-namespace Brows; 
 internal sealed class ZipStreamSource : ZipArchivePath.StreamSource<ZipEntry> {
-    public sealed override string RelativePath =>
-        Entry.Info.Name.Normalized
-            .Substring(Entry.Provider.Zip.RelativePath.Normalized.Length)
-            .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    public sealed override string RelativePath => ZipStreamPath.GetRelativePath(Entry);
+
+    public sealed override string SourceDirectory =>
+        EntryInfo.Kind == ZipEntryKind.Path
+            ? RelativePath
+            : null;
 
     public ZipStreamSource(ZipEntry entry) : base(entry, entry?.Info) {
     }

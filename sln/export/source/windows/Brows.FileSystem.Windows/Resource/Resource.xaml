@@ -1,25 +1,29 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Brows"
-                    xmlns:brows="http://schemas.brows.app/xaml">
-    <DataTemplate x:Key="FileSystemEntry_Name">
-        <brows:EntryNameGrid Text="{Binding Item[Name]}" Icon="{Binding}">
-            <brows:EntryNameGrid.IconTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <brows:EntryIconControl DataContext="{Binding Item[Icon]}"/>
-                        <brows:EntryIconControl DataContext="{Binding Item[Overlay]}"/>
-                    </Grid>
-                </DataTemplate>
-            </brows:EntryNameGrid.IconTemplate>
-        </brows:EntryNameGrid>
-    </DataTemplate>
+                    xmlns:local="clr-namespace:Brows">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary
+      Source="/Brows.FileSystem.Windows;component/Resources/Styles/Brows.Style.FileSystemTerminal.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+  <DataTemplate x:Key="FileSystemEntry_Name">
+    <brows:EntryNameGrid Text="{Binding Item[Name]}" Icon="{Binding}">
+      <brows:EntryNameGrid.IconTemplate>
+        <DataTemplate>
+          <Grid>
+            <brows:EntryIconControl ViewModel="{Binding Item[Icon]}"/>
+            <brows:EntryIconControl ViewModel="{Binding Item[Overlay]}"/>
+          </Grid>
+        </DataTemplate>
+      </brows:EntryNameGrid.IconTemplate>
+    </brows:EntryNameGrid>
+  </DataTemplate>
 
-    <DataTemplate x:Key="FileSystemEntry_Thumbnail">
-        <brows:EntryThumbnailControl DataContext="{Binding Item[Thumbnail]}"/>
-    </DataTemplate>
+  <DataTemplate x:Key="FileSystemEntry_Thumbnail">
+    <brows:EntryThumbnailControl ViewModel="{Binding Item[Thumbnail]}"/>
+  </DataTemplate>
 
-    <DataTemplate x:Key="PanelProvider_FileSystemProvider">
-        <local:FileSystemProviderControl/>
-    </DataTemplate>
+  <DataTemplate x:Key="PanelProvider_FileSystemProvider">
+    <local:FileSystemProviderControl ViewModel="{Binding}"/>
+  </DataTemplate>
 </ResourceDictionary>

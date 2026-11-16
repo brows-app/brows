@@ -24,11 +24,14 @@
     <Using Include="ArgumentException = System.ArgumentException"/>
     <Using Include="ArgumentNullException = System.ArgumentNullException"/>
     <Using Include="ArgumentOutOfRangeException = System.ArgumentOutOfRangeException"/>
+    <Using Include="Array = System.Array"/>
     <Using Include="CancellationToken = System.Threading.CancellationToken"/>
+    <Using Include="CancellationTokenSource = System.Threading.CancellationTokenSource"/>
     <Using Include="ComVisibleAttribute = System.Runtime.InteropServices.ComVisibleAttribute"/>
     <Using Include="CultureInfo = System.Globalization.CultureInfo"/>
     <Using Include="DateTime = System.DateTime"/>
     <Using Include="DateTimeOffset = System.DateTimeOffset"/>
+    <Using Include="Enum = System.Enum" />
     <Using Include="EventArgs = System.EventArgs"/>
     <Using Include="Exception = System.Exception"/>
     <Using Include="FormatException = System.FormatException"/>
@@ -44,5 +47,5 @@
     <Using Include="Thread = System.Threading.Thread"/>
     <Using Include="TimeSpan = System.TimeSpan"/>
     <Using Include="Type = System.Type"/>
-  </ItemGroup>  
+  </ItemGroup>
 </Project>

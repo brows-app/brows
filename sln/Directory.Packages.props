@@ -5,14 +5,42 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.28.0" />
-    <PackageVersion Include="Domore.Async.FileSystemWatching" Version="10.3.1" />
-    <PackageVersion Include="Domore.Async.TaskCaching" Version="10.3.1" />
-    <PackageVersion Include="Domore.Async.TextReading" Version="10.3.1" />
-    <PackageVersion Include="Domore.Conf" Version="10.3.1" />
-    <PackageVersion Include="Domore.Conf.Cli" Version="10.3.1" />
-    <PackageVersion Include="Domore.Logs" Version="10.3.1" />
-    <PackageVersion Include="Domore.Logs.Conf" Version="10.3.1" />
-    <PackageVersion Include="Domore.Notification" Version="10.3.1" />
+    <PackageVersion Include="Brows.Instantiation" Version="1.1.0" />
+    <PackageVersion Include="Brows.IO.Abstractions" Version="1.1.0" />
+    <PackageVersion Include="Brows.IO.Abstractions.Testing" Version="1.1.0" />
+    <PackageVersion Include="Brows.IO.Helpers" Version="1.1.0" />
+    <PackageVersion Include="Brows.DirectoryListing" Version="1.0.0" />
+    <PackageVersion Include="Brows.Composition" Version="1.1.0" />
+    <PackageVersion Include="Brows.Composition.Testing" Version="1.1.0" />
+    <PackageVersion Include="Brows.IPC.Host" Version="1.1.0" />
+    <PackageVersion Include="Brows.Operations" Version="1.6.0" />
+    <PackageVersion Include="Brows.Operations.Composition" Version="1.6.0" />
+    <PackageVersion Include="Brows.Operations.Windows" Version="1.6.0" />
+    <PackageVersion Include="Brows.ProcessAgent" Version="1.1.0" />
+    <PackageVersion Include="Brows.ProcessAgent.Windows" Version="1.1.0" />
+    <PackageVersion Include="Brows.Sys" Version="1.1.0" />
+    <PackageVersion Include="Brows.Sys.Composition" Version="1.1.0" />
+    <PackageVersion Include="Brows.Sys.Win32.Windows" Version="1.1.0" />
+    <PackageVersion Include="Brows.TTY.Windows" Version="0.1.0" />
+    <PackageVersion Include="Brows.Win32.PreviewHandler.Windows" Version="1.1.0" />
+    <PackageVersion Include="Brows.Win32.PropertySystem" Version="1.0.0" />
+    <PackageVersion Include="Brows.Win32.Interop" Version="1.5.0" />
+    <PackageVersion Include="Brows.Win32.Interop.Composition" Version="1.5.0" />
+    <PackageVersion Include="Brows.Win32.Interop.Operations" Version="1.5.0" />
+    <PackageVersion Include="Brows.Win32.STAThreadPool" Version="1.5.1" />
+    <PackageVersion Include="Brows.Win32.STAThreadPool.Composition.Exports" Version="1.5.1" />
+    <PackageVersion Include="Brows.Win32.Windows" Version="1.2.0" />
+    <PackageVersion Include="Brows.Win32.Windows.Composition" Version="1.2.0" />
+    <PackageVersion Include="Domore.Async.FileSystemWatching" Version="11.0.0" />
+    <PackageVersion Include="Domore.Async.TaskCaching" Version="10.6.4" />
+    <PackageVersion Include="Domore.Async.TextReading" Version="11.0.0" />
+    <PackageVersion Include="Domore.Async.TextReading.Windows" Version="11.0.0" />
+    <PackageVersion Include="Domore.Conf" Version="11.0.0" />
+    <PackageVersion Include="Domore.Conf.Cli" Version="11.0.0" />
+    <PackageVersion Include="Domore.Logs" Version="11.1.0" />
+    <PackageVersion Include="Domore.Logs.Conf" Version="11.1.0" />
+    <PackageVersion Include="Domore.Logs.Windows" Version="11.1.0" />
+    <PackageVersion Include="Domore.Notification" Version="11.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
@@ -23,10 +51,10 @@
     <PackageVersion Include="System.ComponentModel.Composition" Version="10.0.12" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
     <PackageVersion Include="System.Threading.Channels" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
-    <PackageVersion Include="Moq" Version="4.20.72" />
-    <PackageVersion Include="NUnit" Version="4.6.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
+    <PackageVersion Include="Moq" Version="4.21.0" />
+    <PackageVersion Include="NUnit" Version="5.0.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
   </ItemGroup>
 </Project>

@@ -1,10 +1,6 @@
-﻿using Brows.Gui;
-using System.Security;
+﻿namespace Brows.Panels;
 
-namespace Brows.Panels;
-
-public interface IPanelSecretController : IController {
-    SecureString SecretString { get; }
+internal interface IPanelSecretController {
     void Clear();
     void Focus();
 }

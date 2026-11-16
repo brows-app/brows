@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Brows.DirectoryListing" />
+    <ProjectReference Include="..\Brows.FileProtocol\Brows.FileProtocol.csproj" />
+    <ProjectReference Include="..\Brows.Url\Brows.Url.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resource\Culture\_" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Ftp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Ftp" />
+  </ItemGroup>
+</Project>

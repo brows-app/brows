@@ -12,17 +12,17 @@
     <Grid.Resources>
       <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
-        <Setter Property="Foreground" Value="{DynamicResource Global_Danger_Foreground_Brush}"/>
-        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.Monospace}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.Danger}"/>
+        <Setter Property="FontWeight" Value="{DynamicResource Brows.Font.Weight.Bold}"/>
         <Setter Property="Margin" Value="0"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
       </Style>
       <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
-        <Setter Property="Foreground" Value="{DynamicResource Global_Danger_Foreground_Brush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.Monospace}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.Danger}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
       </Style>
     </Grid.Resources>

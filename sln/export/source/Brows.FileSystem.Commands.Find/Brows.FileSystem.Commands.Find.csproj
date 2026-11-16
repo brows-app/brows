@@ -11,4 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Brows.IO.Helpers" />
+  </ItemGroup>
 </Project>

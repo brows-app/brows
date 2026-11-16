@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.Git\Brows.Git.csproj" />
+    <ProjectReference Include="..\..\source\Brows.Git.Native\Brows.Git.Native.csproj" />
+  </ItemGroup>
+</Project>

@@ -48,7 +48,14 @@ internal sealed class HostSubscription : CommanderMessageSubscription {
 
     internal static string PortPath => field ??= Path.Combine(
             PortDirectory,
+#if DEBUG
+            /*
+             * Debug instances must not overwrite or delete the running release instance's port file.
+             */
+            $"port.{Environment.ProcessId}");
+#else
             "port");
+#endif
 
     internal HostSubscription() {
         Ch = Channel.CreateUnbounded<CommanderMessage>(new() {

@@ -1,0 +1,8 @@
+Subject                = subject
+From                   = from
+Date                   = date
+To                     = to
+MessageId              = message-id
+Labels                 = labels
+ThreadId               = thread-id
+Size                   = size

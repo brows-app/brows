@@ -1,8 +1,10 @@
 ﻿using Domore.Logs;
 using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 
-namespace Brows.Collections.Generic; 
+namespace Brows.Collections.Generic;
+
 internal sealed class DisposableStack : IDisposable {
     private static readonly ILog Log = Logging.For(typeof(DisposableStack));
 
@@ -11,6 +13,7 @@ internal sealed class DisposableStack : IDisposable {
     private void Dispose(bool disposing) {
         if (disposing) {
             lock (Stack) {
+                ExceptionDispatchInfo failure = null;
                 for (; ; )
                 {
                     var pop = Stack.TryPop(out var disposable);
@@ -24,12 +27,16 @@ internal sealed class DisposableStack : IDisposable {
                         disposable.Dispose();
                     }
                     catch (Exception ex) {
-                        if (Log.Warn()) {
+                        if (failure is null) {
+                            failure = ExceptionDispatchInfo.Capture(ex);
+                        }
+                        else if (Log.Warn()) {
                             Log.Warn(ex);
                         }
                     }
                 }
                 Disposed = true;
+                failure?.Throw();
             }
         }
     }

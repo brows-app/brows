@@ -7,5 +7,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Brows.FileSystem\Brows.FileSystem.csproj" />
+    <ProjectReference Include="..\Brows.Zip.Async\Brows.Zip.Async.csproj" />
   </ItemGroup>
 </Project>

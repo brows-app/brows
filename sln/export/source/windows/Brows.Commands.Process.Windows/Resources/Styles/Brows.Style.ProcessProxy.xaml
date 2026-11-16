@@ -1,0 +1,178 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
+                    xmlns:local="clr-namespace:Brows">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.ScrollBar.xaml"/>
+    <ResourceDictionary Source="/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.ScrollViewer.xaml"/>
+    <ResourceDictionary Source="/Brows.ProcessAgent.Windows;component/Resources/Styles.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <Style x:Key="Brows.Style.ProcessProxy.ScrollViewer"
+         TargetType="{x:Type ScrollViewer}"
+         BasedOn="{StaticResource {x:Type ScrollViewer}}">
+    <Setter Property="CanContentScroll" Value="True"/>
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+    <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="Padding" Value="8 4"/>
+  </Style>
+
+  <!--
+    Output lines are a plain virtualized list. The command palette's list style would give each line
+    the height and selection behavior of a suggestion row, and would cut off lines wider than the palette.
+    Each item is displayed by the implicit ProcessStreamOutput template of ProcessProxyView. The list
+    follows the latest output while it is scrolled to the end; see ProcessOutputScroll.
+  -->
+  <DataTemplate x:Key="Brows.Style.ProcessProxy.LineItemsTemplate">
+    <ItemsControl ItemsSource="{Binding}"
+                  Focusable="False"
+                  IsTabStop="False"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.ScrollUnit="Pixel"
+                  VirtualizingPanel.VirtualizationMode="Recycling">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <VirtualizingStackPanel/>
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.Template>
+        <ControlTemplate TargetType="{x:Type ItemsControl}">
+          <ScrollViewer local:ProcessOutputScroll.FollowsEnd="True"
+                        Style="{DynamicResource Brows.Style.ProcessProxy.ScrollViewer}">
+            <ItemsPresenter/>
+          </ScrollViewer>
+        </ControlTemplate>
+      </ItemsControl.Template>
+    </ItemsControl>
+  </DataTemplate>
+
+  <Style x:Key="Brows.Style.ProcessProxy.StandardOutputLine"
+         TargetType="{x:Type TextBlock}"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.ProcessProxy.StandardOutput.Foreground}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+  </Style>
+
+  <Style x:Key="Brows.Style.ProcessProxy.StandardErrorLine"
+         TargetType="{x:Type TextBlock}"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.ProcessProxy.StandardError.Foreground}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+  </Style>
+
+  <Style x:Key="Brows.Style.ProcessProxy.Status" TargetType="{x:Type Border}">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.ProcessProxy.Status.Background}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Brows.Theme.ProcessProxy.Status.BorderBrush}"/>
+    <Setter Property="BorderThickness" Value="0 1 0 0"/>
+    <Setter Property="Padding" Value="8 4"/>
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Brows.Font.ProcessProxy.Status.FontSize}"/>
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Brows.Theme.ProcessProxy.Status.Foreground}"/>
+  </Style>
+
+  <!--
+    The package's exit-code item, with the state shown in its own color. As in the package, every
+    state overlays the others in a single-cell grid and the inactive ones are hidden rather than
+    collapsed, so the item keeps the width of its widest text and the status area does not shift.
+  -->
+  <DataTemplate x:Key="Brows.Style.ProcessProxy.ExitCodeTemplate">
+    <Grid VerticalAlignment="Center">
+      <StackPanel x:Name="_Exited" Orientation="Horizontal">
+        <TextBlock Text="Exit" Margin="0 0 4 0" Opacity="0.7"/>
+        <TextBlock x:Name="_ExitCode"
+                   Text="{Binding ExitCode}"
+                   Foreground="{DynamicResource Brows.Theme.ProcessProxy.State.Failure.Foreground}"/>
+      </StackPanel>
+      <TextBlock x:Name="_NotStarted"
+                 Text="Not started"
+                 Visibility="Hidden"
+                 Foreground="{DynamicResource Brows.Theme.ProcessProxy.State.Idle.Foreground}"/>
+      <TextBlock x:Name="_Starting"
+                 Text="Starting"
+                 Visibility="Hidden"
+                 Foreground="{DynamicResource Brows.Theme.ProcessProxy.State.Idle.Foreground}"/>
+      <TextBlock x:Name="_Running"
+                 Text="Running"
+                 Visibility="Hidden"
+                 Foreground="{DynamicResource Brows.Theme.ProcessProxy.State.Running.Foreground}"/>
+      <TextBlock x:Name="_Stopped"
+                 Text="Stopped"
+                 Visibility="Hidden"
+                 Foreground="{DynamicResource Brows.Theme.ProcessProxy.State.Failure.Foreground}"/>
+    </Grid>
+    <DataTemplate.Triggers>
+      <!--
+        A known exit code always wins. Without one, later triggers take precedence: not started,
+        then stopped (started but neither running nor exited, such as a canceled process), then
+        starting, then running.
+      -->
+      <DataTrigger Binding="{Binding ExitCode}" Value="0">
+        <Setter TargetName="_ExitCode"
+                Property="Foreground"
+                Value="{DynamicResource Brows.Theme.ProcessProxy.State.Success.Foreground}"/>
+      </DataTrigger>
+      <DataTrigger Binding="{Binding ExitCode}" Value="{x:Null}">
+        <Setter TargetName="_Exited" Property="Visibility" Value="Hidden"/>
+        <Setter TargetName="_NotStarted" Property="Visibility" Value="Visible"/>
+      </DataTrigger>
+      <MultiDataTrigger>
+        <MultiDataTrigger.Conditions>
+          <Condition Binding="{Binding ExitCode}" Value="{x:Null}"/>
+          <Condition Binding="{Binding Started}" Value="True"/>
+        </MultiDataTrigger.Conditions>
+        <Setter TargetName="_NotStarted" Property="Visibility" Value="Hidden"/>
+        <Setter TargetName="_Stopped" Property="Visibility" Value="Visible"/>
+      </MultiDataTrigger>
+      <MultiDataTrigger>
+        <MultiDataTrigger.Conditions>
+          <Condition Binding="{Binding ExitCode}" Value="{x:Null}"/>
+          <Condition Binding="{Binding Starting}" Value="True"/>
+        </MultiDataTrigger.Conditions>
+        <Setter TargetName="_NotStarted" Property="Visibility" Value="Hidden"/>
+        <Setter TargetName="_Stopped" Property="Visibility" Value="Hidden"/>
+        <Setter TargetName="_Starting" Property="Visibility" Value="Visible"/>
+      </MultiDataTrigger>
+      <MultiDataTrigger>
+        <MultiDataTrigger.Conditions>
+          <Condition Binding="{Binding ExitCode}" Value="{x:Null}"/>
+          <Condition Binding="{Binding Running}" Value="True"/>
+        </MultiDataTrigger.Conditions>
+        <Setter TargetName="_NotStarted" Property="Visibility" Value="Hidden"/>
+        <Setter TargetName="_Stopped" Property="Visibility" Value="Hidden"/>
+        <Setter TargetName="_Starting" Property="Visibility" Value="Hidden"/>
+        <Setter TargetName="_Running" Property="Visibility" Value="Visible"/>
+      </MultiDataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <Style x:Key="Brows.Style.ProcessProxy.View"
+         TargetType="{x:Type brows:ProcessProxyView}"
+         BasedOn="{StaticResource {x:Type brows:ProcessProxyView}}">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.ProcessProxy.Foreground}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.ProcessProxy.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.ProcessProxy.FontSize}"/>
+    <Setter Property="ProcessLineItemsControlTemplate"
+            Value="{StaticResource Brows.Style.ProcessProxy.LineItemsTemplate}"/>
+    <Setter Property="ProcessStandardOutputLineStyle"
+            Value="{StaticResource Brows.Style.ProcessProxy.StandardOutputLine}"/>
+    <Setter Property="ProcessStandardErrorLineStyle"
+            Value="{StaticResource Brows.Style.ProcessProxy.StandardErrorLine}"/>
+    <Setter Property="ProcessBorderStyle" Value="{StaticResource Brows.Style.ProcessProxy.Status}"/>
+    <Setter Property="ProcessExitCodeTemplate" Value="{StaticResource Brows.Style.ProcessProxy.ExitCodeTemplate}"/>
+  </Style>
+
+  <Style x:Key="Brows.Style.ProcessProxy" TargetType="{x:Type local:ProcessProxyControl}">
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:ProcessProxyControl}">
+          <brows:ProcessProxyView ProcessProxy="{TemplateBinding ProcessProxy}"
+                                  ProcessDateTimeFormat="{TemplateBinding ProcessDateTimeFormat}"
+                                  Style="{DynamicResource Brows.Style.ProcessProxy.View}"/>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="{x:Type local:ProcessProxyControl}" BasedOn="{StaticResource Brows.Style.ProcessProxy}"/>
+</ResourceDictionary>

@@ -1,0 +1,22 @@
+﻿<ResourceDictionary
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style TargetType="TextBlock" x:Key="Brows.Style.Find.TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.Foreground}" />
+    <Setter Property="Margin" Value="5 0" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding Complete}" Value="False">
+        <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.Warning}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Failed}" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.Warning}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Canceled}" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.Warning}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Truncated}" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.Warning}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+</ResourceDictionary>

@@ -1,5 +1,6 @@
-﻿namespace Brows.Git; 
-public enum GitRepoState {
+﻿namespace Brows.Git;
+
+internal enum GitRepoState {
     None = 0,
     Merge = 1,
     Revert = 2,

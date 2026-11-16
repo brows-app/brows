@@ -1,4 +1,4 @@
-using Brows.Commands;
+﻿using Brows.Commands;
 using Brows.Gui;
 using Brows.Triggers;
 using Domore.Logs;

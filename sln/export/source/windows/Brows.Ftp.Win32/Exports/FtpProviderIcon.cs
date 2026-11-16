@@ -1,14 +1,16 @@
-﻿using Brows.Runtime.Win32;
+﻿using Brows.Win32;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Exports;
 
 internal sealed class FtpProviderIcon : IFtpProviderIcon {
+    [ImportRequired]
+    internal IWin32WindowsServices Services { get; set; }
+
     public async Task<bool> Work(Action<object> set, CancellationToken token) {
         if (null == set) return false;
-        set(await Win32Icon.Load(SHSTOCKICONID.FOLDER, token));
+        set(await Services.GetIconSource(Win32StockIcon.Folder, token));
         return true;
     }
 }

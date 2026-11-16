@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Brows.Commands;
 
@@ -39,9 +38,50 @@ public abstract class CommandContextData : ICommandContextData {
 public abstract class CommandContextData<T> : CommandContextData {
     protected abstract CommandContextData<T> Create(int index, IList<T> list);
 
+    private bool ItemLoaded;
+    private T _Item;
+
+    private bool SameItem(T x, T y) {
+        return typeof(T).IsValueType
+            ? EqualityComparer<T>.Default.Equals(x, y)
+            : ReferenceEquals(x, y);
+    }
+
+    private int FindItemIndex(T item) {
+        for (var i = 0; i < List.Count; i++) {
+            if (SameItem(List[i], item)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int CurrentIndex {
+        get {
+            var item = Item;
+            if (ItemLoaded == false) {
+                return -1;
+            }
+            var index = Index;
+            if (index >= 0 && index < List.Count && SameItem(List[index], item)) {
+                return index;
+            }
+            return FindItemIndex(item);
+        }
+    }
+
     protected CommandContextData(ICommand command, int index, IList<T> list) : base(command) {
         Index = index;
         List = list ?? throw new ArgumentNullException(nameof(list));
+        CaptureItem();
+    }
+
+    private void CaptureItem() {
+        var index = Index;
+        if (index >= 0 && index < List.Count) {
+            _Item = List[index];
+            ItemLoaded = true;
+        }
     }
 
     protected virtual void Removed(T item) {
@@ -56,15 +96,20 @@ public abstract class CommandContextData<T> : CommandContextData {
     public int Index { get; }
     public IList<T> List { get; }
 
-    public T Item =>
-        _Item ?? (
-        _Item = List.Count > Index
-            ? List[Index]
-            : default(T));
-    private T _Item;
+    public T Item {
+        get {
+            if (ItemLoaded == false) {
+                CaptureItem();
+            }
+            return _Item;
+        }
+    }
 
     public override ICommandContextData Remove() {
-        var i = Index;
+        var i = CurrentIndex;
+        if (i < 0) {
+            return null;
+        }
         var item = Item;
         List.RemoveAt(i);
         Removed(item);
@@ -85,7 +130,14 @@ public abstract class CommandContextData<T> : CommandContextData {
     }
 
     public override ICommandContextData Next() {
-        var next = Index + 1;
+        if (List.Count == 0) {
+            return Create(0, List);
+        }
+        var index = CurrentIndex;
+        if (index < 0) {
+            return null;
+        }
+        var next = index + 1;
         if (List.Count > next) {
             return Create(next, List);
         }
@@ -93,7 +145,14 @@ public abstract class CommandContextData<T> : CommandContextData {
     }
 
     public override ICommandContextData Previous() {
-        var prev = Index - 1;
+        if (List.Count == 0) {
+            return null;
+        }
+        var index = CurrentIndex;
+        if (index < 0) {
+            return null;
+        }
+        var prev = index - 1;
         if (prev >= 0) {
             return Create(prev, List);
         }

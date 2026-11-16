@@ -2,26 +2,24 @@
 using Brows.Gui;
 using Domore.Logs;
 using Domore.Notification;
-using Domore.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Providers;
 
-public abstract class ProviderNavigationNode : Notifier, IProviderNavigationNode, ICommandSourceObject, IControlled<IProviderNavigationNodeController> {
+public abstract class ProviderNavigationNode : Notifier, IProviderNavigationNode,
+                                                         ICommandSourceObject,
+                                                         IControlled<IProviderNavigationNodeController> {
     private static readonly ILog Log = Logging.For(typeof(ProviderNavigationNode));
 
     private bool AddedChildren;
     private bool AddingChildren;
     private readonly ObservableCollection<ProviderNavigationNode> ChildCollection = new();
-
-    private TaskCache<object> IconCache => _IconCache ??= new(GetIcon);
-    private TaskCache<object> _IconCache;
+    private readonly object IconLocker = new();
 
     private void Controller_Loaded(object sender, EventArgs e) {
         if (AddedChildren) {
@@ -50,7 +48,7 @@ public abstract class ProviderNavigationNode : Notifier, IProviderNavigationNode
             }
             AddedChildren = true;
         }
-        catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
+        catch (OperationCanceledException canceled) when (token.IsCancellationRequested) {
             if (Log.Debug()) {
                 Log.Debug(Log.Join(nameof(AddChildren), nameof(canceled)));
             }
@@ -65,15 +63,47 @@ public abstract class ProviderNavigationNode : Notifier, IProviderNavigationNode
         }
     }
 
+    private void ResetIcon() {
+        lock (IconLocker) {
+            IconGeneration++;
+            _Icon = null;
+            IconLoaded = false;
+            IconLoading = false;
+        }
+    }
+
+    private async Task LoadIcon(int generation) {
+        object icon = null;
+        try {
+            icon = await GetIcon(Token);
+        }
+        catch (Exception ex) {
+            if (Log.Warn()) {
+                Log.Warn(Log.Join(nameof(Icon), nameof(Exception), ID), ex);
+            }
+        }
+        var iconChanged = false;
+        lock (IconLocker) {
+            if (generation != IconGeneration) {
+                return;
+            }
+            IconLoading = false;
+            iconChanged = _Icon != icon;
+            _Icon = icon;
+            IconLoaded = true;
+        }
+        if (iconChanged) {
+            NotifyPropertyChanged(nameof(Icon));
+        }
+    }
+
     private void Collapsed(bool @private) {
-        _IconCache = null;
-        _Icon = null;
+        ResetIcon();
         Collapsed();
     }
 
     private void Expanded(bool @private) {
-        _IconCache = null;
-        _Icon = null;
+        ResetIcon();
         if (AddedChildren == false && AddingChildren == false) {
             AddChildren();
         }
@@ -135,26 +165,35 @@ public abstract class ProviderNavigationNode : Notifier, IProviderNavigationNode
         }
     }
 
+    /*
+     * A load is considered complete even when it yields null or fails, so the
+     * getter must test IconLoaded instead of _Icon. Testing _Icon would re-enter
+     * the load from every PropertyChanged and recurse without bound whenever the
+     * icon is null.
+     */
     public object Icon {
         get {
-            if (_Icon == null) {
-                async void load() {
-                    try {
-                        _Icon = await IconCache.Ready(Token);
-                        NotifyPropertyChanged(nameof(Icon));
-                    }
-                    catch (Exception ex) {
-                        if (Log.Warn()) {
-                            Log.Warn(Log.Join(nameof(Icon), nameof(Exception), ID), ex);
-                        }
-                    }
+            var startLoad = false;
+            var generation = 0;
+            lock (IconLocker) {
+                if (IconLoaded == false && IconLoading == false) {
+                    IconLoading = true;
+                    generation = IconGeneration;
+                    startLoad = true;
                 }
-                load();
             }
-            return _Icon;
+            if (startLoad) {
+                _ = LoadIcon(generation);
+            }
+            lock (IconLocker) {
+                return _Icon;
+            }
         }
     }
     private object _Icon;
+    private bool IconLoaded;
+    private bool IconLoading;
+    private int IconGeneration;
 
     public bool Select {
         get => _Select;

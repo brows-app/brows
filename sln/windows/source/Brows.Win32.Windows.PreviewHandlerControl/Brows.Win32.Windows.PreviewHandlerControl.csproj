@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Brows.Win32.STAThreadPool\Brows.Win32.STAThreadPool.csproj" />
-    <ProjectReference Include="..\Brows.Win32\Brows.Win32.csproj" />
-  </ItemGroup>
-</Project>

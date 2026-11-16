@@ -1,7 +1,5 @@
 ﻿using Domore.IO;
-using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Url.IO;
@@ -17,7 +15,7 @@ internal sealed class ClientStreamText : IStreamText {
         return new ClientStreamText(stream);
     }
 
-    long IStreamText.StreamLength => throw new NotSupportedException();
+    Task<long> IStreamText.StreamLength(CancellationToken token) => throw new NotSupportedException();
 
     Task<IDisposable> IStreamText.StreamReady(CancellationToken cancellationToken) {
         return Task.FromResult(default(IDisposable));

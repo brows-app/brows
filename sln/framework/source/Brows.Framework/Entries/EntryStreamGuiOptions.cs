@@ -1,5 +1,4 @@
 ﻿using Domore.Text;
-using System;
 using System.Collections.Generic;
 
 namespace Brows.Entries;
@@ -20,28 +19,24 @@ public class EntryStreamGuiOptions : IEntryStreamGuiOptions {
     }
 
     public TextOptions Text {
-        get => _Text ?? (_Text = TextInit());
-        set => _Text = value;
+        get => field ??= TextInit();
+        set;
     }
-    private TextOptions _Text;
 
     public ImageOptions Image {
-        get => _Image ?? (_Image = new());
-        set => _Image = value;
+        get => field ??= new();
+        set;
     }
-    private ImageOptions _Image;
 
     public MediaOptions Media {
-        get => _Media ?? (_Media = new());
-        set => _Media = value;
+        get => field ??= new();
+        set;
     }
-    private MediaOptions _Media;
 
     public PreviewOptions Preview {
-        get => _Preview ?? (_Preview = new());
-        set => _Preview = value;
+        get => field ??= new();
+        set;
     }
-    private PreviewOptions _Preview;
 
     public sealed class ExtensionSet : HashSet<string> {
         public ExtensionSet(params string[] collection) : base(collection, StringComparer.OrdinalIgnoreCase) {
@@ -52,42 +47,37 @@ public class EntryStreamGuiOptions : IEntryStreamGuiOptions {
         public long? SourceLengthMax { get; set; } = 10000000;
 
         public ExtensionSet Extensions {
-            get => _Extensions ?? (_Extensions = new(".bmp", ".jpg", ".jpeg", ".gif", ".heif", ".heic", ".png", ".tif", ".tiff"));
-            set => _Extensions = value;
+            get => field ??= new(".bmp", ".jpg", ".jpeg", ".gif", ".heif", ".heic", ".png", ".tif", ".tiff");
+            set;
         }
-        private ExtensionSet _Extensions;
     }
 
     public sealed class TextOptions : DecodedTextOptions {
         public long? SourceLengthMax { get; set; } = 1000000;
 
         public ExtensionSet Extensions {
-            get => _Extensions ?? (_Extensions = new(".txt"));
-            set => _Extensions = value;
+            get => field ??= new(".txt");
+            set;
         }
-        private ExtensionSet _Extensions;
     }
 
     public sealed class PreviewOptions {
         public Dictionary<string, Guid> CLSID {
-            get => _CLSID ?? (_CLSID = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase));
-            set => _CLSID = value;
+            get => field ??= new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+            set;
         }
-        private Dictionary<string, Guid> _CLSID;
 
         public ExtensionSet Extensions {
-            get => _Extensions ?? (_Extensions = new(".pdf"));
-            set => _Extensions = value;
+            get => field ??= new(".pdf");
+            set;
         }
-        private ExtensionSet _Extensions;
     }
 
     public sealed class MediaOptions {
         public ExtensionSet Extensions {
-            get => _Extensions ?? (_Extensions = new(".3gp", ".avi", ".mov", ".mp4", ".mkv"));
-            set => _Extensions = value;
+            get => field ??= new(".3gp", ".avi", ".mov", ".mp4", ".mkv");
+            set;
         }
-        private ExtensionSet _Extensions;
 
         public bool LoopAudio { get; set; } = true;
         public bool LoopVideo { get; set; } = true;

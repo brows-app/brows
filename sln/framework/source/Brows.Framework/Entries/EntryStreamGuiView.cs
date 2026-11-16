@@ -7,41 +7,36 @@ internal sealed class EntryStreamGuiView : Notifier, IEntryStreamGuiView {
     private static readonly PropertyChangedEventArgs ChangedEvent = new(nameof(Changed));
     private static readonly PropertyChangedEventArgs SuccessEvent = new(nameof(Success));
     private static readonly PropertyChangedEventArgs LoadingEvent = new(nameof(Loading));
-    private static readonly PropertyChangedEventArgs[] ReadyEvent = new[] {
+    private static readonly PropertyChangedEventArgs[] ReadyEvent = [
         new PropertyChangedEventArgs(nameof(Ready))
-    };
+    ];
 
     public bool Success {
-        get => _Success;
+        get;
         set {
-            if (Change(ref _Success, value, SuccessEvent, ReadyEvent)) {
+            if (Change(ref field, value, SuccessEvent, ReadyEvent)) {
                 Changed = true;
                 State.Changed();
             }
         }
     }
-    private bool _Success;
 
     public bool Loading {
-        get => _Loading;
+        get;
         set {
-            if (Change(ref _Loading, value, LoadingEvent, ReadyEvent)) {
+            if (Change(ref field, value, LoadingEvent, ReadyEvent)) {
                 Changed = true;
                 State.Changed();
             }
         }
     }
-    private bool _Loading;
 
-    public bool Ready =>
-        Loading == false &&
-        Success;
+    public bool Ready => Loading == false && Success;
 
     public bool Changed {
-        get => _Changed;
-        private set => Change(ref _Changed, value, ChangedEvent);
+        get;
+        private set => Change(ref field, value, ChangedEvent);
     }
-    private bool _Changed;
 
     public EntryStreamGuiState State { get; }
 

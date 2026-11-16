@@ -1,6 +1,5 @@
 ﻿using Brows.Panels;
 using Domore.Conf.Cli;
-using System;
 
 namespace Brows.Commands;
 

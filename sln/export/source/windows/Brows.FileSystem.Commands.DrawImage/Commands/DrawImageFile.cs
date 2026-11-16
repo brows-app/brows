@@ -1,4 +1,4 @@
-﻿using Brows.Runtime.Win32;
+﻿using Brows.Win32;
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
@@ -119,8 +119,8 @@ internal sealed class DrawImageFile {
                     Log.Info(Log.Join(property.Key?.CanonicalName, property.Value, error, Output));
                 }
                 switch (error) {
-                    case HRESULT.STG_E_ACCESSDENIED:
-                    case HRESULT.WINCODEC_ERR_PROPERTYNOTSUPPORTED:
+                    case 0x80030005: // HRESULT.STG_E_ACCESSDENIED:
+                    case 0x88982F41: // HRESULT.WINCODEC_ERR_PROPERTYNOTSUPPORTED:
                         return true;
                     default:
                         return false;

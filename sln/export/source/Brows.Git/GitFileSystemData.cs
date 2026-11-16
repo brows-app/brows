@@ -1,58 +1,107 @@
 ﻿using Brows.Exports;
 using Brows.Git;
 using System;
+using System.IO;
 using System.Threading.Tasks;
-using GITREPOHEAD = Brows.GitRepoHead;
-using GITREPOSTATE = Brows.Git.GitRepoState;
 
 namespace Brows;
 
 internal static class GitFileSystemData {
-    public sealed class GitRepoState : Definition<GITREPOSTATE?> {
-        protected sealed override async Task<GITREPOSTATE?> GetValue(IFileSystemEntry entry,
-                                                                     Action<GITREPOSTATE?> progress,
-                                                                     CancellationToken token) {
-            var repo = await DirectoryRepo(entry, token);
-            if (repo == null) {
+    internal static readonly Definition[] Columns = [
+        new GitRepoHead(), new GitTrackingBranch(), new GitRepoState(),
+        new GitStatus(), new GitIndexStatus(), new GitWorkTreeStatus()
+    ];
+
+    public sealed class GitRepoHead : Definition {
+        public GitRepoHead() : base("Git branch", 180) { }
+        protected sealed override string Value(GitStatusView view, IFileSystemEntry entry) => view.Branch;
+    }
+
+    public sealed class GitTrackingBranch : Definition {
+        public GitTrackingBranch() : base("Git tracking branch", 240) { }
+        protected sealed override string Value(GitStatusView view, IFileSystemEntry entry) => view.Tracking;
+    }
+
+    public sealed class GitRepoState : Definition {
+        public GitRepoState() : base("Git operation", 160) { }
+        protected sealed override string Value(GitStatusView view, IFileSystemEntry entry) => view.Operation;
+    }
+
+    public sealed class GitStatus : Definition {
+        public GitStatus() : base("Git status", 200) { }
+        protected sealed override string Value(GitStatusView view, IFileSystemEntry entry) {
+            var flags = Status(view, entry);
+            if (flags == null) {
                 return null;
             }
-            return repo.State;
+            if (flags == GitStatusFlags.Current) {
+                return "Clean";
+            }
+            var index = GitStatusRow.Describe(flags.Value, index: true);
+            var workTree = GitStatusRow.Describe(flags.Value, index: false);
+            return index.Length == 0 ? workTree : workTree.Length == 0
+                ? $"Staged: {index}" : $"Staged: {index}; {workTree}";
         }
     }
 
-    public sealed class GitRepoHead : Definition<GITREPOHEAD> {
-        protected sealed override async Task<GITREPOHEAD> GetValue(IFileSystemEntry entry,
-                                                                   Action<GITREPOHEAD> progress,
-                                                                   CancellationToken token) {
-            var repo = await DirectoryRepo(entry, token);
-            if (repo == null) {
-                return null;
-            }
-            var head = await repo.Head(token);
-            var status = await head.CompareRemote(token);
-            return new(
-                name: head.Name,
-                status: status);
-        }
+    public sealed class GitIndexStatus : Definition {
+        public GitIndexStatus() : base("Git staged", 140) { }
+        protected sealed override string Value(GitStatusView view, IFileSystemEntry entry) =>
+            Status(view, entry) is GitStatusFlags status
+                ? GitStatusRow.Describe(status, index: true)
+                : null;
     }
 
-    public abstract class Definition<TValue> : EntryDataExport<IFileSystemEntry, TValue> {
-        protected Task<GitRepo> DirectoryRepo(IFileSystemEntry entry, CancellationToken token) {
+    public sealed class GitWorkTreeStatus : Definition {
+        public GitWorkTreeStatus() : base("Git working tree", 140) { }
+        protected sealed override string Value(GitStatusView view, IFileSystemEntry entry) =>
+            Status(view, entry) is GitStatusFlags status
+                ? GitStatusRow.Describe(status, index: false)
+                : null;
+    }
+
+    public abstract class Definition : EntryDataExport<IFileSystemEntry, string> {
+        public sealed override string Group => "Git";
+        public sealed override string Name { get; }
+
+        protected Definition(string name, double width) {
+            Name = name;
+            Width = width;
+        }
+
+        protected static GitStatusFlags? Status(GitStatusView view, IFileSystemEntry entry) =>
+            view.ForPath(entry.Path, entry.Kind == FileSystemEntryKind.Directory);
+
+        protected abstract string Value(GitStatusView view, IFileSystemEntry entry);
+
+        internal string Display(GitStatusView view, IFileSystemEntry entry) =>
+            view is null ? null : Value(view, entry);
+
+        protected sealed override async Task<string> GetValue(IFileSystemEntry entry,
+                                                              Action<string> progress,
+                                                              CancellationToken token) {
             if (token.IsCancellationRequested) {
-                return Task.FromCanceled<GitRepo>(token);
+                token.ThrowIfCancellationRequested();
             }
-            if (entry is null) {
-                return Task.FromResult(default(GitRepo));
+            if (entry == null) {
+                return null;
             }
-            if (entry.Kind != FileSystemEntryKind.Directory) {
-                return Task.FromResult(default(GitRepo));
+            var directory = entry.Kind == FileSystemEntryKind.Directory
+                ? entry.Path
+                : Path.GetDirectoryName(entry.Path);
+            if (directory is null) {
+                return null;
             }
-            var key = $"{typeof(GitFileSystemData).Name}.{nameof(DirectoryRepo)}";
-            var path = entry.Path;
-            return entry.Task(
-                key: key,
-                token: token,
-                factory: token => GitRepo.Find(path, search: false, token));
+            var view = await GitStatusReader.Read(directory, token).ConfigureAwait(false);
+            return view is null ? null : Value(view, entry);
+        }
+
+        protected sealed override Task RefreshValue(IFileSystemEntry entry, CancellationToken token) {
+            if (token.IsCancellationRequested) {
+                token.ThrowIfCancellationRequested();
+            }
+            GitStatusReader.Invalidate();
+            return Task.CompletedTask;
         }
     }
 }

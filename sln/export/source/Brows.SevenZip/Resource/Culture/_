@@ -1,0 +1,13 @@
+SevenZipEntry_RelativeName                   = Name
+SevenZipEntry_SizeOriginal                   = Size
+SevenZipEntry_SizeCompressed                 = Compressed size
+SevenZipEntry_LastWriteTime                  = Date modified
+SevenZipEntry_CRC32                          = CRC32
+SevenZipEntry_Attributes                     = Attributes
+
+Command_Description_SevenZip_ClipboardCopy   = Copys items from the archive to the clipboard
+Command_Description_SevenZip_ClipboardPaste  = Add items from clipboard to archive
+Command_Description_SevenZip_Copy            = Extract selection
+Command_Description_SevenZip_Delete          = Delete the selection from the current archive
+Command_Description_SevenZip_Open            = Open entries in this archive
+Command_Description_SevenZip_View            = Show a preview of the item

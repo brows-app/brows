@@ -1,6 +1,6 @@
 ﻿namespace Brows.Composition;
 
-public sealed class ProvidedFile {
+public sealed record ProvidedFile {
     public string OriginalPath { get; }
     public string RelativePath { get; }
 

@@ -3,4 +3,5 @@
 internal sealed class ZipEntry {
     public string FilePath { get; init; }
     public string EntryName { get; init; }
+    public bool IsDirectory { get; init; }
 }

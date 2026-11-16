@@ -4,4 +4,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\source\Brows.Framework\Brows.Framework.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Brows.Composition.Testing" />
+  </ItemGroup>
 </Project>

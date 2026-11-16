@@ -1,5 +1,6 @@
-﻿namespace Brows; 
-partial class FtpProviderControl {
+﻿namespace Brows;
+
+internal sealed partial class FtpProviderControl {
     public FtpProviderControl() {
         InitializeComponent();
     }

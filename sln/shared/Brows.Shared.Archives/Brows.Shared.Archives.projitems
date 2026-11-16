@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>25759937-d06e-4a6c-ac63-b2cab08dbe2d</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Brows.Shared.Archives</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Archives\ArchiveProviderID.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Archives\ArchiveProviderIDCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Archives\ArchiveProviderIDFormat.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Shared\" />
+  </ItemGroup>
+</Project>

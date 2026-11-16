@@ -7,6 +7,7 @@ namespace Brows.Url;
 
 public sealed class ClientForUrl : NativeType {
     private static readonly ILog Log = Logging.For(typeof(ClientForUrl));
+    private const int CurlReadFuncAbort = 0x10000000;
 
     [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
     private static extern IntPtr brows_url_ClientForUrl_create(IntPtr url);
@@ -24,6 +25,12 @@ public sealed class ClientForUrl : NativeType {
     private static extern int brows_url_ClientForUrl_on_write(IntPtr p, IntPtr callback);
 
     [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
+    private static extern int brows_url_ClientForUrl_on_read(IntPtr p, IntPtr callback);
+
+    [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
+    private static extern int brows_url_ClientForUrl_on_progress(IntPtr p, IntPtr callback);
+
+    [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
     private static extern int brows_url_ClientForUrl_password(IntPtr p, IntPtr value);
 
     [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
@@ -32,10 +39,33 @@ public sealed class ClientForUrl : NativeType {
     [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
     private static extern int brows_url_ClientForUrl_username(IntPtr p, IntPtr value);
 
+    [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
+    private static extern int brows_url_ClientForUrl_ftp_tls(IntPtr p, FtpNativeTlsMode mode);
+
+    [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
+    private static extern int brows_url_ClientForUrl_ftp_ca_info(IntPtr p, IntPtr path);
+
+    [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
+    private static extern int brows_url_ClientForUrl_ftp_upload(IntPtr p, long length, int append);
+
+    [DllImport(UrlNative.Dll, CallingConvention = UrlNative.Call)]
+    private static extern int brows_url_ClientForUrl_ftp_command(IntPtr p,
+                                                                 FtpNativeCommand command,
+                                                                 IntPtr firstPath,
+                                                                 IntPtr secondPath);
+
+    [UnmanagedFunctionPointer(UrlNative.Call)]
+    private delegate nuint NativeReadCallback(IntPtr p, IntPtr buffer, nuint length);
+
+    [UnmanagedFunctionPointer(UrlNative.Call)]
+    private delegate int NativeProgressCallback(IntPtr p, long downloadTotal, long downloaded, long uploadTotal, long uploaded);
+
     private readonly ClientDataCallbackWrapper WriteCallback;
     private readonly ClientDataCallbackWrapper HeaderCallback;
+    private NativeReadCallback ReadCallback;
+    private NativeProgressCallback ProgressCallback;
 
-    private string UriString => _UriString ??= Uri.ToString();
+    private string UriString => _UriString ??= Uri.AbsoluteUri;
     private string _UriString;
 
     private NativeString UriAlloc => _UriAlloc ??= new(Encoding.UTF8, UriString);
@@ -89,6 +119,52 @@ public sealed class ClientForUrl : NativeType {
 
     public void OnHeader(ClientDataCallback callback) {
         HeaderCallback.Value = callback;
+    }
+
+    internal void OnRead(Func<IntPtr, nuint, nuint> callback) {
+        ArgumentNullException.ThrowIfNull(callback);
+        ReadCallback = (p, buffer, length) => {
+            try {
+                return callback(buffer, length);
+            }
+            catch (Exception ex) {
+                if (Log.Error()) {
+                    Log.Error(ex);
+                }
+                return (nuint)CurlReadFuncAbort;
+            }
+        };
+        var pointer = Marshal.GetFunctionPointerForDelegate(ReadCallback);
+        Try(p => brows_url_ClientForUrl_on_read(p, pointer));
+    }
+
+    internal void OnProgress(CancellationToken token) {
+        ProgressCallback = (p, downloadTotal, downloaded, uploadTotal, uploaded) => token.IsCancellationRequested ? 1 : 0;
+        var pointer = Marshal.GetFunctionPointerForDelegate(ProgressCallback);
+        Try(p => brows_url_ClientForUrl_on_progress(p, pointer));
+    }
+
+    internal void FtpTls(FtpNativeTlsMode mode) {
+        Try(p => brows_url_ClientForUrl_ftp_tls(p, mode));
+    }
+
+    internal void FtpCertificateAuthorityFile(string path) {
+        using var nativePath = new NativeString(Encoding, path);
+        Try(p => brows_url_ClientForUrl_ftp_ca_info(p, nativePath.Handle));
+    }
+
+    internal void FtpUpload(long length, bool append) {
+        Try(p => brows_url_ClientForUrl_ftp_upload(p, length, append ? 1 : 0));
+    }
+
+    internal void FtpCommand(FtpNativeCommand command, string firstPath, string secondPath) {
+        using var nativeFirstPath = new NativeString(Encoding, firstPath);
+        using var nativeSecondPath = secondPath is null ? null : new NativeString(Encoding, secondPath);
+        Try(p => brows_url_ClientForUrl_ftp_command(
+            p,
+            command,
+            nativeFirstPath.Handle,
+            nativeSecondPath?.Handle ?? IntPtr.Zero));
     }
 
     public void TxRx() {

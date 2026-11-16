@@ -61,20 +61,16 @@ internal sealed class DirectoryOpen : Command {
         var channel = Channel.CreateUnbounded<string>(new UnboundedChannelOptions { SingleReader = true });
         var writer = channel.Writer;
         var reader = channel.Reader;
-        async Task write(DirectoryInfo directory, CancellationToken token) {
-            if (directory == null) {
-                return;
-            }
-            if (token.IsCancellationRequested) {
-                token.ThrowIfCancellationRequested();
-            }
-            var path = await directory.CorrectCasingAsync(token);
-            await writer.WriteAsync(path, token);
-        }
         Task.Run(cancellationToken: token, function: async () => {
             var error = default(Exception);
             try {
-                await Task.WhenAll(directories.Select(directory => write(directory, token)));
+                var parent = await directory.CorrectCasingAsync(token);
+                foreach (var child in directories) {
+                    if (token.IsCancellationRequested) {
+                        token.ThrowIfCancellationRequested();
+                    }
+                    await writer.WriteAsync(Path.Join(parent, child.Name), token);
+                }
             }
             catch (Exception ex) {
                 error = ex;

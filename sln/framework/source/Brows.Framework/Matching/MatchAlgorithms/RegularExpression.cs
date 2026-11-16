@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Matching.MatchAlgorithms;
 
 internal class RegularExpression : MatchAlgorithm {
+    /*
+     * The pattern is user-supplied. A per-match timeout bounds the work of a
+     * single matching call, which would otherwise run without interruption on
+     * a catastrophically backtracking pattern, unreachable by cancellation.
+     */
+    protected static readonly TimeSpan MatchTimeout = TimeSpan.FromSeconds(1);
+
     protected virtual Regex Convert(string pattern) {
-        return new Regex(pattern, Options());
+        return new Regex(pattern, Options(), MatchTimeout);
     }
 
     protected RegexOptions Options() {
@@ -23,11 +29,20 @@ internal class RegularExpression : MatchAlgorithm {
         return new RegularExpressionMatcher(regex);
     }
 
-    protected sealed override async IAsyncEnumerable<T> Match<T>(string pattern, IEnumerable<T> source, Func<T, string> selector, [EnumeratorCancellation] CancellationToken cancellationToken) {
-        if (null == pattern) throw new ArgumentNullException(nameof(pattern));
-        if (null == source) throw new ArgumentNullException(nameof(source));
-        if (null == selector) throw new ArgumentNullException(nameof(selector));
-
+    protected sealed override async IAsyncEnumerable<T>
+    Match<T>(string pattern,
+             IEnumerable<T> source,
+             Func<T, string> selector,
+             [EnumeratorCancellation] CancellationToken cancellationToken) {
+        if (pattern is null) {
+            throw new ArgumentNullException(nameof(pattern));
+        }
+        if (source is null) {
+            throw new ArgumentNullException(nameof(source));
+        }
+        if (selector is null) {
+            throw new ArgumentNullException(nameof(selector));
+        }
         var matcher = Matcher(pattern);
         foreach (var item in source) {
             if (cancellationToken.IsCancellationRequested) {

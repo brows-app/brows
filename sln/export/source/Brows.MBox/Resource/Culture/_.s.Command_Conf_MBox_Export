@@ -1,0 +1,12 @@
+# example:
+# {input} C:\Mail
+#
+# Export the selected messages of the mailbox.
+#   The destination may be an existing directory, or an existing file when a single message is
+#   selected. A directory export writes one file per message, named after the offset of the
+#   message in the mailbox.
+#   The mailbox itself is never a destination, because the source is read only.
+#   An existing destination is kept, unless overwrite is set.
+#
+destination =
+#overwrite = true

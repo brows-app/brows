@@ -3,11 +3,13 @@
 
 #include "brows_ssh.h"
 #include "libssh2.h"
+#include "libssh2_sftp.h"
 #include <assert.h>
 #include <malloc.h>
 #include <stdint.h>
 #include <string.h>
 #include <WinSock2.h>
+#include <ws2tcpip.h>
 
 #define brows_ssh_internal brows_EXTERN_C
 
@@ -28,6 +30,9 @@ do {                                                                            
                 if (wait_socket_err) {                                                                          \
                     if (CLOSE_ON_ERROR) {                                                                       \
                         brows_ssh_Conn_close(P, cancel);                                                        \
+                    }                                                                                           \
+                    else {                                                                                      \
+                        brows_ssh_Conn_abort_transport(P);                                                      \
                     }                                                                                           \
                     return wait_socket_err;                                                                     \
                 }                                                                                               \
@@ -55,13 +60,16 @@ struct              brows_ssh_Chan {
                     brows_ssh_ChannelFactory*   channel_factory;
                     LIBSSH2_CHANNEL*            channel; };
 
-brows_ssh_internal  brows_ERROR                 brows_ssh_Chan_free         (brows_ssh_Chan*);
-brows_ssh_internal  brows_ssh_Chan*             brows_ssh_Chan_init         (brows_ssh_Chan*, brows_ssh_Conn*, brows_ssh_ChannelFactory* channel_factory);
-brows_ssh_internal  brows_ERROR                 brows_ssh_Chan_get_channel  (brows_ssh_Chan*, brows_Canceler*, LIBSSH2_CHANNEL**);
+brows_ssh_internal  brows_ERROR                 brows_ssh_Chan_free             (brows_ssh_Chan*);
+brows_ssh_internal  brows_ssh_Chan*             brows_ssh_Chan_init             (brows_ssh_Chan*, brows_ssh_Conn*, brows_ssh_ChannelFactory* channel_factory);
+brows_ssh_internal  brows_ERROR                 brows_ssh_Chan_get_channel      (brows_ssh_Chan*, brows_Canceler*, LIBSSH2_CHANNEL**);
 
-brows_ssh_internal  LIBSSH2_SESSION*            brows_ssh_Conn_get_session  (brows_ssh_Conn*);
-brows_ssh_internal  brows_ERROR                 brows_ssh_Conn_wait_socket  (brows_ssh_Conn*, brows_Canceler*);
+brows_ssh_internal  LIBSSH2_SESSION*            brows_ssh_Conn_get_session      (brows_ssh_Conn*);
+brows_ssh_internal  brows_ERROR                 brows_ssh_Conn_wait_socket      (brows_ssh_Conn*, brows_Canceler*);
+brows_ssh_internal  brows_ERROR                 brows_ssh_Conn_wait_socket_until(brows_ssh_Conn*, brows_Canceler*, ULONGLONG);
+brows_ssh_internal  void                        brows_ssh_Conn_abort_transport  (brows_ssh_Conn*);
+brows_ssh_internal  int32_t                     brows_ssh_Conn_is_aborted       (brows_ssh_Conn*);
 
-brows_ssh_internal  brows_ERROR                 brows_ssh_KnownHost_init    (brows_ssh_KnownHost*, struct libssh2_knownhost*, int check);
+brows_ssh_internal  brows_ERROR                 brows_ssh_KnownHost_init        (brows_ssh_KnownHost*, struct libssh2_knownhost*, int check);
 
 #endif

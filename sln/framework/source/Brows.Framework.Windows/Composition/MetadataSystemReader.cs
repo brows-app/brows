@@ -1,20 +1,27 @@
 ﻿using Brows.Operations;
-using Brows.Runtime.Win32;
 using Brows.Threading;
+using Brows.Win32;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Composition;
 
 internal sealed class MetadataSystemReader : IMetadataSystemReader {
-    private readonly STAThreadPool ThreadPool = Win32ThreadPool.Common;
+    [ImportRequired]
+    internal ISTAThreadPoolProvider ThreadPoolProvider { get; set; }
 
-    public async Task<bool> Work(ICollection<IMetadataDefinition> definitions, string file, IOperationProgress progress, CancellationToken token) {
+    public async Task<bool> Work(ICollection<IMetadataDefinition> definitions,
+                                 string file,
+                                 IOperationProgress progress,
+                                 CancellationToken token) {
         if (definitions is null) {
             return false;
         }
-        var list = await ThreadPool.Work(nameof(MetadataSystemReader), cancellationToken: token, work: () => {
+        var threadPool = ThreadPoolProvider?.GetThreadPool(this);
+        if (threadPool is null) {
+            throw new InvalidOperationException("Unable to get a thread pool!");
+        }
+        var list = await threadPool.Work(nameof(MetadataSystemReader), cancellationToken: token, work: () => {
             var list = new List<MetadataDefinition>();
             var items = string.IsNullOrWhiteSpace(file)
                 ? PropertySystem.EnumeratePropertyDescriptions()

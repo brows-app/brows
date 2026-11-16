@@ -1,0 +1,35 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:Brows.Windows.Controls"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="Styles/Brows.Style.Common.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.ScrollBar.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.ScrollViewer.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.EntryDataTextBlock.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.EntryDataControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryGridViewColumnHeader.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryListViewItem.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryListView.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.EntryObservationControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryIconImage.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.EntryIconControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryThumbnailImage.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.EntryThumbnailControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryNameGrid.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.TextReader.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.EntryStreamImageControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryStreamMediaControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryStreamPreviewControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryStreamTextControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryStreamViewLoadingControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.EntryStreamViewUnavailableControl.xaml" />
+    <ResourceDictionary Source="Styles/Brows.Style.ProviderTreeIconImage.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.ProviderTreeNodeLabel.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.ProviderTreeViewItem.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.ProviderTreeView.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.ProviderGridSplitter.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.ProviderContent.xaml"/>
+    <ResourceDictionary Source="Styles/Brows.Style.ProviderGrid.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

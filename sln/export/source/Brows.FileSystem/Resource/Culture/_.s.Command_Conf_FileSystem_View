@@ -1,0 +1,2 @@
+# Toggle the preview; showing it replaces the active lower view, including a terminal.
+# Closing a terminal does not restore a preview that it replaced.

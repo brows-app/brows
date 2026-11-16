@@ -2,35 +2,36 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-
 using ENVIRONMENT = System.Environment;
 using OPERATINGSYSTEM = System.OperatingSystem;
 
-namespace Brows.Native; 
+namespace Brows.Native;
+
 internal static class NativePath {
     private static readonly ILog Log = Logging.For(typeof(NativePath));
 
-    private static string OperatingSystem => _OperatingSystem ??=
+    private static string OperatingSystem => field ??=
         OPERATINGSYSTEM.IsLinux() ? "linux" :
         OPERATINGSYSTEM.IsMacOS() ? "macos" :
         OPERATINGSYSTEM.IsWindows() ? "windows" :
-        throw new NotSupportedException();
-    private static string _OperatingSystem;
+        throw new NotSupportedException("Unsupported operating system.");
 
-    private static string Platform =>
-        _Platform ??= (ENVIRONMENT.Is64BitProcess ? "x64" : "x86");
-    private static string _Platform;
+    private static string Platform => field ??=
+        (RuntimeInformation.ProcessArchitecture switch {
+            Architecture.X64 => "x64",
+            Architecture.X86 => "x86",
+            Architecture.Arm64 => "arm64",
+            var architecture => throw new NotSupportedException($"Unsupported architecture: {architecture}")
+        });
 
-    private static string Environment => _Environment ??=
+    private static string Environment => field ??=
         $"{Platform}-{OperatingSystem}";
-    private static string _Environment;
 
-    public static string Root => _Root ??=
+    public static string Root => field ??=
         Path.Combine(
             Path.GetDirectoryName(ENVIRONMENT.ProcessPath),
             "brows.native",
             Environment);
-    private static string _Root;
 
     public static IntPtr Load(string dll) {
         if (Log.Info()) {

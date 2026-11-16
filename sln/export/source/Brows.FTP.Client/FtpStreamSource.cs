@@ -1,0 +1,16 @@
+﻿using System.Threading.Tasks;
+
+namespace Brows;
+
+internal sealed class FtpStreamSource : FileProtocolStreamSource<FtpEntry> {
+    protected sealed override async Task<IEntryStreamReady> StreamReady(CancellationToken token) {
+        Stream = await Entry.Provider.Download(Entry, Entry.Info.Size, token);
+        return await base.StreamReady(token);
+    }
+
+    public sealed override string RelativePath => Entry.RelativePath;
+    public sealed override long StreamLength => Entry.Info.Size ?? 0;
+
+    public FtpStreamSource(FtpEntry entry) : base(entry) {
+    }
+}

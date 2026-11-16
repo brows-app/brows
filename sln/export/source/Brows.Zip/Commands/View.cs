@@ -12,9 +12,9 @@ internal sealed class View : ZipCommand<View.Parameter> {
         }
         var toggle = parameter.Toggle;
         if (toggle.HasFlag(Views.Preview)) {
-            provider.Detail[Views.Preview] = provider.Detail[Views.Preview] == null
-                ? new ZipEntryPreview(provider)
-                : null;
+            return context.Operate(async (progress, token) => {
+                return await provider.Detail.ToggleAsync(Views.Preview, () => new ZipEntryPreview(provider), token);
+            });
         }
         return true;
     }

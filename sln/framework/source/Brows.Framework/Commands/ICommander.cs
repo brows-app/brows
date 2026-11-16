@@ -1,6 +1,5 @@
-using Brows.Operations;
+﻿using Brows.Operations;
 using Brows.Panels;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands;

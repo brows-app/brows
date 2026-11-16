@@ -1,0 +1,2 @@
+# Rename one selected SFTP entry to the supplied POSIX file name.
+name = new-name

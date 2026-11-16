@@ -1,6 +1,7 @@
 ﻿using System;
 
-namespace Brows.Gui; 
+namespace Brows.Gui;
+
 public interface IController {
     event EventHandler Loaded;
 }

@@ -5,7 +5,7 @@
     <Grid>
         <Grid.Resources>
             <Style TargetType="Border">
-                <Setter Property="BorderBrush" Value="{DynamicResource Global_Default_Border_Brush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brows.Theme.Border}"/>
                 <Setter Property="BorderThickness" Value="0 0 0 1"/>
                 <Setter Property="Margin" Value="0 0 0 5"/>
             </Style>
@@ -16,9 +16,9 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.Resources>
-                <Style TargetType="TextBlock">
+                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                     <Setter Property="FontSize" Value="14"/>
-                    <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
+                    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.Monospace}"/>
                     <Setter Property="Margin" Value="5 0 0 0"/>
                 </Style>
             </Grid.Resources>
@@ -28,7 +28,7 @@
             <Grid Grid.Row="0">
                 <Border>
                     <TextBlock>
-                        <Run Text="Brows" FontWeight="Bold"/>
+                        <Run Text="Brows" FontWeight="{DynamicResource Brows.Font.Weight.Bold}"/>
                         <Run Text="{Binding Version, Mode=OneWay, StringFormat='v{0}'}"/>
                     </TextBlock>
                 </Border>
@@ -37,7 +37,7 @@
         <Grid Grid.Row="1">
             <ScrollViewer>
                 <ScrollViewer.Style>
-                    <Style TargetType="ScrollViewer">
+                    <Style TargetType="ScrollViewer" BasedOn="{StaticResource {x:Type ScrollViewer}}">
                         <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
                         <Setter Property="Padding" Value="5 0 0 0"/>
                         <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
@@ -45,7 +45,7 @@
                 </ScrollViewer.Style>
                 <ItemsControl ItemsSource="{DynamicResource Manual_TextCollection}">
                     <ItemsControl.Resources>
-                        <Style TargetType="TextBlock">
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                             <Setter Property="TextWrapping" Value="Wrap"/>
                         </Style>
                     </ItemsControl.Resources>

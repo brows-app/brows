@@ -1,0 +1,2 @@
+Command_Description_Status = Show local Git repository status
+Command_Description_GitStatus_IncludeIgnored = Toggle whether ignored files and directories appear in Git status

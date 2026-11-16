@@ -1,10 +1,10 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace Brows;
 
 internal sealed class FoundInFileText : FoundInInfo {
-    public string LineLabel => string.Format(Translation.Global.Value("FileSystem_Find_FoundInFileText_LineLabel"), Match.Line);
+    public string LineLabel => string.Format(
+        Translation.Global.Value("FileSystem_Find_FoundInFileText_LineLabel"), Match.Line + 1);
     public string LineText => $"{Match}".Trim();
 
     public FindMatch Match { get; }

@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace Brows; 
+namespace Brows;
+
 public sealed class ZipArchiveUpdate {
+    internal string CopyStreamTargetDirectory { get; set; }
+
     public HashSet<string> DeleteEntries {
         get => _DeleteEntries ??= [];
         set => _DeleteEntries = value;

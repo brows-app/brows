@@ -1,19 +1,20 @@
 ﻿using Brows.Entries;
 using Brows.Providers;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security;
 using System.Threading.Tasks;
 
 namespace Brows.Panels;
 
 public sealed class TestPanel : IPanel {
+    private IEntryObservation Observation =>
+        (Provider as IEntryProvider)?.Observation;
+
     public IReadOnlyList<IEntry> Entries =>
-        Provider?.Observation?.Observed ?? Array.Empty<IEntry>();
+        Observation?.Observed ?? Array.Empty<IEntry>();
 
     public IReadOnlySet<IEntry> Selection =>
-        Provider?.Observation?.Selected ?? new HashSet<IEntry>();
+        Observation?.Selected ?? new HashSet<IEntry>();
 
     public object Window { get; set; }
     public IProvider Provider { get; set; }
@@ -31,12 +32,8 @@ public sealed class TestPanel : IPanel {
 
     int IPanel.Column => Column;
 
-    Task<SecureString> IPanel.GetSecret(string promptFormat, IEnumerable<string> promptArgs, CancellationToken token) {
-        throw new NotImplementedException();
-    }
-
     bool IPanel.HasEntry(out IEntry current) {
-        current = Provider?.Observation?.Current();
+        current = Observation?.Current();
         return current != null;
     }
 
@@ -87,7 +84,7 @@ public sealed class TestPanel : IPanel {
     }
 
     bool IPanel.HasView(out IEntryDataView view) {
-        view = Provider?.Observation?.DataView;
+        view = Observation?.DataView;
         return view != null;
     }
 
@@ -98,5 +95,9 @@ public sealed class TestPanel : IPanel {
 
     Task<bool> IPanel.Provide(string id, CancellationToken token) {
         throw new NotSupportedException();
+    }
+
+    Task<TSecret> IPanel.GetSecret<TSecret>(string key, string promptFormat, IEnumerable<string> promptArgs, CancellationToken token) {
+        throw new NotImplementedException();
     }
 }

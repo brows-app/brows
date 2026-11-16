@@ -1,5 +1,4 @@
-﻿using Brows.Gui;
-using Domore.Logs;
+﻿using Domore.Logs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,10 +12,11 @@ using System.Windows.Threading;
 
 namespace Brows.Entries;
 
-internal sealed class EntryObservationController : Controller<IEntryObservationController>,
-                                                   IEntryObservationController {
+internal sealed class EntryObservationController : IEntryObservationController {
     private static readonly ILog Log = Logging.For(typeof(EntryObservationController));
 
+    private EntryListView EntryListView;
+    private EntryListViewItemsListView _ItemsListView;
     private IComparer CustomSort;
 
     private List<IEntry> SelectedEntries {
@@ -26,8 +26,8 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
 
     private Dictionary<string, List<EntryGridViewColumnProxy>> GridColumns => field ??= [];
 
-    private ListView ListView => Element.ListView;
-    private GridView GridView => Element.ListView.GridView;
+    private ListView ListView => _ItemsListView;
+    private GridView GridView => _ItemsListView?.View as GridView;
     private ListCollectionView ListCollectionView =>
         (ListCollectionView)CollectionViewSource.GetDefaultView(ListView.ItemsSource);
 
@@ -83,10 +83,45 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
     }
 
     private void ListView_ItemsSourceChanged(object sender, EventArgs e) {
+        UpdateListViewSource();
+        Element.UpdateController();
+    }
+
+    private void UpdateListViewSource() {
+        if (ListView is null || ListView.ItemsSource is null) {
+            return;
+        }
         var view = ListCollectionView;
         if (view != null) {
             view.CustomSort = CustomSort;
         }
+    }
+
+    private void ListView_ItemsListViewChanged(object sender, EventArgs e) {
+        var oldListView = _ItemsListView;
+        if (oldListView is not null) {
+            oldListView.ItemsSourceChanged -= ListView_ItemsSourceChanged;
+            oldListView.MouseMove -= ListView_MouseMove;
+            oldListView.MouseUp -= ListView_MouseUp;
+            oldListView.PreviewKeyDown -= ListView_PreviewKeyDown;
+            oldListView.PreviewMouseDown -= ListView_PreviewMouseDown;
+            oldListView.SelectionChanged -= ListView_SelectionChanged;
+            oldListView.Items.CurrentChanged -= Items_CurrentChanged;
+        }
+        _ItemsListView = EntryListView?.ItemsListView;
+        if (_ItemsListView is null) {
+            Element.UpdateController();
+            return;
+        }
+        _ItemsListView.ItemsSourceChanged += ListView_ItemsSourceChanged;
+        _ItemsListView.MouseMove += ListView_MouseMove;
+        _ItemsListView.MouseUp += ListView_MouseUp;
+        _ItemsListView.PreviewKeyDown += ListView_PreviewKeyDown;
+        _ItemsListView.PreviewMouseDown += ListView_PreviewMouseDown;
+        _ItemsListView.SelectionChanged += ListView_SelectionChanged;
+        _ItemsListView.Items.CurrentChanged += Items_CurrentChanged;
+        UpdateListViewSource();
+        Element.UpdateController(refresh: true);
     }
 
     private void ListView_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
@@ -113,7 +148,7 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
     private void ListView_MouseMove(object sender, MouseEventArgs e) {
         if (e != null) {
             if (e.LeftButton == MouseButtonState.Pressed) {
-                var source = (e.OriginalSource as FrameworkElement)?.DataContext as IEntry;
+                var source = EntryFrom(e.OriginalSource as DependencyObject);
                 if (source != null && source.Select) {
                     DraggingSelected?.Invoke(this, e);
                 }
@@ -126,8 +161,8 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
             switch (e.ChangedButton) {
                 case MouseButton.Left:
                 case MouseButton.Right:
-                    var source = (e.OriginalSource as FrameworkElement)?.DataContext;
-                    var isEntry = source is IEntry || source is IEntryData;
+                    var source = EntryFrom(e.OriginalSource as DependencyObject);
+                    var isEntry = source is not null;
                     var nothing = !isEntry;
                     if (nothing) {
                         NothingSelected?.Invoke(this, e);
@@ -135,6 +170,16 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
                     break;
             }
         }
+    }
+
+    private IEntry EntryFrom(DependencyObject source) {
+        if (source is null || ListView is null) {
+            return null;
+        }
+        var container = ItemsControl.ContainerFromElement(ListView, source) as ListViewItem;
+        return container is null
+            ? null
+            : ListView.ItemContainerGenerator.ItemFromContainer(container) as IEntry;
     }
 
     private void Items_CurrentChanged(object sender, EventArgs e) {
@@ -146,17 +191,21 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
     public event EventHandler CurrentEntryChanged;
     public event EventHandler DraggingSelected;
 
-    public new EntryObservationControl Element { get; }
+    public EntryObservationControl Element { get; }
 
-    public EntryObservationController(EntryObservationControl element) : base(element) {
+    public EntryObservationController(EntryObservationControl element) {
         Element = element ?? throw new ArgumentNullException(nameof(element));
-        Element.ListView.ItemsSourceChanged += ListView_ItemsSourceChanged;
-        Element.ListView.MouseMove += ListView_MouseMove;
-        Element.ListView.MouseUp += ListView_MouseUp;
-        Element.ListView.PreviewKeyDown += ListView_PreviewKeyDown;
-        Element.ListView.PreviewMouseDown += ListView_PreviewMouseDown;
-        Element.ListView.SelectionChanged += ListView_SelectionChanged;
-        Element.ListView.Items.CurrentChanged += Items_CurrentChanged;
+    }
+
+    internal void ListViewChanged(EntryListView oldListView, EntryListView newListView) {
+        if (oldListView is not null) {
+            oldListView.ItemsListViewChanged -= ListView_ItemsListViewChanged;
+        }
+        EntryListView = newListView;
+        if (EntryListView is not null) {
+            EntryListView.ItemsListViewChanged += ListView_ItemsListViewChanged;
+        }
+        ListView_ItemsListViewChanged(EntryListView, EventArgs.Empty);
     }
 
     object IEntryObservationController.DraggingSource => ListView;
@@ -170,7 +219,7 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
             try {
                 result = SetCurrentEntry(item, token);
             }
-            catch (OperationCanceledException canceled) when (canceled.CancellationToken == token) {
+            catch (OperationCanceledException) when (token.IsCancellationRequested) {
             }
         });
         if (token.IsCancellationRequested) {
@@ -229,7 +278,7 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
         if (Log.Info()) {
             Log.Info($"{nameof(entryListViewFocus)} > {entryListViewFocus}");
         }
-        return false;
+        return entryListViewFocus;
     }
 
     void IEntryObservationController.Sort(IEntrySorting sorting) {
@@ -297,7 +346,8 @@ internal sealed class EntryObservationController : Controller<IEntryObservationC
     }
 
     void IEntryObservationController.ClearData() {
-        GridView.Columns.Clear();
+        GridView?.Columns.Clear();
+        GridColumns.Clear();
     }
 
     bool IEntryObservationController.Focused() {

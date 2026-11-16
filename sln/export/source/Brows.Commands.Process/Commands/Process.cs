@@ -1,8 +1,7 @@
-using Brows.Extensions;
+﻿using Brows.Extensions;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace Brows.Commands;
 
@@ -11,12 +10,15 @@ internal sealed class Process : Command {
 
     private CommandProcess CommandProcess => _CommandProcess ??=
         new CommandProcess {
-            Fix = Fix,
+            ConfigFile = ConfigFile,
             Environment = new Dictionary<string, string> {
                 { $"BROWS", Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString() ?? "0" }
             }
         };
     private CommandProcess _CommandProcess;
+
+    [ImportRequired]
+    internal IConfigurationFile ConfigFile { get; set; }
 
     private Dictionary<string, string> Environment(ICommandContext context) {
         var env = new Dictionary<string, string>();
@@ -119,17 +121,4 @@ internal sealed class Process : Command {
             return true;
         });
     }
-
-    public IFixProcessStartInfoError Fix {
-        get => _Fix;
-        set {
-            if (_Fix != value) {
-                _Fix = value;
-                if (_CommandProcess != null) {
-                    _CommandProcess.Fix = _Fix;
-                }
-            }
-        }
-    }
-    private IFixProcessStartInfoError _Fix;
 }

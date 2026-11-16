@@ -4,4 +4,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resource\Culture\_" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Brows.ProcessAgent" />
+  </ItemGroup>
 </Project>

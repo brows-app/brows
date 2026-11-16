@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
@@ -18,7 +16,8 @@ internal sealed class FileStreamSet : IEntryStreamSet {
         return new EntryStreamReady();
     }
 
-    async IAsyncEnumerable<IEntryStreamSource> IEntryStreamSet.StreamSource([EnumeratorCancellation] CancellationToken token) {
+    async IAsyncEnumerable<IEntryStreamSource>
+    IEntryStreamSet.StreamSource([EnumeratorCancellation] CancellationToken token) {
         var paths = Paths.Select(path => new FileStreamSource(path));
         foreach (var path in paths) {
             if (token.IsCancellationRequested) {

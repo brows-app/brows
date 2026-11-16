@@ -8,6 +8,7 @@
     <VcpkgEnabled>true</VcpkgEnabled>
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
+    <VcpkgInstalledDir Condition="'$(VcpkgInstalledDir)' == ''">$(MSBuildThisFileDirectory)..\..\vcpkg_installed\</VcpkgInstalledDir>
     <VcpkgApplocalDeps>true</VcpkgApplocalDeps>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

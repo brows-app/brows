@@ -10,7 +10,12 @@
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Theme" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Brows.Instantiation" />
+    <PackageReference Include="Brows.IPC.Host" />
+    <PackageReference Include="Brows.Operations.Composition" />
+    <PackageReference Include="Brows.Sys.Composition" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\..\framework\source\Brows.Framework\Brows.Framework.csproj" />
-    <ProjectReference Include="..\..\..\framework\source\Brows.IPC.Host\Brows.IPC.Host.csproj" />
   </ItemGroup>
 </Project>

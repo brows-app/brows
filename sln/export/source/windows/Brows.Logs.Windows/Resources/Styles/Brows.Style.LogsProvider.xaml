@@ -1,0 +1,48 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
+                    xmlns:dwc="clr-namespace:Domore.Windows.Controls;assembly=Domore.Logs.Windows"
+                    xmlns:local="clr-namespace:Brows">
+  <Style x:Key="Brows.Style.LogsProvider.ScrollViewer"
+         TargetType="{x:Type ScrollViewer}"
+         BasedOn="{StaticResource {x:Type ScrollViewer}}">
+    <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+  </Style>
+  <Style x:Key="Brows.Style.LogsProvider.Logs" TargetType="{x:Type dwc:LogsControl}">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.LogsProvider.Foreground}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.LogsProvider.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.LogsProvider.FontSize}"/>
+    <Setter Property="Padding" Value="4 2"/>
+    <Setter Property="LogDebugForeground" Value="{DynamicResource Brows.Theme.LogsProvider.DebugForeground}"/>
+    <Setter Property="LogWarnForeground" Value="{DynamicResource Brows.Theme.LogsProvider.WarnForeground}"/>
+    <Setter Property="LogErrorForeground" Value="{DynamicResource Brows.Theme.LogsProvider.ErrorForeground}"/>
+    <Setter Property="LogCriticalForeground" Value="{DynamicResource Brows.Theme.LogsProvider.CriticalForeground}"/>
+    <Setter Property="LogSelectionBackground" Value="{DynamicResource Brows.Theme.LogsProvider.SelectionBackground}"/>
+    <Setter Property="LogScrollViewerStyle" Value="{DynamicResource Brows.Style.LogsProvider.ScrollViewer}"/>
+  </Style>
+  <Style x:Key="Brows.Style.LogsProvider" TargetType="{x:Type local:LogsProviderControl}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:LogsProviderControl}">
+          <brows:ProviderGrid Provider="{Binding ViewModel, RelativeSource={RelativeSource TemplatedParent}}"
+                              DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                              Text="{Binding ViewModel.Name}">
+            <brows:ProviderGrid.TextTemplate>
+              <DataTemplate>
+                <brows:EntryDataTextBlock Text="{Binding}"/>
+              </DataTemplate>
+            </brows:ProviderGrid.TextTemplate>
+            <brows:ProviderGrid.ContentTemplate>
+              <DataTemplate>
+                <dwc:LogsControl Style="{DynamicResource Brows.Style.LogsProvider.Logs}"/>
+              </DataTemplate>
+            </brows:ProviderGrid.ContentTemplate>
+          </brows:ProviderGrid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="{x:Type local:LogsProviderControl}" BasedOn="{StaticResource Brows.Style.LogsProvider}"/>
+</ResourceDictionary>

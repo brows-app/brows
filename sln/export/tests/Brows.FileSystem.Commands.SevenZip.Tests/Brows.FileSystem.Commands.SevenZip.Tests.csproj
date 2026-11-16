@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.FileSystem.Commands.SevenZip\Brows.FileSystem.Commands.SevenZip.csproj" />
+  </ItemGroup>
+</Project>

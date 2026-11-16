@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Brows.Panels;
+using Brows.Providers;
+using System.Collections.Generic;
 
 namespace Brows.Commands;
 
@@ -208,6 +210,57 @@ internal sealed class CommandTest {
         Assert.That(command.ParameterError, Is.Null);
     }
 
+    [Test]
+    public void Command_TriggeredWork_WhenEntriesRequiredAndProviderProvidesEntries_InvokesWork() {
+        var command = new EntriesCommand();
+
+        var worked = ((ICommand)command).TriggeredWork(PanelContext(providesEntries: true));
+
+        Assert.That(worked, Is.True);
+    }
+
+    [Test]
+    public void Command_TriggeredWork_WhenEntriesRequiredAndProviderProvidesNoEntries_ReturnsFalse() {
+        var command = new EntriesCommand();
+
+        var worked = ((ICommand)command).TriggeredWork(PanelContext(providesEntries: false));
+
+        Assert.That(worked, Is.False);
+        Assert.That(command.Triggered, Is.False);
+    }
+
+    [Test]
+    public void Command_TriggeredWork_WhenEntriesRequiredAndContextHasNoPanel_ReturnsFalse() {
+        var command = new EntriesCommand();
+
+        var worked = ((ICommand)command).TriggeredWork(Mock.Of<ICommandContext>());
+
+        Assert.That(worked, Is.False);
+    }
+
+    [Test]
+    public void Command_TriggeredWork_WhenEntriesNotRequiredAndProviderProvidesNoEntries_InvokesWork() {
+        var command = new TestCommand(enabled: true);
+
+        ((ICommand)command).TriggeredWork(PanelContext(providesEntries: false));
+
+        Assert.That(command.Triggered, Is.True);
+    }
+
+    private static ICommandContext PanelContext(bool providesEntries) {
+        var provider = providesEntries
+            ? Mock.Of<IEntryProvider>()
+            : Mock.Of<IProvider>();
+        var entryProvider = provider as IEntryProvider;
+        var panel = new Mock<IPanel>();
+        panel.Setup(value => value.HasProvider(out provider)).Returns(true);
+        panel.Setup(value => value.HasProvider(out entryProvider)).Returns(entryProvider is not null);
+        var panelObject = panel.Object;
+        var context = new Mock<ICommandContext>();
+        context.Setup(value => value.HasPanel(out panelObject)).Returns(true);
+        return context.Object;
+    }
+
     private static ICommandContext LineContext(string parameter, string conf) {
         var context = new Mock<ICommandContext>();
         var line = new Mock<ICommandLine>();
@@ -249,6 +302,17 @@ internal sealed class CommandTest {
     }
 
     private sealed class DefaultCommand : Command {
+    }
+
+    private sealed class EntriesCommand : Command {
+        public bool Triggered { get; private set; }
+
+        protected override bool RequiresEntries => true;
+
+        protected override bool TriggeredWork(ICommandContext context) {
+            Triggered = true;
+            return true;
+        }
     }
 
     private sealed class SourcedCommand : Command {

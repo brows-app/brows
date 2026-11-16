@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
@@ -34,9 +32,7 @@ internal sealed class EntryDataInstance {
     public Task Refresh(CancellationToken token) {
         var tasks = default(Task[]);
         lock (Set) {
-            tasks = Set.Values
-                .Select(value => value.Refresh(token))
-                .ToArray();
+            tasks = [.. Set.Values.Select(value => value.Refresh(token))];
         }
         return Task.WhenAll(tasks);
     }

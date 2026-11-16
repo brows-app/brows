@@ -6,68 +6,48 @@ internal sealed class EntryStreamGuiState : Notifier, IEntryStreamGuiState {
     private static readonly object Loading = new();
     private static readonly object Unavailable = new();
 
-    public EntryStreamGuiView Text =>
-        _Text ?? (
-        _Text = new(this));
-    private EntryStreamGuiView _Text;
+    public EntryStreamGuiView Text => field ??= new(this);
+    public EntryStreamGuiView Image => field ??= new(this);
+    public EntryStreamGuiView Preview => field ??= new(this);
+    public EntryStreamGuiView Media => field ??= new(this);
 
-    public EntryStreamGuiView Image =>
-        _Image ?? (
-        _Image = new(this));
-    private EntryStreamGuiView _Image;
-
-    public EntryStreamGuiView Preview =>
-        _Preview ?? (
-        _Preview = new(this));
-    private EntryStreamGuiView _Preview;
-
-    public EntryStreamGuiView Media =>
-        _Media ?? (
-        _Media = new(this));
-    private EntryStreamGuiView _Media;
-
-    public bool Force =>
-        ForceText || ForceImage || ForceMedia || ForcePreview;
+    public bool Force => ForceText || ForceImage || ForceMedia || ForcePreview;
 
     public bool ForceText {
-        get => _ForceText;
+        get;
         set {
-            if (Change(ref _ForceText, value, nameof(ForceText), nameof(Force))) {
+            if (Change(ref field, value, nameof(ForceText), nameof(Force))) {
                 Changed();
             }
         }
     }
-    private bool _ForceText;
 
     public bool ForceImage {
-        get => _ForceImage;
+        get;
         set {
-            if (Change(ref _ForceImage, value, nameof(ForceImage), nameof(Force))) {
+            if (Change(ref field, value, nameof(ForceImage), nameof(Force))) {
                 Changed();
             }
         }
     }
-    private bool _ForceImage;
 
     public bool ForceMedia {
-        get => _ForceMedia;
+        get;
         set {
-            if (Change(ref _ForceMedia, value, nameof(ForceMedia), nameof(Force))) {
+            if (Change(ref field, value, nameof(ForceMedia), nameof(Force))) {
                 Changed();
             }
         }
     }
-    private bool _ForceMedia;
 
     public bool ForcePreview {
-        get => _ForcePreview;
+        get;
         set {
-            if (Change(ref _ForcePreview, value, nameof(ForcePreview), nameof(Force))) {
+            if (Change(ref field, value, nameof(ForcePreview), nameof(Force))) {
                 Changed();
             }
         }
     }
-    private bool _ForcePreview;
 
     public EntryStreamGui Gui { get; }
 

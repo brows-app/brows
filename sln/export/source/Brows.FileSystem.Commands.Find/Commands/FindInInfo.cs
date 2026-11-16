@@ -1,90 +1,132 @@
-﻿using Brows.Config;
-using Brows.Matching;
-using Domore.IO.Extensions;
+﻿using Domore.IO.Extensions;
 using Domore.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Brows.Commands; 
+namespace Brows.Commands;
+
 internal sealed class FindInInfo {
-    private readonly IMatcher Matcher;
+    private readonly DirectoryInfo Root;
+    private readonly FindSettings Settings;
+    private readonly Func<DecodedTextOptions> CreateDecoder;
 
-    private async Task<FoundInInfo[]> FindInFileText(FileInfo file, CancellationToken token) {
-        if (file is null) throw new ArgumentNullException(nameof(file));
-        var config = await Configure.File<FileSystemConfig>().Load(token);
-        var options = Parameter.Decoder;
-        var decoded = default(DecodedText);
-        try {
-            decoded = await file.DecodeText(default(DecodedTextDelegate), options, token);
-        }
-        catch (Exception ex) {
-            return new[] { new FoundInFileError(file, Root, ex) };
-        }
-        if (decoded == null) return null;
-        if (decoded.Success == false) {
-            return null;
-        }
-        return await Task.Run(cancellationToken: token, function: () => {
-            var text = decoded.Text();
-            if (text != null && text.Length > 0) {
-                var matches = Matcher.Matches(text, out var matched);
-                if (matches) {
-                    return FindMatch.In(text, matched).Select(m => new FoundInFileText(file, Root, m)).ToArray();
+    private async Task<FindEntryResult> FindFile(FileInfo file, CancellationToken token) {
+        var rows = new List<FoundInInfo>();
+        var matched = false;
+        var tried = false;
+        var errors = 0;
+        var skipped = 0;
+        var truncated = false;
+        if (Settings.In.HasFlag(FindIn.FileName)) {
+            tried = true;
+            try {
+                if (Settings.Matcher.Matches(file.Name)) {
+                    matched = true;
+                    rows.Add(new FoundInFileName(file, Root));
                 }
             }
-            return null;
-        });
-    }
-
-    private async Task<FoundInInfo[]> FindInFileName(FileInfo file, CancellationToken token) {
-        if (null == file) throw new ArgumentNullException(nameof(file));
-        return await Task.Run(cancellationToken: token, function: () => {
-            if (Matcher.Matches(file.Name)) {
-                return new[] { new FoundInFileName(file, Root) };
+            catch (RegexMatchTimeoutException ex) {
+                errors++;
+                rows.Add(new FoundInFileError(file, Root, ex));
             }
-            return null;
-        });
-    }
-
-    private async Task<FoundInInfo[]> FindInDirectoryName(DirectoryInfo directory, CancellationToken token) {
-        if (null == directory) throw new ArgumentNullException(nameof(directory));
-        return await Task.Run(cancellationToken: token, function: () => {
-            if (Matcher.Matches(directory.Name)) {
-                return new[] { new FoundInDirectoryName(directory, Root) };
+        }
+        token.ThrowIfCancellationRequested();
+        if (Settings.In.HasFlag(FindIn.FileText)) {
+            tried = true;
+            var options = CreateDecoder();
+            using var buffers = options.Disposable();
+            try {
+                var source = new FindFileTextSource(file, Settings.MaximumContentBytes);
+                var decoded = await source.DecodeText(default(DecodedTextDelegate), options, token)
+                    .ConfigureAwait(false);
+                token.ThrowIfCancellationRequested();
+                if (decoded?.Success == true) {
+                    var count = 0;
+                    var text = decoded.Text();
+                    foreach (var match in Settings.Matcher.FindInText(text, Settings.MaximumPreviewLength, token)) {
+                        if (count == Settings.MaximumMatchesPerFile) {
+                            truncated = true;
+                            break;
+                        }
+                        matched = true;
+                        count++;
+                        truncated |= match.MatchLength > Settings.MaximumPreviewLength;
+                        rows.Add(new FoundInFileText(file, Root, match));
+                    }
+                }
             }
-            return null;
-        });
+            catch (RegexMatchTimeoutException ex) {
+                errors++;
+                rows.Add(new FoundInFileError(file, Root, ex));
+            }
+            catch (FindContentLimitException) {
+                skipped = 1;
+            }
+            catch (IOException ex) {
+                errors = 1;
+                rows.Add(new FoundInFileError(file, Root, ex));
+            }
+            catch (UnauthorizedAccessException ex) {
+                errors = 1;
+                rows.Add(new FoundInFileError(file, Root, ex));
+            }
+        }
+        token.ThrowIfCancellationRequested();
+        return new FindEntryResult(file, rows.ToArray(), tried, matched, errors, skipped, truncated);
     }
 
-    public DirectoryInfo Root { get; }
-    public FindParameter Parameter { get; }
-
-    public FindInInfo(DirectoryInfo root, FindParameter parameter) {
-        Root = root;
-        Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
-        Matcher = Parameter.PatternMatcher();
-    }
-
-    public IEnumerable<Task<FoundInInfo[]>> Tasks(FileSystemInfo info, CancellationToken token) {
-        var find = Parameter.In;
+    private async Task<FindEntryResult> ProcessIncluded(FileSystemInfo info, CancellationToken token) {
+        token.ThrowIfCancellationRequested();
         if (info is FileInfo file) {
-            if (find.HasFlag(FindIn.FileName)) {
-                yield return FindInFileName(file, token);
+            return await FindFile(file, token).ConfigureAwait(false);
+        }
+        var findDirectory = info is DirectoryInfo && Settings.In.HasFlag(FindIn.DirectoryName);
+        if (findDirectory) {
+            try {
+                var matched = Settings.Matcher.Matches(info.Name);
+                token.ThrowIfCancellationRequested();
+                FoundInInfo[] rows = matched ? [new FoundInDirectoryName((DirectoryInfo)info, Root)] : [];
+                return new FindEntryResult(info, rows, Tried: true, Matched: matched);
             }
-            if (find.HasFlag(FindIn.FileText)) {
-                yield return FindInFileText(file, token);
+            catch (RegexMatchTimeoutException) {
+                return new FindEntryResult(info, [], Tried: true, Errors: 1);
             }
         }
-        else {
-            if (find.HasFlag(FindIn.DirectoryName)) {
-                if (info is DirectoryInfo directory) {
-                    yield return FindInDirectoryName(directory, token);
-                }
+        return new FindEntryResult(info, []);
+    }
+
+    internal FindInInfo(DirectoryInfo root, FindParameter parameter) : this(root, new FindSettings(parameter)) {
+    }
+
+    internal FindInInfo(DirectoryInfo root, FindSettings settings, Func<DecodedTextOptions> createDecoder = null) {
+        Root = root ?? throw new ArgumentNullException(nameof(root));
+        Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        CreateDecoder = createDecoder ?? settings.CreateDecoder;
+    }
+
+    internal async Task<FindEntryResult> Process(FileSystemInfo info, CancellationToken token) {
+        ArgumentNullException.ThrowIfNull(info);
+        token.ThrowIfCancellationRequested();
+        foreach (var matcher in Settings.Include) {
+            bool included;
+            try {
+                included = matcher.Matches(info.FullName);
             }
+            catch (RegexMatchTimeoutException ex) {
+                FoundInInfo[] rows = info is FileInfo file ? [new FoundInFileError(file, Root, ex)] : [];
+                return new FindEntryResult(info, rows, Errors: 1);
+            }
+            if (included) {
+                return await ProcessIncluded(info, token).ConfigureAwait(false);
+            }
+            token.ThrowIfCancellationRequested();
         }
+        if (Settings.Include.Count > 0) {
+            return new FindEntryResult(info, []);
+        }
+        return await ProcessIncluded(info, token).ConfigureAwait(false);
     }
 }

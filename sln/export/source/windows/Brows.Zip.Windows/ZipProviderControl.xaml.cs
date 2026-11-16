@@ -1,5 +1,6 @@
-﻿namespace Brows; 
-partial class ZipProviderControl {
+﻿namespace Brows;
+
+internal sealed partial class ZipProviderControl {
     public ZipProviderControl() {
         InitializeComponent();
     }

@@ -1,0 +1,3 @@
+# Open a selected directory in the active panel, or download a selected file to a
+# read-only temporary file and open it with the configured file handler.
+where = activepanel

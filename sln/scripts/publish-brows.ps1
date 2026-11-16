@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-  Builds and publishes Brows as a .NET Windows application.
+  Builds and publishes Brows as a self-contained .NET Windows application.
 
 .DESCRIPTION
   Builds the complete solution with Visual Studio MSBuild so native projects are included,
@@ -115,7 +115,11 @@ $solutionPath = Join-Path -Path $solutionDirectory -ChildPath 'brows.slnx'
 $applicationProject = Join-Path -Path $solutionDirectory -ChildPath 'app\source\brows\brows.csproj'
 $buildOutputDirectory = Join-Path -Path $solutionDirectory -ChildPath "out\$Configuration"
 $OutputPath = [System.IO.Path]::GetFullPath($OutputPath)
-$publishBuildDirectory = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("BrowsPublishBuild-" + [System.Guid]::NewGuid())
+$publishBuildRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+$publishBuildDirectory = [System.IO.Path]::GetFullPath((Join-Path -Path $publishBuildRoot -ChildPath ("BrowsPublishBuild-" + [System.Guid]::NewGuid())))
+$logDirectory = Join-Path -Path $solutionDirectory -ChildPath 'out'
+$buildBinlog = Join-Path -Path $logDirectory -ChildPath 'Publish-Build-{}.binlog'
+$publishBinlog = Join-Path -Path $logDirectory -ChildPath 'Publish-App-{}.binlog'
 
 foreach ($requiredPath in @($solutionPath, $applicationProject)) {
     if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
@@ -157,7 +161,9 @@ if ([string]::IsNullOrWhiteSpace($env:ComSpec)) {
     throw 'cmd.exe was not found through the ComSpec environment variable.'
 }
 
-$buildCommand = 'call "{0}" -arch={1} -host_arch={1} >nul 2>&1 && msbuild "{2}" /restore /t:Rebuild /p:Configuration={3} /p:Platform={1} /p:Deterministic=true /p:ContinuousIntegrationBuild=true /verbosity:minimal' -f $vsDevCmd, $Platform, $solutionPath, $Configuration
+New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
+
+$buildCommand = 'call "{0}" -arch={1} -host_arch={1} >nul 2>&1 && msbuild "{2}" /restore /t:Rebuild /p:Configuration={3} /p:Platform={1} /p:Deterministic=true /p:ContinuousIntegrationBuild=true /verbosity:minimal /bl:"{4}"' -f $vsDevCmd, $Platform, $solutionPath, $Configuration, $buildBinlog
 Invoke-NativeCommand -FilePath $env:ComSpec -Arguments @('/d', '/c', $buildCommand)
 
 Clear-Directory -Path $OutputPath
@@ -174,16 +180,24 @@ try {
         'net10.0-windows',
         '--runtime',
         "win-$Platform",
+        '--self-contained',
+        'true',
         "-p:SolutionDir=$solutionDirectory\",
         "-p:OutputPath=$publishBuildDirectory\",
         '-p:Deterministic=true',
-        '-p:ContinuousIntegrationBuild=true'
+        '-p:ContinuousIntegrationBuild=true',
+        "-bl:$publishBinlog"
     )
 
     Copy-Directory -Source (Join-Path -Path $buildOutputDirectory -ChildPath 'brows.export') -Destination (Join-Path -Path $OutputPath -ChildPath 'brows.export') -Name 'Plugin'
     Copy-Directory -Source (Join-Path -Path $buildOutputDirectory -ChildPath "brows.native\$Platform-windows") -Destination (Join-Path -Path $OutputPath -ChildPath "brows.native\$Platform-windows") -Name 'Native artifact'
 }
 finally {
+    $publishBuildContainsTemporaryRoot = Test-PathIsEqualOrChild -Path $publishBuildRoot -Parent $publishBuildDirectory
+    $publishBuildIsInTemporaryRoot = Test-PathIsEqualOrChild -Path $publishBuildDirectory -Parent $publishBuildRoot
+    if ($publishBuildContainsTemporaryRoot -or -not $publishBuildIsInTemporaryRoot) {
+        throw "The temporary publish build path is not a child of the temporary directory: $publishBuildDirectory"
+    }
     if (Test-Path -LiteralPath $publishBuildDirectory -PathType Container) {
         Remove-Item -LiteralPath $publishBuildDirectory -Force -Recurse
     }

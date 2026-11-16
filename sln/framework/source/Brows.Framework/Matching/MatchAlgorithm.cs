@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Brows.Matching;
 
@@ -20,7 +19,10 @@ public abstract class MatchAlgorithm : IMatchAlgorithm {
     protected bool IgnoreCase { get; set; }
 
     protected abstract IMatcher Matcher(string pattern);
-    protected abstract IAsyncEnumerable<T> Match<T>(string pattern, IEnumerable<T> source, Func<T, string> selector, CancellationToken cancellationToken);
+    protected abstract IAsyncEnumerable<T> Match<T>(string pattern,
+                                                    IEnumerable<T> source,
+                                                    Func<T, string> selector,
+                                                    CancellationToken cancellationToken);
 
     public static IMatchAlgorithm Create(string kind = null) {
         return PrivateCreate(kind);
@@ -37,7 +39,10 @@ public abstract class MatchAlgorithm : IMatchAlgorithm {
         return Matcher(pattern);
     }
 
-    IAsyncEnumerable<T> IMatchAlgorithm.Match<T>(string pattern, IEnumerable<T> source, Func<T, string> selector, CancellationToken cancellationToken) {
+    IAsyncEnumerable<T> IMatchAlgorithm.Match<T>(string pattern,
+                                                 IEnumerable<T> source,
+                                                 Func<T, string> selector,
+                                                 CancellationToken cancellationToken) {
         return Match(pattern, source, selector, cancellationToken);
     }
 }

@@ -1,0 +1,9 @@
+# example:
+# {input} h
+
+# Specify where to show the logs.
+# Options:
+#   here:   Show the logs in this panel.
+#   panel:  Add a panel to this window, and show the logs in that panel.
+#   window: Create a new window, add a panel to it, and show the logs in that panel.
+where = panel

@@ -1,6 +1,5 @@
 ﻿using Brows.Composition;
 using Brows.Entries;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,11 +9,10 @@ internal sealed class ProviderData {
     private static readonly Dictionary<Type, ProviderData> Cache = [];
 
     private IReadOnlyList<IEntryDataDefinition> Definitions => field ??=
-        Import
+        [.. Import
             .List<IEntryDataExport>()
-            .Where(i => i.EntryType == EntryType)
-            .Concat(EntryData ?? Array.Empty<IEntryDataDefinition>())
-            .ToList();
+            .Where(i => i.EntryType == EntryType || i.EntryType.IsAssignableFrom(EntryType))
+            .Concat(EntryData ?? Array.Empty<IEntryDataDefinition>())];
 
     private Type EntryType { get; }
     private IImportAgent Import { get; }

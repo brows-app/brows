@@ -1,12 +1,11 @@
-﻿using Brows.Config;
-using Brows.Entries;
-using Brows.Exports;
+﻿using Brows.Exports;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Brows.Commands; 
+namespace Brows.Commands;
+
 internal sealed class Edit : FileSystemCommand<EditParameter> {
     protected sealed override IEnumerable<Type> Source { get; } = new[] {
         typeof(IEntry)
@@ -20,7 +19,7 @@ internal sealed class Edit : FileSystemCommand<EditParameter> {
         }
         return context.Operate(async (progress, token) => {
             var worked = false;
-            var config = await Configure.File<FileSystemConfig>().Load(token);
+            var config = await ConfigFile.File<FileSystemConfig>().Load(token);
             var editors = config?.Editor ?? new();
             foreach (var info in selection) {
                 var editor = default(string);
@@ -66,6 +65,7 @@ internal sealed class Edit : FileSystemCommand<EditParameter> {
         });
     }
 
+    public IConfigurationFile ConfigFile { get; set; }
     public ILocateProgram LocateProgram { get; set; }
     public IOpenFileWith OpenFileWith { get; set; }
 }

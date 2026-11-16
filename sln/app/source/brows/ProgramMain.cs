@@ -1,9 +1,7 @@
-﻿using Brows.Config;
-using Brows.Programs;
+﻿using Brows.Programs;
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,10 +15,8 @@ internal sealed class ProgramMain {
         Array.Empty<IProgram>();
 
     private ProgramCommand Command { get; }
-    private ProgramConsole Console { get; }
 
-    private ProgramMain(ProgramConsole console, ProgramCommand command) {
-        Console = console ?? throw new ArgumentNullException(nameof(console));
+    private ProgramMain(ProgramCommand command) {
         Command = command ?? throw new ArgumentNullException(nameof(command));
     }
 
@@ -36,7 +32,7 @@ internal sealed class ProgramMain {
     }
 
     private Task<int> Run(CancellationToken token) {
-        var context = new ProgramContext(Command, Console);
+        var context = new ProgramContext(Command);
         var program = default(IProgram);
         var programName = Command.Name;
         var programNameValid = ProgramNameValid(programName);
@@ -50,23 +46,15 @@ internal sealed class ProgramMain {
     }
 
     private static async Task<int> Main(string[] args) {
-        using (var programConsole = new ProgramConsole()) {
-            var token = CancellationToken.None;
-            var command = new ProgramCommand(Environment.CommandLine, args);
-            var program = new ProgramMain(programConsole, command);
-            var programConfig = await Configure.File<ProgramConfig>().Load(token);
-            if (programConfig.Console) {
-                programConsole.Show();
-            }
-            var logConfigPath = await ConfigPath.FileReady(token);
-            var logConfigFile = Path.Combine(logConfigPath, "log.conf");
-            Log.Conf.Configure(logConfigFile);
-            try {
-                return await program.Run(CancellationToken.None);
-            }
-            finally {
-                Logging.Complete();
-            }
+        var token = CancellationToken.None;
+        var command = new ProgramCommand(Environment.CommandLine, args);
+        var program = new ProgramMain(command);
+        await ProgramLogging.Configure(token);
+        try {
+            return await program.Run(CancellationToken.None);
+        }
+        finally {
+            Logging.Complete();
         }
     }
 }

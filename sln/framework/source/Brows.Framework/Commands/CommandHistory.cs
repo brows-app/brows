@@ -1,20 +1,25 @@
 ﻿using Domore.Conf.Cli;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Brows.Commands;
 
 internal sealed class CommandHistory {
-    private readonly HashSet<ICommandLine> Set = new(new Comparer());
+    private readonly Comparer ContentComparer = new();
+    private readonly List<ICommandLine> List = [];
 
     public void Add(ICommandLine history) {
-        Set.Remove(history);
-        Set.Add(history);
+        /*
+         * Re-adding an entry removes it from its old position and inserts it
+         * at the front, so re-executed commands sort most-recent-first. A
+         * hash set would reuse its old slot instead of moving it.
+         */
+        List.RemoveAll(item => ContentComparer.Equals(item, history));
+        List.Insert(0, history);
     }
 
     public IEnumerable<ICommandLine> AsEnumerable() {
-        return Set.Reverse();
+        return List;
     }
 
     private sealed class Comparer : IEqualityComparer<ICommandLine> {

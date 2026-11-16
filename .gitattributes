@@ -1,0 +1,66 @@
+# Auto-detect text files and normalize line endings on checkin
+*               text=auto
+
+# Force CRLF for Windows-centric source/config/data files
+*.cs            text eol=crlf
+*.xaml          text eol=crlf
+*.xml           text eol=crlf
+*.json          text eol=crlf
+*.csproj        text eol=crlf
+*.props         text eol=crlf
+*.targets       text eol=crlf
+*.sln           text eol=crlf
+*.slnx          text eol=crlf
+*.config        text eol=crlf
+*.resx          text eol=crlf
+*.settings      text eol=crlf
+*.editorconfig  text eol=crlf
+*.md            text eol=crlf
+*.yml           text eol=crlf
+*.yaml          text eol=crlf
+*.cmd           text eol=crlf
+*.ps1           text eol=crlf
+*.wixproj       text eol=crlf
+*.wxs           text eol=crlf
+*.wxi           text eol=crlf
+*.sql           text eol=crlf
+*.conf          text eol=crlf
+*.razor         text eol=crlf
+*.ts            text eol=crlf
+*.txt           text eol=crlf
+*.cshtml        text eol=crlf
+*.css           text eol=crlf
+*.projitems     text eol=crlf
+*.shproj        text eol=crlf
+*.esproj        text eol=crlf
+*.slnlaunch     text eol=crlf
+*.html          text eol=crlf
+*.dic           text eol=crlf
+*.runsettings   text eol=crlf
+
+# Git files
+/.git*          text eol=crlf
+/sln/.git*      text eol=crlf
+
+# Keep LF for shell scripts (cross-platform tooling)
+*.sh            text eol=lf
+
+# SVG files should have LF line endings
+*.svg           text eol=lf
+
+*.ico           filter=lfs diff=lfs merge=lfs -text
+*.rtf           filter=lfs diff=lfs merge=lfs -text
+*.ocx           filter=lfs diff=lfs merge=lfs -text
+*.eps           filter=lfs diff=lfs merge=lfs -text
+*.bmp           filter=lfs diff=lfs merge=lfs -text
+*.jpg           filter=lfs diff=lfs merge=lfs -text
+*.jpeg          filter=lfs diff=lfs merge=lfs -text
+*.png           filter=lfs diff=lfs merge=lfs -text
+*.gif           filter=lfs diff=lfs merge=lfs -text
+*.chm           filter=lfs diff=lfs merge=lfs -text
+*.docx          filter=lfs diff=lfs merge=lfs -text
+*.xlsx          filter=lfs diff=lfs merge=lfs -text
+*.dll           filter=lfs diff=lfs merge=lfs -text
+*.exe           filter=lfs diff=lfs merge=lfs -text
+*.pdb           filter=lfs diff=lfs merge=lfs -text
+*.lib           filter=lfs diff=lfs merge=lfs -text

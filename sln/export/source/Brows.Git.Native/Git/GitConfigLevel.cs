@@ -1,5 +1,6 @@
-﻿namespace Brows.Git; 
-public enum GitConfigLevel {
+﻿namespace Brows.Git;
+
+internal enum GitConfigLevel {
     ProgramData = 1,
     System = 2,
     XDG = 3,

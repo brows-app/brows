@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Brows.Triggers;
+﻿namespace Brows.Triggers;
 
 internal sealed class GestureTrigger : IGestureTrigger {
     public string Defined { get; }

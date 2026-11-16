@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+    <EmbeddedResource Include="Resource\Culture\_.alias" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_MBox_Export" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_MBox_Open" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_MBox_PreviewFocus" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_MBox_View" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.MBox.Format\Brows.MBox.Format.csproj" />
+  </ItemGroup>
+</Project>

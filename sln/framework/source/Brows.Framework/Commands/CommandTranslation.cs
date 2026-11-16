@@ -51,7 +51,9 @@ internal static class CommandTranslation {
         builder.AppendLine(comment(""));
         builder.AppendLine(comment(Description(command.Name)));
         builder.AppendLine();
-        builder.AppendLine(Translate.Value($"Command_Conf_{command.Name}")?.Replace("{input}", command.Trigger?.Inputs?.Main?.Input));
+        builder.AppendLine(Translate
+            ?.Value($"Command_Conf_{command.Name}")
+            ?.Replace("{input}", command.Trigger?.Inputs?.Main?.Input));
         return builder.ToString().Trim();
     }
 }

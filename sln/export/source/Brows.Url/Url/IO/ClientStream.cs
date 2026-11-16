@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
@@ -16,13 +15,15 @@ internal sealed class ClientStream : Stream {
 
     private ClientStream(long length, Action<ClientDataCallback> onData) {
         OnData = onData ?? throw new ArgumentNullException(nameof(onData));
-        OnData(Callback);
         Writer = Ch.Writer;
         Reader = Ch.Reader;
         PrivateLength = length;
+        OnData(Callback);
     }
 
-    private async Task<int> ReadPrivate(bool allowAsync, byte[] buffer, int offset, int count, CancellationToken cancellationToken) {
+    private async Task<int> ReadPrivate(byte[] buffer, int offset, int count, CancellationToken cancellationToken) {
+        ValidateBufferArguments(buffer, offset, count);
+        cancellationToken.ThrowIfCancellationRequested();
         var wrote = 0;
         var reader = Reader;
         for (; ; ) {
@@ -39,14 +40,10 @@ internal sealed class ClientStream : Stream {
                 return wrote;
             }
             if (reader.Completion.IsCompleted) {
+                await reader.Completion.ConfigureAwait(false);
                 return wrote;
             }
-            if (allowAsync) {
-                await reader.WaitToReadAsync(cancellationToken);
-            }
-            else {
-                Thread.Sleep(0);
-            }
+            await reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -73,12 +70,11 @@ internal sealed class ClientStream : Stream {
     }
 
     public sealed override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) {
-        return ReadPrivate(allowAsync: true, buffer, offset, count, cancellationToken);
+        return ReadPrivate(buffer, offset, count, cancellationToken);
     }
 
     public sealed override int Read(byte[] buffer, int offset, int count) {
-        var read = ReadPrivate(allowAsync: false, buffer, offset, count, default);
-        return read.Result;
+        return ReadPrivate(buffer, offset, count, default).GetAwaiter().GetResult();
     }
 
     public sealed override long Seek(long offset, SeekOrigin origin) {

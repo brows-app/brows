@@ -1,0 +1,9 @@
+SftpEntry_Name             = name
+SftpEntry_Kind             = type
+SftpEntry_Length           = size
+SftpEntry_Permissions      = permissions
+SftpEntry_Owner             = owner
+SftpEntry_Group             = group
+SftpEntry_LastWriteTime    = date-modified
+SftpConnectionEntry_Kind   = action
+SftpConnectionEntry_Data   = details

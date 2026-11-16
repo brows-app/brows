@@ -1,6 +1,5 @@
-﻿using System;
+﻿namespace Brows.Native;
 
-namespace Brows.Native; 
 public sealed class NativeErrorException : Exception {
     public int Error { get; }
 

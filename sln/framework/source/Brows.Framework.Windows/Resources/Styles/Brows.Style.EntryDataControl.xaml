@@ -1,0 +1,51 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:entries="clr-namespace:Brows.Entries;assembly=Brows.Framework"
+                    xmlns:local="clr-namespace:Brows.Entries">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="Brows.Style.EntryDataTextBlock.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style x:Key="Brows.Style.EntryDataControl" TargetType="local:EntryDataControl">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:EntryDataControl}">
+          <Grid DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+            <local:EntryDataTextBlock>
+              <local:EntryDataTextBlock.Style>
+                <Style TargetType="local:EntryDataTextBlock"
+                       BasedOn="{StaticResource Brows.Style.EntryDataTextBlockControl}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding ViewModel.Ready}" Value="True">
+                      <Setter Property="Text" Value="{Binding ViewModel.Display}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ViewModel.AccessingFlag}" Value="True">
+                      <Setter
+                          Property="Foreground"
+                          Value="{DynamicResource Brows.Theme.EntryDataControl.Accessing.Foreground}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ViewModel.AccessError}" Value="True">
+                      <Setter
+                          Property="Foreground"
+                          Value="{DynamicResource Brows.Theme.EntryDataControl.AccessError.Foreground}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </local:EntryDataTextBlock.Style>
+            </local:EntryDataTextBlock>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding ViewModel.Alignment, RelativeSource={RelativeSource Self}}"
+                   Value="{x:Static entries:EntryDataAlignment.Left}">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding ViewModel.Alignment, RelativeSource={RelativeSource Self}}"
+                   Value="{x:Static entries:EntryDataAlignment.Right}">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+  <Style TargetType="local:EntryDataControl" BasedOn="{StaticResource Brows.Style.EntryDataControl}" />
+</ResourceDictionary>

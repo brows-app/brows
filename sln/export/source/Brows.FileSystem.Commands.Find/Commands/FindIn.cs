@@ -2,7 +2,8 @@
 using Domore.Conf.Cli;
 using System;
 
-namespace Brows.Commands; 
+namespace Brows.Commands;
+
 [Flags]
 internal enum FindIn {
     [CliDisplay(include: false)]

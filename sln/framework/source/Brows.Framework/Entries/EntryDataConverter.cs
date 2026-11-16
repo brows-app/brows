@@ -1,12 +1,11 @@
 ﻿using Brows.Localization;
 using System;
-using System.Globalization;
 using CONVERT = System.Convert;
 
 namespace Brows.Entries;
 
 public abstract class EntryDataConverter : IEntryDataConverter {
-    protected bool Try<T>(Func<object, T> conversion, object input, out T result) {
+    protected static bool Try<T>(Func<object, T> conversion, object input, out T result) {
         try {
             result = conversion(input);
             return true;

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace Brows.Config;
+namespace Brows.Conf;
 
 internal class PropCollection : IEnumerable<PropItem> {
     private readonly HashSet<string> Key = new(StringComparer.OrdinalIgnoreCase);

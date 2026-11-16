@@ -1,4 +1,5 @@
-﻿using Brows.Export;
+﻿using Brows.Conf;
+using Brows.Export;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -7,8 +8,11 @@ using System.Threading.Tasks;
 namespace Brows.Commands;
 
 internal class Bookmark : Command<BookmarkParameter> {
-    private IConfig<Bookmarks> Data => field ??=
-        Configure.Data<Bookmarks>();
+    private IConfiguration<Bookmarks> Data => field ??=
+        ConfigData.Data<Bookmarks>(Bookmarks.DataName);
+
+    [ImportRequired]
+    internal IConfigurationData ConfigData { get; set; }
 
     private async Task<bool> Add(string name, Context context, IOperationProgress progress, CancellationToken token) {
         if (context == null) return false;

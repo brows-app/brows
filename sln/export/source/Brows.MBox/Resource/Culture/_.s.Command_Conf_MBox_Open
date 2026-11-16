@@ -1,0 +1,9 @@
+# example:
+# {input}
+#
+# Extract the selected messages of the mailbox to files of an Internet message, and open them
+# with the application that is associated with the file type.
+#   The messages are written to the temporary folder of the session, and they stay there
+#   until the app exits, because the viewer may read them later.
+#   The command does nothing when no message is selected, or when no application is associated
+#   with the file type.

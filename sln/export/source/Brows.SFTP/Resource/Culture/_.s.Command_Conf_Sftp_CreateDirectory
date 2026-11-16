@@ -1,0 +1,2 @@
+# Create a directory in the current SFTP location.
+name = new-directory

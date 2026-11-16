@@ -3,10 +3,29 @@
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Brows.ProcessAgent.Windows" />
+    <PackageReference Include="Brows.TTY.Windows" GeneratePathProperty="true" />
+    <PackageReference Include="Brows.Win32.Interop.Composition" />
+    <PackageReference Include="Brows.Win32.PreviewHandler.Windows" />
+    <PackageReference Include="Brows.Win32.PropertySystem" />
+    <PackageReference Include="Brows.Win32.STAThreadPool" />
+    <PackageReference Include="Brows.Win32.STAThreadPool.Composition.Exports" />
+    <PackageReference Include="Brows.Win32.Windows" />
+    <PackageReference Include="Brows.Win32.Windows.Composition" />
+    <PackageReference Include="Domore.Async.TextReading.Windows" />
+    <PackageReference Include="Domore.Logs.Windows" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\..\framework\source\Brows.Framework\Brows.Framework.csproj" />
-    <ProjectReference Include="..\..\..\windows\source\Brows.Win32.PropertySystem\Brows.Win32.PropertySystem.csproj" />
-    <ProjectReference Include="..\..\..\windows\source\Brows.Win32.Windows.PreviewHandlerControl\Brows.Win32.Windows.PreviewHandlerControl.csproj" />
-    <ProjectReference Include="..\..\..\windows\source\Brows.Win32.Windows.PreviewTextControl\Brows.Win32.Windows.PreviewTextControl.csproj" />
-    <ProjectReference Include="..\..\..\windows\source\Brows.Win32.Windows\Brows.Win32.Windows.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(PkgBrows_TTY_Windows)\LICENSE"
+          Link="Brows.TTY.LICENSE"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"
+          Visible="false" Pack="false" />
+    <None Include="$(PkgBrows_TTY_Windows)\THIRD-PARTY-NOTICES.txt"
+          Link="Brows.TTY.THIRD-PARTY-NOTICES.txt"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"
+          Visible="false" Pack="false" />
   </ItemGroup>
 </Project>

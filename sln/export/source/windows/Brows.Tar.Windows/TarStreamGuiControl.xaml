@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="Brows.TarStreamGuiControl"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation">
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Style.Resources>
+                <ControlTemplate x:Key="TextControl">
+                    <Grid>
+                        <brows:EntryStreamTextControl ViewModel="{Binding}"/>
+                        <brows:EntryStreamViewLoadingControl ViewModel="{Binding}"/>
+                        <brows:EntryStreamViewUnavailableControl ViewModel="{Binding}"/>
+                    </Grid>
+                </ControlTemplate>
+                <ControlTemplate x:Key="ImageControl">
+                    <Grid>
+                        <brows:EntryStreamImageControl ViewModel="{Binding}"/>
+                        <brows:EntryStreamViewLoadingControl ViewModel="{Binding}"/>
+                        <brows:EntryStreamViewUnavailableControl ViewModel="{Binding}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Style.Resources>
+            <Setter Property="Template" Value="{x:Null}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ForceText}" Value="True">
+                    <Setter Property="Template" Value="{StaticResource TextControl}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ForceImage}" Value="True">
+                    <Setter Property="Template" Value="{StaticResource ImageControl}"/>
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Force}" Value="False"/>
+                        <Condition Binding="{Binding Entry.Info.Kind}" Value="File"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Grid>
+                                    <Control Template="{StaticResource TextControl}"/>
+                                    <Control Template="{StaticResource ImageControl}"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
+</UserControl>

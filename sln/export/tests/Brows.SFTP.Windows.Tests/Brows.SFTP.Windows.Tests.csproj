@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Brows.Composition.Testing" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.SFTP\Brows.SFTP.csproj" />
+    <ProjectReference Include="..\..\source\windows\Brows.SFTP.Windows\Brows.SFTP.Windows.csproj" />
+    <ProjectReference Include="..\..\..\app\source\Brows.Commander.Windows\Brows.Commander.Windows.csproj" />
+    <ProjectReference
+      Include="..\..\..\framework\source\Brows.Framework.Windows.Testing\Brows.Framework.Windows.Testing.csproj" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)/props/windows.build.props" />
+</Project>

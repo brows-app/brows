@@ -1,5 +1,4 @@
 ﻿using Brows.Localization;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,37 +7,32 @@ namespace Brows.Triggers;
 internal sealed class ClickGestureTranslation {
     private readonly Dictionary<ClickGesture, ClickGestureDisplay> ClickGestureDisplays = new();
 
-    public char Delimiter =>
-        _Delimiter ?? (
-        _Delimiter = Translation
-            .Value($"{nameof(ClickGesture)}_{nameof(Delimiter)}")?
-            .FirstOrDefault(defaultValue: '+') ?? '+'
-        ).Value;
+    public char Delimiter => _Delimiter ??=
+        (Translation.Value($"{nameof(ClickGesture)}_{nameof(Delimiter)}")?.FirstOrDefault(defaultValue: '+')
+            ?? '+');
     private char? _Delimiter;
 
-    public IReadOnlyDictionary<ClickButton, string> ClickButtonTranslation =>
-        _ClickButtonTranslation ?? (
-        _ClickButtonTranslation = Enum.GetValues<ClickButton>().Distinct().ToDictionary(
+    public IReadOnlyDictionary<ClickButton, string> ClickButtonTranslation => field ??=
+        Enum.GetValues<ClickButton>().Distinct().ToDictionary(
             clickButton => clickButton,
-            clickButton => Translation.Value($"{nameof(ClickButton)}_{clickButton}") ?? clickButton.ToString()));
-    private IReadOnlyDictionary<ClickButton, string> _ClickButtonTranslation;
+            clickButton => Translation.Value($"{nameof(ClickButton)}_{clickButton}") ?? clickButton.ToString());
 
-    public IReadOnlyDictionary<ClickModifiers, string> ClickModifiersTranslation =>
-        _ClickModifiersTranslation ?? (
-        _ClickModifiersTranslation = Enum.GetValues<ClickModifiers>().ToDictionary(
+    public IReadOnlyDictionary<ClickModifiers, string> ClickModifiersTranslation => field ??=
+        Enum.GetValues<ClickModifiers>().ToDictionary(
             clickMod => clickMod,
-            clickMod => Translation.Value($"{nameof(ClickModifiers)}_{clickMod}") ?? clickMod.ToString()));
-    private IReadOnlyDictionary<ClickModifiers, string> _ClickModifiersTranslation;
+            clickMod => Translation.Value($"{nameof(ClickModifiers)}_{clickMod}") ?? clickMod.ToString());
 
-    public IReadOnlyDictionary<string, ClickButton> ClickButtonLookup =>
-        _ClickButtonLookup ?? (
-        _ClickButtonLookup = ClickButtonTranslation.ToDictionary(pair => pair.Value, pair => pair.Key, StringComparer.OrdinalIgnoreCase));
-    private IReadOnlyDictionary<string, ClickButton> _ClickButtonLookup;
+    public IReadOnlyDictionary<string, ClickButton> ClickButtonLookup => field ??=
+        ClickButtonTranslation.ToDictionary(
+            pair => pair.Value,
+            pair => pair.Key,
+            StringComparer.OrdinalIgnoreCase);
 
-    public IReadOnlyDictionary<string, ClickModifiers> ClickModifiersLookup =>
-        _ClickModifiersLookup ?? (
-        _ClickModifiersLookup = ClickModifiersTranslation.ToDictionary(pair => pair.Value, pair => pair.Key, StringComparer.OrdinalIgnoreCase));
-    private IReadOnlyDictionary<string, ClickModifiers> _ClickModifiersLookup;
+    public IReadOnlyDictionary<string, ClickModifiers> ClickModifiersLookup => field ??=
+        ClickModifiersTranslation.ToDictionary(
+            pair => pair.Value,
+            pair => pair.Key,
+            StringComparer.OrdinalIgnoreCase);
 
     public ITranslation Translation { get; }
 

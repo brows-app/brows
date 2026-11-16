@@ -24,34 +24,27 @@ public abstract class EntryDataDefinition : Notifier, IEntryDataDefinition {
     public abstract IExportResourceKey ResourceKey { get; }
 
     public double Width {
-        get => _Width;
-        set => Change(ref _Width, value, WidthEvent);
-    }
-    private double _Width = double.NaN;
+        get;
+        set => Change(ref field, value, WidthEvent);
+    } = double.NaN;
 
     public EntryDataAlignment Alignment {
-        get => _Alignment;
-        set => Change(ref _Alignment, value, AlignmentEvent);
-    }
-    private EntryDataAlignment _Alignment = EntryDataAlignment.Default;
+        get;
+        set => Change(ref field, value, AlignmentEvent);
+    } = EntryDataAlignment.Default;
 
     public IEntryDataConverter Converter {
-        get => _Converter;
-        set => Change(ref _Converter, value, ConverterEvent);
+        get;
+        set => Change(ref field, value, ConverterEvent);
     }
-    private IEntryDataConverter _Converter;
 
     public object ConverterParameter {
-        get => _ConverterParameter;
-        set => Change(ref _ConverterParameter, value, ConverterParameterEvent);
+        get;
+        set => Change(ref field, value, ConverterParameterEvent);
     }
-    private object _ConverterParameter;
 
-    public virtual string Name =>
-        null;
-
-    public virtual string Group =>
-        null;
+    public virtual string Name => null;
+    public virtual string Group => null;
 
     public string Key { get; }
 
@@ -77,7 +70,9 @@ public abstract class EntryDataDefinition<TEntry, TValue> : EntryDataDefinition 
     private sealed class DefaultDefinition : EntryDataDefinition<TEntry, TValue> {
         private static readonly Task<TValue> ValueTask = Task.FromResult(default(TValue));
 
-        protected sealed override Task<TValue> GetValue(TEntry entry, Action<TValue> progress, CancellationToken cancellationToken) {
+        protected sealed override Task<TValue> GetValue(TEntry entry,
+                                                        Action<TValue> progress,
+                                                        CancellationToken cancellationToken) {
             return ValueTask;
         }
     }
@@ -87,7 +82,9 @@ public abstract class EntryDataDefinition<TEntry, TValue> : EntryDataDefinition 
     protected EntryDataDefinition(string key = null) : base(key) {
     }
 
-    protected abstract Task<TValue> GetValue(TEntry entry, Action<TValue> progress, CancellationToken cancellationToken);
+    protected abstract Task<TValue> GetValue(TEntry entry,
+                                             Action<TValue> progress,
+                                             CancellationToken cancellationToken);
 
     protected virtual Task RefreshValue(TEntry entry, CancellationToken token) {
         return token.IsCancellationRequested
@@ -100,7 +97,9 @@ public abstract class EntryDataDefinition<TEntry, TValue> : EntryDataDefinition 
     public sealed override IExportResourceKey ResourceKey => _ResourceKey ??= new ComponentResourceKey();
     private IExportResourceKey _ResourceKey;
 
-    public sealed override async Task<object> GetValue(IEntry entry, Action<object> progress, CancellationToken cancellationToken) {
+    public sealed override async Task<object> GetValue(IEntry entry,
+                                              Action<object> progress,
+                                              CancellationToken cancellationToken) {
         if (entry is TEntry tentry) {
             return await GetValue(tentry, value => progress?.Invoke(value), cancellationToken);
         }

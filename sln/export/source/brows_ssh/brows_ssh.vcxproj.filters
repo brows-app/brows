@@ -35,6 +35,9 @@
     <ClCompile Include="brows_ssh_ScpSend.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="brows_ssh_Sftp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brows_ssh.h">

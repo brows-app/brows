@@ -1,0 +1,18 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:brows="clr-namespace:Brows"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+  <s:Double x:Key="Brows.Style.PanelSplitter.Width">5</s:Double>
+  <Style TargetType="brows:PanelSplitter" x:Key="Brows.Style.PanelSplitter">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.PanelSplitter.Background}"/>
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+    <Setter Property="ResizeBehavior" Value="PreviousAndCurrent"/>
+    <Setter Property="ResizeDirection" Value="Columns"/>
+    <Setter Property="ShowsPreview" Value="True"/>
+    <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="Width" Value="{DynamicResource Brows.Style.PanelSplitter.Width}"/>
+  </Style>
+  <Style TargetType="brows:PanelSplitter" BasedOn="{StaticResource Brows.Style.PanelSplitter}">
+  </Style>
+</ResourceDictionary>

@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation">
+    <DataTemplate x:Key="TarEntry_RelativeName">
+        <brows:EntryNameGrid Icon="{Binding Item[Icon]}" Text="{Binding Item[RelativeName]}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PanelProvider_TarProvider">
+        <local:TarProviderControl ViewModel="{Binding}"/>
+    </DataTemplate>
+</ResourceDictionary>

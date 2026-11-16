@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 
-namespace Brows.Gui.Collections; 
+namespace Brows.Gui.Collections;
+
 public sealed class SyncedCollection<T> : ObservableCollection<T>, ISyncedCollection {
     private readonly object Locker = new();
 

@@ -1,20 +1,27 @@
 #include "brows_git_internal.h"
 
 struct brows_GitConfigEntry {
-    const char* name;
-    const char* value;
-    const char* source_kind;
-    const char* source_path;
+    char* name;
+    char* value;
+    char* source_kind;
+    char* source_path;
     unsigned int include_depth;
     brows_GitConfigLevel level;
 };
 
 static brows_GitConfigEntry* brows_GitConfigEntry_init(brows_GitConfigEntry* p, const char* name, const char* value, const char* source_kind, const char* source_path, brows_GitConfigLevel level, unsigned int include_depth) {
     assert(p);
-    p->name = name;
-    p->value = value;
-    p->source_kind = source_kind;
-    p->source_path = source_path;
+    if (!brows_git_copy_string(&p->name, name) ||
+        !brows_git_copy_string(&p->value, value) ||
+        !brows_git_copy_string(&p->source_kind, source_kind) ||
+        !brows_git_copy_string(&p->source_path, source_path)) {
+        free(p->name);
+        free(p->value);
+        free(p->source_kind);
+        free(p->source_path);
+        free(p);
+        return NULL;
+    }
     p->include_depth = include_depth;
     p->level = level;
     return p;
@@ -29,6 +36,13 @@ brows_GitConfigEntry* brows_GitConfigEntry_create(const char* name, const char* 
 }
 
 void brows_GitConfigEntry_destroy(brows_GitConfigEntry* p) {
+    if (NULL == p) {
+        return;
+    }
+    free(p->name);
+    free(p->value);
+    free(p->source_kind);
+    free(p->source_path);
     free(p);
 }
 

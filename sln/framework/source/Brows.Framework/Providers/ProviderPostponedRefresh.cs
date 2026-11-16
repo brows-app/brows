@@ -1,16 +1,15 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace Brows.Providers; 
+namespace Brows.Providers;
+
 public sealed class ProviderPostponedRefresh {
     private bool Refreshed;
     private readonly Stopwatch Stopwatch;
 
-    public Provider Provider { get; }
+    public EntryProvider Provider { get; }
 
-    public ProviderPostponedRefresh(Provider provider) {
+    public ProviderPostponedRefresh(EntryProvider provider) {
         Provider = provider ?? throw new ArgumentNullException(nameof(provider));
         Stopwatch = Stopwatch.StartNew();
     }

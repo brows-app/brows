@@ -1,5 +1,4 @@
 ﻿using Brows.Localization;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +9,7 @@ internal sealed class EntryDataKeySet : IEntryDataKeySet {
 
     private IReadOnlyDictionary<string, IReadOnlySet<string>> Alias {
         get {
-            if (_Alias == null) {
+            if (field is null) {
                 var dict = new Dictionary<string, IReadOnlySet<string>>(StringComparer.CurrentCultureIgnoreCase);
                 var keys = Keys;
                 foreach (var key in keys) {
@@ -26,17 +25,17 @@ internal sealed class EntryDataKeySet : IEntryDataKeySet {
                     }
                     dict.Add(key, set);
                 }
-                _Alias = dict;
+                field = dict;
             }
-            return _Alias;
+            return field;
         }
     }
-    private IReadOnlyDictionary<string, IReadOnlySet<string>> _Alias;
 
     private IEnumerable<string> Lookup(string[] aliases) {
         foreach (var key in Keys) {
             var alias = Alias[key];
-            var aliased = aliases.Any(a => string.Equals(a, key, StringComparison.CurrentCultureIgnoreCase) || alias.Contains(a));
+            var aliased = aliases.Any(a =>
+                string.Equals(a, key, StringComparison.CurrentCultureIgnoreCase) || alias.Contains(a));
             if (aliased) {
                 yield return key;
             }
@@ -51,7 +50,7 @@ internal sealed class EntryDataKeySet : IEntryDataKeySet {
     }
 
     string IEntryDataKeySet.Lookup(string alias) {
-        foreach (var item in Lookup(new[] { alias })) {
+        foreach (var item in Lookup([alias])) {
             return item;
         }
         return null;

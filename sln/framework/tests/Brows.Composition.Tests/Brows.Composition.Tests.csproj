@@ -1,8 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\source\Brows.Composition.Testing\Brows.Composition.Testing.csproj" />
-    <ProjectReference Include="..\..\source\Brows.Composition\Brows.Composition.csproj" />
-  </ItemGroup>
-</Project>

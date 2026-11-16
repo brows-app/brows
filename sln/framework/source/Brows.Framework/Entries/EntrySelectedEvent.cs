@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Brows.Entries;
+﻿namespace Brows.Entries;
 
 public delegate void EntrySelectedEventHandler(object sender, EntrySelectedEventArgs e);
 

@@ -27,47 +27,41 @@ public class EntryConfig {
             .Select(group => KeyValuePair.Create(group.Key, group.Last().Value));
 
     public string DefaultKey {
-        get => _DefaultKey ?? (_DefaultKey = string.Join("|", DefaultKeyInit()));
-        set => _DefaultKey = value;
+        get => field ??= string.Join("|", DefaultKeyInit());
+        set;
     }
-    private string _DefaultKey;
 
     public string DefaultSort {
-        get => _DefaultSort ?? (_DefaultSort = string.Join("|", DefaultSortInit()
+        get => field ??= string.Join("|", DefaultSortInit()
             .Select(pair => $"{pair.Key}{(
                 pair.Value == EntrySortDirection.Ascending
                     ? "<"
                     : pair.Value == EntrySortDirection.Descending
                         ? ">"
-                        : "")}")));
-        set => _DefaultSort = value;
+                        : "")}"));
+        set;
     }
-    private string _DefaultSort;
 
     public ObservationConfig Observe {
-        get => _Observe ?? (_Observe = new());
-        set => _Observe = value;
+        get => field ??= new();
+        set;
     }
-    private ObservationConfig _Observe;
 
     public PostponedRefreshConfig PostponedRefresh {
-        get => _PostponedRefresh ??= new();
-        set => _PostponedRefresh = value;
+        get => field ??= new();
+        set;
     }
-    private PostponedRefreshConfig _PostponedRefresh;
 
     public class ObservationConfig {
         public ChunkConfig Add {
-            get => _Add ?? (_Add = new());
-            set => _Add = value;
+            get => field ??= new();
+            set;
         }
-        private ChunkConfig _Add;
 
         public ChunkConfig Remove {
-            get => _Remove ?? (_Remove = new());
-            set => _Remove = value;
+            get => field ??= new();
+            set;
         }
-        private ChunkConfig _Remove;
     }
 
     public class ChunkConfig {

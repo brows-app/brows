@@ -3,7 +3,8 @@
 namespace Brows.Commands;
 
 public static class CommandContextExtension {
-    public static async Task<bool> Provide(this ICommandContext commandContext, string id, CommandContextProvide how, CancellationToken token) {
+    public static async Task<bool>
+    Provide(this ICommandContext commandContext, string id, CommandContextProvide how, CancellationToken token) {
         if (commandContext == null) throw new ArgumentNullException(nameof(commandContext));
         switch (how) {
             case CommandContextProvide.ActivePanel:
@@ -30,7 +31,8 @@ public static class CommandContextExtension {
         return ShowPalette(commandContext, input, 0, 0);
     }
 
-    public static bool ShowPalette(this ICommandContext commandContext, string input, int selectedStart, int selectedLength) {
+    public static bool
+    ShowPalette(this ICommandContext commandContext, string input, int selectedStart, int selectedLength) {
         ArgumentNullException.ThrowIfNull(commandContext);
         return commandContext.ShowPalette(new CommandPaletteConfig {
             Input = input,

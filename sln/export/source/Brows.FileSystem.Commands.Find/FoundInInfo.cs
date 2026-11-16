@@ -1,9 +1,17 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
-namespace Brows; 
+namespace Brows;
+
 internal class FoundInInfo {
     protected FoundInInfo() {
+    }
+
+    private string GetRelativeDirectory() {
+        var directory = Path.GetDirectoryName(FullPath) ?? FindRoot.FullName;
+        var relative = Path.GetRelativePath(FindRoot.FullName, directory);
+        return relative == "."
+            ? string.Empty
+            : relative;
     }
 
     public string Name =>
@@ -20,11 +28,7 @@ internal class FoundInInfo {
             : Path.GetDirectoryName(Info.FullName);
 
     public string RelativeDirectory =>
-        Path.GetDirectoryName(FullPath)
-            .Replace(FindRoot.FullName, "")
-            .TrimStart(
-                Path.DirectorySeparatorChar,
-                Path.AltDirectorySeparatorChar);
+        GetRelativeDirectory();
 
     public FileSystemInfo Info { get; }
     public DirectoryInfo FindRoot { get; }

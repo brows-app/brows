@@ -1,0 +1,5 @@
+# Connect to an SFTP server. Review and trust its host key before entering credentials.
+host = example.com
+# path = /
+# user = username
+# port = 22

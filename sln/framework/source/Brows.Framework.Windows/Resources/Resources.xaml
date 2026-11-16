@@ -1,0 +1,6 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resources/Fonts.xaml"/>
+    <ResourceDictionary Source="pack://application:,,,/Brows.Framework.Windows;component/Resources/Styles.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

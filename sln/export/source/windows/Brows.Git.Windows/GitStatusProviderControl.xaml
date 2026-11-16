@@ -1,0 +1,207 @@
+﻿<brows:ModelView
+        x:Class="Brows.GitStatusProviderControl"
+        x:ClassModifier="internal"
+        x:TypeArguments="_:GitStatusProvider"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:_="clr-namespace:Brows;assembly=Brows.Git">
+  <Control.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Brows.Git.Windows;component/Resources/Styles/Brows.Style.Git.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <Style TargetType="TextBlock" BasedOn="{StaticResource Brows.Style.Git.Provider.Text}" />
+    </ResourceDictionary>
+  </Control.Resources>
+  <Control.Template>
+    <ControlTemplate>
+      <brows:ProviderGrid
+              Provider="{Binding ViewModel, RelativeSource={RelativeSource TemplatedParent}}"
+              DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+        <brows:ProviderGrid.Style>
+          <Style TargetType="brows:ProviderGrid" BasedOn="{StaticResource Brows.Style.ProviderGrid}">
+            <Setter Property="Icon" Value="{Binding ViewModel}" />
+            <Setter Property="IconTemplate" Value="{StaticResource GitIcon}" />
+            <Setter Property="Text" Value="{Binding ViewModel}" />
+            <Setter Property="TextTemplate">
+              <Setter.Value>
+                <DataTemplate>
+                  <TextBlock
+                          Text="{Binding RepositoryPath}"
+                          TextTrimming="CharacterEllipsis"
+                          TextWrapping="NoWrap"
+                          Style="{StaticResource Brows.Style.Git.Provider.Text}">
+                    <ToolTipService.ToolTip>
+                      <StackPanel>
+                        <TextBlock
+                                Text="{Binding RepositoryPath}"
+                                TextWrapping="Wrap"
+                                Style="{StaticResource Brows.Style.Git.Provider.Text}" />
+                        <TextBlock Style="{StaticResource Brows.Style.Git.Provider.Text}">
+                          <Run Text="HEAD: " />
+                          <Run Text="{Binding Status.HeadId, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock
+                                Text="{Binding Status.GitDirectory, StringFormat=Git directory: {0}}"
+                                TextWrapping="Wrap"
+                                Style="{StaticResource Brows.Style.Git.Provider.Text}" />
+                      </StackPanel>
+                    </ToolTipService.ToolTip>
+                  </TextBlock>
+                </DataTemplate>
+              </Setter.Value>
+            </Setter>
+            <Setter Property="Content" Value="{Binding ViewModel}" />
+            <Setter Property="ContentTemplate">
+              <Setter.Value>
+                <DataTemplate>
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="18 5 8 5">
+                      <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" MinHeight="18" />
+                      </Grid.RowDefinitions>
+                      <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="Auto" />
+                          <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                                Grid.Column="0"
+                                Text="{Binding Status.Branch, Mode=OneWay}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap"
+                                MaxHeight="34"
+                                ToolTip="{Binding Status.Branch}"
+                                Style="{StaticResource Brows.Style.Git.Provider.Text}" />
+                        <TextBlock
+                                Grid.Column="1"
+                                Text="Tracking:"
+                                Margin="5 0"
+                                Style="{StaticResource Brows.Style.Git.Provider.Text}" />
+                        <TextBlock
+                                Grid.Column="2"
+                                Text="{Binding Status.Tracking, Mode=OneWay}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap"
+                                MaxHeight="34"
+                                ToolTip="{Binding Status.Tracking}"
+                                Style="{StaticResource Brows.Style.Git.Provider.Text}" />
+                      </Grid>
+                      <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="2*" />
+                          <ColumnDefinition Width="3*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                                Grid.Column="0"
+                                Text="{Binding Status.Summary}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap"
+                                MaxHeight="34"
+                                ToolTip="{Binding Status.Summary}"
+                                Style="{StaticResource Brows.Style.Git.Provider.Summary}" />
+                        <TextBlock
+                                Grid.Column="1"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap"
+                                MaxHeight="34"
+                                ToolTip="{Binding Status.Operation}">
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Brows.Style.Git.Provider.Text}">
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Status.Operation}" Value="{x:Null}">
+                                  <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status.Operation}" Value="">
+                                  <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                          <Run Text="Operation: " />
+                          <Run Text="{Binding Status.Operation, Mode=OneWay}" />
+                        </TextBlock>
+                      </Grid>
+                      <TextBlock
+                              Grid.Row="2"
+                              Foreground="{DynamicResource Brows.Theme.Danger}"
+                              TextTrimming="CharacterEllipsis"
+                              TextWrapping="Wrap"
+                              MaxHeight="52"
+                              ToolTip="Displayed rows are from the last successful refresh.">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock" BasedOn="{StaticResource Brows.Style.Git.Provider.Text}">
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding Error}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                              <DataTrigger Binding="{Binding Error}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                        <Run Text="Refresh failed: " />
+                        <Run Text="{Binding Error, Mode=OneWay}" />
+                      </TextBlock>
+                      <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition />
+                          <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                                Grid.Column="0"
+                                TextTrimming="CharacterEllipsis"
+                                ToolTip="Toggle ignored files and directories with Ctrl+I">
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Brows.Style.Git.Provider.Text}">
+                              <Setter Property="Opacity" Value="0.75" />
+                              <Setter Property="Text" Value="Ignored: off · Ctrl+I" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowIgnored}" Value="True">
+                                  <Setter Property="Text" Value="Ignored: on · Ctrl+I" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Right" ToolTip="Refresh with Ctrl+R">
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Brows.Style.Git.Provider.Text}">
+                              <Setter Property="Opacity" Value="0.75" />
+                              <Setter Property="Text" Value="Ctrl+R refresh" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRefreshing}" Value="True">
+                                  <Setter Property="Text" Value="Refreshing…" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                      </Grid>
+                    </Grid>
+                    <Border
+                            Grid.Row="0"
+                            BorderBrush="{DynamicResource Brows.Theme.Border}"
+                            BorderThickness="0 0 0 1"
+                            VerticalAlignment="Bottom" />
+                    <brows:ProviderContent Grid.Row="1" Provider="{Binding}" />
+                  </Grid>
+                </DataTemplate>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </brows:ProviderGrid.Style>
+      </brows:ProviderGrid>
+    </ControlTemplate>
+  </Control.Template>
+</brows:ModelView>

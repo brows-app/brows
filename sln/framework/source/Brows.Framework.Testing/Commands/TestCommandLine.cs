@@ -12,26 +12,26 @@ public sealed class TestCommandLine : ICommandLine {
 
     bool ICommandLine.HasInput(out string input) {
         input = Input;
-        return input != null;
+        return input is not null && input.TrimStart(' ').Length > 0;
     }
 
     bool ICommandLine.HasCommand(out string command) {
         command = Command;
-        return command != null;
+        return command is not null && command.Length > 0;
     }
 
     bool ICommandLine.HasTrigger(out string trigger) {
         trigger = Trigger;
-        return trigger != null;
+        return trigger is not null && trigger.Length > 0;
     }
 
     bool ICommandLine.HasParameter(out string parameter) {
         parameter = Parameter;
-        return parameter != null;
+        return parameter is not null && parameter.Length > 0;
     }
 
     bool ICommandLine.HasConf(out string conf) {
         conf = Conf;
-        return conf != null;
+        return string.IsNullOrWhiteSpace(conf) == false;
     }
 }

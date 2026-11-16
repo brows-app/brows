@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Brows.FTPS\Brows.FTPS.csproj" />
+  </ItemGroup>
+</Project>

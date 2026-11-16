@@ -2,23 +2,23 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <CompositeCollection x:Key="Manual_TextCollection">
     <TextBlock>
-            <Run Text="Brows" FontWeight="Bold"/>
+            <Run Text="Brows" FontWeight="{DynamicResource Brows.Font.Weight.Bold}"/>
             <Run Text="is a file manager for power users."/>
     </TextBlock>
     <TextBlock>
-            <Run Text="Control+N" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
+            <Run Text="Control+N" Style="{DynamicResource Brows.Style.KeyboardKey}"/>
             <Run Text="opens a new panel."/>
     </TextBlock>
     <TextBlock>
-            <Run Text="Tab" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
+            <Run Text="Tab" Style="{DynamicResource Brows.Style.KeyboardKey}"/>
             <Run Text="cycles through panels."/>
     </TextBlock>
     <TextBlock>
-            <Run Text="Control+L" Style="{DynamicResource CommandContextData_KeyboardKey}"/>
+            <Run Text="Control+L" Style="{DynamicResource Brows.Style.KeyboardKey}"/>
             <Run Text="launches the command palette. From there, type commands or paths to navigate the file system."/>
     </TextBlock>
     <Border/>
-    <TextBlock FontWeight="Bold">
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
       BROWS LICENSE
     </TextBlock>
     <TextBlock/>
@@ -36,7 +36,7 @@
             THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     </TextBlock>
     <Border/>
-    <TextBlock FontWeight="Bold">
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
       LIBSSH2 LICENSE
     </TextBlock>
     <TextBlock/>
@@ -60,7 +60,7 @@
     <TextBlock/>
     <TextBlock>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</TextBlock>
     <Border/>
-    <TextBlock FontWeight="Bold">
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
       OPENSSL LICENSE
     </TextBlock>
     <TextBlock/>
@@ -120,7 +120,7 @@
     <TextBlock/>
     <TextBlock>END OF TERMS AND CONDITIONS</TextBlock>
     <Border/>
-    <TextBlock FontWeight="Bold">
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
       ZLIB LICENSE
     </TextBlock>
     <TextBlock/>

@@ -1,4 +1,4 @@
-﻿namespace Brows.Config;
+﻿namespace Brows.Conf;
 
 internal class PropItem {
     public string Name { get; set; }

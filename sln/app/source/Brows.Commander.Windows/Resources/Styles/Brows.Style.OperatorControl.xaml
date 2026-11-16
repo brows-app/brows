@@ -1,0 +1,355 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.Common.xaml" />
+    <ResourceDictionary Source="/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.ScrollBar.xaml" />
+    <ResourceDictionary Source="/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.ScrollViewer.xaml" />
+    <ResourceDictionary Source="/Brows.Operations.Windows;component/Resources/Styles.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style x:Key="Brows.Style.OperatorControl.FocusVisualStyle" TargetType="Control">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Rectangle Margin="-3"
+                     Stroke="{DynamicResource Brows.Theme.OperatorControl.Stroke.Accent}"
+                     StrokeThickness="1"
+                     StrokeDashArray="1,2"
+                     IsHitTestVisible="False"/>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.ColumnHeaderTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="12,8,12,16"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.Header.FontSize}"
+               FontWeight="{DynamicResource Brows.Font.OperatorControl.FontWeight.SemiBold}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.DepthHeaderTemplate">
+    <TextBlock Text="Level"
+               Margin="8,8,8,16"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.DepthHeader.FontSize}"
+               FontWeight="{DynamicResource Brows.Font.OperatorControl.FontWeight.SemiBold}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.DepthContentTemplate">
+    <TextBlock Margin="8,14"
+               Width="30"
+               VerticalAlignment="Center"
+               TextAlignment="Center"
+               FontFamily="{DynamicResource Brows.Font.OperatorControl.FontFamily}"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}"
+               ToolTip="{Binding}">
+      <TextBlock.Style>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+          <Setter Property="Text" Value="{Binding}" />
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding}" Value="">
+              <Setter Property="Text" Value="•" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </TextBlock.Style>
+    </TextBlock>
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.NameContentTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="12,14"
+               Width="226"
+               VerticalAlignment="Center"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.Name.FontSize}"
+               FontWeight="{DynamicResource Brows.Font.OperatorControl.FontWeight.SemiBold}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground}"
+               TextTrimming="CharacterEllipsis"
+               ToolTip="{Binding}" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.DataContentTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="12,14"
+               Width="226"
+               VerticalAlignment="Center"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}"
+               TextTrimming="CharacterEllipsis"
+               ToolTip="{Binding}" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.ProgressContentTemplate">
+    <Border Background="{DynamicResource Brows.Theme.OperatorControl.Background.Surface}"
+            CornerRadius="{DynamicResource Brows.Theme.Border.CornerRadius}"
+            Margin="12,9"
+            Padding="8,5"
+            Width="76"
+            VerticalAlignment="Center">
+      <TextBlock Text="{Binding}"
+                 FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+                 FontWeight="{DynamicResource Brows.Font.OperatorControl.FontWeight.SemiBold}"
+                 Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Accent}"
+                 TextAlignment="Center"
+                 TextTrimming="CharacterEllipsis"
+                 ToolTip="{Binding}" />
+    </Border>
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.ProgressRateContentTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="12,14"
+               Width="76"
+               VerticalAlignment="Center"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.ProgressRate.FontSize}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Accent}"
+               TextAlignment="Center"
+               TextTrimming="CharacterEllipsis"
+               ToolTip="{Binding}" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.TargetContentTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="12,14"
+               Width="76"
+               VerticalAlignment="Center"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}"
+               TextAlignment="Center"
+               TextTrimming="CharacterEllipsis"
+               ToolTip="{Binding}" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.ErrorTemplate">
+    <Border Background="{DynamicResource Brows.Theme.OperatorControl.Danger.Background}"
+            CornerRadius="{DynamicResource Brows.Theme.Border.CornerRadius}"
+            Padding="8,6"
+            Margin="8,4"
+            MaxWidth="360"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="20" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="!"
+                   FontWeight="{DynamicResource Brows.Font.OperatorControl.FontWeight.Bold}"
+                   Foreground="{DynamicResource Brows.Theme.OperatorControl.Danger.Foreground}" />
+        <TextBlock Grid.Column="1"
+                   Text="{Binding Message}"
+                   TextWrapping="Wrap"
+                   FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+                   Foreground="{DynamicResource Brows.Theme.OperatorControl.Danger.Foreground}"
+                   ToolTip="{Binding Message}" />
+      </Grid>
+    </Border>
+  </DataTemplate>
+  <Style x:Key="Brows.Style.OperatorControl.ProgressBarStyle"
+         TargetType="ProgressBar"
+         BasedOn="{StaticResource Brows.Style.ProgressBar}">
+    <Setter Property="Height" Value="8" />
+    <Setter Property="MinWidth" Value="140" />
+    <Setter Property="Margin" Value="12,0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.OperatorControl.Foreground.Accent}" />
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.OperatorControl.Background.Surface}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ProgressBar">
+          <Grid x:Name="PART_Track" ClipToBounds="True">
+            <Border Background="{TemplateBinding Background}"
+                    CornerRadius="{DynamicResource Brows.Theme.ProgressBar.CornerRadius}" />
+            <Canvas>
+              <Border x:Name="PART_Indicator"
+                      Height="{Binding ActualHeight, ElementName=PART_Track}"
+                      Background="{TemplateBinding Foreground}"
+                      CornerRadius="{DynamicResource Brows.Theme.ProgressBar.CornerRadius}" />
+            </Canvas>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Brows.Style.OperatorControl.ScrollViewerStyle"
+         TargetType="ScrollViewer"
+         BasedOn="{StaticResource {x:Type ScrollViewer}}">
+    <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="CanContentScroll" Value="False" />
+    <Setter Property="Padding" Value="0,0,0,8" />
+  </Style>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.ItemsTemplate">
+    <ListBox ItemsSource="{Binding}"
+             BorderThickness="0"
+             Background="Transparent"
+             Padding="0"
+             AlternationCount="2"
+             HorizontalContentAlignment="Stretch"
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+             ScrollViewer.VerticalScrollBarVisibility="Disabled"
+             ScrollViewer.CanContentScroll="False">
+      <ListBox.Template>
+        <ControlTemplate TargetType="ListBox">
+          <ItemsPresenter />
+        </ControlTemplate>
+      </ListBox.Template>
+      <ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+          <StackPanel />
+        </ItemsPanelTemplate>
+      </ListBox.ItemsPanel>
+      <ListBox.ItemContainerStyle>
+        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+          <Setter Property="Background" Value="Transparent" />
+          <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.OperatorControl.Foreground}" />
+          <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+          <Setter Property="FocusVisualStyle" Value="{StaticResource Brows.Style.OperatorControl.FocusVisualStyle}" />
+          <Setter Property="Template">
+            <Setter.Value>
+              <ControlTemplate TargetType="ListBoxItem">
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{DynamicResource Brows.Theme.ListBoxItem.CornerRadius}">
+                  <ContentPresenter
+                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalAlignment="Center" />
+                </Border>
+              </ControlTemplate>
+            </Setter.Value>
+          </Setter>
+          <Style.Triggers>
+            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+              <Setter Property="Background" Value="{DynamicResource Brows.Theme.OperatorControl.Background.Surface}" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter
+                  Property="Background"
+                  Value="{DynamicResource Brows.Theme.OperatorControl.Background.Selection}"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter
+                  Property="Background"
+                  Value="{DynamicResource Brows.Theme.OperatorControl.Background.Selection}"/>
+            </Trigger>
+            <DataTrigger Binding="{Binding CompleteWithError}" Value="True">
+              <Setter Property="Background" Value="{DynamicResource Brows.Theme.OperatorControl.Danger.Background}" />
+            </DataTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}" />
+            </Trigger>
+          </Style.Triggers>
+        </Style>
+      </ListBox.ItemContainerStyle>
+    </ListBox>
+  </DataTemplate>
+  <Style x:Key="Brows.Style.OperatorControl.ButtonStyle"
+         TargetType="Button"
+         BasedOn="{StaticResource {x:Type Button}}">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.OperatorControl.Button.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brows.Theme.OperatorControl.Button.BorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Brows.Style.OperatorControl.FocusVisualStyle}" />
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.OperatorControl.Button.FontSize}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Brows.Font.OperatorControl.FontWeight.SemiBold}" />
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.OperatorControl.Button.Foreground}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="Margin" Value="6,7,8,7" />
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{DynamicResource Brows.Theme.Button.CornerRadius}"
+                  Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Brows.Theme.OperatorControl.Button.Background.Hover}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource Brows.Theme.OperatorControl.Button.BorderBrush.Hover}" />
+      </Trigger>
+      <Trigger Property="IsPressed" Value="True">
+        <Setter Property="Background"
+                Value="{DynamicResource Brows.Theme.OperatorControl.Button.Background.Pressed}" />
+      </Trigger>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Opacity" Value="0.45" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="Brows.Style.OperatorControl.CancelButtonStyle"
+         TargetType="Button"
+         BasedOn="{StaticResource Brows.Style.OperatorControl.ButtonStyle}">
+    <Setter Property="Content" Value="Cancel" />
+  </Style>
+  <Style x:Key="Brows.Style.OperatorControl.RemoveButtonStyle"
+         TargetType="Button"
+         BasedOn="{StaticResource Brows.Style.OperatorControl.ButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.OperatorControl.RemoveButton.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brows.Theme.OperatorControl.RemoveButton.BorderBrush}" />
+    <Setter Property="Content" Value="Remove" />
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.OperatorControl.RemoveButton.Foreground}" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Background"
+                Value="{DynamicResource Brows.Theme.OperatorControl.RemoveButton.Background.Hover}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource Brows.Theme.OperatorControl.RemoveButton.BorderBrush.Hover}" />
+      </Trigger>
+      <Trigger Property="IsPressed" Value="True">
+        <Setter Property="Background"
+                Value="{DynamicResource Brows.Theme.OperatorControl.RemoveButton.Background.Pressed}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="Brows.Style.OperatorControl"
+         TargetType="brows:OperatorControl"
+         BasedOn="{StaticResource {x:Type brows:OperatorControl}}">
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.OperatorControl.FontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.OperatorControl.FontSize}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Brows.Font.OperatorControl.FontWeight}" />
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.OperatorControl.Foreground}" />
+    <Setter Property="OperationItemsTemplate" Value="{StaticResource Brows.Style.OperatorControl.ItemsTemplate}" />
+    <Setter Property="OperationErrorTemplate" Value="{StaticResource Brows.Style.OperatorControl.ErrorTemplate}" />
+    <Setter Property="OperationProgressBarStyle"
+            Value="{StaticResource Brows.Style.OperatorControl.ProgressBarStyle}" />
+    <Setter Property="OperationScrollViewerStyle"
+            Value="{StaticResource Brows.Style.OperatorControl.ScrollViewerStyle}" />
+    <Setter Property="OperationCancelButtonStyle"
+            Value="{StaticResource Brows.Style.OperatorControl.CancelButtonStyle}" />
+    <Setter Property="OperationRemoveButtonStyle"
+            Value="{StaticResource Brows.Style.OperatorControl.RemoveButtonStyle}" />
+    <Setter Property="OperationDepthHeaderTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.DepthHeaderTemplate}" />
+    <Setter Property="OperationNameHeaderTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ColumnHeaderTemplate}" />
+    <Setter Property="OperationDataHeaderTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ColumnHeaderTemplate}" />
+    <Setter Property="OperationProgressHeaderTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ColumnHeaderTemplate}" />
+    <Setter Property="OperationProgressRateHeaderTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ColumnHeaderTemplate}" />
+    <Setter Property="OperationProgressRateAverageHeaderTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ColumnHeaderTemplate}" />
+    <Setter Property="OperationTargetHeaderTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ColumnHeaderTemplate}" />
+    <Setter Property="OperationDepthContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.DepthContentTemplate}" />
+    <Setter Property="OperationNameContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.NameContentTemplate}" />
+    <Setter Property="OperationDataContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.DataContentTemplate}" />
+    <Setter Property="OperationProgressContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ProgressContentTemplate}" />
+    <Setter Property="OperationProgressRateContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ProgressRateContentTemplate}" />
+    <Setter Property="OperationProgressRateAverageContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.ProgressRateContentTemplate}" />
+    <Setter Property="OperationTargetContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.TargetContentTemplate}" />
+  </Style>
+</ResourceDictionary>

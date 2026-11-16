@@ -7,7 +7,6 @@
     <OutputPath>$(SolutionDir)\out\$(Configuration)\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\framework\source\Brows.Abstractions.IO\Brows.Abstractions.IO.csproj" />
     <ProjectReference Include="..\Brows.App.Windows\Brows.App.Windows.csproj" />
     <ProjectReference Include="..\Brows.Commander.Windows\Brows.Commander.Windows.csproj" />
     <ProjectReference Include="..\Brows.Commander\Brows.Commander.csproj" />

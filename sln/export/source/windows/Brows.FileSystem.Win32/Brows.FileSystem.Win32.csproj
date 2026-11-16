@@ -1,6 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Brows.Win32.Windows.Composition" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Brows.FileSystem.Commands.CreateDirectory\Brows.FileSystem.Commands.CreateDirectory.csproj" />
     <ProjectReference Include="..\..\Brows.FileSystem.Commands.CreateFile\Brows.FileSystem.Commands.CreateFile.csproj" />

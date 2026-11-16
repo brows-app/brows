@@ -24,8 +24,19 @@ Command_Description_FileSystem_Copy             = Copy the current selection to 
 Command_Description_FileSystem_Delete           = Delete the selection from the current panel
 Command_Description_FileSystem_Move             = Move the current selection to another panel
 Command_Description_FileSystem_Open             = Open files and directories
-Command_Description_FileSystem_View             = Show or hide widgets
+Command_Description_FileSystem_View             = Show or hide widgets; the preview replaces the active lower view
 
 Command_Group_FileSystemEntryData               = File System
 Command_Group_FileSystemInfoData                = File System
 Command_Group_FileSystemMetaData                = Property System
+
+Command_Description_FileSystem_TerminalOpen     = Open or focus the PowerShell terminal for this directory
+Command_Description_FileSystem_TerminalRelease  = Return focus to the entries while keeping the terminal running
+Command_Description_FileSystem_TerminalClose    = Stop the terminal session and its owned processes
+FileSystemTerminal_Status_Starting = Starting PowerShell
+FileSystemTerminal_Status_Running  = Running
+FileSystemTerminal_Status_Exited   = Process exited with code {0}
+FileSystemTerminal_Status_ExitedWithoutCode = Process exited
+FileSystemTerminal_Status_Stopping = Stopping PowerShell
+FileSystemTerminal_Status_Stopped  = Stopped
+FileSystemTerminal_Status_Failed   = PowerShell terminal error: {0}

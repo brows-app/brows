@@ -1,9 +1,6 @@
 ﻿using Brows.Threading;
-using Domore.IO;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands;
@@ -19,19 +16,19 @@ internal sealed class DrawImageWork {
         _Info = new List<FileSystemInfo>(Name.Keys));
     private IReadOnlyList<FileSystemInfo> _Info;
 
-    public STAThreadPool ThreadPool { get; }
+    public ISTAThreadPool ThreadPool { get; }
     public FileSystemRename Rename { get; }
     public DrawImageParameter Parameter { get; }
 
-    public DrawImageWork(DrawImageParameter parameter, FileSystemRename rename, STAThreadPool threadPool) {
+    public DrawImageWork(DrawImageParameter parameter, FileSystemRename rename, ISTAThreadPool threadPool) {
         Rename = rename ?? throw new ArgumentNullException(nameof(rename));
         Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
         ThreadPool = threadPool ?? throw new ArgumentNullException(nameof(threadPool));
     }
 
-    public Task<bool> Run(IOperationProgress progress, CancellationToken token) {
+    public async Task<bool> Run(IOperationProgress progress, CancellationToken token) {
         ArgumentNullException.ThrowIfNull(progress);
-        return progress.Children(Info, info => (info.Name, OperationProgressKind.None, async (progress, t) => {
+        var result = await progress.Children(Info, info => new(info.Name, async (progress, childToken) => {
             async Task work(FileSystemInfo info, IOperationProgress progress, CancellationToken token) {
                 ArgumentNullException.ThrowIfNull(progress);
                 token.ThrowIfCancellationRequested();
@@ -55,11 +52,10 @@ internal sealed class DrawImageWork {
                     throw new DrawImageInfoIsNotFileException(info);
                 }
             }
-            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, t)) {
-                await work(info, progress, tokenSource.Token);
-            }
+            await work(info, progress, childToken);
         }
-        ));
+        ), OperationFailureBehavior.Record, token);
+        return result.Results.Count > 0;
     }
 
     private sealed class DrawImageInfoIsNotFileException : Exception {

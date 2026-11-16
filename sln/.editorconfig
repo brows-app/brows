@@ -1,10 +1,21 @@
-# Remove the line below if you want to inherit .editorconfig settings from higher directories
+﻿# Remove the line below if you want to inherit .editorconfig settings from higher directories
 root = true
 
 [*]
 indent_style = space
 trim_trailing_whitespace = true
 end_of_line = crlf
+
+[.editorconfig]
+charset = utf-8-bom
+
+[*.h]
+indent_size = 2
+charset = utf-8
+
+[*.c]
+indent_size = 4
+charset = utf-8
 
 [*.{slnx,csproj,esproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj,wixproj}]
 indent_size = 2
@@ -78,7 +89,7 @@ charset = utf-8
 indent_size = 2
 charset = utf-8-bom
 
-[*.{txt,conf}]
+[*.{txt,conf,conf.default}]
 indent_size = 2
 charset = utf-8
 
@@ -175,9 +186,9 @@ dotnet_style_allow_statement_immediately_after_block_experimental = true
 #### C# Coding Conventions ####
 
 # var preferences
-csharp_style_var_elsewhere = false
-csharp_style_var_for_built_in_types = false
-csharp_style_var_when_type_is_apparent = false
+csharp_style_var_elsewhere = true
+csharp_style_var_for_built_in_types = true
+csharp_style_var_when_type_is_apparent = true
 
 # Expression-bodied members
 csharp_style_expression_bodied_accessors = true:silent

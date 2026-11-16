@@ -2,22 +2,36 @@
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
 
-namespace Brows.Native; 
+namespace Brows.Native;
+
 public abstract class NativeType : CriticalFinalizerObject, IDisposable {
+    private readonly Lock Locker = new();
+    private IntPtr _Handle;
+
     private IntPtr Handle {
         get {
-            if (_Handle == IntPtr.Zero) {
-                var handle = _Handle = Create();
+            lock (Locker) {
+                var handle = _Handle;
                 if (handle == IntPtr.Zero) {
-                    throw new OutOfMemoryException();
+                    handle = Create();
+                    if (handle == IntPtr.Zero) {
+                        throw new OutOfMemoryException();
+                    }
+                    try {
+                        Init(handle);
+                    }
+                    catch {
+                        Destroy(handle);
+                        throw;
+                    }
+                    _Handle = handle;
                 }
-                Init(handle);
+                return handle;
             }
-            return _Handle;
         }
     }
-    private IntPtr _Handle;
 
     protected abstract IntPtr Create();
     protected abstract void Destroy(IntPtr handle);
@@ -107,19 +121,23 @@ public abstract class NativeType : CriticalFinalizerObject, IDisposable {
     }
 
     protected virtual void Dispose(bool disposing) {
-        var handle = _Handle;
-        if (handle != IntPtr.Zero) {
+        lock (Locker) {
+            var handle = _Handle;
+            if (handle == IntPtr.Zero) {
+                return;
+            }
+            _Handle = IntPtr.Zero;
             Destroy(handle);
         }
-        _Handle = IntPtr.Zero;
     }
 
     public event EventHandler Disposed;
 
     public IntPtr GetHandle() {
-        return Handle == IntPtr.Zero
+        var handle = Handle;
+        return handle == IntPtr.Zero
             ? throw new InvalidOperationException()
-            : Handle;
+            : handle;
     }
 
     public void Dispose() {

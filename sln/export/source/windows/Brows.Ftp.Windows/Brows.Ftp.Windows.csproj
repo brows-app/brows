@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Brows.Ftp\Brows.Ftp.csproj" />
+    <ProjectReference Include="..\..\Brows.FTP\Brows.FTP.csproj" />
   </ItemGroup>
 </Project>

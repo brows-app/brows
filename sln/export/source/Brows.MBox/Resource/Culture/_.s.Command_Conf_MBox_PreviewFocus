@@ -1,0 +1,9 @@
+# example:
+# {input} entries
+# {input} preview
+#
+# Move the keyboard focus between the list of the messages and their preview.
+#   The target preview is the default, and it moves the focus to the preview.
+#   The target entries moves the focus back to the list, but only when the preview owns it.
+#
+target = preview

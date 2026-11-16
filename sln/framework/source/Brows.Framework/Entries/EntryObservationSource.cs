@@ -4,6 +4,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Runtime.ExceptionServices;
 
 namespace Brows.Entries;
 
@@ -53,27 +55,86 @@ internal sealed class EntryObservationSource : Notifier {
 
     private void Initialize(IEntry entry) {
         if (null == entry) throw new ArgumentNullException(nameof(entry));
-        entry.Drop += Entry_Drop;
-        entry.Selected += Entry_Selected;
-        Selected(entry);
+        Exception error = null;
+        try {
+            entry.Drop += Entry_Drop;
+        }
+        catch (Exception ex) {
+            error = ex;
+        }
+        try {
+            entry.Selected += Entry_Selected;
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        try {
+            Selected(entry);
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
     }
 
     private void Finalize(IEntry entry) {
         if (null == entry) throw new ArgumentNullException(nameof(entry));
-        if (Select.Remove(entry)) {
-            SelectChanged();
+        var selected = Select.Remove(entry);
+        var dropped = Drop == entry;
+        Exception error = null;
+        try {
+            entry.Drop -= Entry_Drop;
         }
-        if (Drop == entry) {
-            Drop = null;
+        catch (Exception ex) {
+            error = ex;
         }
-        entry.Drop -= Entry_Drop;
-        entry.Selected -= Entry_Selected;
+        try {
+            entry.Selected -= Entry_Selected;
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        if (selected) {
+            try {
+                SelectChanged();
+            }
+            catch (Exception ex) {
+                error ??= ex;
+            }
+        }
+        if (dropped) {
+            try {
+                Drop = null;
+            }
+            catch (Exception ex) {
+                error ??= ex;
+            }
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
     }
 
     private void PrivateAdd(IEntry entry) {
         Snapshot = null;
-        Collection.Add(entry);
-        Initialize(entry);
+        Exception error = null;
+        try {
+            Collection.Add(entry);
+        }
+        catch (Exception ex) {
+            error = ex;
+        }
+        try {
+            Initialize(entry);
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
     }
 
     public event EventHandler DropChanged;
@@ -103,23 +164,62 @@ internal sealed class EntryObservationSource : Notifier {
 
     public void Add(params IEntry[] entries) {
         ArgumentNullException.ThrowIfNull(entries);
+        Exception error = null;
         foreach (var entry in entries) {
-            PrivateAdd(entry);
+            try {
+                PrivateAdd(entry);
+            }
+            catch (Exception ex) {
+                error ??= ex;
+            }
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
         }
     }
 
     public bool Remove(IEntry entry) {
-        Finalize(entry);
+        Exception error = null;
+        try {
+            Finalize(entry);
+        }
+        catch (Exception ex) {
+            error = ex;
+        }
         Snapshot = null;
-        return Collection.Remove(entry);
+        var removed = false;
+        try {
+            removed = Collection.Remove(entry);
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
+        return removed;
     }
 
     public void Clear() {
-        foreach (var entry in Collection) {
-            Finalize(entry);
+        Exception error = null;
+        foreach (var entry in Collection.ToArray()) {
+            try {
+                Finalize(entry);
+            }
+            catch (Exception ex) {
+                error ??= ex;
+            }
         }
         Snapshot = null;
-        Collection.Clear();
+        try {
+            Collection.Clear();
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
     }
 
     public void End() {

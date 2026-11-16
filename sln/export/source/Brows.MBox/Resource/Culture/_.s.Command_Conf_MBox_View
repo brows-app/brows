@@ -1,0 +1,8 @@
+# example:
+# {input}
+#
+# Show or hide the preview of the current message of the mailbox.
+#   The preview is toggled, so the command shows it when it is hidden, and hides it when it
+#   is shown.
+#
+toggle = preview

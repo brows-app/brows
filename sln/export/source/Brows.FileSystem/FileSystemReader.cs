@@ -38,7 +38,7 @@ internal abstract class FileSystemReader {
         try {
             await Task.Delay(timeout, linked.Token);
         }
-        catch (OperationCanceledException canceled) when (canceled.CancellationToken == linked.Token) {
+        catch (OperationCanceledException canceled) when (linked.Token.IsCancellationRequested) {
             if (Log.Info()) {
                 Log.Info(Log.Join(nameof(Wait), nameof(canceled)));
             }

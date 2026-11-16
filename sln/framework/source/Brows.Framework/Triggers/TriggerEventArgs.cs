@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Brows.Triggers;
+﻿namespace Brows.Triggers;
 
 public abstract class TriggerEventArgs : EventArgs {
     protected TriggerEventArgs(object source) {

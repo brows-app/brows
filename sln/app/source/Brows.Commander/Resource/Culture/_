@@ -18,3 +18,8 @@ Command_Description_Up              = Navigate up one level
 Command_Group_Command               = Commands
 Command_Group_CommandHistory        = Command History
 Command_Group_PanelHistory          = Panel History
+
+PanelSecret_Prompt_EntropyChoose          = Choose a password to protect your saved secrets:
+PanelSecret_Prompt_EntropyChooseMismatch  = The passwords did not match. Choose a password to protect your saved secrets:
+PanelSecret_Prompt_EntropyEnter           = Enter the password that protects your saved secrets:
+PanelSecret_Prompt_EntropyEnterFailed     = That password did not work. Enter the password that protects your saved secrets:

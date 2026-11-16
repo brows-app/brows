@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
 
 namespace Brows;
 
@@ -18,8 +16,11 @@ internal sealed class FileProtocolStreamSet<TEntry> : IEntryStreamSet where TEnt
     }
 
     public IAsyncEnumerable<FileProtocolStreamSource<TEntry>> Collection { get; }
+    public int StreamSourceConcurrency { get; }
 
-    public FileProtocolStreamSet(IAsyncEnumerable<FileProtocolStreamSource<TEntry>> collection) {
+    public FileProtocolStreamSet(IAsyncEnumerable<FileProtocolStreamSource<TEntry>> collection,
+                                 int streamSourceConcurrency = 1) {
         Collection = collection ?? throw new ArgumentNullException(nameof(collection));
+        StreamSourceConcurrency = streamSourceConcurrency;
     }
 }

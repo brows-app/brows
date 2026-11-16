@@ -1,6 +1,6 @@
 ﻿namespace Brows.Commands;
 
-using CONFIGPATH = Brows.Config.ConfigPath;
+using CONFIGPATH = Brows.Conf.ConfigurationPath;
 
 internal sealed class Config : Command<Config.Parameter> {
     protected sealed override bool Work(Context context) {

@@ -72,23 +72,33 @@ public sealed class AppComponent {
         return items;
     }
 
-    internal IEnumerable<ResourceDictionary> ResourceDictionaries {
-        get {
-            var assembly = ReferencedAssembly;
+    private IEnumerable<ResourceDictionary> GetResourceDictionaries(
+        bool includeFrameworkCompatibilityDictionary) {
+        var assembly = ReferencedAssembly;
+        var isFrameworkWindows = string.Equals(assembly, "Brows.Framework.Windows", StringComparison.Ordinal);
+        var resourceShouldLoad = includeFrameworkCompatibilityDictionary || !isFrameworkWindows;
+        if (resourceShouldLoad) {
             var resource = SourceResource($"pack://application:,,,/{assembly};component/Resource/Resource.xaml");
             if (resource != null) {
                 yield return resource;
             }
-            var cultureChecks = CultureChecks();
-            foreach (var culture in cultureChecks) {
-                var cultureResource = SourceResource($"pack://application:,,,/{assembly};component/Resource/Culture/{culture}.xaml");
-                if (cultureResource != null) {
-                    yield return cultureResource;
-                    break;
-                }
+        }
+        var cultureChecks = CultureChecks();
+        foreach (var culture in cultureChecks) {
+            var cultureResource = SourceResource(
+                $"pack://application:,,,/{assembly};component/Resource/Culture/{culture}.xaml");
+            if (cultureResource != null) {
+                yield return cultureResource;
+                break;
             }
         }
     }
+
+    internal IEnumerable<ResourceDictionary> ApplicationResourceDictionaries =>
+        GetResourceDictionaries(includeFrameworkCompatibilityDictionary: false);
+
+    internal IEnumerable<ResourceDictionary> ResourceDictionaries =>
+        GetResourceDictionaries(includeFrameworkCompatibilityDictionary: true);
 
     internal Assembly Assembly { get; }
 

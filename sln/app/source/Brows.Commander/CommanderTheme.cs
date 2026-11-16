@@ -3,18 +3,19 @@
 namespace Brows;
 
 public sealed class CommanderTheme : Notifier {
-    public string Base {
+    /// <summary>
+    /// Gets or sets the name of the color theme, independently of its light or dark mode.
+    /// </summary>
+    public string Name {
         get;
         set => Change(ref field, value);
-    }
+    } = "FileExplorer";
 
-    public string Background {
+    /// <summary>
+    /// Gets or sets the color mode. Font resources are independent of this setting.
+    /// </summary>
+    public CommanderThemeMode Mode {
         get;
         set => Change(ref field, value);
-    }
-
-    public string Foreground {
-        get;
-        set => Change(ref field, value);
-    }
+    } = CommanderThemeMode.Dark;
 }

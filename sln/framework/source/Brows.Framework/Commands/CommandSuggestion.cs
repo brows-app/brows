@@ -1,6 +1,6 @@
-namespace Brows.Commands;
+﻿namespace Brows.Commands;
 
-internal sealed class CommandSuggestion : ICommandSuggestion {
+internal sealed record CommandSuggestion : ICommandSuggestion {
     public string Help { get; init; }
     public int Relevance { get; init; }
     public int GroupOrder { get; init; }

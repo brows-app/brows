@@ -1,56 +1,109 @@
 ﻿using Brows.Commands;
 using Brows.Gui;
-using Brows.Gui.Collections;
 using Domore.Notification;
 using System;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
+using System.Threading;
 
-namespace Brows; 
+namespace Brows;
+
 internal sealed class FileSystemFindResult : Notifier, IControlled<IFileSystemFindResultController> {
-    private readonly SyncedCollection<FoundInInfo> Collection = [];
+    private readonly ResultCollection Collection = new();
+    private IFileSystemFindResultController Controller;
 
     private void Controller_CurrentChanged(object sender, EventArgs e) {
-        CurrentItem = Controller?.CurrentItem;
+        if (ReferenceEquals(sender, Controller)) {
+            CurrentItem = Controller?.CurrentItem;
+        }
+    }
+
+    private sealed class ResultCollection : ObservableCollection<FoundInInfo>, ISyncedCollection {
+        private readonly Lock Locker = new();
+
+        internal void AddRange(FoundInInfo[] items) {
+            lock (Locker) {
+                foreach (var item in items) {
+                    Items.Add(item);
+                }
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+                OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            }
+        }
+
+        void ISyncedCollection.Sync(IEnumerable collection, object context, Action accessMethod, bool writeAccess) {
+            lock (Locker) {
+                accessMethod();
+            }
+        }
     }
 
     public object Source =>
         Collection;
 
     public FoundInInfo CurrentItem {
-        get => _CurrentItem;
-        private set => Change(ref _CurrentItem, value, nameof(CurrentItem));
+        get;
+        private set => Change(ref field, value, nameof(CurrentItem));
     }
-    private FoundInInfo _CurrentItem;
 
     public long MatchTried {
-        get => _MatchTried;
-        set => Change(ref _MatchTried, value, nameof(MatchTried));
+        get;
+        set => Change(ref field, value, nameof(MatchTried));
     }
-    private long _MatchTried;
 
     public long MatchMatched {
-        get => _MatchMatched;
-        set => Change(ref _MatchMatched, value, nameof(MatchMatched));
+        get;
+        set => Change(ref field, value, nameof(MatchMatched));
     }
-    private long _MatchMatched;
+
+    public long ErrorCount {
+        get;
+        set => Change(ref field, value, nameof(ErrorCount));
+    }
+
+    public long SkippedCount {
+        get;
+        set => Change(ref field, value, nameof(SkippedCount));
+    }
+
+    public bool Truncated {
+        get;
+        set => Change(ref field, value, nameof(Truncated));
+    }
 
     public bool Complete {
-        get => _Complete;
-        set => Change(ref _Complete, value, nameof(Complete));
+        get;
+        set => Change(ref field, value, nameof(Complete));
     }
-    private bool _Complete;
 
     public bool Canceled {
-        get => _Canceled;
-        set => Change(ref _Canceled, value, nameof(Canceled));
+        get;
+        set {
+            if (Change(ref field, value, nameof(Canceled))) {
+                var failed = Exception is not null && !value;
+                Failed = failed;
+            }
+        }
     }
-    private bool _Canceled;
 
     public Exception Exception {
-        get => _Exception;
-        set => Change(ref _Exception, value, nameof(Exception));
+        get;
+        set {
+            if (Change(ref field, value, nameof(Exception))) {
+                var failed = value is not null && !Canceled;
+                Failed = failed;
+            }
+        }
     }
-    private Exception _Exception;
+
+    public bool Failed {
+        get;
+        private set => Change(ref field, value, nameof(Failed));
+    }
 
     public string Conf { get; }
     public string Input { get; }
@@ -65,12 +118,8 @@ internal sealed class FileSystemFindResult : Notifier, IControlled<IFileSystemFi
     }
 
     public void Add(FoundInInfo[] item) {
-        if (item != null && item.Length > 0) {
-            Collection.Sync(() => {
-                foreach (var i in item) {
-                    Collection.Add(i);
-                }
-            });
+        if (item is { Length: > 0 }) {
+            Collection.AddRange(item);
         }
     }
 
@@ -79,15 +128,18 @@ internal sealed class FileSystemFindResult : Notifier, IControlled<IFileSystemFi
             var newValue = value;
             var oldValue = Controller;
             if (oldValue != newValue) {
-                if (oldValue != null) {
+                if (oldValue is not null) {
                     oldValue.CurrentChanged -= Controller_CurrentChanged;
                 }
-                if (newValue != null) {
-                    newValue.CurrentChanged += Controller_CurrentChanged;
-                }
                 Controller = newValue;
+                if (newValue is not null) {
+                    newValue.CurrentChanged += Controller_CurrentChanged;
+                    CurrentItem = newValue.CurrentItem;
+                }
+                else {
+                    CurrentItem = null;
+                }
             }
         }
     }
-    private IFileSystemFindResultController Controller;
 }

@@ -1,25 +1,28 @@
 ﻿using Brows.Commands;
 using Brows.Composition;
 using Brows.Gui;
-using Brows.Messaging;
 using Brows.Operations;
 using Brows.Panels;
 using Brows.Providers;
-using Brows.Requests;
+using Brows.Sys;
 using Brows.Triggers;
 using Domore.Logs;
 using Domore.Notification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows;
 
-internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderController> {
+internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderController>, IAsyncDisposable {
     private static readonly ILog Log = Logging.For(typeof(Commander));
 
-    private MessageSet MessageSet;
+    private readonly Lock DisposalLocker = new();
+    private Task DisposalTask;
+    private volatile bool Disposing;
+    private CancellationTokenSource SystemMessageCancellation;
 
     private PanelCollection PanelCollection => field ??=
         new PanelCollection(Providers, this);
@@ -28,13 +31,7 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
         var token = CancellationToken.None;
         Loaded?.Invoke(this, e);
 
-        var messageSet = MessageSet;
-        if (messageSet != null) {
-            messageSet.Message -= MessageSet_Message;
-            messageSet.Dispose();
-        }
-        MessageSet = await Messages.Create(Controller?.NativeWindow(), token);
-        MessageSet.Message += MessageSet_Message;
+        ReadSystemMessages();
 
         var load = Load.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
         foreach (var item in load) {
@@ -49,15 +46,33 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
         }
     }
 
-    private void Controller_WindowClosed(object sender, EventArgs e) {
-        PanelCollection.Clear();
-        Closed?.Invoke(this, e);
+    private async void Controller_WindowClosed(object sender, EventArgs e) {
+        try {
+            await ((IAsyncDisposable)this).DisposeAsync();
+            Closed?.Invoke(this, e);
+        }
+        catch (Exception exception) {
+            Log.Error(nameof(Controller_WindowClosed), exception);
+        }
     }
 
     private void Controller_WindowClosing(object sender, EventArgs e) {
-        MessageSet?.Dispose();
+        CancelSystemMessages();
     }
 
+    private void CancelSystemMessages() {
+        try {
+            SystemMessageCancellation?.Cancel();
+        }
+        catch (ObjectDisposedException) {
+        }
+    }
+
+    private async Task DisposeCoreAsync() {
+        await Task.Yield();
+        CancelSystemMessages();
+        await PanelCollection.ClearAsync();
+    }
     private void Controller_WindowInput(object sender, InputEventArgs e) {
         if (e != null) {
             e.Triggered = Input(e.Text, e.Source);
@@ -70,15 +85,36 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
         }
     }
 
-    private async void MessageSet_Message(object source, MessageEventArgs e) {
-        var token = CancellationToken.None;
-        var message = e?.Message;
-        if (message != null) {
+    private async void ReadSystemMessages() {
+        var oldCTS = SystemMessageCancellation;
+        try {
+            oldCTS?.Dispose();
+        }
+        catch (ObjectDisposedException) {
+        }
+        var newCTS = SystemMessageCancellation = new();
+        using (newCTS) {
+            try {
+                await ReadSystemMessages(newCTS.Token);
+            }
+            catch (Exception ex) {
+                Log.Error(ex);
+            }
+        }
+    }
+
+    private async Task ReadSystemMessages(CancellationToken cancellationToken) {
+        var window = NativeWindow();
+        var messages = Messages?.ReadSystemMessages(window, cancellationToken);
+        if (messages is null) {
+            return;
+        }
+        await foreach (var message in messages) {
             IEnumerable<Task> tasks() {
                 foreach (var panel in PanelCollection) {
                     async Task task() {
                         try {
-                            await panel.Post(message, token);
+                            await panel.Post(message, cancellationToken);
                         }
                         catch (Exception ex) {
                             if (Log.Error()) {
@@ -93,8 +129,68 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
         }
     }
 
+    private bool ScopedPanelOwnsProvider(IPanel panel, IProvider provider) {
+        var hasNullInput = panel is null || provider is null;
+        if (hasNullInput) {
+            return false;
+        }
+        var activePanel = PanelCollection.Active;
+        var panelIsActive = ReferenceEquals(panel, activePanel);
+        if (panelIsActive == false) {
+            return false;
+        }
+        var panelHasProvider = panel.HasProvider(out var activeProvider);
+        var panelOwnsProvider = panelHasProvider && ReferenceEquals(provider, activeProvider);
+        return panelOwnsProvider;
+    }
+
     private bool Input(IGesture gesture, object source) {
         if (Palette != null) {
+            return false;
+        }
+        if (source is IControllingCommandGesture scoped) {
+            var scopedPanel = (IPanel)PanelCollection.Active;
+            var scopedProvider = scoped.Provider;
+            var panelIsScopedOwner = ScopedPanelOwnsProvider(scopedPanel, scopedProvider);
+            if (panelIsScopedOwner == false) {
+                return false;
+            }
+            var scopedTriggered = Commands.Triggered(gesture, out var scopedItems);
+            if (scopedTriggered == false) {
+                return false;
+            }
+            foreach (var item in scopedItems) {
+                var command = item.Value;
+                if (command is null) {
+                    continue;
+                }
+                var panelStillOwnsProvider = ScopedPanelOwnsProvider(scopedPanel, scopedProvider);
+                if (panelStillOwnsProvider == false) {
+                    return false;
+                }
+                var commandIsAllowed = scoped.Allows(command);
+                if (commandIsAllowed == false) {
+                    continue;
+                }
+                panelStillOwnsProvider = ScopedPanelOwnsProvider(scopedPanel, scopedProvider);
+                if (panelStillOwnsProvider == false) {
+                    return false;
+                }
+                var defined = command?.Trigger?.Gestures?[gesture]?.Defined;
+                if (defined is null) {
+                    continue;
+                }
+                panelStillOwnsProvider = ScopedPanelOwnsProvider(scopedPanel, scopedProvider);
+                if (panelStillOwnsProvider == false) {
+                    return false;
+                }
+                var cmdLine = new CommandLine(defined, null);
+                var context = new CommandContext(this, new CommandSource(source), cmdLine, gesture);
+                var work = command.TriggeredWork(context);
+                if (work) {
+                    return true;
+                }
+            }
             return false;
         }
         if (source is IControllingGesture) {
@@ -167,8 +263,8 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
         private set => Change(ref field, value);
     }
 
-    public Operator Operator => field ??=
-        new(Import?.Find<IRequestFactory>());
+    public IOperator Operator => field ??=
+        Import?.Find<IOperatorFactory>()?.Create();
 
     public IImport Import =>
         Domain?.Import;
@@ -178,10 +274,10 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
 
     public CommanderDomain Domain { get; }
     public CommandCollection Commands { get; }
-    public MessageSetFactory Messages { get; }
     public ProviderFactorySet Providers { get; }
+    public ISystemMessengerSet Messages { get; }
 
-    public Commander(ProviderFactorySet providers, MessageSetFactory messages,
+    public Commander(ProviderFactorySet providers, ISystemMessengerSet messages,
                      CommandCollection commands, CommanderDomain domain) {
         Commands = commands ?? throw new ArgumentNullException(nameof(commands));
         Domain = domain;
@@ -190,6 +286,9 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
     }
 
     public async Task<bool> AddPanel(string id, CancellationToken token) {
+        if (Disposing) {
+            return false;
+        }
         if (Log.Info()) {
             Log.Info(Log.Join(nameof(AddPanel), id));
         }
@@ -264,6 +363,16 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
         return native != null;
     }
 
+    ValueTask IAsyncDisposable.DisposeAsync() {
+        lock (DisposalLocker) {
+            var canRetry = DisposalTask is null || DisposalTask.IsFaulted || DisposalTask.IsCanceled;
+            if (canRetry) {
+                Disposing = true;
+                DisposalTask = DisposeCoreAsync();
+            }
+            return new ValueTask(DisposalTask);
+        }
+    }
     ICommanderController IControlled<ICommanderController>.Controller {
         set {
             var oldValue = Controller;

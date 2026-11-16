@@ -1,30 +1,17 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 
 namespace Brows.Commands;
 
 public sealed class CommandSource : ICommandSource {
-    private ICommandSourceObject SourceObject =>
-        _SourceObject ?? (
-        _SourceObject = Object as ICommandSourceObject);
-    private ICommandSourceObject _SourceObject;
+    private ICommandSourceObject SourceObject => field ??= Object as ICommandSourceObject;
 
-    public object Item =>
-        _Item ?? (
-        _Item = SourceObject?.Instance);
-    private object _Item;
+    public object Item => field ??= SourceObject?.Instance;
 
-    public IEnumerable Items =>
-        _Items ?? (
-        _Items = SourceObject?.Collection);
-    private IEnumerable _Items;
+    public IEnumerable Items => field ??= SourceObject?.Collection;
 
     public object Object { get; }
 
-    public Type Type =>
-        _Type ?? (
-        _Type = Object?.GetType());
-    private Type _Type;
+    public Type Type => field ??= Object?.GetType();
 
     public CommandSource(object @object) {
         Object = @object;

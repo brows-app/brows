@@ -1,13 +1,15 @@
 ﻿using Brows.Operations;
 using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
 
 public static class EntryStreamConsumer {
-    public static async Task Consume(this IEntryStreamSet entryStreamSet, EntryStreamConsumingDelegate consuming, IOperationProgress progress, CancellationToken token) {
+    public static async Task Consume(this IEntryStreamSet entryStreamSet,
+                                     EntryStreamConsumingDelegate consuming,
+                                     IOperationProgress progress,
+                                     CancellationToken token) {
         if (null == entryStreamSet) throw new ArgumentNullException(nameof(entryStreamSet));
         if (null == consuming) throw new ArgumentNullException(nameof(consuming));
         var set = entryStreamSet;
@@ -38,26 +40,33 @@ public static class EntryStreamConsumer {
         }
     }
 
-    public static async Task ConsumeFromMemory(this IEntryStreamSet entryStreamSet, EntryStreamConsumingDelegate consuming, IOperationProgress progress, CancellationToken token) {
-        if (null == consuming) throw new ArgumentNullException(nameof(consuming));
-        await Consume(entryStreamSet, progress: progress, token: token, consuming: async (source, stream, progress, token) => {
-            if (stream == null) {
-                var task = consuming(source, stream, progress, token);
-                if (task != null) {
-                    await task;
+    public static async Task ConsumeFromMemory(this IEntryStreamSet entryStreamSet,
+                                               EntryStreamConsumingDelegate consuming,
+                                               IOperationProgress progress,
+                                               CancellationToken token) {
+        if (consuming is null) {
+            throw new ArgumentNullException(nameof(consuming));
+        }
+        await Consume(entryStreamSet, progress: progress, token: token,
+            consuming: async (source, stream, progress, token) => {
+                if (stream == null) {
+                    var task = consuming(source, stream, progress, token);
+                    if (task != null) {
+                        await task;
+                    }
                 }
-            }
-            else {
-                await using var memory = source.StreamLength <= int.MaxValue
-                    ? new MemoryStream(Convert.ToInt32(source.StreamLength))
-                    : new MemoryStream();
-                await stream.CopyToAsync(memory, token);
-                memory.Position = 0;
-                var task = consuming.Invoke(source, memory, progress, token);
-                if (task != null) {
-                    await task;
+                else {
+                    var capacityIsKnown = source.StreamLength >= 0 && source.StreamLength <= int.MaxValue;
+                    await using var memory = capacityIsKnown
+                        ? new MemoryStream(Convert.ToInt32(source.StreamLength))
+                        : new MemoryStream();
+                    await stream.CopyToAsync(memory, token);
+                    memory.Position = 0;
+                    var task = consuming.Invoke(source, memory, progress, token);
+                    if (task != null) {
+                        await task;
+                    }
                 }
-            }
-        });
+            });
     }
 }

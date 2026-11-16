@@ -1,5 +1,9 @@
 ﻿using Brows.Export;
+using Brows.Exports;
 using Brows.FileSystem;
+using Brows.Sys;
+using Brows.Sys.Messages.DeviceMessages;
+using Brows.Sys.Messages.DeviceMessages.Devices;
 using Domore.IO;
 using Domore.Logs;
 using System;
@@ -8,12 +12,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using DIRECTORY = System.IO.Directory;
 using PATH = System.IO.Path;
 
 namespace Brows;
 
 internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemConfig>,
+                                           IFileSystemProvider,
                                            IFileSystemNavigationProvider {
     private static readonly ILog Log = Logging.For(typeof(FileSystemProvider));
 
@@ -210,10 +214,10 @@ internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemC
         return false;
     }
 
-    protected sealed override async Task<bool> Take(IMessage message, CancellationToken token) {
+    protected sealed override async Task<bool> Take(ISystemMessage message, CancellationToken token) {
         if (message is DeviceChange deviceChange) {
-            if (deviceChange.Info is DeviceChangeVolume volume) {
-                var affected = await volume.Affects(Directory, token);
+            if (deviceChange.Device is VolumeDevice volume) {
+                var affected = Directory?.Root?.FullName?.StartsWith($"{volume.VolumeName}:");
                 if (affected == true) {
                     await Change(Drives.ID, token);
                 }
@@ -316,6 +320,8 @@ internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemC
             : StringComparer.OrdinalIgnoreCase;
     }
 
+    string IFileSystemProvider.Path => ID;
+
     internal sealed class ProvideIO : IProvideIO, IProviderExport<FileSystemProvider> {
         public async Task<bool> Work(ICollection<IProvidedIO> io,
                                      ICommandSource source,
@@ -372,62 +378,39 @@ internal sealed class FileSystemProvider : Provider<FileSystemEntry, FileSystemC
                                      IProvider target,
                                      IOperationProgress progress,
                                      CancellationToken token) {
-            if (io is null) throw new ArgumentNullException(nameof(io));
+            ArgumentNullException.ThrowIfNull(io);
             if (target is not FileSystemProvider provider) {
                 return false;
             }
             var files = io.FileSources();
             if (files.Count > 0) {
                 var service = provider.Factory.CopyFilesToDirectory;
-                if (service == null) {
+                if (service is null) {
                     return false;
                 }
                 return await service.Work(files, provider.Directory.FullName, progress, token);
-            }
-            if (progress != null) {
-                progress.Change(kind: OperationProgressKind.FileSize);
             }
             var streams = io.StreamSets();
             if (streams.Count == 0) {
                 return false;
             }
+            progress?.Change(kind: OperationProgressKind.FileSize);
             var directory = provider.Directory.FullName;
-            await Task.WhenAll(streams.Select(set =>
-                set.Consume(progress: progress, token: token, consuming: async (source, stream, progress, token) => {
-                    var relativePath = source?.RelativePath
-                        ?.Trim()
-                        ?.Trim(PATH.DirectorySeparatorChar, PATH.AltDirectorySeparatorChar) ?? "";
-                    if (relativePath == "") {
-                        return;
-                    }
-                    if (stream == null) {
-                        var sourceDirectory = source.SourceDirectory;
-                        if (sourceDirectory != null) {
-                            var path = PATH.Combine(directory, relativePath);
-                            await FileSystemTask.CreateDirectory(path, token);
-                        }
-                        return;
-                    }
-                    var fileInfo = await Task.Run(cancellationToken: token, function: () => {
-                        var ext = PATH.GetExtension(relativePath);
-                        var fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
-                        for (; ; ) {
-                            if (fileInfo.Exists == false) {
-                                if (DIRECTORY.Exists(fileInfo.DirectoryName) == false) {
-                                    DIRECTORY.CreateDirectory(fileInfo.DirectoryName);
-                                }
-                                return fileInfo;
-                            }
-                            relativePath = relativePath + ".copy" + ext;
-                            fileInfo = new FileInfo(PATH.Combine(directory, relativePath));
-                        }
-                    });
-                    await progress.Child(relativePath, OperationProgressKind.FileSize, async (progress, token) => {
-                        await using var destination = await Task.Run(fileInfo.Create, token);
-                        await progress.Copy(stream, destination, token);
-                    });
-                })));
-            return true;
+            var copied = false;
+            var succeeded = true;
+            foreach (var set in streams) {
+                token.ThrowIfCancellationRequested();
+                using var sourcesReady = set.StreamSourceReady();
+                using var copy = new FileSystemStreamSetCopy(
+                    directory,
+                    progress,
+                    set.StreamSourceConcurrency,
+                    token);
+                await copy.Work(set);
+                copied = copied || copy.Copied;
+                succeeded = succeeded && copy.Succeeded;
+            }
+            return succeeded && copied;
         }
     }
 

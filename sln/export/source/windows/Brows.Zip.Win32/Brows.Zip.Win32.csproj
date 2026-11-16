@@ -2,6 +2,9 @@
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Brows.Win32.Windows.Composition" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Brows.Zip\Brows.Zip.csproj" />
   </ItemGroup>
 </Project>

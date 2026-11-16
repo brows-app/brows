@@ -3,6 +3,9 @@
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Brows.Operations.Windows" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\..\framework\source\Brows.Framework.Windows\Brows.Framework.Windows.csproj" />
     <ProjectReference Include="..\Brows.Commander\Brows.Commander.csproj" />
   </ItemGroup>

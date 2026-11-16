@@ -1,0 +1,11 @@
+#
+# WARNING: This file will be overwritten when a new version of the application is installed.
+# To customize the application's configuration, create a file named sftp.conf in this
+# directory's parent that contains only the settings you want to change. This file is
+# loaded first, and the settings in that file override the ones here.
+#
+
+PostponedRefresh.Interval = 00:00:02.50
+
+# The maximum number of files downloaded at the same time when entries are copied to the file system.
+StreamSourceConcurrency = 2

@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <UseWindowsForms>true</UseWindowsForms>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Domore.Logs" />
-  </ItemGroup>
-</Project>

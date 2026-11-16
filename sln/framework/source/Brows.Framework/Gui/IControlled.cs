@@ -1,4 +1,5 @@
-﻿namespace Brows.Gui; 
+﻿namespace Brows.Gui;
+
 public interface IControlled<TController> {
     TController Controller { set; }
 }

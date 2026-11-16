@@ -1,3 +1,4 @@
-﻿namespace Brows.Gui; 
+﻿namespace Brows.Gui;
+
 public interface IControllingGesture {
 }

@@ -1,4 +1,4 @@
-using Brows.Config;
+﻿using Brows.Conf;
 using Brows.Providers;
 using Domore.Conf.Cli;
 using System.Linq;
@@ -6,10 +6,11 @@ using System.Linq;
 namespace Brows.Commands;
 
 internal sealed class PanelAdd : Command<PanelAdd.Parameter> {
-    private IConfig<CommanderConfig> CommanderConfig =>
-        _CommanderConfig ?? (
-        _CommanderConfig = Configure.File<CommanderConfig>());
-    private IConfig<CommanderConfig> _CommanderConfig;
+    private IConfiguration<CommanderConfig> CommanderConfig => field ??=
+        ConfigFile.File<CommanderConfig>();
+
+    [ImportRequired]
+    internal IConfigurationFile ConfigFile { get; set; }
 
     protected sealed override bool Work(Context context) {
         if (null == context) return false;

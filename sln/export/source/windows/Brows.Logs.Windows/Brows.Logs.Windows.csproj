@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Logs.Windows" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Brows.Logs\Brows.Logs.csproj" />
+  </ItemGroup>
+</Project>

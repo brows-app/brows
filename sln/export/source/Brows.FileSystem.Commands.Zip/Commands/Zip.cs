@@ -1,4 +1,5 @@
-﻿using Domore.Logs;
+﻿using Brows.Zip;
+using Domore.Logs;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -26,44 +27,17 @@ internal sealed class Zip : FileSystemCommand<ZipParameter> {
             output = Path.ChangeExtension(selection[0].Name, ext);
             outputImplied = true;
         }
-        output = output.Trim().Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        output = Path.IsPathFullyQualified(output)
-            ? output
-            : Path.Combine(directory.FullName, output);
-        var outputExtEmpty = string.IsNullOrWhiteSpace(Path.GetExtension(output));
-        if (outputExtEmpty) {
-            output = Path.ChangeExtension(output, ext);
-        }
+        output = ResolveCompressionOutputPath(output, directory.FullName);
         return context.Operate(async (progress, token) => {
+            progress?.Change(kind: OperationProgressKind.FileSize);
             if (outputImplied) {
                 output = await FileSystemTask.Nonexistent(output, null, token);
             }
-            return await Task.Run(cancellationToken: token, function: () => {
-                var entries = input.Entries(progress, token).ToList();
-                if (progress != null) {
-                    progress.Change(addTarget: entries.Count);
-                }
-                using (var zip = ZipFile.Open(output, ZipArchiveMode.Create)) {
-                    foreach (var entry in entries) {
-                        if (Log.Info()) {
-                            Log.Info(nameof(ZipFileExtensions.CreateEntryFromFile) + " > " + entry.EntryName);
-                        }
-                        if (progress != null) {
-                            progress.Change(data: entry.EntryName);
-                        }
-                        if (level.HasValue) {
-                            zip.CreateEntryFromFile(entry.FilePath, entry.EntryName, level.Value);
-                        }
-                        else {
-                            zip.CreateEntryFromFile(entry.FilePath, entry.EntryName);
-                        }
-                        if (progress != null) {
-                            progress.Change(1);
-                        }
-                    }
-                }
-                return true;
-            });
+            var entries = await Task.Run(
+                () => input.Entries(progress, token).ToList(),
+                token);
+            await CompressEntries(entries, output, level, progress, token);
+            return true;
         });
     }
 
@@ -80,6 +54,7 @@ internal sealed class Zip : FileSystemCommand<ZipParameter> {
         var worked = false;
         foreach (var file in files) {
             worked = worked | context.Operate(async (progress, token) => {
+                progress?.Change(kind: OperationProgressKind.FileSize);
                 var target = parameter.Output?.Trim() ?? "";
                 var targetImplied = false;
                 if (target == "") {
@@ -93,17 +68,109 @@ internal sealed class Zip : FileSystemCommand<ZipParameter> {
                 if (targetImplied) {
                     target = await FileSystemTask.Nonexistent(target, null, token);
                 }
-                return await Task.Run(cancellationToken: token, function: () => {
-                    Directory.CreateDirectory(target);
-                    ZipFile.ExtractToDirectory(
-                        sourceArchiveFileName: file.FullName,
-                        destinationDirectoryName: target,
-                        overwriteFiles: parameter.Overwrite == true);
-                    return true;
-                });
+                await Task.Run(async () => {
+                    await ZipExtractor.ExtractAsync(
+                        file.FullName,
+                        target,
+                        parameter.Overwrite == true,
+                        progress,
+                        token);
+                }, token);
+                return true;
             });
         }
         return worked;
+    }
+
+    internal static string ResolveCompressionOutputPath(string output, string directory) {
+        output = Path.GetFullPath(output.Trim(), directory);
+        var outputExtEmpty = string.IsNullOrWhiteSpace(Path.GetExtension(output));
+        if (outputExtEmpty) {
+            output = Path.ChangeExtension(output, ".zip");
+        }
+        return output;
+    }
+
+    internal static async Task CompressEntries(
+        IReadOnlyList<ZipEntry> entries,
+        string output,
+        CompressionLevel? level,
+        IOperationProgress progress,
+        CancellationToken token) {
+        ArgumentNullException.ThrowIfNull(entries);
+        ArgumentNullException.ThrowIfNull(output);
+        var outputPath = Path.GetFullPath(output);
+        var outputDirectory = Path.GetDirectoryName(outputPath);
+        var stagingPath = Path.Combine(outputDirectory, $".brows-{Guid.NewGuid():N}.tmp");
+        var stagingOwned = false;
+        try {
+            token.ThrowIfCancellationRequested();
+            await using (var outputStream = new FileStream(
+                stagingPath,
+                FileMode.CreateNew,
+                FileAccess.ReadWrite,
+                FileShare.None,
+                bufferSize: 81920,
+                FileOptions.Asynchronous | FileOptions.SequentialScan)) {
+                stagingOwned = true;
+                using (var zip = new ZipArchive(outputStream, ZipArchiveMode.Create, leaveOpen: true)) {
+                    foreach (var entry in entries) {
+                        token.ThrowIfCancellationRequested();
+                        if (Log.Info()) {
+                            Log.Info(nameof(ZipFileExtensions.CreateEntryFromFile) + " > " + entry.EntryName);
+                        }
+                        if (progress is not null) {
+                            progress.Change(data: entry.EntryName);
+                        }
+                        var entryName = entry.IsDirectory && entry.EntryName.EndsWith('/') == false
+                            ? entry.EntryName + "/"
+                            : entry.EntryName;
+                        var compressionLevel = level ?? CompressionLevel.Optimal;
+                        var zipEntry = zip.CreateEntry(entryName, compressionLevel);
+                        var sourceInfo = entry.IsDirectory
+                            ? (FileSystemInfo)new DirectoryInfo(entry.FilePath)
+                            : new FileInfo(entry.FilePath);
+                        sourceInfo.Refresh();
+                        if (sourceInfo.Exists is false) {
+                            throw new FileNotFoundException(
+                                "The source for a ZIP entry no longer exists.",
+                                sourceInfo.FullName);
+                        }
+                        zipEntry.LastWriteTime = sourceInfo.LastWriteTime;
+                        zipEntry.ExternalAttributes = (int)sourceInfo.Attributes;
+                        if (entry.IsDirectory == false) {
+                            await using var sourceStream = new FileStream(
+                                sourceInfo.FullName,
+                                FileMode.Open,
+                                FileAccess.Read,
+                                FileShare.Read,
+                                bufferSize: 81920,
+                                FileOptions.Asynchronous | FileOptions.SequentialScan);
+                            await using var destinationStream = zipEntry.Open();
+                            if (progress is not null) {
+                                progress.Change(addTarget: sourceStream.Length);
+                            }
+                            await ZipArchiveUpdateRewriter.CopyBytesAsync(
+                                sourceStream,
+                                destinationStream,
+                                progress,
+                                addTargetDynamically: false,
+                                token);
+                        }
+                        token.ThrowIfCancellationRequested();
+                    }
+                }
+                await outputStream.FlushAsync(token);
+            }
+            token.ThrowIfCancellationRequested();
+            File.Move(stagingPath, outputPath);
+        }
+        finally {
+            var ownedStagingFileExists = stagingOwned && File.Exists(stagingPath);
+            if (ownedStagingFileExists) {
+                File.Delete(stagingPath);
+            }
+        }
     }
 
     protected sealed override IEnumerable<Type> Source { get; } = new[] {
@@ -119,7 +186,9 @@ internal sealed class Zip : FileSystemCommand<ZipParameter> {
         }
         var action = parameter.Direction;
         if (action == null) {
-            var allZip = selection.All(item => item is FileInfo file && file.Extension?.Equals(".zip", StringComparison.OrdinalIgnoreCase) == true);
+            var allZip = selection.All(item =>
+                item is FileInfo file &&
+                file.Extension?.Equals(".zip", StringComparison.OrdinalIgnoreCase) == true);
             if (allZip) {
                 action = ZipDirection.Extract;
             }

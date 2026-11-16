@@ -1,11 +1,12 @@
 ﻿using Brows.Gui;
-using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace Brows.Providers; 
-public abstract class ProviderNavigation : IProviderNavigation, IProviderFocus, IControlled<IProviderNavigationController> {
+namespace Brows.Providers;
+
+public abstract class ProviderNavigation : IProviderNavigation,
+                                           IProviderFocus,
+                                           IControlled<IProviderNavigationController> {
     private string CurrentID;
     private Provider Provider;
 

@@ -8,16 +8,16 @@
   </Grid.RowDefinitions>
   <TextBlock Grid.Row="0" Text="{Binding Name}">
     <TextBlock.Style>
-      <Style TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{DynamicResource Global_Monospace_FontFamily}"/>
+      <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.Monospace}"/>
         <Setter Property="FontSize" Value="14"/>
       </Style>
     </TextBlock.Style>
   </TextBlock>
   <TextBlock Grid.Row="1" Text="{Binding RelativeDirectory}">
     <TextBlock.Style>
-      <Style TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12"/>
+      <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontSize" Value="{DynamicResource Brows.Font.Monospace.Size}"/>
         <Setter Property="FontStyle" Value="Italic"/>
         <Setter Property="Visibility" Value="Visible"/>
         <Style.Triggers>

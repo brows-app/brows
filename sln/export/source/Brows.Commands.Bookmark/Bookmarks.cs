@@ -6,6 +6,8 @@ namespace Brows;
 using Gui;
 
 internal sealed class Bookmarks : Notifier, IControlled<IBookmarksController> {
+    internal const string DataName = "bookmarks";
+
     public event EventHandler Changed;
 
     public IReadOnlyList<Bookmarked> Bookmark {

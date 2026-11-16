@@ -1,13 +1,12 @@
-using Brows.FileSystem;
-using Brows.Localization;
-using Brows.Messaging;
-using Brows.Messaging.Messages;
+﻿using Brows.FileSystem;
+using Brows.Sys;
+using Brows.Sys.Messages.DeviceMessages;
+using Brows.Sys.Messages.DeviceMessages.DeviceChanges;
+using Brows.Sys.Messages.DeviceMessages.Devices;
 using Domore.Logs;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows;
@@ -32,33 +31,33 @@ internal sealed class DriveProvider : Provider<DriveEntry, DrivesConfig>, IFileS
         await Provide(await List(token), token);
     }
 
-    protected sealed override async Task<bool> Take(IMessage message, CancellationToken token) {
+    protected sealed override async Task<bool> Take(ISystemMessage message, CancellationToken token) {
         if (message is DeviceChange deviceChange) {
-            if (deviceChange.Info is DeviceChangeVolume volume) {
-                var drives = volume.Drive;
-                if (drives != null) {
-                    foreach (var drive in drives) {
-                        switch (deviceChange.Kind) {
-                            case DeviceChangeKind.Arrival:
-                                var info = default(DriveInfo);
-                                try {
-                                    info = new DriveInfo($"{drive}");
-                                }
-                                catch (Exception ex) {
-                                    if (Log.Error()) {
-                                        Log.Error(ex);
-                                    }
-                                }
-                                if (info != null) {
-                                    await Provide(new DriveEntry(this, info), token);
-                                }
-                                break;
-                            case DeviceChangeKind.RemovalComplete:
-                                var entry = Provided.FirstOrDefault(e => e.Char == drive);
-                                if (entry != null) {
-                                    await Revoke(entry, token);
-                                }
-                                break;
+            if (deviceChange.Device is VolumeDevice volume) {
+                var drives = volume.VolumeName?.Trim() ?? "";
+                if (drives != "") {
+
+
+                    if (deviceChange is DeviceArrival) {
+                        var info = default(DriveInfo);
+                        try {
+                            info = new DriveInfo($"{drives}");
+                        }
+                        catch (Exception ex) {
+                            if (Log.Error()) {
+                                Log.Error(ex);
+                            }
+                        }
+                        if (info != null) {
+                            await Provide(new DriveEntry(this, info), token);
+                        }
+                    }
+                    if (deviceChange is DeviceRemovalComplete) {
+                        if (drives.Length == 1) {
+                            var entry = Provided.FirstOrDefault(e => e.Char == drives[0]);
+                            if (entry != null) {
+                                await Revoke(entry, token);
+                            }
                         }
                     }
                 }

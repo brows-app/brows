@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Brows.Entries;
+﻿namespace Brows.Entries;
 
 public interface IEntryStreamReady : IDisposable {
 }

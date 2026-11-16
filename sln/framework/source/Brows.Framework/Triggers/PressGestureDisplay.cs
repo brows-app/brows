@@ -3,7 +3,7 @@
 namespace Brows.Triggers;
 
 internal sealed class PressGestureDisplay {
-    private string BuildDisplay() {
+    private string DisplayFactory() {
         var s = "";
         var d = Translation.Delimiter;
         var k = Gesture.Key;
@@ -24,13 +24,8 @@ internal sealed class PressGestureDisplay {
         return s;
     }
 
-    public string Display =>
-        _Display ?? (
-        _Display = BuildDisplay());
-    private string _Display;
-
-    public char Delimiter =>
-        Translation.Delimiter;
+    public string Display => field ??= DisplayFactory();
+    public char Delimiter => Translation.Delimiter;
 
     public PressGesture Gesture { get; }
     public PressGestureTranslation Translation { get; }

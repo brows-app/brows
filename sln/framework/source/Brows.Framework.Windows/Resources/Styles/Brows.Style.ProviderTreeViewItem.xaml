@@ -1,0 +1,177 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:providers="clr-namespace:Brows.Providers">
+  <Style x:Key="Brows.Style.ProviderTreeViewItem" TargetType="TreeViewItem">
+    <Style.Resources>
+      <PathGeometry po:Freeze="True" x:Key="TreeArrow">
+        <PathGeometry.Figures>
+          <PathFigureCollection>
+            <PathFigure IsFilled="True" StartPoint="0 0" IsClosed="True">
+              <PathFigure.Segments>
+                <PathSegmentCollection>
+                  <LineSegment Point="0 6"/>
+                  <LineSegment Point="6 0"/>
+                </PathSegmentCollection>
+              </PathFigure.Segments>
+            </PathFigure>
+          </PathFigureCollection>
+        </PathGeometry.Figures>
+      </PathGeometry>
+      <Style x:Key="_.Brows.Style.ProviderTreeViewItem.ExpandCollapse" TargetType="{x:Type ToggleButton}">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type ToggleButton}">
+              <Border Width="16" Height="16" Background="Transparent" Padding="5,5,5,5">
+                <Path
+                        x:Name="ExpandPath"
+                        Fill="Transparent"
+                        Stroke="{DynamicResource Brows.Theme.ProviderTreeViewItem.Stroke.Muted}"
+                        Data="{StaticResource TreeArrow}">
+                  <Path.RenderTransform>
+                    <RotateTransform po:Freeze="True" Angle="135" CenterX="3" CenterY="3"/>
+                  </Path.RenderTransform>
+                </Path>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter
+                      TargetName="ExpandPath"
+                      Property="Stroke"
+                      Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Stroke.Accent}"/>
+                  <Setter TargetName="ExpandPath" Property="Fill" Value="Transparent"/>
+                </Trigger>
+
+                <Trigger Property="IsChecked" Value="True">
+                  <Setter TargetName="ExpandPath" Property="RenderTransform">
+                    <Setter.Value>
+                      <RotateTransform po:Freeze="True" Angle="180" CenterX="3" CenterY="3"/>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter
+                      TargetName="ExpandPath"
+                      Property="Fill"
+                      Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Fill.Muted}"/>
+                  <Setter
+                      TargetName="ExpandPath"
+                      Property="Stroke"
+                      Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Stroke.Muted}"/>
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="_.Brows.Style.ProviderTreeViewItem.FocusVisual">
+        <Setter Property="Control.Template">
+          <Setter.Value>
+            <ControlTemplate>
+              <Border>
+                <Rectangle
+                  Margin="0,0,0,0"
+                  StrokeThickness="1"
+                  Stroke="{DynamicResource Brows.Theme.ProviderTreeViewItem.Stroke.RowFocus}"
+                  StrokeDashArray="1 2"
+                  Opacity="1" />
+              </Border>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+    </Style.Resources>
+    <Setter Property="IsExpanded" Value="{Binding Expand, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+    <Setter Property="IsSelected" Value="{Binding Select, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Padding" Value="1,0,0,0"/>
+    <Setter Property="HorizontalContentAlignment"
+
+                    Value="{Binding Path=HorizontalContentAlignment,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+    <Setter Property="VerticalContentAlignment"
+
+                    Value="{Binding Path=VerticalContentAlignment,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+    <Setter Property="Foreground"
+            Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Foreground}"/>
+    <Setter Property="FocusVisualStyle"
+            Value="{StaticResource _.Brows.Style.ProviderTreeViewItem.FocusVisual}"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type TreeViewItem}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition MinWidth="19" Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition/>
+            </Grid.RowDefinitions>
+            <ToggleButton x:Name="Expander"
+                            Style="{StaticResource _.Brows.Style.ProviderTreeViewItem.ExpandCollapse}"
+                            IsChecked="{Binding Path=IsExpanded,RelativeSource={RelativeSource TemplatedParent}}"
+                            ClickMode="Press"/>
+            <Border Name="Bd"
+                            Grid.Column="1"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="true">
+              <ContentPresenter x:Name="PART_Header"
+                                ContentSource="Header"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+            </Border>
+            <ItemsPresenter x:Name="ItemsHost"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"/>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsExpanded" Value="false">
+              <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+            <Trigger Property="HasItems" Value="false">
+              <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="true">
+              <Setter TargetName="Bd" Property="Background"
+                                Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Background.Selection}"/>
+              <Setter Property="Foreground"
+                                Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Foreground}"/>
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsSelected" Value="true"/>
+                <Condition Property="IsSelectionActive" Value="false"/>
+              </MultiTrigger.Conditions>
+              <Setter TargetName="Bd" Property="Background"
+                            Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Background.SelectionInactive}"/>
+              <Setter Property="Foreground"
+                                Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Foreground}"/>
+            </MultiTrigger>
+            <Trigger Property="IsEnabled" Value="false">
+              <Setter Property="Foreground"
+                                Value="{DynamicResource Brows.Theme.ProviderTreeViewItem.Foreground.Muted}"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="VirtualizingStackPanel.IsVirtualizing" Value="true">
+        <Setter Property="ItemsPanel">
+          <Setter.Value>
+            <ItemsPanelTemplate>
+              <VirtualizingStackPanel/>
+            </ItemsPanelTemplate>
+          </Setter.Value>
+        </Setter>
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style TargetType="providers:ProviderTreeViewItem" BasedOn="{StaticResource Brows.Style.ProviderTreeViewItem}"/>
+</ResourceDictionary>

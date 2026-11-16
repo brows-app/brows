@@ -9,6 +9,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
@@ -23,6 +25,34 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
     private static readonly PropertyChangedEventArgs SelectedEvent = new(nameof(Selected));
 
     private readonly List<IEntry> SortingList = [];
+    private readonly Lock Locker = new();
+    private volatile bool Ended;
+
+    /// <summary>
+    /// Gets whether the observation was ended, so that it accepts no further change.
+    /// </summary>
+    private protected bool IsEnded =>
+        Ended;
+
+    /// <summary>
+    /// Applies the specified change, unless the observation was already ended.
+    /// </summary>
+    /// <param name="change">
+    /// The change to apply. It runs while the teardown of the observation is blocked, so that a
+    /// change never races the end of the observation.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the change was applied.
+    /// </returns>
+    private protected bool TryChange(Action change) {
+        lock (Locker) {
+            if (Ended) {
+                return false;
+            }
+            change();
+            return true;
+        }
+    }
 
     private void Controller_CurrentEntryChanged(object sender, EventArgs e) {
         CurrentChanged?.Invoke(this, e);
@@ -78,6 +108,9 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
     protected async Task Add(IEnumerable<IEntry> items, int count, CancellationToken token) {
         if (items == null) return;
         if (count == 0) return;
+        if (IsEnded) {
+            return;
+        }
         var chunkSize = Provider.Config.Observe.Add.Size;
         var chunkDelay = Provider.Config.Observe.Add.Delay;
         var chunks = items.Chunk(chunkSize < 1 ? count : chunkSize);
@@ -91,6 +124,13 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
                     await Task.Delay(chunkDelay, token);
                 }
             }
+            if (IsEnded) {
+                /*
+                 * The observation was ended while the chunk was awaited, so the chunk is dropped
+                 * instead of being added to an observation that no longer accepts changes.
+                 */
+                return;
+            }
             var sorted = default(IEnumerable<Task>);
             var sorting = DataView.Sorting;
             if (sorting.Count > 0) {
@@ -99,9 +139,11 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
                 if (sortingComplete == false) {
                     sorted = sortingTasks.Select(async task => {
                         var item = await task;
-                        Collection.Add(item);
-                        SortingList.Remove(item);
-                        SortingChanged?.Invoke(this, EventArgs.Empty);
+                        TryChange(() => {
+                            Collection.Add(item);
+                            SortingList.Remove(item);
+                            SortingChanged?.Invoke(this, EventArgs.Empty);
+                        });
                     });
                     SortingList.AddRange(chunk);
                     SortingChanged?.Invoke(this, EventArgs.Empty);
@@ -111,7 +153,10 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
                 await Task.WhenAll(sorted);
             }
             else {
-                Collection.Add(chunk);
+                TryChange(() => Collection.Add(chunk));
+            }
+            if (IsEnded) {
+                return;
             }
             ObservedChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -120,15 +165,34 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
     protected async Task Remove(IEnumerable<IEntry> items, int count, CancellationToken token) {
         if (items == null) return;
         if (count == 0) return;
+        if (IsEnded) {
+            return;
+        }
         var current = Controller?.CurrentEntry();
         var currentRemoved = false;
         var currentPosition = Controller?.CurrentPosition();
+        Exception error = null;
         var chunkSize = Provider.Config.Observe.Remove.Size;
         var chunkDelay = Provider.Config.Observe.Remove.Delay;
         var chunks = items.Chunk(chunkSize < 1 ? count : chunkSize);
         foreach (var chunk in chunks) {
             foreach (var item in chunk) {
-                var itemRemoved = Collection.Remove(item);
+                var itemRemoved = false;
+                try {
+                    TryChange(() => {
+                        itemRemoved = Collection.Remove(item);
+                    });
+                    var itemIsNotObserved = Collection.Observation.Contains(item) == false;
+                    var wasRemovedFromSource = itemRemoved == false && itemIsNotObserved;
+                    if (wasRemovedFromSource) {
+                        itemRemoved = true;
+                    }
+                }
+                catch (Exception ex) {
+                    error ??= ex;
+                    var itemIsNotObserved = Collection.Observation.Contains(item) == false;
+                    itemRemoved = itemIsNotObserved;
+                }
                 if (itemRemoved) {
                     var currentIsItem = current == item;
                     if (currentIsItem) {
@@ -139,7 +203,15 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
             if (chunkDelay > 0) {
                 await Task.Delay(chunkDelay, token);
             }
-            ObservedChanged?.Invoke(this, EventArgs.Empty);
+            if (IsEnded) {
+                return;
+            }
+            try {
+                ObservedChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex) {
+                error ??= ex;
+            }
         }
         if (currentRemoved) {
             if (currentPosition.HasValue) {
@@ -153,6 +225,9 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
                     }
                 }
             }
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
         }
     }
 
@@ -210,7 +285,7 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
         private set => Change(ref field, value);
     }
 
-    public Provider Provider {
+    public EntryProvider Provider {
         get => field ?? throw new InvalidOperationException();
         set => Change(ref field, value);
     }
@@ -220,13 +295,36 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
     }
 
     public virtual void End() {
+        lock (Locker) {
+            if (Ended) {
+                return;
+            }
+            Ended = true;
+        }
+        Exception error = null;
         CurrentChanged = null;
+        DropChanged = null;
+        SortingChanged = null;
         SelectedChanged = null;
         ObservedChanged = null;
+        ControllerChanged = null;
         Collection.DropChanged -= Collection_DropChanged;
         Collection.SelectionChanged -= Collection_SelectionChanged;
-        Collection.Clear();
-        Collection.End();
+        try {
+            Collection.Clear();
+        }
+        catch (Exception ex) {
+            error = ex;
+        }
+        try {
+            Collection.End();
+        }
+        catch (Exception ex) {
+            error ??= ex;
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
     }
 
     public Task Init(CancellationToken token) {
@@ -289,7 +387,7 @@ internal abstract class EntryObservation : Notifier, IEntryObservation,
     }
 
     IEntry IEntryObservation.LookupName(string value) {
-        return InternalLookupID(value);
+        return InternalLookupName(value);
     }
 
     object ICommandSourceObject.Instance =>
@@ -328,21 +426,40 @@ internal sealed class EntryObservation<TEntry> : EntryObservation where TEntry :
     }
 
     public sealed override void End() {
-        base.End();
-        List.Clear();
-        SetID.Clear();
-        SetName.Clear();
+        Exception error = null;
+        try {
+            base.End();
+        }
+        catch (Exception ex) {
+            error = ex;
+        }
+        finally {
+            List.Clear();
+            SetID.Clear();
+            SetName.Clear();
+        }
+        if (error is not null) {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
     }
 
     public Task Add(IReadOnlyCollection<TEntry> items, CancellationToken token) {
         if (items == null) return Task.CompletedTask;
         if (items.Count == 0) return Task.CompletedTask;
-        foreach (var item in items) {
-            if (item is not null) {
-                List.Add(item);
-                SetID[item.ID] = item;
-                SetName[item.Name] = item;
+        if (IsEnded) {
+            return Task.CompletedTask;
+        }
+        TryChange(() => {
+            foreach (var item in items) {
+                if (item is not null) {
+                    List.Add(item);
+                    SetID[item.ID] = item;
+                    SetName[item.Name] = item;
+                }
             }
+        });
+        if (IsEnded) {
+            return Task.CompletedTask;
         }
         return Add(items.Cast<IEntry>(), items.Count, token);
     }
@@ -350,20 +467,28 @@ internal sealed class EntryObservation<TEntry> : EntryObservation where TEntry :
     public Task Remove(IReadOnlyCollection<TEntry> items, CancellationToken token) {
         if (items == null) return Task.CompletedTask;
         if (items.Count == 0) return Task.CompletedTask;
-        if (items == List) {
-            items = new List<TEntry>(items);
-            List.Clear();
-            SetID.Clear();
-            SetName.Clear();
+        if (IsEnded) {
+            return Task.CompletedTask;
         }
-        else {
-            foreach (var item in items) {
-                if (item is not null) {
-                    List.Remove(item);
-                    SetID.Remove(item.ID);
-                    SetName.Remove(item.Name);
+        TryChange(() => {
+            if (items == List) {
+                items = new List<TEntry>(items);
+                List.Clear();
+                SetID.Clear();
+                SetName.Clear();
+            }
+            else {
+                foreach (var item in items) {
+                    if (item is not null) {
+                        List.Remove(item);
+                        SetID.Remove(item.ID);
+                        SetName.Remove(item.Name);
+                    }
                 }
             }
+        });
+        if (IsEnded) {
+            return Task.CompletedTask;
         }
         return Remove(items.Cast<IEntry>(), items.Count, token);
     }

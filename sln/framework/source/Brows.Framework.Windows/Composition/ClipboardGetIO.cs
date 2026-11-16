@@ -9,14 +9,21 @@ using System.Windows;
 namespace Brows.Composition;
 
 internal sealed class ClipboardGetIO : IClipboardGetIO {
-    private readonly ClipboardData ClipboardData = ClipboardData.Instance;
+    private readonly IClipboardTransport Clipboard;
+
+    public ClipboardGetIO() : this(new WindowsClipboardTransport()) {
+    }
+
+    internal ClipboardGetIO(IClipboardTransport clipboard) {
+        Clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
+    }
 
     private async Task<bool> MoveOnPaste(CancellationToken token) {
         await Task.CompletedTask;
-        return ClipboardData.PreferredDropEffect == DragDropEffects.Move;
+        return Clipboard.PreferredDropEffect == DragDropEffects.Move;
     }
 
-    private async static Task<IReadOnlyList<string>> FileDropList(CancellationToken token) {
+    private async Task<IReadOnlyList<string>> FileDropList(CancellationToken token) {
         var files = new List<string>();
         var filesDropped = Clipboard.ContainsFileDropList();
         if (filesDropped) {
@@ -32,7 +39,11 @@ internal sealed class ClipboardGetIO : IClipboardGetIO {
         return await Task.FromResult(files);
     }
 
-    public async Task<bool> Work(ICollection<IProvidedIO> collection, IClipboardGetIOData data, IOperationProgress progress, CancellationToken token) {
+    public async Task<bool> Work(
+        ICollection<IProvidedIO> collection,
+        IClipboardGetIOData data,
+        IOperationProgress progress,
+        CancellationToken token) {
         if (collection == null) {
             return false;
         }
@@ -42,7 +53,6 @@ internal sealed class ClipboardGetIO : IClipboardGetIO {
                 var moveOnPaste = data.MoveOnPaste = await MoveOnPaste(token);
                 if (moveOnPaste) {
                     Clipboard.Clear();
-                    ClipboardData.Reset();
                 }
             }
         }

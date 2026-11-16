@@ -1,8 +1,6 @@
-﻿using Brows.Panels;
-using Domore.Logs;
+﻿using Domore.Logs;
 using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows;
@@ -13,6 +11,7 @@ public abstract class FileProtocolProviderFactory<TProvider> : ProviderFactory<T
     protected string Scheme { get; }
 
     protected FileProtocolProviderFactory(string scheme) {
+        ArgumentNullException.ThrowIfNull(scheme);
         Scheme = scheme;
     }
 
@@ -34,7 +33,7 @@ public abstract class FileProtocolProviderFactory<TProvider> : ProviderFactory<T
                 return null;
             }
             var scheme = uri.Scheme;
-            if (scheme != Scheme) {
+            if (scheme.Equals(Scheme, StringComparison.OrdinalIgnoreCase) == false) {
                 return null;
             }
             var path = uri.AbsolutePath;

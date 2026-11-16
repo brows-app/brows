@@ -1,23 +1,22 @@
-﻿using Brows.Config;
+﻿using Brows.Conf;
 using Brows.Providers;
 using Domore.Notification;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
 
 internal sealed class EntryDataViewConfig {
     private EntryDataViewConfigData Data {
-        get => _Data ??= new();
-        set => _Data = value;
+        get => field ??= new();
+        set;
     }
-    private EntryDataViewConfigData _Data;
 
-    private ConfigClass Config => _Config ??= new(Provider.GetType());
-    private ConfigClass _Config;
+    private IConfigurationData ConfigData => field ??=
+        Provider.Import?.Find<IConfigurationData>() ?? new ConfigurationData();
+
+    private ConfigClass Config => field ??= new(Provider.GetType(), ConfigData);
 
     private bool Default(IEnumerable<string> keys) {
         if (null == keys) throw new ArgumentNullException(nameof(keys));
@@ -59,12 +58,28 @@ internal sealed class EntryDataViewConfig {
         Config.Set(Provider.ID, data);
     }
 
+    internal static string DataName(Type providerType) {
+        ArgumentNullException.ThrowIfNull(providerType);
+        const string suffix = "Provider";
+        var name = providerType.Name;
+        var nameHasSuffix = name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase);
+        if (nameHasSuffix) {
+            name = name.Substring(0, name.Length - suffix.Length);
+        }
+        if (name.Length == 0) {
+            throw new ArgumentException(
+                $"The provider type name '{providerType.Name}' is invalid.",
+                nameof(providerType));
+        }
+        return $"entrydataview.{name.ToLowerInvariant()}";
+    }
+
     public IReadOnlyList<string> Key => Data.Keys;
     public IReadOnlyDictionary<string, EntrySortDirection> Sort => Data.Sort;
 
-    public Provider Provider { get; }
+    public EntryProvider Provider { get; }
 
-    public EntryDataViewConfig(Provider provider) {
+    public EntryDataViewConfig(EntryProvider provider) {
         Provider = provider ?? throw new ArgumentNullException(nameof(provider));
     }
 
@@ -90,27 +105,27 @@ internal sealed class EntryDataViewConfig {
 
     private sealed class EntryDataViewConfigData {
         public IReadOnlyList<string> Keys {
-            get => _Key ?? (_Key = new List<string>());
-            set => _Key = value;
+            get => field ??= new List<string>();
+            set;
         }
-        private IReadOnlyList<string> _Key;
 
         public IReadOnlyDictionary<string, EntrySortDirection> Sort {
-            get => _Sort ?? (_Sort = new Dictionary<string, EntrySortDirection>());
-            set => _Sort = value;
+            get => field ??= new Dictionary<string, EntrySortDirection>();
+            set;
         }
-        private IReadOnlyDictionary<string, EntrySortDirection> _Sort;
     }
 
     private sealed class ConfigClass {
-        private IConfig<EntryDataViewConfigSet> Cache => _Cache ??=
-            Configure.Data<EntryDataViewConfigSet>(ProviderType.Name);
-        private IConfig<EntryDataViewConfigSet> _Cache;
+        private IConfiguration<EntryDataViewConfigSet> Cache => field ??=
+            ConfigData.Data<EntryDataViewConfigSet>(DataName(ProviderType));
 
         public Type ProviderType { get; }
 
-        public ConfigClass(Type providerType) {
+        public IConfigurationData ConfigData { get; }
+
+        public ConfigClass(Type providerType, IConfigurationData configData) {
             ProviderType = providerType ?? throw new ArgumentNullException(nameof(providerType));
+            ConfigData = configData ?? throw new ArgumentNullException(nameof(configData));
         }
 
         public async Task<EntryDataViewConfigData> Get(string id, CancellationToken token) {
@@ -125,7 +140,7 @@ internal sealed class EntryDataViewConfig {
         public void Set(string id, EntryDataViewConfigData config) {
             var data = Cache.Loaded;
             var dict = data.Set;
-            if (config == null) {
+            if (config is null) {
                 if (dict.Remove(id)) {
                     data.Changed();
                 }
@@ -137,10 +152,9 @@ internal sealed class EntryDataViewConfig {
 
         private sealed class EntryDataViewConfigSet : Notifier {
             public Dictionary<string, EntryDataViewConfigData> Set {
-                get => _Set ?? (_Set = new Dictionary<string, EntryDataViewConfigData>());
-                set => _Set = value;
+                get => field ??= new Dictionary<string, EntryDataViewConfigData>();
+                set;
             }
-            private Dictionary<string, EntryDataViewConfigData> _Set;
 
             public void Changed() {
                 NotifyPropertyChanged(nameof(Set));

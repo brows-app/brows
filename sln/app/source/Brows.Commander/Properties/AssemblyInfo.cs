@@ -1,3 +1,3 @@
-using System.Runtime.InteropServices;
-
-[assembly: ComVisible(false)]
+﻿[assembly: ComVisible(false)]
+[assembly: InternalsVisibleTo("Brows.Commander.Windows")]
+[assembly: InternalsVisibleTo("Brows.App.Windows.Tests")]

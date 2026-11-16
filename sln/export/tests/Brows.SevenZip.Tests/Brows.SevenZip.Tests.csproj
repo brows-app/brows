@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.FileSystem\Brows.FileSystem.csproj" />
+    <ProjectReference Include="..\..\source\Brows.SevenZip\Brows.SevenZip.csproj" />
+    <ProjectReference Include="..\..\source\Brows.SevenZip.Native\Brows.SevenZip.Native.csproj" />
+    <ProjectReference Include="..\..\..\framework\source\Brows.Framework.Testing\Brows.Framework.Testing.csproj" />
+  </ItemGroup>
+  <!--
+    The native library that talks to the 7-Zip engine is loaded from the
+    folder of the native libraries of the process, so it has to be copied next
+    to the test binaries.
+  -->
+  <Target Name="CopySevenZipNativeBinaries" AfterTargets="Build">
+    <PropertyGroup>
+      <SevenZipNativeDirectory>$(MSBuildThisFileDirectory)..\..\..\out\$(Configuration)\brows.native\x64-windows\</SevenZipNativeDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <SevenZipNativeBinary Include="$(SevenZipNativeDirectory)*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(SevenZipNativeBinary)"
+          DestinationFolder="$(OutDir)brows.native\x64-windows\"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

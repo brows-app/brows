@@ -1,12 +1,12 @@
 ﻿using Brows.Commands;
 using Brows.Composition;
-using Brows.Config;
+using Brows.Conf;
 using Brows.IPC;
 using Brows.IPC.Messages;
 using Brows.IPC.MessageSubscriptions;
 using Brows.IPC.TxRx;
-using Brows.Messaging;
 using Brows.Providers;
+using Brows.Sys;
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
@@ -25,11 +25,14 @@ public sealed class CommanderDomain : ICommanderDomain {
     private readonly List<Commander> Commanders = [];
     private CancellationTokenSource TokenSource;
 
-    private MessageSetFactory Messages => field ??=
-        new MessageSetFactory(Import.List<IMessageFactory>());
+    private ISystemMessengerSet Messages => field ??=
+        Import.Find<ISystemMessengerSet>();
 
-    private IConfig<CommanderConfig> Config => field ??=
-        Configure.File<CommanderConfig>();
+    private IConfigurationFile ConfigFile => field ??=
+        Import.Find<IConfigurationFile>();
+
+    private IConfiguration<CommanderConfig> Config => field ??=
+        ConfigFile.File<CommanderConfig>();
 
     private CommandCollection Commands => field ??=
         new CommandCollection(Import.List<ICommand>());

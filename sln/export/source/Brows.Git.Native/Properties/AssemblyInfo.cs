@@ -4,3 +4,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: InternalsVisibleTo("Brows.Git")]
 [assembly: InternalsVisibleTo("Brows.Git.Gui")]
+[assembly: InternalsVisibleTo("Brows.Git.Tests")]

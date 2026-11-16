@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Conf.Cli" />
+    <ProjectReference Include="..\..\source\Brows.FileProtocol\Brows.FileProtocol.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Brows.Entries" />
+    <Using Include="Brows.Providers" />
+  </ItemGroup>
+
+</Project>

@@ -13,7 +13,7 @@ internal sealed class EntryGridViewColumnCellTemplate {
         var
         factory = new FrameworkElementFactory(typeof(EntryDataControl));
         factory.Name = nameof(EntryDataControl);
-        factory.SetBinding(EntryDataControl.DataContextProperty, new Binding($"Item[{data.Key}]"));
+        factory.SetBinding(EntryDataControl.ViewModelProperty, new Binding($"Item[{data.Key}]"));
         return new DataTemplate {
             VisualTree = factory
         };

@@ -1,11 +1,9 @@
 ﻿using Brows.Commands;
-using Brows.Config;
-using Brows.IO.Helpers;
+using Brows.Conf;
 using Brows.Triggers;
 using Domore.Conf;
 using Domore.Logs;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,6 +22,16 @@ internal sealed class CommandCollection {
     private Dictionary<string, IReadOnlyDictionary<IInputTrigger, ICommand>> InputSet {
         get => field ??= [];
         set;
+    }
+
+    private static void Configure(ICommand command, IConfContainer config) {
+        var type = command.GetType();
+        var name = type.Name;
+        var assembly = type.Assembly?.GetName()?.Name;
+        var namespac = type.Namespace;
+        config.Configure(command.Config, key: name);
+        config.Configure(command.Config, key: name + $"[{assembly}]");
+        config.Configure(command.Config, key: name + $"[{assembly}][{namespac}]");
     }
 
     public CommandCollection(IEnumerable<ICommand> items) {
@@ -72,23 +80,17 @@ internal sealed class CommandCollection {
         if (Log.Info()) {
             Log.Info(nameof(Init));
         }
-        var configPath = Path.Join(ConfigPath.FileRoot, "commands.conf");
-        var configFile = await FileSystemTask.ExistingFile(configPath, token);
-        var config = configFile == null ? null : Conf.Contain(configFile.FullName);
         var items = new List<ICommand>(List);
-        await Task.WhenAll(items.Select(async command => {
-            if (config != null) {
+        var configInfo = await ConfigurationFileInfo.Load("commands", invalidated: null, token);
+        await configInfo.Configure(container => {
+            foreach (var command in items) {
                 if (Log.Info()) {
-                    Log.Info(Log.Join(nameof(config.Configure), command));
+                    Log.Info(Log.Join(nameof(container.Configure), command));
                 }
-                var type = command.GetType();
-                var name = type.Name;
-                var assembly = type.Assembly?.GetName()?.Name;
-                var namespac = type.Namespace;
-                config.Configure(command.Config, key: name);
-                config.Configure(command.Config, key: name + $"[{assembly}]");
-                config.Configure(command.Config, key: name + $"[{assembly}][{namespac}]");
+                Configure(command, container);
             }
+        }, token);
+        await Task.WhenAll(items.Select(async command => {
             try {
                 await command.Init(token);
             }

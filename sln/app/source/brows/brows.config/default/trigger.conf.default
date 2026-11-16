@@ -1,7 +1,8 @@
-﻿#
+#
 # WARNING: This file will be overwritten when a new version of the application is installed.
-# To customize the application's configuration, copy this file to its directory's parent and
-# remove the .default extension.
+# To customize the application's configuration, create a file named trigger.conf in this
+# directory's parent that contains only the settings you want to change. This file is
+# loaded first, and the settings in that file override the ones here.
 #
 
 cmd[Bookmark]                       .input                      = bookmark|bm
@@ -21,12 +22,14 @@ cmd[Delete]                         .press[DEL]                 = *
 cmd[Drives]                         .input                      = drives
 cmd[Escape]                         .press[ESC]                 = *
 cmd[Exit]                           .input                      = exit
+cmd[Ftp]                            .input                      = ftp
 cmd[Fit]                            .input                      = fit
 cmd[Focus]                          .input                      = focus
 cmd[Focus]                          .press[ALT+1]               = * navigation
 cmd[Hide]                           .input                      = hide
 cmd[HistoryBack]                    .press[Back|ALT+LEFT]       = *
 cmd[HistoryForward]                 .press[ALT+RIGHT]           = *
+cmd[Logs]                           .input                      = logs
 cmd[Manual]                         .input                      = ?
 cmd[Move]                           .input                      = move|m
 cmd[Open]                           .input                      = open
@@ -61,7 +64,22 @@ cmd[ResetAll]                       .press[ALT+CTRL+SHIFT+R]    = *
 cmd[Select]                         .input                      = select|sel
 cmd[Show]                           .input                      = show
 cmd[Sort]                           .input                      = sort
-cmd[SSH]                            .input                      = ssh
+cmd[Sftp]                           .input                      = sftp
+cmd[Sftp_Open]                      .input                      = sftp-open
+cmd[Sftp_Open]                      .press[ENTER]               = *
+cmd[Sftp_View]                      .input                      = sftp-view
+cmd[Sftp_View]                      .press[ALT+P]               = * toggle=preview
+cmd[Sftp_Move]                      .input                      = sftp-move
+cmd[Sftp_Delete]                    .input                      = sftp-delete
+cmd[Sftp_Delete]                    .press[DEL]                 = *
+cmd[Sftp_Rename]                    .input                      = sftp-rename
+cmd[Sftp_Rename]                    .press[F2]                  = *
+cmd[Sftp_CreateDirectory]           .input                      = sftp-new-dir|sftp-newd
+cmd[Sftp_CreateDirectory]           .press[CTRL+SHIFT+N]        = *
+cmd[Sftp_CreateFile]                .input                      = sftp-new-file|sftp-newf
+cmd[Sftp_CreateFile]                .press[ALT+CTRL+SHIFT+N]    = *
+cmd[SftpConnection_Open]            .press[ENTER]               = *
+cmd[Status]                         .input                      = status|st
 cmd[Theme]                          .input                      = theme
 cmd[Up]                             .input                      = up
 cmd[Up]                             .press[ALT+UP]              = *
@@ -85,7 +103,46 @@ cmd[FileSystem_NativeDetail]        .input                      = detail
 cmd[FileSystem_NativeDetail]        .press[ALT+ENTER]           = *
 cmd[FileSystem_Rename]              .input                      = rename
 cmd[FileSystem_Rename]              .press[F2]                  = *
+cmd[FileSystem_SevenZip]            .input                      = 7z|sevenzip
+cmd[FileSystem_Tar]                 .input                      = tar
 cmd[FileSystem_Zip]                 .input                      = zip
+cmd[FileSystem_TerminalOpen]        .input                      = terminal|term
+cmd[FileSystem_TerminalOpen]        .press[CTRL+ALT+T]           = *
+cmd[FileSystem_TerminalRelease]     .input                      = terminal-release
+cmd[FileSystem_TerminalRelease]     .press[CTRL+SHIFT+F12]       = *
+cmd[FileSystem_TerminalClose]       .input                      = terminal-close
 
 cmd[Ftp_ViewRaw]                    .input                      = raw|r
 cmd[Ftp_ViewRaw]                    .press[ALT+V]               = *
+cmd[Ftp_View]                       .input                      = ftp-view
+cmd[Ftp_View]                       .press[ALT+P]               = * toggle=preview
+cmd[Ftp_Open]                       .press[ENTER]               = *
+cmd[Ftp_Delete]                     .input                      = ftp-delete|fdelete
+cmd[Ftp_Delete]                     .press[DEL]                 = *
+cmd[Ftp_Rename]                     .input                      = ftp-rename|frename
+cmd[Ftp_Rename]                     .press[F2]                  = *
+cmd[Ftp_Move]                       .input                      = ftp-move|fmove
+cmd[Ftp_CreateDirectory]            .input                      = ftp-new-dir|ftpd
+cmd[Ftp_CreateFile]                 .input                      = ftp-new-file|ftpf
+cmd[Ftps_Open]                      .press[ENTER]               = *
+cmd[Ftps_Delete]                    .input                      = ftps-delete|fsdelete
+cmd[Ftps_Delete]                    .press[DEL]                 = *
+cmd[Ftps_Rename]                    .input                      = ftps-rename|fsrename
+cmd[Ftps_Rename]                    .press[F2]                  = *
+cmd[Ftps_Move]                      .input                      = ftps-move|fsmove
+cmd[Ftps_CreateDirectory]           .input                      = ftps-new-dir|ftpsd
+cmd[Ftps_CreateFile]                .input                      = ftps-new-file|ftpsf
+cmd[Ftps_ViewRaw]                   .input                      = raw|r
+cmd[Ftps_ViewRaw]                   .press[ALT+V]               = *
+cmd[Ftps_View]                      .input                      = ftps-view
+cmd[Ftps_View]                      .press[ALT+P]               = * toggle=preview
+
+cmd[GitStatus_IncludeIgnored]       .input                      = include-ignored|includeignored
+cmd[GitStatus_IncludeIgnored]       .press[CTRL+I]              = *
+
+cmd[MBox_Open]                      .input                      = mbox-open
+cmd[MBox_View]                      .input                      = mbox-view
+cmd[MBox_View]                      .press[ALT+P]               = * toggle=preview
+cmd[MBox_Export]                    .input                      = mbox-export
+cmd[MBox_PreviewFocus]              .input                      = mbox-focus
+cmd[MBox_PreviewFocus]              .press[ESC]                 = * target=entries

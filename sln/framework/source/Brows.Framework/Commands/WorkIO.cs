@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 namespace Brows.Commands;
 
-public abstract class WorkIO<TService> : Command<WorkIOParameter> where TService : class, IWorkProvidedIO, IProviderExport {
+public abstract class WorkIO<TService> : Command<WorkIOParameter>
+where TService : class, IWorkProvidedIO, IProviderExport {
     protected sealed override bool Work(Context context) {
         if (null == context) return false;
         if (false == context.HasSource(out var source)) return false;

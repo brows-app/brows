@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
-using System.Threading;
 
-namespace Brows; 
+namespace Brows;
+
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct BrowsCanceler {
     [UnmanagedFunctionPointer(BrowsNative.Call, CharSet = BrowsNative.Chars)]

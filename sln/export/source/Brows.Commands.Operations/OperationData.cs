@@ -1,9 +1,8 @@
-﻿using Brows.Commands;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Brows; 
+namespace Brows;
+
 internal sealed class OperationData : CommandContextData<IOperation> {
     protected sealed override CommandContextData<IOperation> Create(int index, IList<IOperation> list) {
         return new OperationData(Command, index, Collection);
@@ -18,7 +17,8 @@ internal sealed class OperationData : CommandContextData<IOperation> {
 
     public IOperationCollection Collection { get; }
 
-    public OperationData(ICommand command, int index, IOperationCollection collection) : base(command, index, collection?.AsEnumerable()?.ToList()) {
+    public OperationData(ICommand command, int index, IOperationCollection collection)
+    : base(command, index, collection?.Snapshot()?.ToList()) {
         Collection = collection ?? throw new ArgumentNullException(nameof(collection));
     }
 }

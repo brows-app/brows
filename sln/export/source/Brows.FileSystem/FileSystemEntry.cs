@@ -1,4 +1,5 @@
-﻿using Brows.FileSystem;
+﻿using Brows.Exports;
+using Brows.FileSystem;
 using Domore.Logs;
 using Domore.Threading.Tasks;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Brows;
 
-internal sealed class FileSystemEntry : Entry<FileSystemProvider>, IFileSystemInfo {
+internal sealed class FileSystemEntry : Entry<FileSystemProvider>, IFileSystemEntry, IFileSystemInfo {
     private static readonly ILog Log = Logging.For(typeof(FileSystemEntry));
 
     private FileSystemEntryRefreshDelay RefreshDelay;
@@ -111,4 +112,8 @@ internal sealed class FileSystemEntry : Entry<FileSystemProvider>, IFileSystemIn
         }
         await Refresh(token);
     }
+
+    string IFileSystemEntry.Path => ID;
+    FileSystemEntryKind IFileSystemEntry.Kind => Kind;
+    IFileSystemProvider IFileSystemEntry.Provider => Provider;
 }

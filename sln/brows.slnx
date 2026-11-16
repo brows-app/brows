@@ -15,6 +15,17 @@
     <Project Path="app/source/Brows.Commander/Brows.Commander.csproj" />
     <Project Path="app/source/brows/brows.csproj" />
   </Folder>
+  <Folder Name="/app/tests/">
+    <Project Path="app/tests/Brows.App.Windows.Tests/Brows.App.Windows.Tests.csproj" />
+  </Folder>
+  <Folder Name="/conf/">
+    <Project Path="config/source/Brows.Conf.Composition/Brows.Conf.Composition.csproj" />
+    <Project Path="config/source/Brows.Conf/Brows.Conf.csproj" />
+  </Folder>
+  <Folder Name="/conf/tests/">
+    <Project Path="config/tests/Brows.Conf.Composition.Tests/Brows.Conf.Composition.Tests.csproj" />
+    <Project Path="config/tests/Brows.Conf.Tests/Brows.Conf.Tests.csproj" />
+  </Folder>
   <Folder Name="/export/" />
   <Folder Name="/export/Commands/">
     <Project Path="export/source/Brows.Commands.Bookmark/Brows.Commands.Bookmark.csproj" />
@@ -35,6 +46,9 @@
   <Folder Name="/export/FileProtocol/">
     <Project Path="export/source/Brows.FileProtocol/Brows.FileProtocol.csproj" />
   </Folder>
+  <Folder Name="/export/FileProtocol/tests/">
+    <Project Path="export/tests/Brows.FileProtocol.Tests/Brows.FileProtocol.Tests.csproj" Id="3637ab33-33f3-49ce-90f1-79e1ea42e48b" />
+  </Folder>
   <Folder Name="/export/FileSystem/">
     <Project Path="export/source/Brows.FileSystem.Commands.CreateDirectory/Brows.FileSystem.Commands.CreateDirectory.csproj" />
     <Project Path="export/source/Brows.FileSystem.Commands.CreateFile/Brows.FileSystem.Commands.CreateFile.csproj" />
@@ -46,6 +60,8 @@
     <Project Path="export/source/Brows.FileSystem.Commands.NativeBrowse/Brows.FileSystem.Commands.NativeBrowse.csproj" />
     <Project Path="export/source/Brows.FileSystem.Commands.NativeDetail/Brows.FileSystem.Commands.NativeDetail.csproj" />
     <Project Path="export/source/Brows.FileSystem.Commands.Rename/Brows.FileSystem.Commands.Rename.csproj" />
+    <Project Path="export/source/Brows.FileSystem.Commands.SevenZip/Brows.FileSystem.Commands.SevenZip.csproj" />
+    <Project Path="export/source/Brows.FileSystem.Commands.Tar/Brows.FileSystem.Commands.Tar.csproj" />
     <Project Path="export/source/Brows.FileSystem.Commands.Zip/Brows.FileSystem.Commands.Zip.csproj" />
     <Project Path="export/source/Brows.FileSystem.Navigation/Brows.FileSystem.Navigation.csproj" />
     <Project Path="export/source/Brows.FileSystem/Brows.FileSystem.csproj" />
@@ -56,12 +72,27 @@
     <Project Path="export/source/windows/Brows.FileSystem.Windows/Brows.FileSystem.Windows.csproj" />
   </Folder>
   <Folder Name="/export/FileSystem/tests/">
+    <Project Path="export/tests/Brows.FileSystem.Commands.Find.Tests/Brows.FileSystem.Commands.Find.Tests.csproj" />
+    <Project Path="export/tests/Brows.FileSystem.Commands.Find.Windows.Tests/Brows.FileSystem.Commands.Find.Windows.Tests.csproj" />
+    <Project Path="export/tests/Brows.FileSystem.Commands.SevenZip.Tests/Brows.FileSystem.Commands.SevenZip.Tests.csproj" />
+    <Project Path="export/tests/Brows.FileSystem.Commands.Tar.Tests/Brows.FileSystem.Commands.Tar.Tests.csproj" />
+    <Project Path="export/tests/Brows.FileSystem.Commands.Zip.Tests/Brows.FileSystem.Commands.Zip.Tests.csproj" />
     <Project Path="export/tests/Brows.FileSystem.Tests/Brows.FileSystem.Tests.csproj" />
+    <Project Path="export/tests/Brows.FileSystem.Windows.Tests/Brows.FileSystem.Windows.Tests.csproj" />
   </Folder>
   <Folder Name="/export/FTP/">
-    <Project Path="export/source/Brows.Ftp/Brows.Ftp.csproj" />
-    <Project Path="export/source/windows/Brows.Ftp.Win32/Brows.Ftp.Win32.csproj" />
-    <Project Path="export/source/windows/Brows.Ftp.Windows/Brows.Ftp.Windows.csproj" />
+    <Project Path="export/source/Brows.FTP.Client/Brows.FTP.Client.csproj" />
+    <Project Path="export/source/Brows.FTP/Brows.FTP.csproj" />
+    <Project Path="export/source/Brows.FTPS/Brows.FTPS.csproj" />
+    <Project Path="export/source/windows/Brows.FTP.Win32/Brows.FTP.Win32.csproj" />
+    <Project Path="export/source/windows/Brows.FTP.Windows/Brows.FTP.Windows.csproj" />
+    <Project Path="export/source/windows/Brows.FTPS.Windows/Brows.FTPS.Windows.csproj" />
+  </Folder>
+  <Folder Name="/export/FTP/tests/">
+    <Project Path="export/tests/Brows.FTP.Tests/Brows.FTP.Tests.csproj">
+      <BuildDependency Project="export/source/brows_url/brows_url.vcxproj" />
+    </Project>
+    <Project Path="export/tests/Brows.FTP.Windows.Tests/Brows.FTP.Windows.Tests.csproj" />
   </Folder>
   <Folder Name="/export/Git/">
     <Project Path="export/source/Brows.Git.Native/Brows.Git.Native.csproj" />
@@ -71,15 +102,31 @@
     </Project>
     <Project Path="export/source/windows/Brows.Git.Windows/Brows.Git.Windows.csproj" />
   </Folder>
+  <Folder Name="/export/Git/tests/">
+    <Project Path="export/tests/Brows.Git.Tests/Brows.Git.Tests.csproj" />
+  </Folder>
+  <Folder Name="/export/Logs/">
+    <Project Path="export/source/Brows.Logs/Brows.Logs.csproj" Id="54187bb0-154c-45b0-b920-40d66339fac7" />
+    <Project Path="export/source/windows/Brows.Logs.Windows/Brows.Logs.Windows.csproj" />
+  </Folder>
+  <Folder Name="/export/Logs/tests/">
+    <Project Path="export/tests/Brows.Logs.Tests/Brows.Logs.Tests.csproj" />
+    <Project Path="export/tests/Brows.Logs.Windows.Tests/Brows.Logs.Windows.Tests.csproj" />
+  </Folder>
+  <Folder Name="/export/MBox/">
+    <Project Path="export/source/Brows.MBox.Format/Brows.MBox.Format.csproj" />
+    <Project Path="export/source/Brows.MBox/Brows.MBox.csproj" />
+    <Project Path="export/source/windows/Brows.MBox.Windows/Brows.MBox.Windows.csproj" />
+  </Folder>
+  <Folder Name="/export/MBox/tests/">
+    <Project Path="export/tests/Brows.MBox.Format.Tests/Brows.MBox.Format.Tests.csproj" />
+    <Project Path="export/tests/Brows.MBox.Tests/Brows.MBox.Tests.csproj" />
+    <Project Path="export/tests/Brows.MBox.Windows.Tests/Brows.MBox.Windows.Tests.csproj" />
+  </Folder>
   <Folder Name="/export/SSH/">
-    <Project Path="export/source/Brows.SSH.Commands.SSH/Brows.SSH.Commands.SSH.csproj" />
-    <Project Path="export/source/Brows.SSH.Native/Brows.SSH.Native.csproj" />
-    <Project Path="export/source/Brows.SSH/Brows.SSH.csproj" />
     <Project Path="export/source/brows_ssh/brows_ssh.vcxproj" Id="12a5bd53-dafb-44d6-bad7-cce36ed0962f">
       <BuildDependency Project="framework/source/brows_framework/brows_framework.vcxproj" />
     </Project>
-    <Project Path="export/source/windows/Brows.SSH.Win32/Brows.SSH.Win32.csproj" />
-    <Project Path="export/source/windows/Brows.SSH.Windows/Brows.SSH.Windows.csproj" />
   </Folder>
   <Folder Name="/export/Url/">
     <Project Path="export/source/Brows.Url.Native/Brows.Url.Native.csproj" />
@@ -97,51 +144,61 @@
     <Project Path="export/source/windows/Brows.Zip.Win32/Brows.Zip.Win32.csproj" />
     <Project Path="export/source/windows/Brows.Zip.Windows/Brows.Zip.Windows.csproj" />
   </Folder>
+  <Folder Name="/export/Zip/tests/">
+    <Project Path="export/tests/Brows.Zip.Async.Tests/Brows.Zip.Async.Tests.csproj" />
+    <Project Path="export/tests/Brows.Zip.Tests/Brows.Zip.Tests.csproj" />
+  </Folder>
+  <Folder Name="/export/SevenZip/">
+    <Project Path="export/source/Brows.SevenZip.Native/Brows.SevenZip.Native.csproj" />
+    <Project Path="export/source/Brows.SevenZip/Brows.SevenZip.csproj" />
+    <Project Path="export/source/brows_7z/brows_7z.vcxproj" Id="6d1c74a8-2f3b-4e57-9a10-5c8b7d4e3f62">
+      <BuildDependency Project="framework/source/brows_framework/brows_framework.vcxproj" />
+    </Project>
+    <Project Path="export/source/windows/Brows.SevenZip.Win32/Brows.SevenZip.Win32.csproj" />
+    <Project Path="export/source/windows/Brows.SevenZip.Windows/Brows.SevenZip.Windows.csproj" />
+  </Folder>
+  <Folder Name="/export/SevenZip/tests/">
+    <Project Path="export/tests/Brows.SevenZip.Tests/Brows.SevenZip.Tests.csproj" />
+  </Folder>
+  <Folder Name="/export/Tar/">
+    <Project Path="export/source/Brows.Tar/Brows.Tar.csproj" />
+    <Project Path="export/source/windows/Brows.Tar.Win32/Brows.Tar.Win32.csproj" />
+    <Project Path="export/source/windows/Brows.Tar.Windows/Brows.Tar.Windows.csproj" />
+  </Folder>
+  <Folder Name="/export/Tar/tests/">
+    <Project Path="export/tests/Brows.Tar.Tests/Brows.Tar.Tests.csproj" />
+  </Folder>
+  <Folder Name="/export/SFTP/">
+    <Project Path="export/source/Brows.SFTP.Native/Brows.SFTP.Native.csproj">
+      <BuildDependency Project="export/source/brows_ssh/brows_ssh.vcxproj" />
+    </Project>
+    <Project Path="export/source/Brows.SFTP/Brows.SFTP.csproj" />
+    <Project Path="export/source/windows/Brows.SFTP.Win32/Brows.SFTP.Win32.csproj" />
+    <Project Path="export/source/windows/Brows.SFTP.Windows/Brows.SFTP.Windows.csproj" />
+  </Folder>
+  <Folder Name="/export/SFTP/tests/">
+    <Project Path="export/tests/Brows.SFTP.Native.Tests/Brows.SFTP.Native.Tests.csproj" />
+    <Project Path="export/tests/Brows.SFTP.Tests/Brows.SFTP.Tests.csproj">
+      <BuildDependency Project="export/source/brows_ssh/brows_ssh.vcxproj" />
+    </Project>
+    <Project Path="export/tests/Brows.SFTP.Windows.Tests/Brows.SFTP.Windows.Tests.csproj" />
+  </Folder>
   <Folder Name="/framework/">
-    <Project Path="framework/source/Brows.Abstractions.IO.Testing/Brows.Abstractions.IO.Testing.csproj" />
-    <Project Path="framework/source/Brows.Abstractions.IO/Brows.Abstractions.IO.csproj" />
-    <Project Path="framework/source/Brows.CLI.About/Brows.CLI.About.csproj" />
-    <Project Path="framework/source/Brows.CLI.Help/Brows.CLI.Help.csproj" />
-    <Project Path="framework/source/Brows.CLI/Brows.CLI.csproj" />
-    <Project Path="framework/source/Brows.Composition.Testing/Brows.Composition.Testing.csproj" />
-    <Project Path="framework/source/Brows.Composition/Brows.Composition.csproj" />
-    <Project Path="framework/source/Brows.Config.Json/Brows.Config.Json.csproj" />
-    <Project Path="framework/source/Brows.Config/Brows.Config.csproj" />
     <Project Path="framework/source/Brows.Framework.Testing/Brows.Framework.Testing.csproj" />
+    <Project Path="framework/source/Brows.Framework.Windows.Testing/Brows.Framework.Windows.Testing.csproj" />
     <Project Path="framework/source/Brows.Framework.Windows/Brows.Framework.Windows.csproj" />
     <Project Path="framework/source/Brows.Framework/Brows.Framework.csproj" />
-    <Project Path="framework/source/Brows.Instantiation/Brows.Instantiation.csproj" />
-    <Project Path="framework/source/Brows.IPC.Host/Brows.IPC.Host.csproj" />
-    <Project Path="framework/source/Brows.IPC/Brows.IPC.csproj" />
     <Project Path="framework/source/brows_framework/brows_framework.vcxproj" Id="498b8ecc-336e-4040-8ce6-e92b3f4b849b" />
-  </Folder>  
-  <Folder Name="/framework/samples/">
-    <Project Path="framework/samples/Brows.CLI.Sample/Brows.CLI.Sample.csproj" />
-    <Project Path="framework/samples/Brows.IPC.Sample.Client/Brows.IPC.Sample.Client.csproj" />
-    <Project Path="framework/samples/Brows.IPC.Sample.Common/Brows.IPC.Sample.Common.csproj" />
-    <Project Path="framework/samples/Brows.IPC.Sample.Host/Brows.IPC.Sample.Host.csproj" />
   </Folder>
   <Folder Name="/framework/tests/">
-    <Project Path="framework/tests/Brows.Abstractions.IO.Testing.Tests/Brows.Abstractions.IO.Testing.Tests.csproj" />
-    <Project Path="framework/tests/Brows.Abstractions.IO.Tests/Brows.Abstractions.IO.Tests.csproj" />
-    <Project Path="framework/tests/Brows.CLI.About.Tests/Brows.CLI.About.Tests.csproj" />
-    <Project Path="framework/tests/Brows.CLI.Help.Tests/Brows.CLI.Help.Tests.csproj" />
-    <Project Path="framework/tests/Brows.CLI.Tests/Brows.CLI.Tests.csproj" />
-    <Project Path="framework/tests/Brows.Composition.Tests/Brows.Composition.Tests.csproj" />
-    <Project Path="framework/tests/Brows.Config.Tests/Brows.Config.Tests.csproj" />
     <Project Path="framework/tests/Brows.Framework.Testing.Tests/Brows.Framework.Testing.Tests.csproj" />
     <Project Path="framework/tests/Brows.Framework.Tests/Brows.Framework.Tests.csproj" />
-    <Project Path="framework/tests/Brows.Instantiation.Tests/Brows.Instantiation.Tests.csproj" />
-    <Project Path="framework/tests/Brows.IPC.Host.Tests/Brows.IPC.Host.Tests.csproj" />
-    <Project Path="framework/tests/Brows.IPC.Tests/Brows.IPC.Tests.csproj" />
+    <Project Path="framework/tests/Brows.Framework.Windows.Tests/Brows.Framework.Windows.Tests.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="shared/Brows.Shared.Archives/Brows.Shared.Archives.shproj" Id="25759937-d06e-4a6c-ac63-b2cab08dbe2d" />
   </Folder>
   <Folder Name="/windows/">
-    <Project Path="windows/source/Brows.Win32.PropertySystem/Brows.Win32.PropertySystem.csproj" />
-    <Project Path="windows/source/Brows.Win32.STAThreadPool/Brows.Win32.STAThreadPool.csproj" />
-    <Project Path="windows/source/Brows.Win32.Windows.PreviewHandlerControl/Brows.Win32.Windows.PreviewHandlerControl.csproj" />
-    <Project Path="windows/source/Brows.Win32.Windows.PreviewTextControl/Brows.Win32.Windows.PreviewTextControl.csproj" />
-    <Project Path="windows/source/Brows.Win32.Windows/Brows.Win32.Windows.csproj" />
-    <Project Path="windows/source/Brows.Win32/Brows.Win32.csproj" />
     <Project Path="windows/source/brows_win32/brows_win32.vcxproj" Id="7425a2c8-a4e2-4390-b936-ffe17d4e345f">
       <BuildDependency Project="framework/source/brows_framework/brows_framework.vcxproj" />
     </Project>
@@ -149,7 +206,6 @@
   <Folder Name="/_/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
-    <File Path="AGENTS.md" />
     <File Path="Directory.Packages.props" />
     <File Path="global.json" />
     <File Path="spelling.exclusion.dic" />
@@ -160,6 +216,13 @@
   </Folder>
   <Folder Name="/_/app/tests/">
     <File Path="app/tests/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/_/config/" />
+  <Folder Name="/_/config/source/">
+    <File Path="config/source/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/_/config/tests/">
+    <File Path="config/tests/Directory.Build.props" />
   </Folder>
   <Folder Name="/_/export/" />
   <Folder Name="/_/export/source/">
@@ -185,6 +248,7 @@
     <File Path="props/export.build.props" />
     <File Path="props/native.export.build.props" />
     <File Path="props/native.root.build.props" />
+    <File Path="props/native.root.build.targets" />
     <File Path="props/root.build.props" />
     <File Path="props/tests.build.props" />
     <File Path="props/windows.build.props" />

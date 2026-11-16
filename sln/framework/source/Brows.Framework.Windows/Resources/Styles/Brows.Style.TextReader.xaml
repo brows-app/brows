@@ -1,0 +1,24 @@
+﻿<ResourceDictionary
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:domore="http://schemas.domore.local/winfx/2026/xaml/presentation">
+  <Style TargetType="{x:Type domore:TextReader}" x:Key="Brows.Style.TextReader">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.TextReader.FontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.TextReader.FontSize}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Brows.Font.TextReader.FontWeight}" />
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.TextReader.Foreground}" />
+    <Setter Property="TextReaderEncodingLabelStyle">
+      <Setter.Value>
+        <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+          <Setter Property="Background" Value="{DynamicResource Brows.Theme.TextReader.Background.Opacity67}" />
+          <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.TextReader.EncodingLabel.Foreground}" />
+          <Setter Property="Padding" Value="2.5 0 0 0" />
+        </Style>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="domore:TextReader" BasedOn="{StaticResource Brows.Style.TextReader}" />
+</ResourceDictionary>

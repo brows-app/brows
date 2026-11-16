@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\ProtocolTestSupport\ProtocolTestServer.cs" Link="ProtocolTestSupport\ProtocolTestServer.cs" />
+    <ProjectReference Include="..\..\source\Brows.SFTP\Brows.SFTP.csproj" />
+    <ProjectReference Include="..\..\source\Brows.FTP\Brows.FTP.csproj" />
+    <ProjectReference Include="..\..\source\Brows.FTPS\Brows.FTPS.csproj" />
+    <ProjectReference Include="..\..\source\Brows.FileSystem\Brows.FileSystem.csproj" />
+    <Compile Include="..\ProtocolTestSupport\FileSystemTestDestination.cs" Link="ProtocolTestSupport\FileSystemTestDestination.cs" />
+    <ProjectReference Include="..\..\..\framework\source\Brows.Framework.Testing\Brows.Framework.Testing.csproj" />
+    <Compile
+      Include="..\ProtocolTestSupport\ProtocolTestServerInfrastructure.cs"
+      Link="ProtocolTestSupport\ProtocolTestServerInfrastructure.cs" />
+  </ItemGroup>
+  <Target Name="CopySftpNativeBinaries" AfterTargets="Build">
+    <PropertyGroup>
+      <SftpNativeDirectory>$(MSBuildThisFileDirectory)..\..\..\out\$(Configuration)\brows.native\x64-windows\</SftpNativeDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <SftpNativeBinary Include="$(SftpNativeDirectory)*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(SftpNativeBinary)"
+          DestinationFolder="$(OutDir)brows.native\x64-windows\" />
+  </Target>
+</Project>

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Brows.Entries;
+﻿namespace Brows.Entries;
 
 internal class EntryStreamSourceUsedException : Exception {
     public EntryStreamSource EntryStreamSource { get; }

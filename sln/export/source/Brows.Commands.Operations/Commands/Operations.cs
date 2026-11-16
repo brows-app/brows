@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
-namespace Brows.Commands; 
+namespace Brows.Commands;
+
 internal sealed class Operations : Command<OperationsParameter> {
     protected sealed override async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
         if (context == null) yield break;
@@ -30,7 +30,7 @@ internal sealed class Operations : Command<OperationsParameter> {
         if (false == commander.HasOperations(out var collection)) return false;
         var clearErrors = parameter.ClearErrors == true;
         if (clearErrors) {
-            var errors = collection.AsEnumerable().Where(operation => operation.CompleteWithError);
+            var errors = collection.Snapshot().Where(operation => operation.CompleteWithError);
             var list = errors.ToList();
             foreach (var item in list) {
                 collection.Remove(item);

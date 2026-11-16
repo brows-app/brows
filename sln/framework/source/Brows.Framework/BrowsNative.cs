@@ -3,7 +3,8 @@ using Domore.Logs;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Brows; 
+namespace Brows;
+
 internal sealed class BrowsNative : NativeLoader {
     private static readonly ILog Log = Logging.For(typeof(BrowsNative));
 
@@ -62,7 +63,9 @@ internal sealed class BrowsNative : NativeLoader {
     public const CharSet Chars = CharSet.Unicode;
 
     public BrowsNative() : base(Dll) {
-        LoggedFunctionPointer = Marshal.GetFunctionPointerForDelegate(LoggedDelegate = new brows_logged_handler(LoggedHandler));
-        LoggingFunctionPointer = Marshal.GetFunctionPointerForDelegate(LoggingDelegate = new brows_logging_handler(LoggingHandler));
+        LoggedFunctionPointer = Marshal.GetFunctionPointerForDelegate(
+            LoggedDelegate = new brows_logged_handler(LoggedHandler));
+        LoggingFunctionPointer = Marshal.GetFunctionPointerForDelegate(
+            LoggingDelegate = new brows_logging_handler(LoggingHandler));
     }
 }

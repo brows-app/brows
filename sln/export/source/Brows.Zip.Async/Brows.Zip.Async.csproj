@@ -1,4 +1,3 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-  </PropertyGroup>
+  <Import Project="..\..\..\shared\Brows.Shared.Archives\Brows.Shared.Archives.projitems" Label="Shared" />
 </Project>

@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\source\Brows.Abstractions.IO.Testing\Brows.Abstractions.IO.Testing.csproj" />
-  </ItemGroup>
-</Project>

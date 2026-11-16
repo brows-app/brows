@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace Brows; 
+namespace Brows;
+
 internal sealed class CommandProcessHistory {
     private readonly HashSet<string> Items = new HashSet<string>();
 

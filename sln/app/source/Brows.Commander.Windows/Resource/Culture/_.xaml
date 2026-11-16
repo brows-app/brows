@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:brows="http://schemas.brows.app/xaml"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:commands="clr-namespace:Brows.Commands;assembly=Brows.Framework">
+                    xmlns:commands="clr-namespace:Brows.Commands;assembly=Brows.Framework"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
   <ControlTemplate x:Key="CommandContextDataGesture_Hint_Down_Up">
     <StackPanel Orientation="Horizontal">
       <TextBlock Text="Press "/>
@@ -12,34 +13,13 @@
     </StackPanel>
   </ControlTemplate>
 
-  <Style TargetType="TextBlock" BasedOn="{StaticResource PanelStateTextBlockStyle}" x:Key="PanelStateItemsCountTextBlockStyle">
-    <Setter Property="Text" Value="{Binding ItemsCount, StringFormat='{}{0} items  |  '}"/>
-    <Style.Triggers>
-      <DataTrigger Binding="{Binding ItemsCount}" Value="1">
-        <Setter Property="Text" Value="1 item  |  "/>
-      </DataTrigger>
-    </Style.Triggers>
-  </Style>
-  <Style TargetType="TextBlock" BasedOn="{StaticResource PanelStateTextBlockStyle}" x:Key="PanelStateItemsSelectedCountTextBlockStyle">
-    <Setter Property="Text" Value="{Binding ItemsSelectedCount, StringFormat='{}{0} items selected  |  '}"/>
-    <Style.Triggers>
-      <DataTrigger Binding="{Binding ItemsSelectedCount}" Value="0">
-        <Setter Property="Text" Value=""/>
-      </DataTrigger>
-      <DataTrigger Binding="{Binding ItemsSelectedCount}" Value="1">
-        <Setter Property="Text" Value="1 item selected  |  "/>
-      </DataTrigger>
-    </Style.Triggers>
-  </Style>
-  <Style TargetType="TextBlock" BasedOn="{StaticResource PanelStateTextBlockStyle}" x:Key="PanelStateItemsSortingCountTextBlockStyle">
-    <Setter Property="Text" Value="{Binding ItemsSortingCount, StringFormat='{}{0} items sorting  |  '}"/>
-    <Style.Triggers>
-      <DataTrigger Binding="{Binding ItemsSortingCount}" Value="0">
-        <Setter Property="Text" Value=""/>
-      </DataTrigger>
-      <DataTrigger Binding="{Binding ItemsSortingCount}" Value="1">
-        <Setter Property="Text" Value="1 item sorting  |  "/>
-      </DataTrigger>
-    </Style.Triggers>
-  </Style>
+  <s:String x:Key="Brows.i18n.PanelState.{0} Items">{0} items</s:String>
+  <s:String x:Key="Brows.i18n.PanelState.1 Item">1 item</s:String>
+
+
+  <s:String x:Key="Brows.i18n.PanelState.{0} items selected">{0} items selected</s:String>
+  <s:String x:Key="Brows.i18n.PanelState.1 item selected">1 item selected</s:String>
+
+  <s:String x:Key="Brows.i18n.PanelState.{0} items sorting">{0} items sorting</s:String>
+  <s:String x:Key="Brows.i18n.PanelState.1 item sorting">1 item sorting</s:String>
 </ResourceDictionary>

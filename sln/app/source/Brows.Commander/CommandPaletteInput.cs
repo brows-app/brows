@@ -238,7 +238,7 @@ internal sealed class CommandPaletteInput : Notifier, ICommandPalette, IControll
                 SuggestionCollector.Commands = SuggestCommands ?? Commander.Commands.AsEnumerable();
                 await SuggestionCollector.Collect(token);
             }
-            catch (OperationCanceledException canceled) when (canceled?.CancellationToken == token) {
+            catch (OperationCanceledException) when (token.IsCancellationRequested) {
                 if (Log.Debug()) {
                     Log.Debug(Log.Join(nameof(Suggest), text, nameof(OperationCanceledException)));
                 }

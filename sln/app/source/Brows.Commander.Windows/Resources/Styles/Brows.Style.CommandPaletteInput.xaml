@@ -1,0 +1,112 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Brows.Framework.Windows;component/Resources/Styles/Brows.Style.Common.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style x:Key="Brows.Style.CommandPaletteInput" TargetType="local:CommandPaletteInputControl">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.CommandPaletteInput.Background}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:CommandPaletteInputControl}">
+          <Border Background="{TemplateBinding Background}">
+            <Grid DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+              </Grid.RowDefinitions>
+              <Grid Grid.Row="0">
+                <Grid.Resources>
+                  <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                    <Setter Property="Background"
+                            Value="{DynamicResource Brows.Theme.CommandPaletteInput.Background.Input}" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="CaretBrush" Value="{DynamicResource Brows.Theme.CommandPaletteInput.CaretBrush}" />
+                    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.CommandPaletteInput.FontFamily}" />
+                    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.CommandPaletteInput.FontSize}" />
+                    <Setter Property="FontWeight" Value="{DynamicResource Brows.Font.CommandPaletteInput.FontWeight}" />
+                    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.CommandPaletteInput.Foreground}" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="SelectionBrush"
+                            Value="{DynamicResource Brows.Theme.CommandPaletteInput.SelectionBrush}" />
+                    <Setter Property="SelectionOpacity"
+                            Value="{DynamicResource Brows.Theme.CommandPaletteInput.SelectionOpacity}" />
+                    <Setter Property="SelectionTextBrush"
+                            Value="{DynamicResource Brows.Theme.CommandPaletteInput.SelectionTextBrush}" />
+                    <Setter Property="Template">
+                      <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                          <Border Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                              <Setter Property="Foreground"
+                                      Value="{DynamicResource Brows.Theme.CommandPaletteInput.Foreground.Muted}" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Setter.Value>
+                    </Setter>
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                  </Style>
+                </Grid.Resources>
+                <TextBox x:Name="PART_TextSuggestion">
+                  <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                      <Setter Property="Focusable" Value="False" />
+                      <Setter Property="IsEnabled" Value="False" />
+                      <Setter Property="Text" Value="{Binding ViewModel.TextSuggestion, Mode=OneWay}" />
+                    </Style>
+                  </TextBox.Style>
+                </TextBox>
+                <TextBox x:Name="PART_Text" Background="Transparent">
+                  <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                      <Setter Property="Text" Value="{Binding ViewModel.Text, UpdateSourceTrigger=PropertyChanged}" />
+                    </Style>
+                  </TextBox.Style>
+                </TextBox>
+              </Grid>
+              <Grid Grid.Row="1">
+                <Grid>
+                  <Grid.Style>
+                    <Style TargetType="Grid">
+                      <Setter Property="Visibility" Value="Collapsed" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding ViewModel.Conf.Text}" Value="{x:Null}">
+                          <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Grid.Style>
+                  <local:CommandSuggestionCollectionControl ViewModel="{Binding ViewModel.Suggestions}" />
+                </Grid>
+                <Grid>
+                  <Grid.Style>
+                    <Style TargetType="Grid">
+                      <Setter Property="Visibility" Value="Visible" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding ViewModel.Conf.Text}" Value="{x:Null}">
+                          <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Grid.Style>
+                  <local:CommandPaletteConfControl ViewModel="{Binding ViewModel.Conf}" />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="local:CommandPaletteInputControl"
+         BasedOn="{StaticResource Brows.Style.CommandPaletteInput}" />
+</ResourceDictionary>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
-using Config;
+using Conf;
 
 internal class BookmarkOpen : Command {
-    private IConfig<Bookmarks> Data =>
-        _Data ?? (
-        _Data = Configure.Data<Bookmarks>());
-    private IConfig<Bookmarks> _Data;
+    private IConfiguration<Bookmarks> Data => field ??=
+        ConfigData.Data<Bookmarks>(Bookmarks.DataName);
+
+    [ImportRequired]
+    internal IConfigurationData ConfigData { get; set; }
 
     protected override async IAsyncEnumerable<ICommandSuggestion> Suggest(ICommandContext context, [EnumeratorCancellation] CancellationToken token) {
         if (context == null) yield break;

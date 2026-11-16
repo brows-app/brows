@@ -4,8 +4,6 @@ using Domore.Notification;
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Entries;
@@ -77,45 +75,39 @@ internal sealed class EntryData : Notifier, IEntryData, ICommandSourceObject {
     }
 
     public bool Accessing {
-        get => _Accessing;
-        private set => Change(ref _Accessing, value, AccessingEvent);
+        get;
+        private set => Change(ref field, value, AccessingEvent);
     }
-    private bool _Accessing;
 
     public bool AccessingFlag {
-        get => _AccessingFlag;
-        private set => Change(ref _AccessingFlag, value, AccessingFlagEvent);
+        get;
+        private set => Change(ref field, value, AccessingFlagEvent);
     }
-    private bool _AccessingFlag;
 
     public bool AccessCanceled {
-        get => _AccessCanceled;
-        private set => Change(ref _AccessCanceled, value, AccessCanceledEvent);
+        get;
+        private set => Change(ref field, value, AccessCanceledEvent);
     }
-    private bool _AccessCanceled;
 
     public bool AccessError {
-        get => _AccessError;
-        private set => Change(ref _AccessError, value, AccessErrorEvent);
+        get;
+        private set => Change(ref field, value, AccessErrorEvent);
     }
-    private bool _AccessError;
 
     public Exception AccessException {
-        get => _AccessException;
-        private set => Change(ref _AccessException, value, AccessExceptionEvent);
+        get;
+        private set => Change(ref field, value, AccessExceptionEvent);
     }
-    private Exception _AccessException;
 
     public object Value {
-        get => _Value;
-        private set => Change(ref _Value, value, ValueEvent, ValueDependents);
+        get;
+        private set => Change(ref field, value, ValueEvent, ValueDependents);
     }
-    private object _Value;
 
     public object Display {
         get {
             var converter = Definition.Converter;
-            return converter == null
+            return converter is null
                 ? Value
                 : converter.Convert(Value, Definition.ConverterParameter, CultureInfo.CurrentUICulture);
         }
@@ -123,16 +115,15 @@ internal sealed class EntryData : Notifier, IEntryData, ICommandSourceObject {
 
     public bool Ready {
         get {
-            if (ReadyTask == null) {
+            if (ReadyTask is null) {
                 ReadyInit();
             }
-            return _Ready = true;
+            return field = true;
         }
         private set {
-            Change(ref _Ready, value, ReadyEvent);
+            Change(ref field, value, ReadyEvent);
         }
     }
-    private bool _Ready;
 
     public string Key =>
         Definition.Key;
@@ -166,6 +157,13 @@ internal sealed class EntryData : Notifier, IEntryData, ICommandSourceObject {
     }
 
     int IEntryData.Compare(IEntryData other) {
+        /*
+         * Null compares lower than any non-null entry data, so mixed sorts
+         * keep a consistent order.
+         */
+        if (other is null) {
+            return 1;
+        }
         try {
             if (other is EntryData entryData) {
                 return Definition.CompareValue(Entry, entryData.Entry);

@@ -9,7 +9,7 @@ internal sealed class Fit : DataKeyCommand<Fit.Parameter> {
         if (false == context.HasPanel(out var active)) return false;
         if (false == context.GetParameter(out var parameter)) return false;
         if (false == active.HasView(out var view)) return false;
-        if (false == active.HasProvider(out IProvider provider)) return false;
+        if (false == active.HasProvider(out IEntryProvider provider)) return false;
         var valid = Validate(provider.Data.Key, parameter.Args);
         if (valid == false) {
             return false;

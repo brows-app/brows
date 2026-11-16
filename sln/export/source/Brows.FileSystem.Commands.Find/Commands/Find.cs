@@ -1,14 +1,9 @@
-﻿using Brows.Entries;
-using System;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
 
-namespace Brows.Commands; 
+namespace Brows.Commands;
+
 internal sealed class Find : FileSystemCommand<FindParameter> {
-    private FileSystemFindCommand FindCommand =>
-        _FindCommand ?? (
-        _FindCommand = new FileSystemFindCommand());
-    private FileSystemFindCommand _FindCommand;
+    private FileSystemFindCommand FindCommand => field ??= new FileSystemFindCommand();
 
     protected sealed override IEnumerable<Type> Source { get; } = new[] {
         typeof(IEntry),
@@ -32,14 +27,20 @@ internal sealed class Find : FileSystemCommand<FindParameter> {
     }
 
     protected sealed override bool Work(Context context) {
-        if (context == null) return false;
+        if (context is null) {
+            return false;
+        }
         if (context.HasGesture(out _)) {
             if (context.HasCommander(out var commander)) {
                 return context.ShowPalette($"{InputTrigger} ");
             }
         }
-        if (context.HasInput(out var input) == false) return false;
-        if (context.HasParameter(out var parameter) == false) return false;
+        if (context.HasInput(out var input) == false) {
+            return false;
+        }
+        if (context.HasParameter(out var parameter) == false) {
+            return false;
+        }
         if (context.HasPanel(out var active) == false) {
             return false;
         }
@@ -52,8 +53,9 @@ internal sealed class Find : FileSystemCommand<FindParameter> {
         var conf = context.HasConf(out var c) ? c.Text : null;
         var work = new FindWork(new FileSystemFindResult(directory, parameter, input, conf));
         var list = FindCommand.List;
-        var data = new FileSystemFindData(this, context, 0, list);
         list.Insert(0, work.Result);
+        FindCommand.PruneCompleted();
+        var data = new FileSystemFindData(this, context, 0, list);
         context.SetData(data);
         context.SetHint(data);
         context.SetFlag(new CommandContextFlag {
@@ -61,9 +63,13 @@ internal sealed class Find : FileSystemCommand<FindParameter> {
             RefreshInput = false
         });
         return context.Operate(async (progress, token) => {
-            await work
-                .Done(progress, token);
-            return true;
+            try {
+                await work.Done(progress, token);
+                return true;
+            }
+            finally {
+                FindCommand.PruneCompleted();
+            }
         });
     }
 }

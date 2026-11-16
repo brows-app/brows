@@ -1,0 +1,11 @@
+﻿<ResourceDictionary
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style x:Key="Brows.Style.KeyboardKey">
+    <Setter Property="TextElement.FontStyle" Value="Italic" />
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Brows.Font.KeyboardKey.FontWeight}" />
+    <Setter Property="TextBlock.FontStyle" Value="Italic" />
+    <Setter Property="TextBlock.FontWeight" Value="{DynamicResource Brows.Font.KeyboardKey.FontWeight}" />
+  </Style>
+  <Style x:Key="Brows.Style.KeyboardKey.Hint" BasedOn="{StaticResource Brows.Style.KeyboardKey}"></Style>
+</ResourceDictionary>

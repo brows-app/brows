@@ -27,10 +27,10 @@ internal sealed class EntryDataView : IEntryDataView {
         }
     }
 
-    public Provider Provider { get; }
+    public EntryProvider Provider { get; }
     public EntryObservationSource Source { get; }
 
-    public EntryDataView(Provider provider, EntryObservationSource source) {
+    public EntryDataView(EntryProvider provider, EntryObservationSource source) {
         Provider = provider ?? throw new ArgumentNullException(nameof(provider));
         Source = source ?? throw new ArgumentNullException(nameof(source));
     }

@@ -1,6 +1,4 @@
-﻿using Brows.Composition;
-
-namespace Brows.Resource;
+﻿namespace Brows.Resource;
 
 internal sealed class Resource : IExport {
 }

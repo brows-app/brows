@@ -1,11 +1,10 @@
 ﻿using Brows.Localization;
-using System;
 
 namespace Brows.Triggers;
 
 public static class GestureExtension {
-    private static readonly ClickGestureTranslation ClickGestureTranslation = new ClickGestureTranslation(Translation.Global);
-    private static readonly PressGestureTranslation PressGestureTranslation = new PressGestureTranslation(Translation.Global);
+    private static readonly ClickGestureTranslation ClickGestureTranslation = new(Translation.Global);
+    private static readonly PressGestureTranslation PressGestureTranslation = new(Translation.Global);
 
     public static string Display(this IGesture gesture) {
         if (gesture is PressGesture press) {

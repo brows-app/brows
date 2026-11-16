@@ -1,5 +1,4 @@
 ﻿using Brows.Panels;
-using System;
 
 namespace Brows.Entries;
 

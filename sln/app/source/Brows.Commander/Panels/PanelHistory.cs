@@ -65,11 +65,10 @@ internal sealed class PanelHistory {
         if (CurrentLoading) {
             return;
         }
-        if (provider is null) {
+        if (provider is not IEntryProvider entryProvider) {
             return;
         }
-        var entries = provider.Observation;
-        if (entries == null) return;
+        var entries = entryProvider.Observation;
         if (entries.ManualInteraction) {
             return;
         }

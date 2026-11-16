@@ -1,14 +1,11 @@
-﻿using Brows.Entries;
-using Brows.Runtime.Win32;
-using Brows.Threading;
+﻿using Brows.Threading;
+using Brows.Win32;
 using Domore.Logs;
 using Domore.Threading.Tasks;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Commands;
@@ -16,8 +13,8 @@ namespace Brows.Commands;
 internal sealed class Metadata : FileSystemCommand<MetadataParameter> {
     private static readonly ILog Log = Logging.For(typeof(Metadata));
 
-    private readonly STAThreadPool ThreadPool = new(nameof(Metadata)) { WorkerCountMin = 0 };
-    private readonly Dictionary<string, TaskCache<PropertyDescription>> PropertyCache = new();
+    private readonly ISTAThreadPool ThreadPool = new STAThreadPool(nameof(Metadata)) { WorkerCountMin = 0 };
+    private readonly Dictionary<string, TaskCache<PropertyDescription>> PropertyCache = [];
 
     private async Task<PropertyDescription> Property(string name, CancellationToken token) {
         if (PropertyCache.TryGetValue(name, out var value) == false) {
@@ -42,7 +39,7 @@ internal sealed class Metadata : FileSystemCommand<MetadataParameter> {
             var propertyList = await Task.WhenAll(parameterSet.Keys
                 .Where(p => !string.IsNullOrWhiteSpace(p))
                 .Select(async p => KeyValuePair.Create(p, await Property(p, token))));
-            return await progress.Children(fileSystemInfos, fileSystemInfo => (fileSystemInfo.Name, OperationProgressKind.None, async (progress, token) => {
+            var result = await progress.Children(fileSystemInfos, fileSystemInfo => new(fileSystemInfo.Name, async (progress, token) => {
                 if (fileSystemInfo is not FileInfo file) {
                     throw new MetadataInfoIsNotFileException(fileSystemInfo);
                 }
@@ -74,7 +71,8 @@ internal sealed class Metadata : FileSystemCommand<MetadataParameter> {
                     throw new MetadataFailedException(fileSystemInfo, propError);
                 }
             }
-            ));
+            ), OperationFailureBehavior.Record, token);
+            return result.Results.Count > 0;
         });
     }
 
