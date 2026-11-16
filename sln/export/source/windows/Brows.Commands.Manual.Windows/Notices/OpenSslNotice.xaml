@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="Brows.Notices.OpenSslNotice"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">OpenSSL</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Website: https://www.openssl.org/<LineBreak/>
+      Included in: libcrypto-3-x64.dll and libssl-3-x64.dll<LineBreak/>
+      License: Apache-2.0
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Copyright (c) 1998-2026 The OpenSSL Project Authors<LineBreak/>
+      Copyright (c) 1995-1998 Eric A. Young, Tim J. Hudson<LineBreak/>
+      All rights reserved.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>OpenSSL is licensed under the Apache License, Version 2.0.</TextBlock>
+    <TextBlock/>
+    <TextBlock>[The full text of the Apache License, Version 2.0, appears under LICENSE TEXTS.]</TextBlock>
+  </StackPanel>
+</UserControl>

@@ -2,7 +2,7 @@
 <Project>
   <PropertyGroup>
     <Authors>Ken Yourek</Authors>
-    <Copyright>Copyright © Ken Yourek 2023</Copyright>
+    <Copyright>Copyright © Ken Yourek 2021-2026</Copyright>
     <VersionPrefix>0.100.0.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <RepositoryType>git</RepositoryType>

@@ -1,0 +1,176 @@
+﻿<UserControl x:Class="Brows.Notices.SevenZipNotice"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">7-Zip</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Website: https://www.7-zip.org/<LineBreak/>
+      Included in: 7zip.dll<LineBreak/>
+      License: LGPL-2.1-or-later AND BSD-3-Clause AND BSD-2-Clause, with the unRAR license restriction
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">7-Zip source code</TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">License for use and distribution</TextBlock>
+    <TextBlock/>
+    <TextBlock>7-Zip Copyright (C) 1999-2026 Igor Pavlov.</TextBlock>
+    <TextBlock/>
+    <TextBlock>The licenses for files are:</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      - CPP/7zip/Compress/Rar* files: the "GNU LGPL" with "unRAR license restriction"<LineBreak/>
+      - CPP/7zip/Compress/LzfseDecoder.cpp: the "BSD 3-clause License"<LineBreak/>
+      - C/ZstdDec.c: the "BSD 3-clause License"<LineBreak/>
+      - C/Xxh64.c: the "BSD 2-clause License"<LineBreak/>
+      - Some files are "public domain" files, if "public domain" status is stated in source file.<LineBreak/>
+      - the "GNU LGPL" for all other files. If there is no license information in some source file, that
+      file is under the "GNU LGPL".
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      The "GNU LGPL" with "unRAR license restriction" means that you must follow both "GNU LGPL" rules and
+      "unRAR license restriction" rules.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">GNU LGPL information</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      This library is free software; you can redistribute it and/or modify it under the terms of the GNU
+      Lesser General Public License as published by the Free Software Foundation; either version 2.1 of
+      the License, or (at your option) any later version.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+      even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+      Lesser General Public License for more details.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      You should have received a copy of the GNU Lesser General Public License along with this library; if
+      not, you can get a copy of the GNU Lesser General Public License from http://www.gnu.org/
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      [The full text of the GNU Lesser General Public License, version 2.1, appears under LICENSE TEXTS.]
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
+      BSD 3-clause License in 7-Zip code
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      The "BSD 3-clause License" is used for the following code in 7z.dll<LineBreak/>
+      1) LZFSE data decompression. CPP/7zip/Compress/LzfseDecoder.cpp. That code was derived from the code
+      in the "LZFSE compression library" developed by Apple Inc, that also uses the "BSD 3-clause
+      License".<LineBreak/>
+      2) ZSTD data decompression. C/ZstdDec.c that code was developed using original zstd decoder code as
+      reference code. The original zstd decoder code was developed by Facebook Inc, that also uses the
+      "BSD 3-clause License".
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Copyright (c) 2015-2016, Apple Inc. All rights reserved.<LineBreak/>
+      Copyright (c) Facebook, Inc. All rights reserved.<LineBreak/>
+      Copyright (c) 2023-2026 Igor Pavlov.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
+      Text of the "BSD 3-clause License"
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Redistribution and use in source and binary forms, with or without modification, are permitted
+      provided that the following conditions are met:
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      1. Redistributions of source code must retain the above copyright notice, this list of conditions
+      and the following disclaimer.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+      and the following disclaimer in the documentation and/or other materials provided with the
+      distribution.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse
+      or promote products derived from this software without specific prior written permission.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+      IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+      FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+      CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+      DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+      IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+      THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
+      BSD 2-clause License in 7-Zip code
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>The "BSD 2-clause License" is used for the XXH64 code in 7-Zip. C/Xxh64.c</TextBlock>
+    <TextBlock/>
+    <TextBlock>XXH64 code in 7-Zip was derived from the original XXH64 code developed by Yann Collet.</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Copyright (c) 2012-2021 Yann Collet.<LineBreak/>
+      Copyright (c) 2023-2026 Igor Pavlov.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
+      Text of the "BSD 2-clause License"
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Redistribution and use in source and binary forms, with or without modification, are permitted
+      provided that the following conditions are met:
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      1. Redistributions of source code must retain the above copyright notice, this list of conditions
+      and the following disclaimer.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+      and the following disclaimer in the documentation and/or other materials provided with the
+      distribution.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+      IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+      FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+      CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+      DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+      IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+      THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">unRAR license restriction</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      The decompression engine for RAR archives was developed using source code of unRAR program. All
+      copyrights to original unRAR code are owned by Alexander Roshal.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>The license for original unRAR code has the following restriction:</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      The unRAR sources cannot be used to re-create the RAR compression algorithm, which is proprietary.
+      Distribution of modified unRAR sources in separate form or as a part of other software is permitted,
+      provided that it is clearly stated in the documentation and source comments that the code may not be
+      used to develop a RAR (WinRAR) compatible archiver.
+    </TextBlock>
+  </StackPanel>
+</UserControl>

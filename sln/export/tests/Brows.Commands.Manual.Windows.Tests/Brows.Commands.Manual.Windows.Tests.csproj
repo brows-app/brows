@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.Commands.Manual\Brows.Commands.Manual.csproj" />
+    <ProjectReference
+      Include="..\..\source\windows\Brows.Commands.Manual.Windows\Brows.Commands.Manual.Windows.csproj" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)/props/windows.build.props" />
+</Project>

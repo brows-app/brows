@@ -1,0 +1,125 @@
+﻿<UserControl x:Class="Brows.Notices.PcreNotice"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">PCRE</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Website: https://www.pcre.org/<LineBreak/>
+      Included in: pcre.dll<LineBreak/>
+      License: BSD-3-Clause
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">PCRE LICENCE</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      PCRE is a library of functions to support regular expressions whose syntax and semantics are as
+      close as possible to those of the Perl 5 language.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Release 8 of PCRE is distributed under the terms of the "BSD" licence, as specified below. The
+      documentation for PCRE, supplied in the "doc" directory, is distributed under the same terms as the
+      software itself. The data in the testdata directory is not copyrighted and is in the public domain.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      The basic library functions are written in C and are freestanding. Also included in the distribution
+      is a set of C++ wrapper functions, and a just-in-time compiler that can be used to optimize pattern
+      matching. These are both optional features that can be omitted when the library is built.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">THE BASIC LIBRARY FUNCTIONS</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Written by:       Philip Hazel<LineBreak/>
+      Email local part: Philip.Hazel<LineBreak/>
+      Email domain:     gmail.com
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      University of Cambridge Computing Service,<LineBreak/>
+      Cambridge, England.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Copyright (c) 1997-2021 University of Cambridge<LineBreak/>
+      All rights reserved.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
+      PCRE JUST-IN-TIME COMPILATION SUPPORT
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Written by:       Zoltan Herczeg<LineBreak/>
+      Email local part: hzmester<LineBreak/>
+      Email domain:     freemail.hu
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Copyright(c) 2010-2021 Zoltan Herczeg<LineBreak/>
+      All rights reserved.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">STACK-LESS JUST-IN-TIME COMPILER</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Written by:       Zoltan Herczeg<LineBreak/>
+      Email local part: hzmester<LineBreak/>
+      Email domain:     freemail.hu
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Copyright(c) 2009-2021 Zoltan Herczeg<LineBreak/>
+      All rights reserved.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">THE C++ WRAPPER FUNCTIONS</TextBlock>
+    <TextBlock/>
+    <TextBlock>Contributed by:   Google Inc.</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Copyright (c) 2007-2012, Google Inc.<LineBreak/>
+      All rights reserved.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">THE "BSD" LICENCE</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Redistribution and use in source and binary forms, with or without modification, are permitted
+      provided that the following conditions are met:
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      * Redistributions of source code must retain the above copyright notice, this list of conditions and
+      the following disclaimer.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      * Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+      and the following disclaimer in the documentation and/or other materials provided with the
+      distribution.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      * Neither the name of the University of Cambridge nor the name of Google Inc. nor the names of their
+      contributors may be used to endorse or promote products derived from this software without specific
+      prior written permission.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+      IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+      FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+      CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+      DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+      IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+      THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>End</TextBlock>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="Brows.Notices.BrowsNotice"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">BROWS LICENSE</TextBlock>
+    <TextBlock/>
+    <TextBlock>© Ken Yourek 2021-2026</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Brows is free software: you can redistribute it and/or modify it under the terms of the GNU General
+      Public License as published by the Free Software Foundation, either version 3 of the License, or (at
+      your option) any later version.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Brows is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+      implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+      License for more details.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      [The full text of the GNU General Public License, version 3, appears under LICENSE TEXTS.]
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      The source code of Brows is available at https://github.com/brows-app/brows. The source code of the
+      third-party software included in Brows is available from the websites listed in its notices.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      The third-party software included in Brows remains available under its own license terms, which
+      appear under THIRD-PARTY SOFTWARE NOTICES.
+    </TextBlock>
+  </StackPanel>
+</UserControl>

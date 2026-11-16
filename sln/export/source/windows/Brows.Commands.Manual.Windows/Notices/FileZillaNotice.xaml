@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="Brows.Notices.FileZillaNotice"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">
+      FileZilla directory listing parser
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Website: https://filezilla-project.org/<LineBreak/>
+      Included in: Brows.DirectoryListing.dll<LineBreak/>
+      License: GPL-3.0-or-later
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Parts of Brows.DirectoryListing are derived from FileZilla Client's FTP directory listing parser.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>Copyright (C) 2004-2024 Tim Kosse &lt;tim.kosse@filezilla-project.org&gt;</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Brows.DirectoryListing contains a C# port. The source has been modified, including translation to
+      C#, renaming of types and members, and restructuring of the parsing pipeline.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      The FileZilla-derived code is distributed under the GNU General Public License, version 3 or (at
+      your option) any later version, as permitted by the upstream GPL version 2 or later grant.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      [The full text of the GNU General Public License, version 3, appears under LICENSE TEXTS.]
+    </TextBlock>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="Brows.Notices.MingwW64Notice"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <TextBlock FontWeight="{DynamicResource Brows.Font.Weight.Bold}">mingw-w64</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Website: https://www.mingw-w64.org/<LineBreak/>
+      Included in: the C runtime linked into the terminal components (ghostty-vt.dll and
+      brows-ghostty.dll) supplied by the Brows.TTY package<LineBreak/>
+      License: ZPL-2.1
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      With exception of certain parts that are prominently marked as being in the Public Domain, BSD, or
+      LGPL this Software is provided under the Zope Public License (ZPL) Version 2.1.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>Copyright (c) 2009 - 2013 by the mingw-w64 project</TextBlock>
+    <TextBlock/>
+    <TextBlock>See the AUTHORS file for the list of contributors to the mingw-w64 project.</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      This license has been certified as open source. It has also been designated as GPL compatible by the
+      Free Software Foundation (FSF).
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      Redistribution and use in source and binary forms, with or without modification, are permitted
+      provided that the following conditions are met:
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      1. Redistributions in source code must retain the accompanying copyright notice, this list of
+      conditions, and the following disclaimer.<LineBreak/>
+      2. Redistributions in binary form must reproduce the accompanying copyright notice, this list of
+      conditions, and the following disclaimer in the documentation and/or other materials provided with
+      the distribution.<LineBreak/>
+      3. Names of the copyright holders must not be used to endorse or promote products derived from this
+      software without prior written permission from the copyright holders.<LineBreak/>
+      4. The right to distribute this software or to use it for any purpose does not give you the right to
+      use Servicemarks (sm) or Trademarks (tm) of the copyright holders.  Use of them is covered by
+      separate agreement with the copyright holders.<LineBreak/>
+      5. If any files are modified, you must cause the modified files to carry prominent notices stating
+      that you changed the files and the date of any change.
+    </TextBlock>
+    <TextBlock/>
+    <TextBlock>Disclaimer</TextBlock>
+    <TextBlock/>
+    <TextBlock>
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+      WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+      DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+      INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+      OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+      IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    </TextBlock>
+  </StackPanel>
+</UserControl>

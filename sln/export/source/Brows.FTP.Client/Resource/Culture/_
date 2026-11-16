@@ -29,3 +29,4 @@ Command_Description_Ftps_CreateDirectory   = Create an FTPS directory
 Command_Description_Ftp_CreateFile         = Create an empty FTP file
 Command_Description_Ftps_CreateFile        = Create an empty FTPS file
 Command_Description_Ftp                   = Open an FTP or FTPS URL
+Command_Description_FtpUrl                = Open the FTP or FTPS URL entered in the command palette

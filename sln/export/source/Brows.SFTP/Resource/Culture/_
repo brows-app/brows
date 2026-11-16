@@ -7,6 +7,7 @@ Command_Description_Sftp_Rename                  = Rename an SFTP entry
 Command_Description_Sftp_CreateDirectory          = Create a directory on the SFTP server
 Command_Description_Sftp_CreateFile               = Create an empty file on the SFTP server
 Command_Description_Sftp                          = Open an SFTP server
+Command_Description_SftpUrl                       = Open the SFTP URL entered in the command palette
 Command_Description_SftpConnection_Open          = Trust the host key or retry SFTP authentication
 Command_Group_SftpEntryData                      = SFTP
 Command_Group_SftpConnectionEntryData            = SFTP connection

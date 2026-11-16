@@ -39,6 +39,9 @@
     <Project Path="export/source/windows/Brows.Commands.Manual.Windows/Brows.Commands.Manual.Windows.csproj" />
     <Project Path="export/source/windows/Brows.Commands.Process.Windows/Brows.Commands.Process.Windows.csproj" />
   </Folder>
+  <Folder Name="/export/Commands/tests/">
+    <Project Path="export/tests/Brows.Commands.Manual.Windows.Tests/Brows.Commands.Manual.Windows.Tests.csproj" />
+  </Folder>
   <Folder Name="/export/Drives/">
     <Project Path="export/source/Brows.Drives/Brows.Drives.csproj" />
     <Project Path="export/source/windows/Brows.Drives.Windows/Brows.Drives.Windows.csproj" />
