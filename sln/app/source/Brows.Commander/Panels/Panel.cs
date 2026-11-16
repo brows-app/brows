@@ -389,7 +389,12 @@ internal sealed class Panel : Notifier, IPanel, IControlled<IPanelController> {
         try {
             token.ThrowIfCancellationRequested();
             await StopAsync();
-            token.ThrowIfCancellationRequested();
+            /*
+             * A provider that replaces itself requests the replacement with its own
+             * token, which stopping that provider cancels. Once the previous provider
+             * is stopped, only closing the panel abandons the replacement.
+             */
+            LifetimeToken.ThrowIfCancellationRequested();
         }
         catch {
             await RetireProspectiveAsync();

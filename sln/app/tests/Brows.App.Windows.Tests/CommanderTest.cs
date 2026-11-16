@@ -425,6 +425,32 @@ internal sealed class CommanderTest {
     }
 
     [Test]
+    public async Task Provide_InstallsReplacementRequestedWithTokenOfStoppedProvider() {
+        /*
+         * A provider that replaces itself, as an SFTP connection does once it
+         * authenticates, requests the replacement with its own token. Stopping
+         * that provider cancels the token.
+         */
+        using var outgoing = new CancellationTokenSource();
+        var first = CreateProvider("one");
+        Mock.Get(first.Provider).Setup(item => item.End()).Callback(() => outgoing.Cancel());
+        var second = CreateProvider("two");
+        var commander = CreateCommander([], first.Provider, second.Provider);
+        await AddPanel(commander, "one");
+        var panel = commander.Panels.Active;
+
+        var provided = await panel.Provide("two", outgoing.Token);
+
+        Assert.That(provided, Is.True);
+        Assert.That(outgoing.IsCancellationRequested, Is.True);
+        Assert.That(panel.HasProvider(out IProvider after), Is.True);
+        Assert.That(after, Is.SameAs(second.Provider));
+        Mock.Get(second.Provider).Verify(item => item.Begin(), Times.Once);
+        Mock.Get(second.Provider).Verify(item => item.End(), Times.Never);
+        await ((IAsyncDisposable)commander).DisposeAsync();
+    }
+
+    [Test]
     public async Task DisposeAsync_FailedLaterPanelKeepsRemainingPanelActiveUntilRetry() {
         var first = CreateProvider("first");
         var second = new Mock<IEntryProvider>();

@@ -163,12 +163,12 @@ internal sealed class SftpConnectionProvider : Provider<SftpConnectionEntry, Sft
         base.End();
     }
 
-    internal object Icon { get; }
-
     internal SftpConnectionProvider(SftpProviderFactory factory, Uri uri, object icon, SftpClientLease lease)
         : base(uri?.ToString()) {
         Factory = factory ?? throw new ArgumentNullException(nameof(factory));
         Icon = icon;
         Lease = lease ?? throw new ArgumentNullException(nameof(lease));
     }
+
+    public object Icon { get; }
 }
