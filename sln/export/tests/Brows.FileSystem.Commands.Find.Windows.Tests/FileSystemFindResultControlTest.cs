@@ -57,7 +57,7 @@ public sealed class FileSystemFindResultControlTest {
     }
 
     private static FileSystemFindResult Result(DirectoryInfo root) {
-        return new FileSystemFindResult(root, new FindParameter { Pattern = "*" }, "find", null);
+        return new FileSystemFindResult(root, new Find.Parameter { Pattern = "*" }, "find", null);
     }
 
     private static void AddResources() {

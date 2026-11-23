@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Brows.Native;
 
+/// <summary>
+/// Loads and releases a native library and reports loading failures.
+/// </summary>
 public abstract class NativeLoader {
     private static readonly ILog Log = Logging.For(typeof(NativeLoader));
     private static readonly NativeLoader Brows = new BrowsNative();
@@ -12,16 +15,34 @@ public abstract class NativeLoader {
     private volatile Task HandleTask;
     private readonly Lock HandleLocker = new();
 
+    /// <summary>
+    /// Initializes a loader for a native library.
+    /// </summary>
+    /// <param name="dll">
+    /// The native library file name.
+    /// </param>
     protected NativeLoader(string dll) {
         Dll = dll;
     }
 
+    /// <summary>
+    /// Performs library-specific setup after the library is loaded.
+    /// </summary>
     protected virtual void HandleLoaded() {
     }
 
+    /// <summary>
+    /// Performs library-specific cleanup before the library is released.
+    /// </summary>
     protected virtual void HandleFreeing() {
     }
 
+    /// <summary>
+    /// Runs a native operation and throws when its error code is nonzero.
+    /// </summary>
+    /// <param name="result">
+    /// The operation, returning zero on success or an error code on failure.
+    /// </param>
     protected void Try(Func<int> result) {
         ArgumentNullException.ThrowIfNull(result);
         var error = result();
@@ -30,10 +51,30 @@ public abstract class NativeLoader {
         }
     }
 
+    /// <summary>
+    /// Gets the name of the native library to load.
+    /// </summary>
     public string Dll { get; }
+
+    /// <summary>
+    /// Gets the loaded library's handle, or zero when it is not loaded.
+    /// </summary>
     public IntPtr Handle { get; private set; }
+
+    /// <summary>
+    /// Gets the most recently recorded loading or release error, or null when none is recorded.
+    /// </summary>
     public Exception Error { get; private set; }
 
+    /// <summary>
+    /// Ensures that the native library is loaded.
+    /// </summary>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// True if the library is loaded; otherwise, false. Loading failures are available through Error.
+    /// </returns>
     public async Task<bool> Loaded(CancellationToken token) {
         if (token.IsCancellationRequested){
             token.ThrowIfCancellationRequested();
@@ -91,6 +132,15 @@ public abstract class NativeLoader {
         return Handle != IntPtr.Zero;
     }
 
+    /// <summary>
+    /// Waits for any pending load and releases the native library.
+    /// </summary>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task that completes when the library has been released.
+    /// </returns>
     public async Task Freed(CancellationToken token) {
         // TODO: Call this method somewhere and make sure it works.
         token.ThrowIfCancellationRequested();

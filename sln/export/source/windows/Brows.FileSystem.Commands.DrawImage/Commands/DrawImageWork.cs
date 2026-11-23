@@ -18,9 +18,9 @@ internal sealed class DrawImageWork {
 
     public ISTAThreadPool ThreadPool { get; }
     public FileSystemRename Rename { get; }
-    public DrawImageParameter Parameter { get; }
+    public DrawImage.Parameter Parameter { get; }
 
-    public DrawImageWork(DrawImageParameter parameter, FileSystemRename rename, ISTAThreadPool threadPool) {
+    public DrawImageWork(DrawImage.Parameter parameter, FileSystemRename rename, ISTAThreadPool threadPool) {
         Rename = rename ?? throw new ArgumentNullException(nameof(rename));
         Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
         ThreadPool = threadPool ?? throw new ArgumentNullException(nameof(threadPool));

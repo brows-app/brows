@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Brows.Security;
 
+/// <summary>
+/// Protects sensitive data and encodes credentials for storage.
+/// </summary>
 public static class SecurityData {
     private static readonly Encoding Encoding = Encoding.UTF8;
 
@@ -71,40 +74,148 @@ public static class SecurityData {
         return result;
     }
 
+    /// <summary>
+    /// Protects data for later restoration.
+    /// </summary>
+    /// <param name="data">
+    /// The data to protect.
+    /// </param>
+    /// <param name="entropy">
+    /// The additional secret; restoration requires the same value used for protection.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The protected bytes.
+    /// </returns>
     public static Task<byte[]> Protect(byte[] data, SecureString entropy, CancellationToken token) {
         return Protect(data, Bytes(entropy), token);
     }
 
+    /// <summary>
+    /// Restores data that was previously protected.
+    /// </summary>
+    /// <param name="data">
+    /// The data to unprotect.
+    /// </param>
+    /// <param name="entropy">
+    /// The additional secret; restoration requires the same value used for protection.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The original bytes.
+    /// </returns>
     public static Task<byte[]> Unprotect(byte[] data, SecureString entropy, CancellationToken token) {
         return Unprotect(data, Bytes(entropy), token);
     }
 
+    /// <summary>
+    /// Protects data for later restoration. Uses the configured additional secret.
+    /// </summary>
+    /// <param name="data">
+    /// The data to protect.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The protected bytes.
+    /// </returns>
     public static async Task<byte[]> Protect(byte[] data, CancellationToken token) {
         var entropy = await Entropy(token);
         return await Protect(data, entropy, token);
     }
 
+    /// <summary>
+    /// Restores data that was previously protected. Uses the configured additional secret.
+    /// </summary>
+    /// <param name="data">
+    /// The data to unprotect.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The original bytes.
+    /// </returns>
     public static async Task<byte[]> Unprotect(byte[] data, CancellationToken token) {
         var entropy = await Entropy(token);
         return await Unprotect(data, entropy, token);
     }
 
+    /// <summary>
+    /// Protects data for later restoration.
+    /// </summary>
+    /// <param name="data">
+    /// The data to protect.
+    /// </param>
+    /// <param name="entropy">
+    /// The additional secret; restoration requires the same value used for protection.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The protected data encoded as Base64 text.
+    /// </returns>
     public static async Task<string> Protect(string data, SecureString entropy, CancellationToken token) {
         var bytData = await Protect(Encode(data), entropy, token);
         return Convert.ToBase64String(bytData);
     }
 
+    /// <summary>
+    /// Restores data that was previously protected.
+    /// </summary>
+    /// <param name="data">
+    /// The Base64 text returned by Protect.
+    /// </param>
+    /// <param name="entropy">
+    /// The additional secret; restoration requires the same value used for protection.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The original text.
+    /// </returns>
     public static async Task<string> Unprotect(string data, SecureString entropy, CancellationToken token) {
         var bytData = Convert.FromBase64String(data);
         var newData = await Unprotect(bytData, entropy, token);
         return Decode(newData);
     }
 
+    /// <summary>
+    /// Protects data for later restoration. Uses the configured additional secret.
+    /// </summary>
+    /// <param name="data">
+    /// The data to protect.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The protected data encoded as Base64 text.
+    /// </returns>
     public static async Task<string> Protect(string data, CancellationToken token) {
         var bytData = await Protect(Encode(data), await Entropy(token), token);
         return Convert.ToBase64String(bytData);
     }
 
+    /// <summary>
+    /// Restores data that was previously protected. Uses the configured additional secret.
+    /// </summary>
+    /// <param name="data">
+    /// The Base64 text returned by Protect.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The original text.
+    /// </returns>
     public static async Task<string> Unprotect(string data, CancellationToken token) {
         var bytData = Convert.FromBase64String(data);
         var newData = await Unprotect(bytData, await Entropy(token), token);
@@ -116,6 +227,18 @@ public static class SecurityData {
      * a length-prefixed UTF-16 password, so a stored secret can be decoded
      * without knowing which kind of secret it holds.
      */
+    /// <summary>
+    /// Encodes a username and password together for storage or protection.
+    /// </summary>
+    /// <param name="username">
+    /// The username, or null for an empty username.
+    /// </param>
+    /// <param name="password">
+    /// The password, or null for an empty password.
+    /// </param>
+    /// <returns>
+    /// The encoded credentials. The bytes are not protected by this method.
+    /// </returns>
     public static byte[] EncodeSecret(string username, SecureString password) {
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream);
@@ -129,6 +252,15 @@ public static class SecurityData {
         return stream.ToArray();
     }
 
+    /// <summary>
+    /// Decodes credentials created by <see cref="EncodeSecret"/>.
+    /// </summary>
+    /// <param name="data">
+    /// The encoded credentials.
+    /// </param>
+    /// <returns>
+    /// The username and a read-only password. The caller must dispose of the password when finished.
+    /// </returns>
     public static (string Username, SecureString Password) DecodeSecret(byte[] data) {
         using var stream = new MemoryStream(data ?? []);
         using var reader = new BinaryReader(stream);

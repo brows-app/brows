@@ -3,6 +3,7 @@ using Brows.Triggers;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CONF = Domore.Conf.Conf;
 
@@ -11,7 +12,7 @@ namespace Brows.Commands;
 [TestFixture]
 [NonParallelizable]
 internal sealed class CommandTriggerTest {
-    private ITranslation PreviousTranslation;
+    private ITranslation Translation;
 
     private static async Task<TriggerConfig> LoadConfig(string userContent) {
         var temporaryDirectory = Directory.CreateTempSubdirectory("BrowsCommandTriggerTest-");
@@ -58,7 +59,6 @@ internal sealed class CommandTriggerTest {
 
     [SetUp]
     public void SetUp() {
-        PreviousTranslation = Translation.Global;
         var translation = new Mock<ITranslation>();
         translation.Setup(item => item.Value(It.IsAny<string>()))
             .Returns((string key) => key switch {
@@ -71,62 +71,319 @@ internal sealed class CommandTriggerTest {
                 "PressKey_F11" => "F11",
                 "PressKey_Back" => "BACK",
                 "PressKey_Left" => "LEFT",
+                "PressKey_Delete" => "DEL",
+                "ClickButton_Left" => "L",
                 _ => null
             });
-        Translation.Global = translation.Object;
+        Translation = translation.Object;
     }
 
     [TearDown]
     public void TearDown() {
-        Translation.Global = PreviousTranslation;
+        Translation = null;
     }
 
     [Test]
-    public async Task Compile_LoadedDefaultsAndUserRemapExposeOnlyEffectiveReleaseGesture() {
+    public async Task Compile_LoadedDefaultsAndUserRemapExposeOnlyEffectiveTerminalGestures() {
         var config = await LoadConfig(
-            "cmd[FileSystem_TerminalRelease].input = terminal-return\r\n" +
-            "cmd[FileSystem_TerminalRelease].press[CTRL+SHIFT+F12] = disabled\r\n" +
-            "cmd[FileSystem_TerminalRelease].press[CTRL+SHIFT+F11] = *\r\n");
-        var release = config.Cmd["FileSystem_TerminalRelease"];
-        ICommandTrigger trigger = CommandTrigger.Compile(release.Input, release.Press, release.Click, release.Macro);
+            "cmd[FileSystem_Terminal].press[CTRL+SHIFT+F12] = disabled\r\n" +
+            "cmd[FileSystem_Terminal].press[CTRL+SHIFT+F11] = *\r\n");
+        var terminal = config.Cmd["FileSystem_Terminal"];
+        ICommandTrigger trigger = CommandTrigger.Compile(
+            terminal.Input,
+            terminal.Press,
+            terminal.Click,
+            terminal.Macro,
+            Translation);
         var oldGesture = new PressGesture(PressKey.F12, PressModifiers.Control | PressModifiers.Shift);
         var newGesture = new PressGesture(PressKey.F11, PressModifiers.Control | PressModifiers.Shift);
+        var closeGesture = new PressGesture(
+            PressKey.F12,
+            PressModifiers.Control | PressModifiers.Shift | PressModifiers.Alt);
 
-        Assert.That(trigger.Triggered("terminal-return", out _), Is.True);
-        Assert.That(trigger.Triggered("terminal-release", out _), Is.False);
+        Assert.That(trigger.Triggered("terminal", out _), Is.True);
         Assert.That(trigger.Triggered(oldGesture, out _), Is.False);
         Assert.That(trigger.Triggered(newGesture, out var newTrigger), Is.True);
-        Assert.That(newTrigger.Defined, Is.EqualTo("terminal-return"));
-
-        var open = config.Cmd["FileSystem_TerminalOpen"];
-        ICommandTrigger openTrigger = CommandTrigger.Compile(open.Input, open.Press, open.Click, open.Macro);
-        var openGesture = new PressGesture(PressKey.T, PressModifiers.Control | PressModifiers.Alt);
-        Assert.That(openTrigger.Triggered("terminal", out _), Is.True);
-        Assert.That(openTrigger.Triggered("term", out _), Is.True);
-        Assert.That(openTrigger.Triggered(openGesture, out var openGestureTrigger), Is.True);
-        Assert.That(openGestureTrigger.Defined, Is.EqualTo("terminal"));
+        Assert.That(newTrigger.Defined, Is.EqualTo("terminal"));
+        Assert.That(trigger.Triggered(closeGesture, out var closeTrigger), Is.True);
+        Assert.That(closeTrigger.Defined, Is.EqualTo("terminal close"));
+        Assert.That(trigger.Gestures, Has.Count.EqualTo(2));
     }
 
     [Test]
-    public async Task Compile_LoadedDefaultsWithoutUserOverlayBindReleaseAndCloseAlias() {
+    public async Task Compile_LoadedDefaultsWithoutUserOverlayBindTerminal() {
         var config = await LoadConfig("");
-        var release = config.Cmd["FileSystem_TerminalRelease"];
-        ICommandTrigger releaseTrigger = CommandTrigger.Compile(
-            release.Input,
-            release.Press,
-            release.Click,
-            release.Macro);
-        var releaseGesture = new PressGesture(PressKey.F12, PressModifiers.Control | PressModifiers.Shift);
+        var terminal = config.Cmd["FileSystem_Terminal"];
+        ICommandTrigger trigger = CommandTrigger.Compile(
+            terminal.Input,
+            terminal.Press,
+            terminal.Click,
+            terminal.Macro,
+            Translation);
+        var gesture = new PressGesture(PressKey.F12, PressModifiers.Control | PressModifiers.Shift);
+        var closeGesture = new PressGesture(
+            PressKey.F12,
+            PressModifiers.Control | PressModifiers.Shift | PressModifiers.Alt);
+        var formerOpenGesture = new PressGesture(PressKey.T, PressModifiers.Control | PressModifiers.Alt);
 
-        Assert.That(releaseTrigger.Triggered("terminal-release", out _), Is.True);
-        Assert.That(releaseTrigger.Triggered(releaseGesture, out var gestureTrigger), Is.True);
-        Assert.That(gestureTrigger.Defined, Is.EqualTo("terminal-release"));
+        Assert.That(trigger.Triggered("terminal", out _), Is.True);
+        Assert.That(trigger.Triggered("term", out _), Is.True);
+        Assert.That(trigger.Triggered(gesture, out var gestureTrigger), Is.True);
+        Assert.That(gestureTrigger.Defined, Is.EqualTo("terminal"));
+        Assert.That(trigger.Triggered(closeGesture, out var closeTrigger), Is.True);
+        Assert.That(closeTrigger.Defined, Is.EqualTo("terminal close"));
+        Assert.That(trigger.Triggered(formerOpenGesture, out _), Is.False);
+        Assert.That(trigger.Triggered("terminal-close", out _), Is.False);
+        Assert.That(trigger.Gestures, Has.Count.EqualTo(2));
+        Assert.That(config.Cmd.ContainsKey("FileSystem_TerminalOpen"), Is.False);
+        Assert.That(config.Cmd.ContainsKey("FileSystem_TerminalRelease"), Is.False);
+        Assert.That(config.Cmd.ContainsKey("FileSystem_TerminalClose"), Is.False);
+    }
 
-        var close = config.Cmd["FileSystem_TerminalClose"];
-        ICommandTrigger closeTrigger = CommandTrigger.Compile(close.Input, close.Press, close.Click, close.Macro);
+    private static Func<string, CommandTrigger.Layer> Find(TriggerConfig config) {
+        return key => config.Cmd.TryGetValue(key, out var cmd)
+            ? new CommandTrigger.Layer(cmd.Input, cmd.Press, cmd.Click, cmd.Macro)
+            : null;
+    }
 
-        Assert.That(closeTrigger.Triggered("terminal-close", out _), Is.True);
-        Assert.That(closeTrigger.Gestures.Count, Is.Zero);
+    private static Dictionary<string, string> Set(params (string Key, string Value)[] items) {
+        var set = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in items) {
+            set[item.Key] = item.Value;
+        }
+        return set;
+    }
+
+    private static Func<string, CommandTrigger.Layer> Find(params (string Key, CommandTrigger.Layer Layer)[] layers) {
+        return key => {
+            foreach (var item in layers) {
+                if (string.Equals(item.Key, key, StringComparison.OrdinalIgnoreCase)) {
+                    return item.Layer;
+                }
+            }
+            return null;
+        };
+    }
+
+    [TestCase("MBox_Open", "Open", PressKey.Enter, PressModifiers.None, "open")]
+    [TestCase("Ftp_Open", "Open", PressKey.Enter, PressModifiers.None, "open")]
+    [TestCase("Ftps_Open", "Open", PressKey.Enter, PressModifiers.None, "open")]
+    [TestCase("Sftp_Open", "Open", PressKey.Enter, PressModifiers.None, "open")]
+    [TestCase("SftpConnection_Open", "Open", PressKey.Enter, PressModifiers.None, "open")]
+    [TestCase("Zip_Open", "Open", PressKey.Enter, PressModifiers.None, "open")]
+    [TestCase("MBox_View", "View", PressKey.P, PressModifiers.Alt, "view toggle=preview")]
+    [TestCase("Ftp_View", "View", PressKey.P, PressModifiers.Alt, "view toggle=preview")]
+    [TestCase("Ftps_View", "View", PressKey.P, PressModifiers.Alt, "view toggle=preview")]
+    [TestCase("Sftp_View", "View", PressKey.P, PressModifiers.Alt, "view toggle=preview")]
+    [TestCase("Zip_View", "View", PressKey.P, PressModifiers.Alt, "view toggle=preview")]
+    [TestCase("FileSystem_Delete", "Delete", PressKey.Delete, PressModifiers.None, "delete")]
+    [TestCase("FileSystem_Delete", "Delete", PressKey.Delete, PressModifiers.Shift, "delete unrecoverable=true")]
+    [TestCase("Ftp_Delete", "Delete", PressKey.Delete, PressModifiers.None, "delete")]
+    [TestCase("Ftps_Delete", "Delete", PressKey.Delete, PressModifiers.None, "delete")]
+    [TestCase("Sftp_Delete", "Delete", PressKey.Delete, PressModifiers.None, "delete")]
+    [TestCase("FileSystem_Rename", "Rename", PressKey.F2, PressModifiers.None, "rename")]
+    [TestCase("Ftp_Rename", "Rename", PressKey.F2, PressModifiers.None, "rename")]
+    [TestCase("Ftps_Rename", "Rename", PressKey.F2, PressModifiers.None, "rename")]
+    [TestCase("Sftp_Rename", "Rename", PressKey.F2, PressModifiers.None, "rename")]
+    [TestCase("FileSystem_CreateDirectory", "CreateDirectory", PressKey.N,
+              PressModifiers.Control | PressModifiers.Shift, "new-dir")]
+    [TestCase("Ftp_CreateDirectory", "CreateDirectory", PressKey.N,
+              PressModifiers.Control | PressModifiers.Shift, "new-dir")]
+    [TestCase("Ftps_CreateDirectory", "CreateDirectory", PressKey.N,
+              PressModifiers.Control | PressModifiers.Shift, "new-dir")]
+    [TestCase("Sftp_CreateDirectory", "CreateDirectory", PressKey.N,
+              PressModifiers.Control | PressModifiers.Shift, "new-dir")]
+    [TestCase("Ftp_CreateFile", "CreateFile", PressKey.N,
+              PressModifiers.Alt | PressModifiers.Control | PressModifiers.Shift, "new-file")]
+    [TestCase("Ftps_CreateFile", "CreateFile", PressKey.N,
+              PressModifiers.Alt | PressModifiers.Control | PressModifiers.Shift, "new-file")]
+    [TestCase("Sftp_CreateFile", "CreateFile", PressKey.N,
+              PressModifiers.Alt | PressModifiers.Control | PressModifiers.Shift, "new-file")]
+    [TestCase("Ftp_ViewRaw", "ViewRaw", PressKey.V, PressModifiers.Alt, "raw")]
+    [TestCase("Ftps_ViewRaw", "ViewRaw", PressKey.V, PressModifiers.Alt, "raw")]
+    public async Task Resolve_LoadedDefaultsShareTheShortcutOfACommandAcrossProviders(string name,
+                                                                                      string typeName,
+                                                                                      PressKey key,
+                                                                                      PressModifiers modifiers,
+                                                                                      string defined) {
+        var config = await LoadConfig("");
+        ICommandTrigger trigger = CommandTrigger.Resolve(name, typeName, Find(config), Translation);
+
+        Assert.That(trigger, Is.Not.Null);
+        Assert.That(trigger.Triggered(new PressGesture(key, modifiers), out var gesture), Is.True);
+        Assert.That(gesture.Defined, Is.EqualTo(defined));
+    }
+
+    [TestCase("Ftp_View", "View", "view", "ftp-view")]
+    [TestCase("Ftp_Delete", "Delete", "delete", "ftp-delete")]
+    [TestCase("Ftp_Rename", "Rename", "rename", "ftp-rename")]
+    [TestCase("Ftp_Move", "Move", "move", "ftp-move")]
+    [TestCase("Ftp_CreateDirectory", "CreateDirectory", "new-dir", "ftp-new-dir")]
+    [TestCase("Ftp_CreateFile", "CreateFile", "new-file", "ftp-new-file")]
+    [TestCase("Ftps_View", "View", "view", "ftps-view")]
+    [TestCase("Ftps_Delete", "Delete", "delete", "ftps-delete")]
+    [TestCase("Ftps_Rename", "Rename", "rename", "ftps-rename")]
+    [TestCase("Ftps_Move", "Move", "move", "ftps-move")]
+    [TestCase("Ftps_CreateDirectory", "CreateDirectory", "new-dir", "ftps-new-dir")]
+    [TestCase("Ftps_CreateFile", "CreateFile", "new-file", "ftps-new-file")]
+    [TestCase("Sftp_Open", "Open", "open", "sftp-open")]
+    [TestCase("Sftp_View", "View", "view", "sftp-view")]
+    [TestCase("Sftp_Delete", "Delete", "delete", "sftp-delete")]
+    [TestCase("Sftp_Rename", "Rename", "rename", "sftp-rename")]
+    [TestCase("Sftp_Move", "Move", "move", "sftp-move")]
+    [TestCase("Sftp_CreateDirectory", "CreateDirectory", "new-dir", "sftp-new-dir")]
+    [TestCase("Sftp_CreateFile", "CreateFile", "new-file", "sftp-new-file")]
+    public async Task Resolve_LoadedDefaultsGiveRemoteCommandsOnlyTheSharedInput(string name,
+                                                                                 string typeName,
+                                                                                 string sharedInput,
+                                                                                 string providerInput) {
+        /*
+         * The FTP, FTPS, and SFTP commands take their input from the shared entry of their type
+         * name. The defaults no longer define provider-prefixed inputs for them.
+         */
+        var config = await LoadConfig("");
+        ICommandTrigger trigger = CommandTrigger.Resolve(name, typeName, Find(config), Translation);
+
+        Assert.That(trigger, Is.Not.Null);
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(config.Cmd.ContainsKey(name), Is.False);
+            Assert.That(trigger.Triggered(sharedInput, out _), Is.True);
+            Assert.That(trigger.Triggered(providerInput, out _), Is.False);
+        }
+    }
+
+    [Test]
+    public async Task Resolve_LoadedDefaultsDoNotRepeatSharedTriggers() {
+        /*
+         * The entry of a command's type name, such as cmd[Open], is shared by the commands of that
+         * name in every provider. An entry of a provider's command does not repeat what the
+         * shared entry holds, and a shortcut that the commands of several providers have in
+         * common belongs to the shared entry.
+         */
+        var config = await LoadConfig("");
+        var repeated = new List<string>();
+        var shortcuts = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in config.Cmd) {
+            var separator = pair.Key.IndexOf('_');
+            if (separator < 0) {
+                continue;
+            }
+            var typeName = pair.Key.Substring(separator + 1);
+            var hasShared = config.Cmd.TryGetValue(typeName, out var shared);
+            var gestures = pair.Value.Press.Select(item => ("press", item))
+                .Concat(pair.Value.Click.Select(item => ("click", item)));
+            foreach (var (kind, item) in gestures) {
+                var sharedSet = kind == "press" ? shared?.Press : shared?.Click;
+                var gestureIsShared = hasShared && sharedSet.ContainsKey(item.Key);
+                if (gestureIsShared) {
+                    repeated.Add($"{pair.Key}.{kind}[{item.Key}]");
+                }
+                var shortcut = $"{typeName}.{kind}[{item.Key}] = {item.Value}";
+                if (shortcuts.TryGetValue(shortcut, out var owners) == false) {
+                    shortcuts[shortcut] = owners = [];
+                }
+                owners.Add(pair.Key);
+            }
+            var sharedInputs = (shared?.Input ?? "").Split('|', StringSplitOptions.TrimEntries);
+            foreach (var input in (pair.Value.Input ?? "").Split('|', StringSplitOptions.RemoveEmptyEntries)) {
+                var inputIsShared = sharedInputs.Contains(input.Trim(), StringComparer.OrdinalIgnoreCase);
+                if (inputIsShared) {
+                    repeated.Add($"{pair.Key}.input = {input.Trim()}");
+                }
+            }
+        }
+        foreach (var pair in shortcuts) {
+            var shortcutIsCommon = pair.Value.Count > 1;
+            if (shortcutIsCommon) {
+                repeated.Add($"{pair.Key} ({string.Join(", ", pair.Value)})");
+            }
+        }
+        Assert.That(repeated, Is.Empty);
+    }
+
+    [Test]
+    public void Resolve_QualifiedEntryInheritsTheGesturesOfTheUnqualifiedEntry() {
+        var find = Find(
+            ("Open", new CommandTrigger.Layer(
+                "open",
+                Set(("ENTER", "*"), ("ENTER+CTRL", "* p")),
+                Set(("2L", "*")),
+                Set(("open-here", "* here")))),
+            ("MBox_Open", new CommandTrigger.Layer("mbox-open", Set(), Set(), Set())));
+        ICommandTrigger trigger = CommandTrigger.Resolve("MBox_Open", "Open", find, Translation);
+
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(trigger.Triggered("mbox-open", out _), Is.True);
+            Assert.That(trigger.Triggered("open", out _), Is.True);
+            Assert.That(trigger.Triggered(new PressGesture(PressKey.Enter), out var enter), Is.True);
+            Assert.That(enter?.Defined, Is.EqualTo("mbox-open"));
+            Assert.That(trigger.Triggered(new PressGesture(PressKey.Enter, PressModifiers.Control), out var ctrl),
+                        Is.True);
+            Assert.That(ctrl?.Defined, Is.EqualTo("mbox-open p"));
+            Assert.That(trigger.Triggered("open-here", out var macro), Is.True);
+            Assert.That(macro?.Defined, Is.EqualTo("mbox-open here"));
+            Assert.That(trigger.Gestures, Has.Count.EqualTo(3));
+        }
+    }
+
+    [Test]
+    public void Resolve_QualifiedEntryInheritsTheInputWhenItHasNone() {
+        var find = Find(
+            ("Open", new CommandTrigger.Layer("open", Set(("ENTER", "*")), Set(), Set())),
+            ("Ftp_Open", new CommandTrigger.Layer(null, Set(), Set(), Set())));
+        ICommandTrigger trigger = CommandTrigger.Resolve("Ftp_Open", "Open", find, Translation);
+
+        Assert.That(trigger.Triggered("open", out _), Is.True);
+        Assert.That(trigger.Triggered(new PressGesture(PressKey.Enter), out var enter), Is.True);
+        Assert.That(enter.Defined, Is.EqualTo("open"));
+    }
+
+    [Test]
+    public void Resolve_QualifiedEntryOverridesAndDisablesInheritedGestures() {
+        var find = Find(
+            ("Open", new CommandTrigger.Layer(
+                "open",
+                Set(("ENTER", "*"), ("ENTER+CTRL", "* p")),
+                Set(),
+                Set())),
+            ("MBox_Open", new CommandTrigger.Layer(
+                "mbox-open",
+                Set(("ENTER", "* all=true"), ("ENTER+CTRL", "disabled")),
+                Set(),
+                Set())));
+        ICommandTrigger trigger = CommandTrigger.Resolve("MBox_Open", "Open", find, Translation);
+
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(trigger.Triggered(new PressGesture(PressKey.Enter), out var enter), Is.True);
+            Assert.That(enter?.Defined, Is.EqualTo("mbox-open all=true"));
+            Assert.That(trigger.Triggered(new PressGesture(PressKey.Enter, PressModifiers.Control), out _),
+                        Is.False);
+        }
+    }
+
+    [Test]
+    public void Resolve_QualifiedEntryEnablesAGestureThatTheUnqualifiedEntryDisables() {
+        var find = Find(
+            ("Open", new CommandTrigger.Layer("open", Set(("ENTER", "disabled")), Set(), Set())),
+            ("MBox_Open", new CommandTrigger.Layer("mbox-open", Set(("ENTER", "*")), Set(), Set())));
+        ICommandTrigger trigger = CommandTrigger.Resolve("MBox_Open", "Open", find, Translation);
+
+        Assert.That(trigger.Triggered(new PressGesture(PressKey.Enter), out var enter), Is.True);
+        Assert.That(enter.Defined, Is.EqualTo("mbox-open"));
+    }
+
+    [Test]
+    public void Resolve_UsesTheUnqualifiedEntryAloneWhenThereIsNoQualifiedEntry() {
+        var find = Find(("Open", new CommandTrigger.Layer("open", Set(("ENTER", "*")), Set(), Set())));
+        ICommandTrigger trigger = CommandTrigger.Resolve("Zip_Open", "Open", find, Translation);
+
+        Assert.That(trigger.Triggered(new PressGesture(PressKey.Enter), out var enter), Is.True);
+        Assert.That(enter.Defined, Is.EqualTo("open"));
+    }
+
+    [Test]
+    public void Resolve_ReturnsNullWhenNeitherEntryExists() {
+        Assert.That(CommandTrigger.Resolve("MBox_Open", "Open", Find(), Translation), Is.Null);
     }
 
     [Test]
@@ -137,7 +394,8 @@ internal sealed class CommandTriggerTest {
             historyBack.Input,
             historyBack.Press,
             historyBack.Click,
-            historyBack.Macro);
+            historyBack.Macro,
+            Translation);
         var back = new PressGesture(PressKey.Back);
         var altLeft = new PressGesture(PressKey.Left, PressModifiers.Alt);
 
@@ -151,7 +409,7 @@ internal sealed class CommandTriggerTest {
             ["CTRL+ALT+T"] = "  DiSaBlEd  ",
             ["CTRL+ALT+Y"] = "mode=disabled"
         };
-        ICommandTrigger trigger = CommandTrigger.Compile("terminal", press, [], []);
+        ICommandTrigger trigger = CommandTrigger.Compile("terminal", press, [], [], Translation);
         var disabled = new PressGesture(PressKey.T, PressModifiers.Control | PressModifiers.Alt);
         var enabled = new PressGesture(PressKey.Y, PressModifiers.Control | PressModifiers.Alt);
 
@@ -165,7 +423,7 @@ internal sealed class CommandTriggerTest {
         var macro = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             ["terminal-start"] = "start=*"
         };
-        ICommandTrigger trigger = CommandTrigger.Compile("terminal|term", [], [], macro);
+        ICommandTrigger trigger = CommandTrigger.Compile("terminal|term", [], [], macro, Translation);
 
         Assert.That(trigger.Triggered("terminal", out _), Is.True);
         Assert.That(trigger.Triggered("term", out _), Is.True);

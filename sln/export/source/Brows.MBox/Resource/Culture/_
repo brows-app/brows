@@ -24,8 +24,10 @@ MBoxPreview_Status_Unavailable        = The message cannot be shown.
 MBoxPreview_Status_Malformed          = The message is malformed.
 MBoxPreview_Status_HtmlOnly           = The message holds no plain text. Use MBox_Open or MBox_Export to read it.
 MBoxPreview_Status_NoSelection        = No message is selected.
+MBoxPreview_Attachments               = Attachments
+MBoxPreview_Attachment_Unnamed        = (unnamed)
 
 Command_Description_MBox_Open         = Open the selected messages of the mailbox
 Command_Description_MBox_View         = Show a preview of the current message
-Command_Description_MBox_Export       = Extract the selected messages of the mailbox
+Command_Description_MBox_Export       = Extract the selected messages of the mailbox to a panel
 Command_Description_MBox_PreviewFocus = Move the focus between the message list and its preview

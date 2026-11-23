@@ -1,4 +1,6 @@
-﻿using Domore.Logs;
+﻿using Domore.Conf;
+using Domore.Conf.Cli;
+using Domore.Logs;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
-internal sealed class Tar : FileSystemCommand<TarParameter> {
+internal sealed class Tar : FileSystemCommand<Tar.Parameter> {
     private static readonly ILog Log = Logging.For(typeof(Tar));
 
     private bool Compress(Context context) {
@@ -181,5 +183,15 @@ internal sealed class Tar : FileSystemCommand<TarParameter> {
             default:
                 return false;
         }
+    }
+
+    public sealed record Parameter {
+        [CliArgument]
+        public string Output { get; init; }
+
+        [Conf("force")]
+        public TarDirection? Direction { get; init; }
+
+        public bool? Overwrite { get; init; }
     }
 }

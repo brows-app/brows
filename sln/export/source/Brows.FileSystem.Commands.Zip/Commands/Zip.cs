@@ -1,4 +1,6 @@
 ﻿using Brows.Zip;
+using Domore.Conf;
+using Domore.Conf.Cli;
 using Domore.Logs;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
-internal sealed class Zip : FileSystemCommand<ZipParameter> {
+internal sealed class Zip : FileSystemCommand<Zip.Parameter> {
     private static readonly ILog Log = Logging.For(typeof(Zip));
 
     private bool Compress(Context context) {
@@ -204,5 +206,18 @@ internal sealed class Zip : FileSystemCommand<ZipParameter> {
             default:
                 return false;
         }
+    }
+
+    public sealed class Parameter {
+        [CliArgument]
+        public string Output { get; set; }
+
+        [Conf("force")]
+        public ZipDirection? Direction { get; set; }
+
+        [Conf("compression")]
+        public CompressionLevel? CompressionLevel { get; set; }
+
+        public bool? Overwrite { get; set; }
     }
 }

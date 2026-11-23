@@ -6,25 +6,23 @@ using System.Text;
 namespace Brows.Commands;
 
 internal static class CommandTranslation {
-    private static ITranslation Translate =>
-        Translation.Global;
-
-    public static string Group(string name) {
+    public static string Group(ITranslation translation, string name) {
         return string.IsNullOrWhiteSpace(name)
-            ? Translate.Value($"Command_Group_{nameof(Command)}")
-            : Translate.Value($"Command_Group_{name}");
+            ? translation?.Value($"Command_Group_{nameof(Command)}")
+            : translation?.Value($"Command_Group_{name}");
     }
 
-    public static string Description(string name) {
-        return Translate.Value($"Command_Description_{name}");
+    public static string Description(ITranslation translation, string name) {
+        return translation?.Value($"Command_Description_{name}");
     }
 
-    public static string Help(string name) {
-        return Translate.Value($"Command_Help_{name}");
+    public static string Help(ITranslation translation, string name) {
+        return translation?.Value($"Command_Help_{name}");
     }
 
     public static string Conf(Command command) {
         if (null == command) throw new ArgumentNullException(nameof(command));
+        var translation = command.Translate;
         string comment(string s) => "# " + s;
         var builder = new StringBuilder();
         var helpLine = command.HelpLine;
@@ -49,9 +47,9 @@ internal static class CommandTranslation {
             }
         }
         builder.AppendLine(comment(""));
-        builder.AppendLine(comment(Description(command.Name)));
+        builder.AppendLine(comment(Description(translation, command.Name)));
         builder.AppendLine();
-        builder.AppendLine(Translate
+        builder.AppendLine(translation
             ?.Value($"Command_Conf_{command.Name}")
             ?.Replace("{input}", command.Trigger?.Inputs?.Main?.Input));
         return builder.ToString().Trim();

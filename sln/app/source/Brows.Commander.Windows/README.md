@@ -41,9 +41,10 @@ Unmatched keys remain available to the interactive control; the input policy its
 does not mark them handled.
 
 The file-system terminal uses this routing boundary and allows only
-`FileSystem_TerminalRelease` while its subtree owns input. Open, release, and close
-are also available through the command palette. Default shortcuts are configured
-in the later shortcut phase; this integration does not install default bindings.
+`FileSystem_Terminal` while its subtree owns input. The same command opens,
+focuses, and closes the terminal through the command palette. Default shortcuts
+are configured in the later shortcut phase; this integration does not install
+default bindings.
 
 Provider lower views are selected through `Provider.Detail.Active`, with resources
 keyed by the concrete model type. Use `ShowAsync` and expected-instance `CloseAsync`

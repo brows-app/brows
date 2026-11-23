@@ -30,7 +30,7 @@
                 </Style>
               </ContentControl.Style>
             </ContentControl>
-            <ContentControl Grid.Column="2">
+            <ContentControl Grid.Column="2" HorizontalContentAlignment="Stretch">
               <ContentControl.Resources>
                 <DataTemplate x:Key="DefaultTemplate">
                   <local:EntryDataControl ViewModel="{Binding}" />

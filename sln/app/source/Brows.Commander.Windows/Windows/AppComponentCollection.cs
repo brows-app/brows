@@ -15,6 +15,14 @@ public sealed class AppComponentCollection : IEnumerable<AppComponent> {
         Agent = [.. collection.Where(item => item is not null)];
     }
 
+    private static AppComponentCollection From(IEnumerable<IExport> exports) {
+        return new AppComponentCollection(exports
+            .Select(item => item?.GetType()?.Assembly)
+            .Where(assembly => assembly is not null)
+            .Distinct()
+            .Select(assembly => new AppComponent(assembly)));
+    }
+
     internal IEnumerable<ResourceDictionary> ApplicationResourceDictionaries {
         get {
             foreach (var component in Agent) {
@@ -25,14 +33,14 @@ public sealed class AppComponentCollection : IEnumerable<AppComponent> {
         }
     }
 
+    internal static AppComponentCollection From(IExportContext context) {
+        ArgumentNullException.ThrowIfNull(context);
+        return From(context.ListImports<IExport>());
+    }
+
     public static AppComponentCollection From(IImport imported) {
         ArgumentNullException.ThrowIfNull(imported);
-        return new AppComponentCollection(imported
-            .List<IExport>()
-            .Select(item => item?.GetType()?.Assembly)
-            .Where(assembly => assembly is not null)
-            .Distinct()
-            .Select(assembly => new AppComponent(assembly)));
+        return From(imported.List<IExport>());
     }
 
     public IEnumerable<ResourceDictionary> ResourceDictionaries {

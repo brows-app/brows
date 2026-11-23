@@ -3,6 +3,9 @@ using Domore.Conf.Cli;
 
 namespace Brows.Commands;
 
+/// <summary>
+/// Specifies the destination panel for a transfer command.
+/// </summary>
 public class WorkIOParameter {
     internal PanelPassiveMode Panel() {
         switch (Where) {
@@ -21,6 +24,9 @@ public class WorkIOParameter {
         }
     }
 
+    /// <summary>
+    /// Gets or sets how the destination panel is chosen.
+    /// </summary>
     [CliArgument]
     [CliRequired]
     public WorkIOWhere Where { get; set; }

@@ -7,6 +7,7 @@
     <Setter Property="Background" Value="{DynamicResource Brows.Theme.PanelSplitter.Background}"/>
     <Setter Property="Focusable" Value="False"/>
     <Setter Property="HorizontalAlignment" Value="Left"/>
+    <Setter Property="Panel.ZIndex" Value="1"/>
     <Setter Property="ResizeBehavior" Value="PreviousAndCurrent"/>
     <Setter Property="ResizeDirection" Value="Columns"/>
     <Setter Property="ShowsPreview" Value="True"/>

@@ -16,9 +16,9 @@ internal sealed class FtpViewTest {
                                                                           string id) {
         using var provider = CreateProvider(assemblyName, factoryName, providerName, id);
 
-        Assert.That(Work(assemblyName, provider, parameter: null, input: PaletteInput(assemblyName)), Is.True);
+        Assert.That(Work(assemblyName, provider, parameter: null, input: "view"), Is.True);
         Assert.That(HasPreview(provider), Is.True);
-        Assert.That(Work(assemblyName, provider, parameter: null, input: PaletteInput(assemblyName)), Is.True);
+        Assert.That(Work(assemblyName, provider, parameter: null, input: "view"), Is.True);
         Assert.That(HasPreview(provider), Is.False);
     }
 
@@ -84,10 +84,6 @@ internal sealed class FtpViewTest {
             }
         };
         return command.TriggeredWork(context);
-    }
-
-    private static string PaletteInput(string assemblyName) {
-        return assemblyName == "Brows.FTPS" ? "ftps-view" : "ftp-view";
     }
 
     private static string ViewCommandName(string assemblyName) {

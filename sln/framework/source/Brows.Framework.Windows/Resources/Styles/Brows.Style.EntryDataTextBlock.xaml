@@ -4,11 +4,14 @@
   <Style x:Key="Brows.Style.EntryDataTextBlock"
          TargetType="TextBlock"
          BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="TextWrapping" Value="NoWrap"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
   </Style>
   <Style x:Key="Brows.Style.EntryDataTextBlockControl" TargetType="entries:EntryDataTextBlock">
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Focusable" Value="False" />
     <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.EntryDataTextBlock.FontFamily}" />

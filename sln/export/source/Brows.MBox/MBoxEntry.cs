@@ -49,7 +49,7 @@ internal sealed class MBoxEntry : Entry<MBoxProvider> {
         get {
             var subject = Metadata.Subject;
             if (string.IsNullOrWhiteSpace(subject)) {
-                return MBoxText.Value("MBoxEntry_NoSubject");
+                return MBoxText.Value(Provider.Translation, "MBoxEntry_NoSubject");
             }
             return subject;
         }

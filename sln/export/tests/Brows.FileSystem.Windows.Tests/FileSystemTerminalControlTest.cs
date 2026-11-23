@@ -1,11 +1,13 @@
-﻿using Brows.Composition;
+﻿using Brows.Commands;
+using Brows.Composition;
 using Brows.Conf;
 using Brows.Detail;
 using Brows.Entries;
-using Brows.Gui;
 using Brows.Panels;
 using Brows.Providers;
 using Brows.Terminal;
+using Brows.Triggers;
+using Brows.Windows;
 using Brows.Windows.Controls;
 using System;
 using System.Collections.Generic;
@@ -21,6 +23,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using TERMINAL = Brows.Commands.Terminal;
 
 namespace Brows;
 
@@ -67,6 +70,141 @@ internal sealed class FileSystemTerminalControlTest {
             titleProperty.RemoveValueChanged(terminal, titleChanged);
         }
     }
+
+    private static IGestureTrigger PressGestureTrigger(Func<string> display, string defined) {
+        var press = new Mock<IGestureTrigger>();
+        press.Setup(item => item.Gesture).Returns(new PressGesture(PressKey.F12));
+        press.Setup(item => item.Display).Returns(display);
+        press.Setup(item => item.Defined).Returns(defined);
+        return press.Object;
+    }
+
+    private static Mock<ICommandTrigger> PressTrigger(Command command, Func<string> display) {
+        return PressTrigger(command, PressGestureTrigger(display, "terminal"));
+    }
+
+    private static Mock<ICommandTrigger> PressTrigger(Command command, params IGestureTrigger[] gestures) {
+        var trigger = new Mock<ICommandTrigger>();
+        trigger.Setup(item => item.PressGestures()).Returns(() => gestures);
+        /*
+         * A command's trigger is otherwise loaded from trigger.conf when the command is initialized.
+         */
+        typeof(Command).GetProperty(nameof(Command.Trigger)).SetValue(command, trigger.Object);
+        return trigger;
+    }
+
+    private static void RaiseTriggerChanged(Command command) {
+        var field = typeof(Command).GetField(
+            nameof(Command.TriggerChanged), BindingFlags.Instance | BindingFlags.NonPublic);
+        var handler = (EventHandler)field.GetValue(command);
+        handler?.Invoke(command, EventArgs.Empty);
+    }
+
+    [Test]
+    public void Trigger_ShowsFocusDescriptionWhenTerminalDoesNotHaveFocus() {
+        DispatcherTools.Run(dispatcher => {
+            var command = new TERMINAL();
+            PressTrigger(command, () => "CTRL+SHIFT+F12");
+            using var host = new HostFixture(dispatcher, terminalCommand: command);
+            Assert.That(host.Control.TerminalView.IsKeyboardFocusWithin, Is.False);
+            Assert.That(host.Control.Trigger.Text, Is.EqualTo("CTRL+SHIFT+F12"));
+            Assert.That(host.Control.TriggerDescription.Text,
+                Is.EqualTo(FileSystemText.Value(host.Control.Translation, "FileSystemTerminal_Trigger_Focus")));
+        });
+    }
+
+    [Test]
+    public void Trigger_ShowsShortcutWithoutArgumentsWhenCloseShortcutComesFirst() {
+        DispatcherTools.Run(dispatcher => {
+            var command = new TERMINAL();
+            PressTrigger(command,
+                PressGestureTrigger(() => "CTRL+SHIFT+ALT+F12", "terminal close"),
+                PressGestureTrigger(() => "CTRL+SHIFT+F11", "terminal"));
+            using var host = new HostFixture(dispatcher, terminalCommand: command);
+            Assert.That(host.Control.Trigger.Text, Is.EqualTo("CTRL+SHIFT+F11"));
+            Assert.That(host.Control.TriggerDescription.Text,
+                Is.EqualTo(FileSystemText.Value(host.Control.Translation, "FileSystemTerminal_Trigger_Focus")));
+        });
+    }
+
+    [Test]
+    public void TriggerDescription_IsEmptyWhenCommandHasOnlyShortcutsWithArguments() {
+        DispatcherTools.Run(dispatcher => {
+            var command = new TERMINAL();
+            PressTrigger(command, PressGestureTrigger(() => "CTRL+SHIFT+ALT+F12", "terminal close"));
+            using var host = new HostFixture(dispatcher, terminalCommand: command);
+            Assert.That(host.Control.Trigger.Text, Is.Null.Or.Empty);
+            Assert.That(host.Control.TriggerDescription.Text, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void TriggerDescription_IsEmptyWhenCommandHasNoShortcut() {
+        DispatcherTools.Run(dispatcher => {
+            var command = new TERMINAL();
+            using var host = new HostFixture(dispatcher, terminalCommand: command);
+            host.Window.Activate();
+            Assert.That(host.Control.TerminalView.Focus(), Is.True);
+            DispatcherTools.Pump(dispatcher);
+            Assert.That(host.Control.Trigger.Text, Is.Null.Or.Empty);
+            Assert.That(host.Control.TriggerDescription.Text, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void Trigger_ShowsReleaseDescriptionWhileTerminalHasFocus() {
+        DispatcherTools.Run(dispatcher => {
+            var command = new TERMINAL();
+            PressTrigger(command, () => "CTRL+SHIFT+F12");
+            using var host = new HostFixture(dispatcher, terminalCommand: command);
+            host.Window.Activate();
+            Assert.That(host.Control.TerminalView.Focus(), Is.True);
+            DispatcherTools.Pump(dispatcher);
+            Assert.That(host.Control.Trigger.Text, Is.EqualTo("CTRL+SHIFT+F12"));
+            Assert.That(host.Control.TriggerDescription.Text,
+                Is.EqualTo(FileSystemText.Value(host.Control.Translation, "FileSystemTerminal_Trigger_Release")));
+            Assert.That(host.Anchor.Focus(), Is.True);
+            DispatcherTools.Pump(dispatcher);
+            Assert.That(host.Control.Trigger.Text, Is.EqualTo("CTRL+SHIFT+F12"));
+            Assert.That(host.Control.TriggerDescription.Text,
+                Is.EqualTo(FileSystemText.Value(host.Control.Translation, "FileSystemTerminal_Trigger_Focus")));
+        });
+    }
+
+    [Test]
+    public void Trigger_IsNotUpdatedRepeatedlyWhileTerminalKeepsFocus() {
+        DispatcherTools.Run(dispatcher => {
+            var command = new TERMINAL();
+            var trigger = PressTrigger(command, () => "CTRL+SHIFT+F12");
+            using var host = new HostFixture(dispatcher, terminalCommand: command);
+            var unfocusedUpdates = trigger.Invocations.Count;
+            host.Window.Activate();
+            Assert.That(host.Control.TerminalView.Focus(), Is.True);
+            DispatcherTools.Pump(dispatcher);
+            var focusedUpdates = trigger.Invocations.Count;
+            Assert.That(focusedUpdates, Is.EqualTo(unfocusedUpdates + 1));
+            var settled = Task.Delay(TimeSpan.FromMilliseconds(500));
+            Complete(settled, dispatcher);
+            DispatcherTools.Pump(dispatcher);
+            Assert.That(trigger.Invocations, Has.Count.EqualTo(focusedUpdates));
+            Assert.That(host.Control.TriggerDescription.Text,
+                Is.EqualTo(FileSystemText.Value(host.Control.Translation, "FileSystemTerminal_Trigger_Release")));
+        });
+    }
+
+    [Test]
+    public void Trigger_UpdatesWhenCommandTriggerChanges() {
+        DispatcherTools.Run(dispatcher => {
+            var display = "CTRL+SHIFT+F12";
+            var command = new TERMINAL();
+            PressTrigger(command, () => display);
+            using var host = new HostFixture(dispatcher, terminalCommand: command);
+            display = "ALT+F12";
+            RaiseTriggerChanged(command);
+            Assert.That(host.Control.Trigger.Text, Is.EqualTo("ALT+F12"));
+        });
+    }
+
     [Test]
     public void Constructor_DisablesAutomaticStartupAndScopesInputToTerminal() {
         DispatcherTools.Run(dispatcher => {
@@ -94,6 +232,32 @@ internal sealed class FileSystemTerminalControlTest {
             Complete(control.CloseAsync(CancellationToken.None), dispatcher);
         });
     }
+
+    [TestCase("Dark")]
+    [TestCase("Light")]
+    public void StatusBar_UsesThemeStatusBarColors(string mode) {
+        DispatcherTools.Run(dispatcher => {
+            var theme = new ResourceDictionary {
+                Source = new Uri($"/Brows.Framework.Windows;component/Resources/Themes/{mode}.FileExplorer.xaml",
+                    UriKind.Relative)
+            };
+            var control = new FileSystemTerminalControl();
+            control.Resources.MergedDictionaries.Add(theme);
+            control.Resources.MergedDictionaries.Add(new ResourceDictionary {
+                Source = new Uri("/Brows.FileSystem.Windows;component/Resource/Resource.xaml", UriKind.Relative)
+            });
+            control.ApplyTemplate();
+            var statusBar = (Border)VisualTreeHelper.GetParent(VisualTreeHelper.GetParent(control.Status));
+            var background = theme["Brows.Theme.FileSystemTerminal.StatusBar.Background"];
+            var foreground = theme["Brows.Theme.FileSystemTerminal.StatusBar.Foreground"];
+            Assert.That(statusBar.Background, Is.SameAs(background));
+            Assert.That(control.Status.Foreground, Is.SameAs(foreground));
+            Assert.That(control.TriggerDescription.Foreground, Is.SameAs(foreground));
+            Assert.That(control.Trigger.Foreground, Is.SameAs(foreground));
+            Complete(control.CloseAsync(CancellationToken.None), dispatcher);
+        });
+    }
+
     [Test]
     public void ProviderTemplate_RegistersTerminalAndPreviewInSharedGrid() {
         var application = Application.Current ?? new Application {
@@ -533,7 +697,8 @@ internal sealed class FileSystemTerminalControlTest {
 
         internal HostFixture(Dispatcher dispatcher,
                                   DirectoryInfo directory = null,
-                                  Func<TerminalEmulator, ITerminalSessionAdapter> sessionAdapterFactory = null) {
+                                  Func<TerminalEmulator, ITerminalSessionAdapter> sessionAdapterFactory = null,
+                                  TERMINAL terminalCommand = null) {
             Dispatcher = dispatcher;
             Provider = new FileSystemProvider(new FileSystemProviderFactory(),
                 directory ?? new DirectoryInfo(Environment.SystemDirectory), caseSensitive: false, initialCapacity: 0);
@@ -545,6 +710,12 @@ internal sealed class FileSystemTerminalControlTest {
             Control = sessionAdapterFactory is null
                 ? new FileSystemTerminalControl { ViewModel = Detail }
                 : new FileSystemTerminalControl(sessionAdapterFactory) { ViewModel = Detail };
+            /*
+             * Stand in for the command that imports populate in the application.
+             */
+            if (terminalCommand is not null) {
+                Control.TerminalCommand = terminalCommand;
+            }
             Control.Resources.MergedDictionaries.Add(new ResourceDictionary {
                 Source = new Uri("/Brows.Framework.Windows;component/Resources/Resources.xaml", UriKind.Relative)
             });
@@ -560,8 +731,12 @@ internal sealed class FileSystemTerminalControlTest {
             Grid.SetRow(Control, 1);
             Root.Children.Add(Control);
             Window = new Window {
-                Content = Root, Left = -10000, Width = 400, Height = 200,
-                ShowActivated = false, ShowInTaskbar = false
+                Content = Root,
+                Left = -10000,
+                Width = 400,
+                Height = 200,
+                ShowActivated = false,
+                ShowInTaskbar = false
             };
             Window.Show();
             Window.UpdateLayout();

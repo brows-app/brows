@@ -30,6 +30,6 @@ internal sealed class Delete : ZipCommand<Delete.Parameter> {
         });
     }
 
-    public class Parameter {
+    public sealed class Parameter {
     }
 }

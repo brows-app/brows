@@ -10,12 +10,14 @@
     <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
   </Style>
   <Style x:Key="Brows.Style.LogsProvider.Logs" TargetType="{x:Type dwc:LogsControl}">
-    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.LogsProvider.Background}"/>
     <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.LogsProvider.Foreground}"/>
     <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.LogsProvider.FontFamily}"/>
     <Setter Property="FontSize" Value="{DynamicResource Brows.Font.LogsProvider.FontSize}"/>
-    <Setter Property="Padding" Value="4 2"/>
+    <Setter Property="FontWeight" Value="{DynamicResource Brows.Font.LogsProvider.FontWeight}"/>
+    <Setter Property="Padding" Value="12 8"/>
     <Setter Property="LogDebugForeground" Value="{DynamicResource Brows.Theme.LogsProvider.DebugForeground}"/>
+    <Setter Property="LogInfoForeground" Value="{DynamicResource Brows.Theme.LogsProvider.InfoForeground}"/>
     <Setter Property="LogWarnForeground" Value="{DynamicResource Brows.Theme.LogsProvider.WarnForeground}"/>
     <Setter Property="LogErrorForeground" Value="{DynamicResource Brows.Theme.LogsProvider.ErrorForeground}"/>
     <Setter Property="LogCriticalForeground" Value="{DynamicResource Brows.Theme.LogsProvider.CriticalForeground}"/>

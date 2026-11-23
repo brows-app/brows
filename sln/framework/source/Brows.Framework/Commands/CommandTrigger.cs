@@ -1,4 +1,5 @@
 ﻿using Brows.Conf;
+using Brows.Localization;
 using Brows.Triggers;
 using Domore.Logs;
 using System;
@@ -48,11 +49,41 @@ internal sealed class CommandTrigger : ICommandTrigger {
         }
     }
 
-    private static InputTriggerCollection CompileInputs(string input, Dictionary<string, string> macro) {
-        var inputInput = input?.Trim() ?? "";
-        var inputParts = inputInput.Split(
+    private static string[] InputParts(string input) {
+        return (input?.Trim() ?? "").Split(
             '|',
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    }
+
+    /*
+     * The input of the qualified layer comes first, so that it is the main input of the command,
+     * and the aliases of the unqualified layer follow it.
+     */
+    private static string MergeInputs(IReadOnlyList<Layer> layers) {
+        var parts = new List<string>();
+        for (var i = layers.Count - 1; i >= 0; i--) {
+            foreach (var part in InputParts(layers[i].Input)) {
+                var partIsNew = parts.Contains(part, StringComparer.OrdinalIgnoreCase) == false;
+                if (partIsNew) {
+                    parts.Add(part);
+                }
+            }
+        }
+        return parts.Count == 0 ? null : string.Join("|", parts);
+    }
+
+    private static Dictionary<string, string> MergeMacros(IReadOnlyList<Layer> layers) {
+        var macro = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var layer in layers) {
+            foreach (var pair in layer.Macro ?? throw new ArgumentNullException(nameof(Layer.Macro))) {
+                macro[pair.Key] = pair.Value;
+            }
+        }
+        return macro;
+    }
+
+    private static InputTriggerCollection CompileInputs(string input, Dictionary<string, string> macro) {
+        var inputParts = InputParts(input);
         var inputTrigger = inputParts.Length == 0
             ? null
             : new InputTrigger(null, inputParts[0], inputParts.Skip(1).ToArray());
@@ -72,55 +103,111 @@ internal sealed class CommandTrigger : ICommandTrigger {
             .Where(trigger => trigger is not null));
     }
 
+    /*
+     * The sets are applied in order, so that a later set replaces or disables a gesture of an
+     * earlier one. Within one set, a disabled gesture stays disabled whatever the order of its
+     * entries.
+     */
     private static GestureTriggerCollection CompileGestures<TGesture>(
         string input,
-        Dictionary<string, string> set)
+        IEnumerable<Dictionary<string, string>> sets,
+        ITranslation translation)
     where TGesture : IGesture, new() {
-        if (set is null) {
-            throw new ArgumentNullException(nameof(set));
-        }
-
         var gestures = new Dictionary<IGesture, string>();
-        var disabledGestures = new HashSet<IGesture>();
         var inputAlias = input?.Split('|')?.FirstOrDefault()?.Trim() ?? "*";
-        foreach (var pair in set) {
-            var shortcutIsDisabled = string.Equals(
-                pair.Value?.Trim(),
-                "disabled",
-                StringComparison.OrdinalIgnoreCase);
-            foreach (var key in pair.Key.Split(
-                '|',
-                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) {
-                var gesture = new TGesture().Parse(key);
-                if (shortcutIsDisabled) {
-                    disabledGestures.Add(gesture);
-                    gestures.Remove(gesture);
+        foreach (var set in sets) {
+            if (set is null) {
+                throw new ArgumentNullException(nameof(sets));
+            }
+            var setGestures = new Dictionary<IGesture, string>();
+            var setDisabled = new HashSet<IGesture>();
+            foreach (var pair in set) {
+                var shortcutIsDisabled = string.Equals(
+                    pair.Value?.Trim(),
+                    "disabled",
+                    StringComparison.OrdinalIgnoreCase);
+                foreach (var key in pair.Key.Split(
+                    '|',
+                    StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) {
+                    var gesture = new TGesture().Parse(key, translation);
+                    if (shortcutIsDisabled) {
+                        setDisabled.Add(gesture);
+                        continue;
+                    }
+                    setGestures[gesture] = pair.Value.Replace("*", inputAlias);
+                }
+            }
+            foreach (var pair in setGestures) {
+                if (setDisabled.Contains(pair.Key)) {
                     continue;
                 }
-                if (disabledGestures.Contains(gesture)) {
-                    continue;
-                }
-                gestures[gesture] = pair.Value.Replace("*", inputAlias);
+                gestures[pair.Key] = pair.Value;
+            }
+            foreach (var gesture in setDisabled) {
+                gestures.Remove(gesture);
             }
         }
+        return GestureTriggerCollection.From(gestures, translation);
+    }
 
-        foreach (var gesture in disabledGestures) {
-            gestures.Remove(gesture);
-        }
-        return GestureTriggerCollection.From(gestures);
+    private static CommandTrigger Compile(IReadOnlyList<Layer> layers, ITranslation translation) {
+        var input = MergeInputs(layers);
+        var inputTriggers = CompileInputs(input, MergeMacros(layers));
+        var pressTriggers = CompileGestures<PressGesture>(
+            input,
+            layers.Select(layer => layer.Press),
+            translation);
+        var clickTriggers = CompileGestures<ClickGesture>(
+            input,
+            layers.Select(layer => layer.Click),
+            translation);
+        var gestureTriggers = GestureTriggerCollection.Combine(pressTriggers, clickTriggers);
+        return new CommandTrigger(inputTriggers, gestureTriggers);
     }
 
     internal static CommandTrigger Compile(
         string input,
         Dictionary<string, string> press,
         Dictionary<string, string> click,
-        Dictionary<string, string> macro) {
-        var inputTriggers = CompileInputs(input, macro);
-        var pressTriggers = CompileGestures<PressGesture>(input, press);
-        var clickTriggers = CompileGestures<ClickGesture>(input, click);
-        var gestureTriggers = GestureTriggerCollection.Combine(pressTriggers, clickTriggers);
-        return new CommandTrigger(inputTriggers, gestureTriggers);
+        Dictionary<string, string> macro,
+        ITranslation translation) {
+        return Compile([new Layer(input, press, click, macro)], translation);
     }
+
+    /*
+     * The entry of a command's type name, such as cmd[Open], holds the triggers that every
+     * command of that name shares across providers. The entry of the command's own name, such
+     * as cmd[MBox_Open], is layered on top of it.
+     */
+    internal static CommandTrigger Resolve(
+        string name,
+        string typeName,
+        Func<string, Layer> find,
+        ITranslation translation) {
+        ArgumentNullException.ThrowIfNull(find);
+        var layers = new List<Layer>();
+        var nameIsQualified = string.Equals(name, typeName, StringComparison.OrdinalIgnoreCase) == false;
+        if (nameIsQualified) {
+            var unqualified = find(typeName);
+            if (unqualified is not null) {
+                layers.Add(unqualified);
+            }
+        }
+        var qualified = find(name);
+        if (qualified is not null) {
+            layers.Add(qualified);
+        }
+        if (layers.Count == 0) {
+            return null;
+        }
+        return Compile(layers, translation);
+    }
+
+    internal sealed record Layer(
+        string Input,
+        Dictionary<string, string> Press,
+        Dictionary<string, string> Click,
+        Dictionary<string, string> Macro);
 
     public static event EventHandler Changed;
 
@@ -135,13 +222,13 @@ internal sealed class CommandTrigger : ICommandTrigger {
         if (confCmd == null) {
             return null;
         }
-        if (confCmd.TryGetValue(name, out var cmd) == false) {
-            var type = command.GetType();
-            if (confCmd.TryGetValue(type.Name, out cmd) == false) {
-                return null;
-            }
-        }
-        return Compile(cmd.Input, cmd.Press, cmd.Click, cmd.Macro);
+        return Resolve(
+            name,
+            command.GetType().Name,
+            key => confCmd.TryGetValue(key, out var cmd)
+                ? new Layer(cmd.Input, cmd.Press, cmd.Click, cmd.Macro)
+                : null,
+            command.Translate);
     }
 
     public static async Task<CommandTrigger> For(Command command, CancellationToken token) {

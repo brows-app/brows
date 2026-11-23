@@ -81,7 +81,7 @@ internal sealed class RenameTest {
 
     [Test]
     public void Rename_F2OpensPaletteWithOnlyTheFileStemSelected() {
-        const string inputTrigger = "sftp-rename";
+        const string inputTrigger = "rename";
         var factory = new SftpProviderFactory();
         var uri = new Uri("sftp://user@127.0.0.1:2222/root/");
         using var lease = factory.Acquire(uri);
@@ -104,7 +104,7 @@ internal sealed class RenameTest {
 
     [Test]
     public void Rename_NoNameInvocationRoundTripsCliQuotesAndBackslashes() {
-        const string inputTrigger = "sftp-rename";
+        const string inputTrigger = "rename";
         const string name = "both 'single' and \"double\" slash\\name.txt";
         var factory = new SftpProviderFactory();
         var uri = new Uri("sftp://user@127.0.0.1:2222/root/");
@@ -131,7 +131,7 @@ internal sealed class RenameTest {
     [TestCase(" leading and trailing ")]
     [TestCase("   ")]
     public void Rename_PrefilledNamePreservesBoundaryAndOnlySpaces(string name) {
-        const string inputTrigger = "sftp-rename";
+        const string inputTrigger = "rename";
         var factory = new SftpProviderFactory();
         var uri = new Uri("sftp://user@127.0.0.1:2222/root/");
         using var lease = factory.Acquire(uri);
@@ -147,7 +147,7 @@ internal sealed class RenameTest {
 
     [Test]
     public void Rename_UnchangedNameSkipsProviderRename() {
-        const string inputTrigger = "sftp-rename";
+        const string inputTrigger = "rename";
         const string name = " same name ";
         var factory = new SftpProviderFactory();
         var uri = new Uri("sftp://user@127.0.0.1:2222/root/");
@@ -172,7 +172,7 @@ internal sealed class RenameTest {
     [TestCase(".env.local", FileProtocolEntryKind.File)]
     public void Rename_NoNameInvocationSelectsWholeDirectoriesAndDotfiles(string name,
                                                                           FileProtocolEntryKind kind) {
-        const string inputTrigger = "sftp-rename";
+        const string inputTrigger = "rename";
         var factory = new SftpProviderFactory();
         var uri = new Uri("sftp://user@127.0.0.1:2222/root/");
         using var lease = factory.Acquire(uri);
@@ -188,7 +188,7 @@ internal sealed class RenameTest {
 
     [Test]
     public void Rename_NamedCliParameterStillParses() {
-        const string inputTrigger = "sftp-rename";
+        const string inputTrigger = "rename";
         var factory = new SftpProviderFactory();
         var uri = new Uri("sftp://user@127.0.0.1:2222/root/");
         using var lease = factory.Acquire(uri);

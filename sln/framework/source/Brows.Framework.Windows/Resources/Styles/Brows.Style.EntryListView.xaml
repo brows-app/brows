@@ -29,7 +29,9 @@
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type local:EntryListView}">
           <Grid DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
-            <local:EntryListViewItemsListView x:Name="PART_Items" ItemsSource="{Binding ViewModel.Source.Items}" />
+            <local:EntryListViewItemsListView x:Name="PART_Items"
+                                              DataContext="{Binding ViewModel}"
+                                              ItemsSource="{Binding Source.Items}" />
           </Grid>
         </ControlTemplate>
       </Setter.Value>

@@ -4,9 +4,22 @@ using System.Collections.Generic;
 
 namespace Brows.Commands;
 
+/// <summary>
+/// Provides a command that pastes clipboard sources into the active provider.
+/// </summary>
 public abstract class ClipboardPasteIO : Command<ClipboardPasteIO.Parameter> {
     private static readonly ILog Log = Logging.For(typeof(ClipboardPasteIO));
 
+    /// <summary>
+    /// Schedules a paste of the clipboard sources into the active provider. A move requested by the clipboard data
+    /// is performed as a copy when the provider cannot move.
+    /// </summary>
+    /// <param name="context">
+    /// The context supplying the destination provider.
+    /// </param>
+    /// <returns>
+    /// True if the paste was scheduled; otherwise, false.
+    /// </returns>
     protected sealed override bool Work(Context context) {
         if (context == null) return false;
         if (context.HasPanel(out var active) == false) {
@@ -51,8 +64,14 @@ public abstract class ClipboardPasteIO : Command<ClipboardPasteIO.Parameter> {
         });
     }
 
+    /// <summary>
+    /// Gets or sets the service that reads clipboard sources.
+    /// </summary>
     public IClipboardGetIO Clipboard { get; set; }
 
-    public class Parameter {
+    /// <summary>
+    /// Represents the parameters for the clipboard paste command.
+    /// </summary>
+    public sealed class Parameter {
     }
 }

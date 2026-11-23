@@ -93,7 +93,7 @@ internal sealed class FileSystemTerminalPackageIntegrationTest {
     }
 
     private static void AssertStartupFailureReported(TerminalHost host) {
-        var format = FileSystemText.Value("FileSystemTerminal_Status_Failed");
+        var format = FileSystemText.Value(host.Control.Translation, "FileSystemTerminal_Status_Failed");
         var argumentStart = format.IndexOf("{0}", StringComparison.Ordinal);
         var prefix = argumentStart < 0 ? format : format[..argumentStart];
         Assert.That(host.Control.Status.Text, Does.StartWith(prefix));

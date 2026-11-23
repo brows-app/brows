@@ -39,11 +39,11 @@
     <Style.Triggers>
       <DataTrigger Binding="{Binding ViewModel.Alignment, RelativeSource={RelativeSource Self}}"
                    Value="{x:Static entries:EntryDataAlignment.Left}">
-        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="TextBlock.TextAlignment" Value="Left" />
       </DataTrigger>
       <DataTrigger Binding="{Binding ViewModel.Alignment, RelativeSource={RelativeSource Self}}"
                    Value="{x:Static entries:EntryDataAlignment.Right}">
-        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="TextBlock.TextAlignment" Value="Right" />
       </DataTrigger>
     </Style.Triggers>
   </Style>

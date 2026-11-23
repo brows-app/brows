@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Brows.Terminal;
+﻿namespace Brows.Terminal;
 
 internal sealed class TerminalSessionLifecycleEventArgs : EventArgs {
     internal long OperationId { get; }

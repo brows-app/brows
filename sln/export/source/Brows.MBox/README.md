@@ -3,12 +3,11 @@
 Brows reads a mailbox file as a list of messages, shows a preview of the current
 message, and extracts the selected messages as Internet messages.
 
-The feature is made of three assemblies:
+The feature is made of two assemblies:
 
 | Project | Purpose |
 | --- | --- |
-| `Brows.MBox.Format` | The parser of the mailbox format. It has no knowledge of Brows. |
-| `Brows.MBox` | The provider, the commands, and the data of the messages. |
+| `Brows.MBox` | The provider, the commands, and the data of the messages. The parser of the mailbox format is in its `Brows.MBox.Format` namespace, which does not depend on the rest of Brows. |
 | `Brows.MBox.Windows` | The WPF layer: the panel of the mailbox and its preview. |
 
 ## Opening a mailbox
@@ -31,22 +30,26 @@ that writes to it fails until the panel is closed.
 2. The list shows the messages of the mailbox, newest first.
 3. `MBox_View` shows the preview of the current message, and hides it again when
    it is run a second time.
-4. `MBox_PreviewFocus` moves the keyboard focus into the preview, after the command
-   palette has closed.
+4. `MBox_PreviewFocus`, or `Ctrl+Alt+P`, moves the keyboard focus into the
+   preview, after the command palette has closed.
 5. The preview supports the arrow keys, `PageUp`, `PageDown`, `Ctrl+Home`,
    `Ctrl+End`, the selection, and `Ctrl+C`.
 6. `Escape` moves the focus back to the list of the messages.
-7. `MBox_Export` extracts the selected messages to files of an Internet message.
+7. `MBox_Export`, or `Ctrl+Alt+E`, exports archives of the selected messages and
+   their attachments, or the messages alone, to another panel.
 8. `Up` returns to the directory that holds the mailbox.
 
 ## The commands
 
 | Command | Input | Parameters |
 | --- | --- | --- |
-| `MBox_Open` | `mbox-open` | None |
-| `MBox_View` | `mbox-view` | `toggle=preview` |
-| `MBox_Export` | `mbox-export` | `destination`, `overwrite` |
+| `MBox_Open` | `open` | None |
+| `MBox_View` | `view` | `toggle=preview` |
+| `MBox_Export` | `export` | `where`, then `archive` or `eml` |
 | `MBox_PreviewFocus` | `mbox-focus` | `target=preview` or `target=entries` |
+
+`MBox_Open` and `MBox_View` share the input and the shortcuts of the `Open` and
+`View` commands of the other providers.
 
 `MBox_View` takes the views to toggle, and does nothing when it is given none.
 The `ALT+P` shortcut is bound to it with `toggle=preview`.
@@ -54,23 +57,35 @@ The `ALT+P` shortcut is bound to it with `toggle=preview`.
 `MBox_Open` extracts the selected messages to files of an Internet message, and
 opens them with the application that is associated with the file type.
 
-`MBox_Export` extracts the selected messages to a destination:
+`MBox_Export` exports the selected messages to the provider of a panel:
 
-- One selected message may be written to a file, or to an existing directory.
-- Several selected messages need an existing directory, which receives one file
-  per message.
-- The files of a directory export are named `message-{offset}.eml`, after the
-  offset of the message in the mailbox. A subject, a sender, or a message ID is
-  never used as a name.
-- The mailbox itself is never a destination, because the source is read only.
-- An existing destination is kept, unless `overwrite` is set.
-- A failed export removes the file that it was writing, and leaves the previous
-  destination as it was.
+- `where` chooses the panel the same way that copy and move do: `auto`, `here`,
+  `next`, or `previous`, or their first letters. `auto`, the default, chooses
+  the other panel when there are exactly two panels.
+- `mode` chooses the file that is exported for each message. `archive`, the
+  default, exports a ZIP archive, `message-{offset}.zip`, that holds the message
+  and its decoded attachments. `eml` exports the message as a file of an
+  Internet message, `message-{offset}.eml`.
+- Both arguments may be given by position, `where` first: `export n eml`. The
+  mode alone is named, `export mode=eml`, because a first argument is always
+  read as `where`.
+- The files are named after the offset of the message in the mailbox. A subject,
+  a sender, or a message ID is never used as a name. The name of an attachment is
+  made safe: a path, a character that a file name cannot hold, or the name of a
+  device is removed or replaced, and a repeated name is numbered, such as
+  `report (2).pdf`. An attachment that the mailbox cuts short, or whose transfer
+  encoding is not supported, is left out of the archive.
+- The panel receives the files the way that it receives copied files, so any
+  provider that can receive copied files, such as a directory, an archive, or a
+  remote host, can receive them. The provider decides what happens to a file that
+  already exists; a directory keeps the existing file and gives the new file a
+  name of its own. The mailbox itself, which is read only, never receives them.
 
 `MBox_PreviewFocus` moves the focus between the list of the messages and their
 preview. The target `preview` is the default, and it shows the preview when it is
-hidden. The target `entries` moves the focus back to the list, but only when the
-preview owns the focus, so `Escape` keeps its usual meaning everywhere else.
+hidden; `Ctrl+Alt+P` is bound to it. The target `entries` moves the focus back to
+the list, but only when the preview owns the focus, so `Escape` keeps its usual
+meaning everywhere else.
 
 ## The columns
 
@@ -167,5 +182,6 @@ unowned directories older than seven days, including markers left by a crashed
 process. Application exit releases ownership and removes its own temporary files.
 A file that is locked stays until a later cleanup.
 
-`MBox_Export` writes its files where the user asks for them, and it does not
-use the temporary directory of the feature.
+`MBox_Export` builds each file in a temporary file of the system that is deleted
+when the panel has received the file, and it does not use the temporary directory
+of the feature.

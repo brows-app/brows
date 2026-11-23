@@ -6,7 +6,28 @@ using System.Threading.Tasks;
 
 namespace Brows.Entries;
 
+/// <summary>
+/// Copies stream content while reporting the number of bytes transferred.
+/// </summary>
 public static class EntryStreamProgress {
+    /// <summary>
+    /// Copies from the source's current position to its end while reporting byte progress. Leaves both streams open.
+    /// </summary>
+    /// <param name="progress">
+    /// Receives progress updates for the operation.
+    /// </param>
+    /// <param name="source">
+    /// The readable source stream.
+    /// </param>
+    /// <param name="destination">
+    /// The writable destination stream.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task that completes when copying finishes.
+    /// </returns>
     public static Task Copy(this IOperationProgress progress,
                             Stream source,
                             Stream destination,
@@ -14,6 +35,27 @@ public static class EntryStreamProgress {
         return Copy(progress, source, destination, bufferSize: 0, token);
     }
 
+    /// <summary>
+    /// Copies from the source's current position to its end while reporting byte progress. Leaves both streams open.
+    /// </summary>
+    /// <param name="progress">
+    /// Receives progress updates for the operation.
+    /// </param>
+    /// <param name="source">
+    /// The readable source stream.
+    /// </param>
+    /// <param name="destination">
+    /// The writable destination stream.
+    /// </param>
+    /// <param name="bufferSize">
+    /// The requested copy buffer size in bytes, or a nonpositive value to use the default.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task that completes when copying finishes.
+    /// </returns>
     public static async Task Copy(this IOperationProgress progress,
                                   Stream source,
                                   Stream destination,

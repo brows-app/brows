@@ -1,7 +1,6 @@
 ﻿using Brows.Composition;
 using Brows.Detail;
 using Brows.Entries;
-using Brows.Localization;
 using Brows.Panels;
 using Brows.Providers;
 using Brows.Support;
@@ -16,6 +15,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 
+using SHAPE = System.Windows.Shapes.Shape;
+
 namespace Brows;
 
 /// <summary>
@@ -25,28 +26,11 @@ namespace Brows;
 [Apartment(ApartmentState.STA)]
 [NonParallelizable]
 internal sealed class MBoxProviderControlTest {
-    private static ITranslation _PreviousTranslation;
-
     private MBoxTestDirectory _Directory;
     private MBoxProviderFactory _Factory;
     private MBoxProvider _Provider;
     private Window _Window;
     private MBoxProviderControl _Control;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() {
-        /*
-         * The user interface of the list shows the texts of the columns through the translation
-         * of the application, so the fixture needs one to show the texts that the user sees.
-         */
-        _PreviousTranslation = Translation.Global;
-        Translation.Global = new MBoxTranslation();
-    }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() {
-        Translation.Global = _PreviousTranslation;
-    }
 
     [SetUp]
     public void SetUp() {
@@ -70,6 +54,11 @@ internal sealed class MBoxProviderControlTest {
     private static IExport[] Exports(MBoxProviderFactory factory) {
         return [
             factory,
+            /*
+             * The user interface of the list shows the texts of the columns through the translation
+             * of the application, so the fixture needs one to show the texts that the user sees.
+             */
+            new MBoxTranslation(),
             new Brows.Data.MBoxEntryData.Subject(),
             new Brows.Data.MBoxEntryData.From(),
             new Brows.Data.MBoxEntryData.Date(),
@@ -134,7 +123,7 @@ internal sealed class MBoxProviderControlTest {
 
     private void Show() {
         _Control = new MBoxProviderControl {
-            DataContext = _Provider
+            ViewModel = _Provider
         };
         _Window = new Window {
             Width = 800,
@@ -146,18 +135,22 @@ internal sealed class MBoxProviderControlTest {
     }
 
     private static IReadOnlyList<TextBlock> FindTextBlocks(DependencyObject root) {
-        var textBlocks = new List<TextBlock>();
-        AddTextBlocks(root, textBlocks);
-        return textBlocks;
+        return FindVisuals<TextBlock>(root);
     }
 
-    private static void AddTextBlocks(DependencyObject root, ICollection<TextBlock> textBlocks) {
-        if (root is TextBlock textBlock) {
-            textBlocks.Add(textBlock);
+    private static IReadOnlyList<T> FindVisuals<T>(DependencyObject root) where T : DependencyObject {
+        var visuals = new List<T>();
+        AddVisuals(root, visuals);
+        return visuals;
+    }
+
+    private static void AddVisuals<T>(DependencyObject root, ICollection<T> visuals) where T : DependencyObject {
+        if (root is T visual) {
+            visuals.Add(visual);
         }
         var count = VisualTreeHelper.GetChildrenCount(root);
         for (var i = 0; i < count; i++) {
-            AddTextBlocks(VisualTreeHelper.GetChild(root, i), textBlocks);
+            AddVisuals(VisualTreeHelper.GetChild(root, i), visuals);
         }
     }
 
@@ -197,17 +190,90 @@ internal sealed class MBoxProviderControlTest {
         return detail;
     }
 
+    private TextBlock FindTextBlock(string text) {
+        return FindTextBlocks(_Control).FirstOrDefault(textBlock => textBlock.Text == text);
+    }
+
+    private static object ThemeBrush(string name) {
+        return Application.Current.Resources[$"Brows.Theme.MBoxProvider.{name}"];
+    }
+
+    /*
+     * The shapes of the icon that draw lines, which are those of the template of the icon that
+     * have a stroke.
+     */
+    private IReadOnlyList<SHAPE> FindIconShapes() {
+        var viewbox = FindVisuals<Viewbox>(FindProviderGrid(_Control)).First();
+        return FindVisuals<SHAPE>(viewbox).Where(shape => shape.Stroke is not null).ToList();
+    }
+
+    /*
+     * Shows the control while the mailbox is read, and again once the read is finished.
+     */
+    private async Task Read(Action whileReading, Action afterReading) {
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        await Run(Mailbox(), new MBoxConfig(), async () => {
+            _Provider.IndexGateForTesting = token => release.Task.WaitAsync(token);
+            var refresh = ((IProvider)_Provider).Refresh(CancellationToken.None);
+            try {
+                Show();
+                await WaitFor(() => FindTextBlock(_Provider.Status) is not null);
+                Assert.That(_Provider.State, Is.EqualTo(MBoxProviderState.Loading));
+                whileReading();
+            }
+            finally {
+                /*
+                 * The read is finished before the test ends, so that it does not continue on
+                 * the context of a test that has already ended.
+                 */
+                release.TrySetResult();
+                await refresh;
+            }
+            ProcessDispatcher();
+            afterReading();
+        }, refresh: false);
+    }
+
+    private void AssertInlineWithTheID(TextBlock textBlock) {
+        var id = FindTextBlock(_Provider.ID);
+        var idOrigin = id.TranslatePoint(new Point(0, 0), _Control);
+        var origin = textBlock.TranslatePoint(new Point(0, 0), _Control);
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(origin.Y, Is.EqualTo(idOrigin.Y).Within(0.5));
+            Assert.That(origin.X, Is.GreaterThan(idOrigin.X + id.ActualWidth));
+        }
+    }
+
+    private static ProviderGrid FindProviderGrid(MBoxProviderControl control) {
+        var count = VisualTreeHelper.GetChildrenCount(control);
+        if (count == 0) {
+            return null;
+        }
+        return VisualTreeHelper.GetChild(control, 0) as ProviderGrid;
+    }
+
+    [Test]
+    public void Resource_PanelProviderTemplate_ShowsMBoxProviderControl() {
+        var resource = new ResourceDictionary {
+            Source = new Uri("/Brows.MBox.Windows;component/Resource/Resource.xaml", UriKind.Relative)
+        };
+        var template = (DataTemplate)resource["PanelProvider_MBoxProvider"];
+        Assert.That(template.LoadContent(), Is.TypeOf<MBoxProviderControl>());
+    }
+
     [Test]
     public void ProviderControl_HoldsTheGridOfTheProvider() {
-        var control = new MBoxProviderControl();
-        Assert.That(control.Content, Is.InstanceOf<ProviderGrid>());
+        Show();
+        Assert.That(FindProviderGrid(_Control), Is.InstanceOf<ProviderGrid>());
     }
 
     [Test]
     public void ProviderControl_HoldsTheTemplateOfThePreview() {
-        var control = new MBoxProviderControl();
-        var grid = (ProviderGrid)control.Content;
+        Show();
+        var grid = FindProviderGrid(_Control);
         Assert.That(grid.Resources.Contains(typeof(MBoxEntryPreview)), Is.True);
+        var template = (DataTemplate)grid.Resources[typeof(MBoxEntryPreview)];
+        Assert.That(template.LoadContent(), Is.TypeOf<MBoxEntryPreviewControl>());
     }
 
     [Test]
@@ -218,7 +284,7 @@ internal sealed class MBoxProviderControlTest {
              */
             await ShowPreview();
             Show();
-            var grid = (ProviderGrid)_Control.Content;
+            var grid = FindProviderGrid(_Control);
             var preview = FindPreview(_Control);
             var list = FindEntryListView(_Control);
             using (Assert.EnterMultipleScope()) {
@@ -227,13 +293,15 @@ internal sealed class MBoxProviderControlTest {
                 Assert.That(list.Items.Count, Is.EqualTo(1));
                 Assert.That(list.Items[0], Is.SameAs(_Provider.Entries[0]));
                 Assert.That(preview, Is.Not.Null);
-                Assert.That(preview.DataContext, Is.SameAs(_Provider.Detail.Active));
+                Assert.That(preview.ViewModel, Is.SameAs(_Provider.Detail.Active));
+                Assert.That(((MBoxEntryPreview)_Provider.Detail.Active).Controller, Is.SameAs(preview));
                 Assert.That(FindTextBlocks(_Control).Select(textBlock => textBlock.Text),
                             Does.Contain(_Provider.ID));
             }
             ((IEntryObservation)_Provider.Observation).Current(_Provider.Entries[0]);
-            await WaitFor(() => preview.Controller.Text.Contains("First body."));
-            Assert.That(preview.Controller.Text, Does.Contain("First body."));
+            await WaitFor(() => preview.Text.Contains("First body."));
+            Assert.That(preview.Text, Does.Contain("First body."));
+            Assert.That(preview.BodyTextBox.Text, Does.Contain("First body."));
         });
     }
 
@@ -249,13 +317,13 @@ internal sealed class MBoxProviderControlTest {
     }
 
     private async Task FocusPreviewAndList(MBoxEntryPreviewControl preview) {
-        await WaitFor(() => preview.Controller.Text.Contains("First body."));
+        await WaitFor(() => preview.Text.Contains("First body."));
         var observation = (IEntryObservation)_Provider.Observation;
-        Assert.That(preview.Controller.RequestFocus(), Is.True);
-        Assert.That(preview.Controller.HasKeyboardFocus, Is.True);
+        Assert.That(preview.RequestFocus(), Is.True);
+        Assert.That(preview.HasKeyboardFocus, Is.True);
         Assert.That(observation.Focus(), Is.True);
         Assert.That(((IProviderFocus)observation).Get(), Is.True);
-        Assert.That(preview.Controller.HasKeyboardFocus, Is.False);
+        Assert.That(preview.HasKeyboardFocus, Is.False);
     }
 
     [Test]
@@ -268,6 +336,115 @@ internal sealed class MBoxProviderControlTest {
                 Assert.That(_Provider.Error, Is.Not.Empty);
                 Assert.That(renderedText, Does.Contain(_Provider.Status));
                 Assert.That(renderedText, Does.Contain(_Provider.Error));
+            }
+            return Task.CompletedTask;
+        });
+    }
+
+    [Test]
+    public async Task ProviderControl_ShowsTheIconOfTheProviderBeforeTheID() {
+        await Run(() => {
+            Show();
+            var grid = FindProviderGrid(_Control);
+            var stroke = ThemeBrush("Icon.Stroke");
+            var icon = FindVisuals<SHAPE>(_Control)
+                .Where(shape => ReferenceEquals(shape.Stroke, stroke))
+                .ToList();
+            var id = FindTextBlock(_Provider.ID);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(grid.Icon, Is.SameAs(_Provider));
+                Assert.That(grid.IconTemplate, Is.SameAs(_Control.TryFindResource("Brows.Style.MBoxProvider.Icon")));
+                Assert.That(icon, Is.Not.Empty);
+                Assert.That(icon.Select(shape => shape.IsVisible), Is.All.True);
+            }
+            var iconOrigin = icon[0].TranslatePoint(new Point(0, 0), _Control);
+            var idOrigin = id.TranslatePoint(new Point(0, 0), _Control);
+            Assert.That(iconOrigin.X, Is.LessThan(idOrigin.X));
+            return Task.CompletedTask;
+        });
+    }
+
+    [Test]
+    public async Task ProviderControl_ShowsTheStatusAndErrorInLineWithTheID() {
+        await Run("not a mailbox\n", new MBoxConfig(), () => {
+            Show();
+            AssertInlineWithTheID(FindTextBlock(_Provider.Status));
+            AssertInlineWithTheID(FindTextBlock(_Provider.Error));
+            return Task.CompletedTask;
+        });
+    }
+
+    [Test]
+    public async Task ProviderControl_ShowsTheStatusInTheReadingColorWhileTheMailboxIsRead() {
+        await Read(() => {
+            var status = FindTextBlock(_Provider.Status);
+            Assert.That(status.Foreground, Is.SameAs(ThemeBrush("StatusReadingForeground")));
+            AssertInlineWithTheID(status);
+        }, () => {
+        });
+    }
+
+    [Test]
+    public async Task ProviderControl_ShowsTheIconAndIDInTheReadingColorOnlyWhileTheMailboxIsRead() {
+        var reading = ThemeBrush("ReadingForeground");
+        await Read(() => {
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(FindTextBlock(_Provider.ID).Foreground, Is.SameAs(reading));
+                Assert.That(FindIconShapes(), Has.Count.EqualTo(3));
+                Assert.That(FindIconShapes().Select(shape => shape.Stroke), Is.All.SameAs(reading));
+            }
+        }, () => {
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Provider.State, Is.EqualTo(MBoxProviderState.Ready));
+                Assert.That(FindTextBlock(_Provider.ID).Foreground, Is.Not.SameAs(reading));
+                Assert.That(FindIconShapes().Select(shape => shape.Stroke), Has.None.SameAs(reading));
+                Assert.That(FindIconShapes().Select(shape => shape.Stroke), Has.Some.SameAs(ThemeBrush("Icon.Stroke")));
+            }
+        });
+    }
+
+    [Test]
+    public async Task ProviderControl_ShowsTheStatusInTheErrorColorWhenTheReadFails() {
+        await Run("not a mailbox\n", new MBoxConfig(), () => {
+            Show();
+            var status = FindTextBlock(_Provider.Status);
+            var error = FindTextBlock(_Provider.Error);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Provider.State, Is.EqualTo(MBoxProviderState.Failed));
+                Assert.That(status.Foreground, Is.SameAs(ThemeBrush("StatusErrorForeground")));
+                Assert.That(error.Foreground, Is.SameAs(ThemeBrush("ErrorForeground")));
+            }
+            return Task.CompletedTask;
+        });
+    }
+
+    [Test]
+    public async Task ProviderControl_ShowsTheStatusInTheStatusColorWhenTheReadStopsAtALimit() {
+        await Run(Mailbox(), new MBoxConfig { MaxEntries = 0 }, () => {
+            Show();
+            var status = FindTextBlock(_Provider.Status);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Provider.State, Is.EqualTo(MBoxProviderState.Partial));
+                Assert.That(status.Foreground, Is.SameAs(ThemeBrush("StatusForeground")));
+            }
+            return Task.CompletedTask;
+        });
+    }
+
+    [Test]
+    public async Task ProviderControl_HidesTheStatusAndErrorWhenTheyAreEmpty() {
+        await Run(() => {
+            Show();
+            var statusStyle = _Control.TryFindResource("Brows.Style.MBoxProvider.Status");
+            var errorStyle = _Control.TryFindResource("Brows.Style.MBoxProvider.Error");
+            var hidden = FindTextBlocks(_Control)
+                .Where(textBlock => ReferenceEquals(textBlock.Style, statusStyle) ||
+                                    ReferenceEquals(textBlock.Style, errorStyle))
+                .ToList();
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Provider.State, Is.EqualTo(MBoxProviderState.Ready));
+                Assert.That(hidden, Has.Count.EqualTo(2));
+                Assert.That(hidden.Select(textBlock => textBlock.Visibility), Is.All.EqualTo(Visibility.Collapsed));
             }
             return Task.CompletedTask;
         });

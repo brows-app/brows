@@ -5,6 +5,7 @@ using Brows.IPC;
 using Brows.IPC.Messages;
 using Brows.IPC.MessageSubscriptions;
 using Brows.IPC.TxRx;
+using Brows.Localization;
 using Brows.Providers;
 using Brows.Sys;
 using Domore.Logs;
@@ -88,6 +89,9 @@ public sealed class CommanderDomain : ICommanderDomain {
             }
         }
     }
+
+    internal ITranslationExport Translation => field ??=
+        Import.Find<ITranslationExport>();
 
     public event CommanderEndedEventHandler Ended;
     public event CommanderLoadedEventHandler Loaded;

@@ -25,7 +25,6 @@ public sealed class GitStatusProviderTest {
     private GitTestSandbox ConfigSandbox;
     private string PreviousConfigFileRoot;
     private string PreviousConfigDataRoot;
-    private ITranslation PreviousTranslation;
 
     private static void AssertRow(
         IReadOnlyDictionary<string, GitStatusEntry> rows,
@@ -175,9 +174,15 @@ public sealed class GitStatusProviderTest {
             new GitStatusEntryData.OriginalPath(),
             new GitStatusEntryData.Conflict()
         ];
+        Mock<ITranslationExport> translation = new();
+        translation.Setup(value => value.Alias(It.IsAny<string>())).Returns(Array.Empty<string>());
+        translation.Setup(value => value.Value(It.IsAny<string>())).Returns((string key) => key);
         Mock<IImportAgent> import = new();
         import.SetupGet(value => value.Ready).Returns(true);
         import.Setup(value => value.List<IEntryDataExport>(It.IsAny<bool>())).Returns(data);
+        import
+            .Setup(value => value.Find<ITranslationExport>(It.IsAny<bool>(), It.IsAny<bool>()))
+            .Returns(translation.Object);
 
         GitStatusProviderFactory factory = new();
         PropertyInfo property = typeof(ProviderFactory<GitStatusProvider>)
@@ -212,11 +217,6 @@ public sealed class GitStatusProviderTest {
         ConfigSandbox = new GitTestSandbox();
         PreviousConfigFileRoot = ConfigFileRoot.GetValue(null) as string;
         PreviousConfigDataRoot = ConfigDataRoot.GetValue(null) as string;
-        PreviousTranslation = Translation.Global;
-        Mock<ITranslation> translation = new();
-        translation.Setup(value => value.Alias(It.IsAny<string>())).Returns(Array.Empty<string>());
-        translation.Setup(value => value.Value(It.IsAny<string>())).Returns((string key) => key);
-        Translation.Global = translation.Object;
         ConfigFileRoot.SetValue(null, ConfigSandbox.PathFor("config"));
         ConfigDataRoot.SetValue(null, ConfigSandbox.PathFor("data"));
     }
@@ -225,7 +225,6 @@ public sealed class GitStatusProviderTest {
     public void RestoreConfiguration() {
         ConfigFileRoot.SetValue(null, PreviousConfigFileRoot);
         ConfigDataRoot.SetValue(null, PreviousConfigDataRoot);
-        Translation.Global = PreviousTranslation;
         ConfigSandbox?.Dispose();
         ConfigSandbox = null;
     }

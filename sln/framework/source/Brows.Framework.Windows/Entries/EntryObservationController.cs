@@ -18,6 +18,7 @@ internal sealed class EntryObservationController : IEntryObservationController {
     private EntryListView EntryListView;
     private EntryListViewItemsListView _ItemsListView;
     private IComparer CustomSort;
+    private Point? DragStart;
 
     private List<IEntry> SelectedEntries {
         get => field ??= [];
@@ -101,6 +102,7 @@ internal sealed class EntryObservationController : IEntryObservationController {
         var oldListView = _ItemsListView;
         if (oldListView is not null) {
             oldListView.ItemsSourceChanged -= ListView_ItemsSourceChanged;
+            oldListView.MouseLeave -= ListView_MouseLeave;
             oldListView.MouseMove -= ListView_MouseMove;
             oldListView.MouseUp -= ListView_MouseUp;
             oldListView.PreviewKeyDown -= ListView_PreviewKeyDown;
@@ -114,6 +116,7 @@ internal sealed class EntryObservationController : IEntryObservationController {
             return;
         }
         _ItemsListView.ItemsSourceChanged += ListView_ItemsSourceChanged;
+        _ItemsListView.MouseLeave += ListView_MouseLeave;
         _ItemsListView.MouseMove += ListView_MouseMove;
         _ItemsListView.MouseUp += ListView_MouseUp;
         _ItemsListView.PreviewKeyDown += ListView_PreviewKeyDown;
@@ -125,7 +128,14 @@ internal sealed class EntryObservationController : IEntryObservationController {
     }
 
     private void ListView_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
+        DragStart = e.ChangedButton == MouseButton.Left
+            ? e.GetPosition(ListView)
+            : null;
         ManualInteraction?.Invoke(this, e);
+    }
+
+    private void ListView_MouseLeave(object sender, MouseEventArgs e) {
+        DragStart = null;
     }
 
     private void ListView_PreviewKeyDown(object sender, KeyEventArgs e) {
@@ -146,14 +156,35 @@ internal sealed class EntryObservationController : IEntryObservationController {
     }
 
     private void ListView_MouseMove(object sender, MouseEventArgs e) {
-        if (e != null) {
-            if (e.LeftButton == MouseButtonState.Pressed) {
-                var source = EntryFrom(e.OriginalSource as DependencyObject);
-                if (source != null && source.Select) {
-                    DraggingSelected?.Invoke(this, e);
-                }
-            }
+        if (e is null) {
+            return;
         }
+        if (e.LeftButton != MouseButtonState.Pressed) {
+            DragStart = null;
+            return;
+        }
+        if (DragStart is not Point start) {
+            return;
+        }
+        /*
+         * WPF raises MouseMove without any pointer movement when the element
+         * under the pointer changes, such as when a click selects an entry.
+         * Start a drag only after the pointer has moved past the system's
+         * drag threshold from where the button was pressed.
+         */
+        var position = e.GetPosition(ListView);
+        var movedFarEnough =
+            Math.Abs(position.X - start.X) >= SystemParameters.MinimumHorizontalDragDistance ||
+            Math.Abs(position.Y - start.Y) >= SystemParameters.MinimumVerticalDragDistance;
+        if (movedFarEnough == false) {
+            return;
+        }
+        var source = EntryFrom(e.OriginalSource as DependencyObject);
+        if (source is null || source.Select == false) {
+            return;
+        }
+        DragStart = null;
+        DraggingSelected?.Invoke(this, e);
     }
 
     private void ListView_MouseUp(object sender, MouseButtonEventArgs e) {
@@ -209,6 +240,10 @@ internal sealed class EntryObservationController : IEntryObservationController {
     }
 
     object IEntryObservationController.DraggingSource => ListView;
+
+    bool IEntryObservationController.AutoFit {
+        set => _ItemsListView?.Sizing.SetAutoFit(value);
+    }
 
     async Task<bool> IEntryObservationController.CurrentEntry(IEntry item, CancellationToken token) {
         if (token.IsCancellationRequested) {
@@ -312,7 +347,7 @@ internal sealed class EntryObservationController : IEntryObservationController {
         }
         var key = definition.Key;
         var
-        col = new EntryGridViewColumnProxy(definition);
+        col = new EntryGridViewColumnProxy(definition, Element.Translation);
         col.AddTo(GridView);
         var
         list = GridColumnList(key);
@@ -355,15 +390,23 @@ internal sealed class EntryObservationController : IEntryObservationController {
     }
 
     bool IEntryObservationController.SizeToFit(string key) {
+        var grid = GridView;
+        if (grid is null) {
+            return false;
+        }
         var result = false;
-        foreach (var column in Element.ListView.GridView.Columns) {
-            if (column is EntryGridViewColumn c) {
-                if (c.DataKey == key) {
-                    c.Width = c.ActualWidth;
-                    c.Width = double.NaN;
-                    result = true;
-                }
+        foreach (var column in grid.Columns.OfType<EntryGridViewColumn>()) {
+            if (column.DataKey != key) {
+                continue;
             }
+            if (column.Owner is not null) {
+                column.Owner.RequestFit(column);
+            }
+            else {
+                column.Width = column.ActualWidth;
+                column.Width = double.NaN;
+            }
+            result = true;
         }
         return result;
     }

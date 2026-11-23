@@ -150,6 +150,7 @@ internal sealed class EntryDataView : IEntryDataView {
         }
         var controller = Controller;
         if (controller != null) {
+            controller.AutoFit = Provider.Config.AutoFit;
             controller.ClearData();
             foreach (var key in KeyList) {
                 controller.AddData(Provider.Data.Definition.Get(key));

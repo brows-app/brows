@@ -1,13 +1,11 @@
-﻿using Brows.Entries;
-using Brows.MBox.Format;
+﻿using Brows.MBox.Format;
 using Domore.Logs;
-using Domore.Notification;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Brows;
@@ -17,6 +15,7 @@ namespace Brows;
 /// </summary>
 internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
     private static readonly ILog Log = Logging.For(typeof(MBoxProvider));
+    private static readonly TimeSpan ProvideInterval = TimeSpan.FromMilliseconds(100);
 
     private readonly Lock _Locker = new();
     private readonly Lock _SettingsLocker = new();
@@ -178,22 +177,30 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
     }
 
     /// <summary>
-    /// Reads the mailbox and provides its messages.
+    /// Reads the mailbox, and provides its messages as they are read.
     /// </summary>
     /// <param name="token">
     /// The token used to cancel the read.
     /// </param>
     protected sealed override async Task Begin(CancellationToken token) {
-        await Refresh(token);
+        await Read(PrepareStreamed, token);
     }
 
     /// <summary>
-    /// Reads the mailbox again, and provides its messages.
+    /// Reads the mailbox again, and provides its messages once all of them are read.
     /// </summary>
     /// <param name="token">
     /// The token used to cancel the read.
     /// </param>
+    /// <remarks>
+    /// The messages that the provider shows are kept until the mailbox has been read again, and
+    /// they are kept when the read fails.
+    /// </remarks>
     protected sealed override async Task Refresh(CancellationToken token) {
+        await Read(Prepare, token);
+    }
+
+    private async Task Read(Func<CancellationToken, Task> read, CancellationToken token) {
         try {
             await _RefreshLocker.WaitAsync(token);
         }
@@ -204,7 +211,7 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
              */
             SetState(
                 MBoxProviderState.Cancelled,
-                MBoxText.Value("MBoxProvider_Status_Cancelled"),
+                MBoxText.Value(Translation, "MBoxProvider_Status_Cancelled"),
                 string.Empty);
             return;
         }
@@ -215,10 +222,10 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
                 }
             }
             State = MBoxProviderState.Loading;
-            Status = MBoxText.Value("MBoxProvider_Status_Loading");
+            Status = MBoxText.Value(Translation, "MBoxProvider_Status_Loading");
             Error = string.Empty;
             Refreshing = true;
-            await Prepare(token);
+            await read(token);
         }
         finally {
             Refreshing = false;
@@ -232,6 +239,9 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
 
     internal Func<CancellationToken, Task> DecodeGateForTesting { get; set; }
 
+    internal ITranslation Translation =>
+        Factory.Translation;
+
     /// <summary>
     /// Gets the messages that the provider provides.
     /// </summary>
@@ -240,6 +250,10 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
     /// </returns>
     internal IReadOnlyList<MBoxEntry> Entries =>
         Provided;
+
+    internal Task BeginForTesting(CancellationToken token) {
+        return Begin(token);
+    }
 
     /// <summary>
     /// Retires the provider, and releases the mailbox that it holds.
@@ -398,6 +412,7 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
                 Html = message.Body.Html,
                 State = message.Body.State,
                 Diagnostics = message.Body.Diagnostics,
+                Attachments = Attachments(message.Body),
             };
             lock (_Locker) {
                 var resultSessionIsCurrent = _Ended == false && ReferenceEquals(_Session, session);
@@ -411,6 +426,17 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
         finally {
             ExitDecode();
         }
+    }
+
+    private MBoxPreviewAttachment[] Attachments(MBoxBody body) {
+        return body.Parts
+            .Where(part => part.IsAttachmentPart)
+            .Select(part => new MBoxPreviewAttachment(
+                string.IsNullOrWhiteSpace(part.FileName)
+                    ? MBoxText.Value(Translation, "MBoxPreview_Attachment_Unnamed")
+                    : part.FileName,
+                $"{part.ContentType.Type}/{part.ContentType.Subtype}"))
+            .ToArray();
     }
 
     private async Task<bool> EnterDecode(CancellationToken token) {
@@ -463,32 +489,10 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
             }
             var entries = new List<MBoxEntry>();
             var diagnostics = new List<MBoxDiagnostic>();
-            var limitReached = await Task.Run(() => Index(session, config, entries, diagnostics, token), token);
-            var nextState = MBoxProviderState.Ready;
-            var nextStatus = string.Empty;
-            var nextError = string.Empty;
-            if (limitReached) {
-                nextState = MBoxProviderState.Partial;
-                nextStatus = MBoxText.Value("MBoxProvider_Status_Partial");
-            }
-            else if (entries.Count == 0) {
-                if (session.File.Length == 0) {
-                    nextState = MBoxProviderState.Empty;
-                    nextStatus = MBoxText.Value("MBoxProvider_Status_Empty");
-                }
-                else {
-                /*
-                 * A mailbox that holds bytes but no accepted message is not an empty mailbox,
-                 * but a malformed one.
-                 */
-                    nextState = MBoxProviderState.Failed;
-                    nextStatus = MBoxText.Value("MBoxProvider_Status_Failed");
-                    nextError = MBoxText.Value("MBoxProvider_Error_Invalid");
-                }
-            }
-
+            var limitReached = await Task.Run(() => Index(session, config, entries.Add, diagnostics, token), token);
+            var nextState = IndexedState(limitReached, entries.Count, session.File.Length);
             if (nextState == MBoxProviderState.Failed) {
-                SetState(nextState, nextStatus, nextError);
+                SetIndexedState(nextState);
                 return;
             }
             if (await Commit(session, entries) == false) {
@@ -496,12 +500,12 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
             }
             published = true;
             IndexedCount = entries.Count;
-            SetState(nextState, nextStatus, nextError);
+            SetIndexedState(nextState);
         }
         catch (OperationCanceledException) {
             SetState(
                 MBoxProviderState.Cancelled,
-                MBoxText.Value("MBoxProvider_Status_Cancelled"),
+                MBoxText.Value(Translation, "MBoxProvider_Status_Cancelled"),
                 string.Empty);
         }
         catch (Exception ex) {
@@ -510,7 +514,7 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
             }
             SetState(
                 MBoxProviderState.Failed,
-                MBoxText.Value("MBoxProvider_Status_Failed"),
+                MBoxText.Value(Translation, "MBoxProvider_Status_Failed"),
                 ex.Message);
         }
         finally {
@@ -530,8 +534,8 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
     /// <param name="config">
     /// The configuration that bounds the index.
     /// </param>
-    /// <param name="entries">
-    /// The list that receives the messages.
+    /// <param name="add">
+    /// The callback that receives each message, as it is indexed.
     /// </param>
     /// <param name="diagnostics">
     /// The list that receives the problems that were found.
@@ -544,15 +548,16 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
     /// </returns>
     private bool Index(MBoxSession session,
                        MBoxConfig config,
-                       List<MBoxEntry> entries,
+                       Action<MBoxEntry> add,
                        List<MBoxDiagnostic> diagnostics,
                        CancellationToken token) {
         var maxEntries = Math.Max(0, config.MaxEntries);
         var maxTextBytes = Math.Max(0, config.MaxIndexTextBytes);
         var indexBytes = 0L;
+        var count = 0;
         IndexStageForTesting?.Invoke(IndexStage.Scan);
         foreach (var record in session.File.Scan(diagnostics.Add, token)) {
-            if (entries.Count >= maxEntries) {
+            if (count >= maxEntries) {
                 return true;
             }
             MBoxMessage message;
@@ -566,9 +571,175 @@ internal sealed class MBoxProvider : Provider<MBoxEntry, MBoxConfig> {
             }
             indexBytes += size;
             session.Add(record);
-            entries.Add(new MBoxEntry(this, session, record, metadata));
+            add(new MBoxEntry(this, session, record, metadata));
+            count++;
         }
         return false;
+    }
+
+    private async Task PrepareStreamed(CancellationToken token) {
+        var config = Settings;
+        MBoxSession session = null;
+        var published = false;
+        try {
+            var options = MBoxParserOptions.Default.WithFormat(config.Format);
+            session = await Task.Run(cancellationToken: token, function: () => {
+                var file = new MBoxFile(Path, options);
+                return new MBoxSession(file, options);
+            });
+            var gate = IndexGateForTesting;
+            IndexGateForTesting = null;
+            if (gate is not null) {
+                await gate(token);
+            }
+            /*
+             * The session is published before the mailbox is indexed, so that the messages can
+             * be previewed as soon as they are shown.
+             */
+            if (await Publish(session) == false) {
+                return;
+            }
+            published = true;
+            var channel = Channel.CreateUnbounded<MBoxEntry>(new UnboundedChannelOptions {
+                SingleReader = true,
+                SingleWriter = true,
+            });
+            var diagnostics = new List<MBoxDiagnostic>();
+            using var indexCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
+            var indexToken = indexCancellation.Token;
+            var index = Task.Run(() => {
+                try {
+                    return Index(session, config, entry => channel.Writer.TryWrite(entry), diagnostics, indexToken);
+                }
+                finally {
+                    channel.Writer.TryComplete();
+                }
+            });
+            int count;
+            try {
+                count = await ProvideIndexed(channel.Reader, token);
+            }
+            catch (Exception) {
+                indexCancellation.Cancel();
+                await Abandon(index);
+                throw;
+            }
+            var limitReached = await index;
+            SetIndexedState(IndexedState(limitReached, count, session.File.Length));
+        }
+        catch (OperationCanceledException) {
+            SetState(
+                MBoxProviderState.Cancelled,
+                MBoxText.Value(Translation, "MBoxProvider_Status_Cancelled"),
+                string.Empty);
+        }
+        catch (Exception ex) {
+            if (Log.Error()) {
+                Log.Error(nameof(PrepareStreamed), Path, ex);
+            }
+            SetState(
+                MBoxProviderState.Failed,
+                MBoxText.Value(Translation, "MBoxProvider_Status_Failed"),
+                ex.Message);
+        }
+        finally {
+            if (published == false) {
+                session?.Retire();
+                session?.Dispose();
+            }
+        }
+    }
+
+    private async Task<int> ProvideIndexed(ChannelReader<MBoxEntry> reader, CancellationToken token) {
+        var count = 0;
+        while (await reader.WaitToReadAsync(token)) {
+            var batch = new List<MBoxEntry>();
+            while (reader.TryRead(out var entry)) {
+                batch.Add(entry);
+            }
+            await Provide(batch, token);
+            count += batch.Count;
+            IndexedCount = count;
+            if (reader.Completion.IsCompleted == false) {
+                /*
+                 * The index collects the next batch while this one is shown, so that a large
+                 * mailbox is not provided one message at a time.
+                 */
+                await Task.Delay(ProvideInterval, token);
+            }
+        }
+        return count;
+    }
+
+    private async Task Abandon(Task index) {
+        try {
+            await index;
+        }
+        catch (Exception ex) {
+            if (Log.Debug()) {
+                Log.Debug(nameof(Abandon), Path, ex);
+            }
+        }
+    }
+
+    private async Task<bool> Publish(MBoxSession session) {
+        var previousEntries = Provided.ToArray();
+        if (previousEntries.Length > 0) {
+            await Revoke(previousEntries, CancellationToken.None);
+        }
+        MBoxSession previous;
+        MBoxPreviewCache previousCache;
+        lock (_Locker) {
+            if (_Ended) {
+                return false;
+            }
+            previous = _Session;
+            previousCache = _Cache;
+            _Session = session;
+            _Cache = new MBoxPreviewCache(Settings.MaxPreviewCacheBytes, Settings.MaxPreviewCacheCount);
+        }
+        ActiveGenerationId = session.GenerationId;
+        previousCache?.Clear();
+        previous?.Retire();
+        previous?.Dispose();
+        return true;
+    }
+
+    private static MBoxProviderState IndexedState(bool limitReached, int count, long length) {
+        if (limitReached) {
+            return MBoxProviderState.Partial;
+        }
+        if (count > 0) {
+            return MBoxProviderState.Ready;
+        }
+        if (length == 0) {
+            return MBoxProviderState.Empty;
+        }
+        /*
+         * A mailbox that holds bytes but no accepted message is not an empty mailbox, but a
+         * malformed one.
+         */
+        return MBoxProviderState.Failed;
+    }
+
+    private void SetIndexedState(MBoxProviderState state) {
+        switch (state) {
+            case MBoxProviderState.Partial:
+                SetState(state, MBoxText.Value(Translation, "MBoxProvider_Status_Partial"), string.Empty);
+                break;
+            case MBoxProviderState.Empty:
+                SetState(state, MBoxText.Value(Translation, "MBoxProvider_Status_Empty"), string.Empty);
+                break;
+            case MBoxProviderState.Failed:
+                SetState(
+                    state,
+                    MBoxText.Value(Translation, "MBoxProvider_Status_Failed"),
+                    MBoxText.Value(Translation, "MBoxProvider_Error_Invalid"));
+                break;
+            default:
+                SetState(state, string.Empty, string.Empty);
+                break;
+        }
     }
 
     private async Task<bool> Commit(MBoxSession session, List<MBoxEntry> entries) {

@@ -15,21 +15,23 @@ internal static class MBoxText {
     /// Returns the localized text of the specified key, or the key itself when the text has no
     /// translation.
     /// </summary>
+    /// <param name="translation">
+    /// The translation of the application, or null when it is not available.
+    /// </param>
     /// <param name="key">
     /// The key of the text.
     /// </param>
     /// <returns>
     /// The localized text of the specified key.
     /// </returns>
-    public static string Value(string key) {
+    public static string Value(ITranslation translation, string key) {
         if (string.IsNullOrEmpty(key)) {
             return string.Empty;
         }
-        var translate = Translation.Global;
-        if (translate == null) {
+        if (translation == null) {
             return key;
         }
-        var value = translate.Value(key);
+        var value = translation.Value(key);
         return string.IsNullOrEmpty(value) ? key : value;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Brows.Threading;
 using Brows.Win32;
+using Domore.Conf.Cli;
 using Domore.Logs;
 using Domore.Threading.Tasks;
 using System.Collections.Concurrent;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
-internal sealed class Metadata : FileSystemCommand<MetadataParameter> {
+internal sealed class Metadata : FileSystemCommand<Metadata.Parameter> {
     private static readonly ILog Log = Logging.For(typeof(Metadata));
 
     private readonly ISTAThreadPool ThreadPool = new STAThreadPool(nameof(Metadata)) { WorkerCountMin = 0 };
@@ -91,6 +92,14 @@ internal sealed class Metadata : FileSystemCommand<MetadataParameter> {
         public MetadataFailedException(FileSystemInfo info, Dictionary<string, Exception> propertyException) {
             Info = info;
             PropertyException = propertyException;
+        }
+    }
+
+    public sealed class Parameter {
+        [CliParameters]
+        public Dictionary<string, string> Set {
+            get => field ??= new();
+            set;
         }
     }
 }

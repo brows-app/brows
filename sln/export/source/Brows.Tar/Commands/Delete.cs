@@ -35,5 +35,5 @@ internal sealed class Delete : TarCommand<Delete.Parameter> {
         });
     }
 
-    internal sealed record Parameter;
+    public sealed record Parameter;
 }

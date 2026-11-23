@@ -4,7 +4,28 @@ using CONVERT = System.Convert;
 
 namespace Brows.Entries;
 
+/// <summary>
+/// Provides display formatting for entry data and commonly used converters.
+/// </summary>
 public abstract class EntryDataConverter : IEntryDataConverter {
+    /// <summary>
+    /// Attempts a conversion without passing conversion errors to the caller.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The type of the converted value.
+    /// </typeparam>
+    /// <param name="conversion">
+    /// The conversion to attempt.
+    /// </param>
+    /// <param name="input">
+    /// The value to convert.
+    /// </param>
+    /// <param name="result">
+    /// Receives the converted value, or the default value if conversion fails.
+    /// </param>
+    /// <returns>
+    /// True if conversion succeeded; otherwise, false.
+    /// </returns>
     protected static bool Try<T>(Func<object, T> conversion, object input, out T result) {
         try {
             result = conversion(input);
@@ -16,10 +37,47 @@ public abstract class EntryDataConverter : IEntryDataConverter {
         }
     }
 
+    /// <summary>
+    /// Formats a data value for display.
+    /// </summary>
+    /// <param name="value">
+    /// The data value to format.
+    /// </param>
+    /// <param name="parameter">
+    /// An optional converter-specific setting.
+    /// </param>
+    /// <param name="culture">
+    /// The culture used to format the value.
+    /// </param>
+    /// <returns>
+    /// The display text, or null when the value cannot be displayed.
+    /// </returns>
     public abstract string Convert(object value, object parameter, CultureInfo culture);
 
+    /// <summary>
+    /// Gets a date and time converter that accepts a format string as its parameter.
+    /// </summary>
     public static EntryDataConverter DateTime { get; } = new DateTimeConverter();
-    public static EntryDataConverter BooleanYesNo { get; } = new BooleanYesNoConverter();
+
+    /// <summary>
+    /// Creates a Boolean converter that displays translated Yes or No text.
+    /// </summary>
+    /// <param name="translation">
+    /// The translation that supplies the Yes and No text.
+    /// </param>
+    /// <returns>
+    /// The Boolean converter.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="translation"/> is null.
+    /// </exception>
+    public static EntryDataConverter BooleanYesNo(ITranslation translation) {
+        return new BooleanYesNoConverter(translation);
+    }
+
+    /// <summary>
+    /// Gets a byte-count converter that displays a readable size and accepts a number format parameter.
+    /// </summary>
     public static EntryDataConverter FileSystemSize { get; } = new FileSystemSizeConverter();
 
     private sealed class DateTimeConverter : EntryDataConverter {
@@ -38,6 +96,12 @@ public abstract class EntryDataConverter : IEntryDataConverter {
     }
 
     private sealed class BooleanYesNoConverter : EntryDataConverter {
+        private readonly ITranslation Translation;
+
+        public BooleanYesNoConverter(ITranslation translation) {
+            Translation = translation ?? throw new ArgumentNullException(nameof(translation));
+        }
+
         public sealed override string Convert(object value, object parameter, CultureInfo culture) {
             if (value == null) return null;
 
@@ -46,7 +110,7 @@ public abstract class EntryDataConverter : IEntryDataConverter {
 
             var yesNo = boolean ? "Yes" : "No";
             var key = $"EntryData_{yesNo}";
-            var s = Translation.Global.Value(key);
+            var s = Translation.Value(key);
             return s;
         }
     }

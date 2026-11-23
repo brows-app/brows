@@ -1,8 +1,8 @@
 ﻿using Brows.Gui;
 using Brows.Panels;
-using Moq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,13 +15,23 @@ internal sealed class PanelCollectionControlTest {
     private sealed class PanelModel {
         private readonly Mock<IPanel> _Mock = new();
 
-        internal int Column { get; set; }
+        internal int Column {
+            get;
+            set {
+                field = value;
+                _Mock.As<INotifyPropertyChanged>().Raise(
+                    notifier => notifier.PropertyChanged += null,
+                    new PropertyChangedEventArgs(nameof(IPanel.Column)));
+            }
+        }
+
         internal IPanel Value { get; }
 
         internal PanelModel(int column) {
-            Column = column;
+            _Mock.As<INotifyPropertyChanged>();
             _Mock.SetupGet(panel => panel.Column).Returns(() => Column);
             Value = _Mock.Object;
+            Column = column;
         }
     }
 
@@ -47,6 +57,17 @@ internal sealed class PanelCollectionControlTest {
                 _Panels[i].Column = i;
             }
             _Controller?.RemovePanel(panel.Value);
+        }
+
+        internal void Shift(PanelModel panel, int column) {
+            var removed = _Panels.Remove(panel);
+            if (removed == false) {
+                return;
+            }
+            _Panels.Insert(column, panel);
+            for (var i = 0; i < _Panels.Count; i++) {
+                _Panels[i].Column = i;
+            }
         }
 
         IPanel IPanelCollection.this[int index] => _Panels[index].Value;
@@ -114,6 +135,24 @@ internal sealed class PanelCollectionControlTest {
         return (Grid)control.Template.FindName("PART_Grid", control);
     }
 
+    private static bool IsDrawnAbove(Grid grid, UIElement element, UIElement other) {
+        /*
+         * A panel draws its children in ascending ZIndex order, and
+         * children with equal ZIndex in the order they were added.
+         */
+        var elementZIndex = Grid.GetZIndex(element);
+        var otherZIndex = Grid.GetZIndex(other);
+        if (elementZIndex != otherZIndex) {
+            return elementZIndex > otherZIndex;
+        }
+        return grid.Children.IndexOf(element) > grid.Children.IndexOf(other);
+    }
+
+    private static Thickness SplitterPadding(FrameworkElement element) {
+        var width = (double)element.FindResource("Brows.Style.PanelSplitter.Width");
+        return new Thickness(width, 0, 0, 0);
+    }
+
     [Test]
     public void RemovePanel_RemovesVisualAndReleasesItsViewModel() {
         DispatcherTools.Run(_ => {
@@ -147,6 +186,85 @@ internal sealed class PanelCollectionControlTest {
                     Assert.That(removedControl.ViewModel, Is.Null);
                     Assert.That(remainingControl.ViewModel, Is.SameAs(second.Value));
                     Assert.That(remainingControl.Padding, Is.EqualTo(new Thickness(0)));
+                });
+            }
+            finally {
+                window.Close();
+            }
+        });
+    }
+
+    [Test]
+    public void RemovePanel_KeepsSplittersAbovePanelsThatShiftIntoTheirColumns() {
+        DispatcherTools.Run(_ => {
+            var model = new PanelCollectionModel();
+            var first = new PanelModel(0);
+            var second = new PanelModel(1);
+            var third = new PanelModel(2);
+            var fourth = new PanelModel(3);
+            model.Add(first, second, third, fourth);
+
+            var control = new PanelCollectionControl {
+                ViewModel = model
+            };
+            var window = CreateWindow();
+            try {
+                window.Content = control;
+                window.Show();
+                window.UpdateLayout();
+
+                model.Remove(second);
+                window.UpdateLayout();
+
+                var grid = GetPanelGrid(control);
+                var panels = grid.Children.OfType<PanelControl>().ToList();
+                var splitters = grid.Children.OfType<PanelSplitter>().ToList();
+                Assert.That(splitters.Select(Grid.GetColumn), Is.EquivalentTo(new[] { 1, 2 }));
+                Assert.Multiple(() => {
+                    foreach (var splitter in splitters) {
+                        var column = Grid.GetColumn(splitter);
+                        var panel = panels.Single(item => Grid.GetColumn(item) == column);
+                        Assert.That(IsDrawnAbove(grid, splitter, panel), Is.True, $"Splitter in column {column}");
+                    }
+                });
+            }
+            finally {
+                window.Close();
+            }
+        });
+    }
+
+    [Test]
+    public void Shift_PadsOnlyPanelsThatFollowASplitter() {
+        DispatcherTools.Run(_ => {
+            var model = new PanelCollectionModel();
+            var first = new PanelModel(0);
+            var second = new PanelModel(1);
+            model.Add(first, second);
+
+            var control = new PanelCollectionControl {
+                ViewModel = model
+            };
+            var window = CreateWindow();
+            try {
+                window.Content = control;
+                window.Show();
+                window.UpdateLayout();
+
+                var grid = GetPanelGrid(control);
+                var firstControl = grid.Children.OfType<PanelControl>()
+                    .Single(panel => panel.ViewModel == first.Value);
+                var secondControl = grid.Children.OfType<PanelControl>()
+                    .Single(panel => panel.ViewModel == second.Value);
+
+                model.Shift(first, 1);
+                window.UpdateLayout();
+
+                Assert.Multiple(() => {
+                    Assert.That(Grid.GetColumn(secondControl), Is.Zero);
+                    Assert.That(secondControl.Padding, Is.EqualTo(new Thickness(0)));
+                    Assert.That(Grid.GetColumn(firstControl), Is.EqualTo(1));
+                    Assert.That(firstControl.Padding, Is.EqualTo(SplitterPadding(firstControl)));
                 });
             }
             finally {

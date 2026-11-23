@@ -68,7 +68,7 @@ internal sealed class LogsProviderControlTest {
 
     [SetUp]
     public void SetUp() {
-        Provider = new LogsProvider("Logs");
+        Provider = new LogsProvider("Logs", translation: null);
     }
 
     [TearDown]
@@ -115,10 +115,12 @@ internal sealed class LogsProviderControlTest {
         var logs = Descendant<LogsControl>(control);
 
         using (Assert.EnterMultipleScope()) {
-            Assert.That(((SolidColorBrush)logs.Background).Color, Is.EqualTo(Colors.Transparent));
+            Assert.That(logs.Background, Is.SameAs(window.FindResource("Brows.Theme.LogsProvider.Background")));
             Assert.That(logs.Foreground, Is.SameAs(window.FindResource("Brows.Theme.LogsProvider.Foreground")));
             Assert.That(logs.LogDebugForeground,
                         Is.SameAs(window.FindResource("Brows.Theme.LogsProvider.DebugForeground")));
+            Assert.That(logs.LogInfoForeground,
+                        Is.SameAs(window.FindResource("Brows.Theme.LogsProvider.InfoForeground")));
             Assert.That(logs.LogWarnForeground,
                         Is.SameAs(window.FindResource("Brows.Theme.LogsProvider.WarnForeground")));
             Assert.That(logs.LogErrorForeground,
@@ -127,28 +129,35 @@ internal sealed class LogsProviderControlTest {
                         Is.SameAs(window.FindResource("Brows.Theme.LogsProvider.CriticalForeground")));
             Assert.That(logs.LogSelectionBackground,
                         Is.SameAs(window.FindResource("Brows.Theme.LogsProvider.SelectionBackground")));
-            Assert.That(logs.FontFamily.Source, Is.EqualTo("Consolas"));
+            Assert.That(logs.FontFamily, Is.SameAs(window.FindResource("Brows.Font.LogsProvider.FontFamily")));
+            Assert.That(logs.FontWeight, Is.EqualTo(window.FindResource("Brows.Font.LogsProvider.FontWeight")));
             Assert.That(logs.LogScrollViewerStyle,
                         Is.SameAs(window.FindResource("Brows.Style.LogsProvider.ScrollViewer")));
         }
+    }
+
+    [TestCase("Dark")]
+    [TestCase("Light")]
+    public void LogsProviderControl_Shown_ColorsInfoUnlikeEntryData(string theme) {
+        var control = new LogsProviderControl { ViewModel = Provider };
+        var window = Show(theme, control);
+        var logs = Descendant<LogsControl>(control);
+        var entryData = (SolidColorBrush)window.FindResource("Brows.Theme.EntryDataTextBlock.Foreground");
+
+        Assert.That(((SolidColorBrush)logs.LogInfoForeground).Color, Is.Not.EqualTo(entryData.Color));
     }
 
     [Test]
     public void LogsProviderControl_Shown_ShowsTranslatedProviderName() {
         var translation = new Mock<ITranslation>();
         translation.Setup(item => item.Value("Logs")).Returns("Translated logs");
-        var previousTranslation = Translation.Global;
-        Translation.Global = translation.Object;
-        try {
-            var control = new LogsProviderControl { ViewModel = Provider };
-            Show("Dark", control);
-            var grid = Descendant<ProviderGrid>(control);
+        Provider.Dispose();
+        Provider = new LogsProvider("Logs", translation.Object);
+        var control = new LogsProviderControl { ViewModel = Provider };
+        Show("Dark", control);
+        var grid = Descendant<ProviderGrid>(control);
 
-            Assert.That(grid.Text, Is.EqualTo("Translated logs"));
-            Assert.That(grid.Provider, Is.SameAs(Provider));
-        }
-        finally {
-            Translation.Global = previousTranslation;
-        }
+        Assert.That(grid.Text, Is.EqualTo("Translated logs"));
+        Assert.That(grid.Provider, Is.SameAs(Provider));
     }
 }

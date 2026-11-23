@@ -28,6 +28,14 @@ internal sealed class MBoxProviderFactory : ProviderFactory<MBoxProvider> {
         set;
     }
 
+    /// <summary>
+    /// Gets or sets the translation of the application.
+    /// </summary>
+    public ITranslationExport Translation {
+        get;
+        set;
+    }
+
     protected sealed override async Task<MBoxProvider> CreateFor(string id, IPanel panel, CancellationToken token) {
         if (string.IsNullOrWhiteSpace(id)) {
             return null;

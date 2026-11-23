@@ -9,6 +9,7 @@ internal interface IEntryObservationController {
     event EventHandler DraggingSelected;
     event EventHandler CurrentEntryChanged;
     object DraggingSource { get; }
+    bool AutoFit { set; }
     void Sort(IEntrySorting sorting);
     bool Focus();
     bool Focused();

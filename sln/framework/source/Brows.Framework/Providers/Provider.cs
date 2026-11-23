@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 
 namespace Brows.Providers;
 
+/// <summary>
+/// Provides a base for panel content, navigation, detail views, and provider lifetime management.
+/// </summary>
 public abstract class Provider : Notifier,
                                  IProvider,
                                  IControlled<IProviderController>,
@@ -314,6 +317,9 @@ public abstract class Provider : Notifier,
     private protected virtual void EndProvided() {
     }
 
+    /// <summary>
+    /// Gets a token canceled when the provider ends.
+    /// </summary>
     protected internal CancellationToken Token {
         get {
             if (TokenSource != null) {
@@ -343,6 +349,12 @@ public abstract class Provider : Notifier,
         ID = id;
     }
 
+    /// <summary>
+    /// Releases resources owned by the provider.
+    /// </summary>
+    /// <param name="disposing">
+    /// True for explicit disposal; false when called during finalization.
+    /// </param>
     protected virtual void Dispose(bool disposing) {
         if (disposing) {
             if (TokenSource != null) {
@@ -357,19 +369,90 @@ public abstract class Provider : Notifier,
         }
     }
 
+    /// <summary>
+    /// Offers a system message to the provider.
+    /// </summary>
+    /// <param name="message">
+    /// The message to handle.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// True if the provider handled the message; otherwise, false.
+    /// </returns>
     protected virtual Task<bool> Take(ISystemMessage message, CancellationToken token) {
         return Task.FromResult(false);
     }
 
+    /// <summary>
+    /// Handles files offered to the provider through a drop operation.
+    /// </summary>
+    /// <param name="data">
+    /// The drop target and offered file paths.
+    /// </param>
+    /// <param name="progress">
+    /// Receives progress updates for the operation.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// True if the provider handled the drop; otherwise, false.
+    /// </returns>
     protected virtual Task<bool> Drop(IPanelDrop data, IOperationProgress progress, CancellationToken token) {
         return Task.FromResult(false);
     }
 
+    /// <summary>
+    /// Refreshes the provider content.
+    /// </summary>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task that completes when the refresh finishes.
+    /// </returns>
     protected virtual Task Refresh(CancellationToken token) => Task.CompletedTask;
+
+    /// <summary>
+    /// Starts provider-specific work after the provider has been opened.
+    /// </summary>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task that completes when startup finishes.
+    /// </returns>
     protected virtual Task Begin(CancellationToken token) => Task.CompletedTask;
+
+    /// <summary>
+    /// Performs provider-specific cleanup when the provider ends.
+    /// </summary>
     protected virtual void End() {
     }
 
+    /// <summary>
+    /// Retrieves credentials from the owning panel, asking the user when needed.
+    /// </summary>
+    /// <typeparam name="TSecret">
+    /// The kind of credentials to retrieve.
+    /// </typeparam>
+    /// <param name="key">
+    /// The key used to identify stored credentials.
+    /// </param>
+    /// <param name="promptFormat">
+    /// The format string for the user prompt.
+    /// </param>
+    /// <param name="promptArgs">
+    /// The values to insert into the prompt.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The credentials, or null if none are available or the provider has no panel.
+    /// </returns>
     protected async Task<TSecret> GetSecret<TSecret>(string key,
                                                      string promptFormat,
                                                      IEnumerable<string> promptArgs,
@@ -382,23 +465,52 @@ public abstract class Provider : Notifier,
         return await panel.GetSecret<TSecret>(key, promptFormat, promptArgs, token);
     }
 
+    /// <summary>
+    /// Gets the identifier used to open this provider.
+    /// </summary>
     public string ID { get; }
+
+    /// <summary>
+    /// Gets the parent location identifier, or null when no parent is supplied.
+    /// </summary>
     public virtual string Parent { get; }
 
+    /// <summary>
+    /// Gets the detail view associated with this provider.
+    /// </summary>
     public ProviderDetailSet Detail => field ??=
         new(this);
 
+    /// <summary>
+    /// Gets or sets the provider navigation model.
+    /// </summary>
     public ProviderNavigation Navigation {
         get;
         set => Change(ref field, value);
     }
 
+    /// <summary>
+    /// Opens another provider in the same panel.
+    /// </summary>
+    /// <param name="id">
+    /// The identifier of the provider to open.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// True if the replacement provider was opened; otherwise, false.
+    /// </returns>
     public async Task<bool> Change(string id, CancellationToken token) {
         var panel = Panel;
         if (panel == null) return false;
         return await panel.Provide(id, token);
     }
 
+    /// <summary>
+    /// Starts closing the detail view, ending the provider, and releasing its resources. Use DisposeAsync to await
+    /// completion.
+    /// </summary>
     public void Dispose() {
         RethrowCompletedFailure(EnsureLifetime(dispose: true));
     }
@@ -406,10 +518,16 @@ public abstract class Provider : Notifier,
     /// <summary>
     /// Asynchronously closes provider details before ending and disposing the provider.
     /// </summary>
+    /// <returns>
+    /// A task that completes after the provider and its details have been closed and disposed.
+    /// </returns>
     public async ValueTask DisposeAsync() {
         await EnsureLifetime(dispose: true);
     }
 
+    /// <summary>
+    /// Releases provider resources during finalization.
+    /// </summary>
     ~Provider() {
         Dispose(false);
     }
@@ -464,9 +582,33 @@ public abstract class Provider : Notifier,
     }
 }
 
+/// <summary>
+/// Provides a panel's entries using a specified entry type and configuration type.
+/// </summary>
+/// <typeparam name="TEntry">
+/// The type of entry supplied by the provider.
+/// </typeparam>
+/// <typeparam name="TConfig">
+/// The configuration type used by the provider.
+/// </typeparam>
 public abstract class Provider<TEntry, TConfig> : EntryProvider.Of<TEntry>.With<TConfig>
 where TEntry : Entry
 where TConfig : EntryConfig, new() {
+    /// <summary>
+    /// Initializes a provider of entries.
+    /// </summary>
+    /// <param name="id">
+    /// The provider identifier.
+    /// </param>
+    /// <param name="initialCapacity">
+    /// The initial capacity reserved for entries.
+    /// </param>
+    /// <param name="compareID">
+    /// The comparer used for entry identifiers, or null for the default comparer.
+    /// </param>
+    /// <param name="compareName">
+    /// The comparer used for entry names, or null for the default comparer.
+    /// </param>
     protected Provider(string id,
                        int initialCapacity,
                        IEqualityComparer<string> compareID,
@@ -474,6 +616,12 @@ where TConfig : EntryConfig, new() {
     : base(id, initialCapacity, compareID, compareName) {
     }
 
+    /// <summary>
+    /// Initializes a provider of entries.
+    /// </summary>
+    /// <param name="id">
+    /// The provider identifier.
+    /// </param>
     protected Provider(string id) : this(id, 0, null, null) {
     }
 }

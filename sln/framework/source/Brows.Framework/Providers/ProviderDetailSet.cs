@@ -705,6 +705,12 @@ public sealed class ProviderDetailSet : Notifier, IControlled<IProviderDetailSet
     /// <summary>
     /// Gets the active detail when its key matches the supplied key.
     /// </summary>
+    /// <param name="key">
+    /// The key identifying the detail to retrieve.
+    /// </param>
+    /// <returns>
+    /// The active detail with this key, or null if it is not active.
+    /// </returns>
     public ProviderDetail this[object key] {
         get {
             var active = Volatile.Read(ref ActiveValue);
@@ -717,6 +723,9 @@ public sealed class ProviderDetailSet : Notifier, IControlled<IProviderDetailSet
     /// <summary>
     /// Initializes a new provider detail set for its owning provider.
     /// </summary>
+    /// <param name="owner">
+    /// The provider that owns the detail set.
+    /// </param>
     public ProviderDetailSet(Provider owner) {
         Owner = owner ?? throw new ArgumentNullException(nameof(owner));
     }
@@ -724,6 +733,18 @@ public sealed class ProviderDetailSet : Notifier, IControlled<IProviderDetailSet
     /// <summary>
     /// Shows a detail, closing the current detail before publishing its replacement.
     /// </summary>
+    /// <param name="key">
+    /// The key identifying this kind of detail.
+    /// </param>
+    /// <param name="detail">
+    /// The detail to show. It must belong to the provider that owns this set.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// True if the detail is shown; false if the request could not be applied.
+    /// </returns>
     public Task<bool> ShowAsync(object key, ProviderDetail detail, CancellationToken token) {
         ArgumentNullException.ThrowIfNull(key);
         ValidateDetail(Owner, detail, nameof(detail));
@@ -733,6 +754,15 @@ public sealed class ProviderDetailSet : Notifier, IControlled<IProviderDetailSet
     /// <summary>
     /// Closes the expected detail without affecting a replacement.
     /// </summary>
+    /// <param name="expected">
+    /// The active or pending detail to close. It must belong to this set's provider.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// True if the expected detail was closed or its pending display was withdrawn; otherwise, false.
+    /// </returns>
     public Task<bool> CloseAsync(ProviderDetail expected, CancellationToken token) {
         ValidateDetail(Owner, expected, nameof(expected));
         return OnController(() => Close(expected, token));
@@ -742,6 +772,18 @@ public sealed class ProviderDetailSet : Notifier, IControlled<IProviderDetailSet
     /// Toggles a keyed detail. Overlapping toggles run in invocation order after the preceding transition completes.
     /// A canceled request waiting its turn does not change the view.
     /// </summary>
+    /// <param name="key">
+    /// The key of the detail to close if active, or show otherwise.
+    /// </param>
+    /// <param name="factory">
+    /// Creates a detail owned by this set's provider when the key is not already active.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// True if the toggle was applied; false if it could not be applied.
+    /// </returns>
     public Task<bool> ToggleAsync(object key, Func<ProviderDetail> factory, CancellationToken token) {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(factory);
@@ -752,6 +794,9 @@ public sealed class ProviderDetailSet : Notifier, IControlled<IProviderDetailSet
     /// Closes the active detail and retains completion for repeated shutdown requests.
     /// A failed close can be retried.
     /// </summary>
+    /// <returns>
+    /// A task that completes after active and pending detail resources have been closed.
+    /// </returns>
     public Task ShutdownAsync() {
         TaskCompletionSource completion;
         lock (ShutdownLocker) {
@@ -776,6 +821,15 @@ public sealed class ProviderDetailSet : Notifier, IControlled<IProviderDetailSet
     /// <summary>
     /// Checks whether a detail and generation still identify the active, stable view.
     /// </summary>
+    /// <param name="detail">
+    /// The detail whose view is being checked.
+    /// </param>
+    /// <param name="generation">
+    /// The Generation value captured when the work was requested.
+    /// </param>
+    /// <returns>
+    /// True if the detail is still active, the generation matches, and no view change or shutdown is pending.
+    /// </returns>
     public bool IsCurrent(ProviderDetail detail, long generation) {
         if (detail is null) {
             return false;

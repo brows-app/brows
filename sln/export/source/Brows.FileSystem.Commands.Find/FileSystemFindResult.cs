@@ -108,9 +108,10 @@ internal sealed class FileSystemFindResult : Notifier, IControlled<IFileSystemFi
     public string Conf { get; }
     public string Input { get; }
     public DirectoryInfo Root { get; }
-    public FindParameter Parameter { get; }
+    public Find.Parameter Parameter { get; }
+    public ITranslation Translation { get; init; }
 
-    public FileSystemFindResult(DirectoryInfo root, FindParameter parameter, string input, string conf) {
+    public FileSystemFindResult(DirectoryInfo root, Find.Parameter parameter, string input, string conf) {
         Root = root;
         Conf = conf;
         Input = input;

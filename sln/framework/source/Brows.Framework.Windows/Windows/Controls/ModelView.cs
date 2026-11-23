@@ -9,9 +9,25 @@ public abstract class ModelView : Control {
         FocusableProperty.OverrideMetadata(typeof(ModelView), new FrameworkPropertyMetadata(false));
         IsTabStopProperty.OverrideMetadata(typeof(ModelView), new FrameworkPropertyMetadata(false));
     }
+
+    private protected ModelView(bool populateImports) {
+        if (populateImports) {
+            Imports.Current.Populate(this);
+        }
+    }
+
+    internal abstract object ViewModelObject { get; }
 }
 
 public abstract class ModelView<TViewModel> : ModelView {
+    internal sealed override object ViewModelObject => ViewModel;
+
+    protected ModelView(bool populateImports) : base(populateImports) {
+    }
+
+    protected ModelView() : this(populateImports: true) {
+    }
+
     protected virtual void OnViewModelChanged(TViewModel oldValue, TViewModel newValue) {
     }
 
@@ -49,9 +65,12 @@ where TController : class {
         }
     }
 
-    protected ModelView() {
+    protected ModelView(bool populateImports) : base(populateImports) {
         Loaded += This_Loaded;
         Unloaded += This_Unloaded;
+    }
+
+    protected ModelView() : this(populateImports: true) {
     }
 
     protected override void OnViewModelChanged(TViewModel oldValue, TViewModel newValue) {

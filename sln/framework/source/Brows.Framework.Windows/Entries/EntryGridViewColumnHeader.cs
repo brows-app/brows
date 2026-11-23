@@ -7,9 +7,6 @@ using System.Windows.Controls;
 namespace Brows.Entries;
 
 internal sealed class EntryGridViewColumnHeader : ContentControl {
-    private static ITranslation Translate => _Translate ??= Translation.Global;
-    private static ITranslation _Translate;
-
     private IEnumerable<string> ResourceKeys() {
         var key = Key;
         var resolver = Resolver;
@@ -27,7 +24,7 @@ internal sealed class EntryGridViewColumnHeader : ContentControl {
             }
             else {
                 foreach (var key in ResourceKeys()) {
-                    var content = Translate.Value(key);
+                    var content = Translation?.Value(key);
                     if (content is not null) {
                         Content = content;
                         break;
@@ -38,8 +35,14 @@ internal sealed class EntryGridViewColumnHeader : ContentControl {
                 }
             }
         }
+        if (e.Property == ContentProperty) {
+            Column?.Owner?.DirtyHeaders(Column);
+        }
         base.OnPropertyChanged(e);
     }
+
+    public static readonly DependencyProperty ColumnProperty = DependencyProperty.Register(
+        nameof(Column), typeof(EntryGridViewColumn), typeof(EntryGridViewColumnHeader));
 
     public static readonly DependencyProperty KeyProperty = DependencyProperty.Register(
         name: nameof(Key),
@@ -50,6 +53,11 @@ internal sealed class EntryGridViewColumnHeader : ContentControl {
         name: nameof(Display),
         propertyType: typeof(string),
         ownerType: typeof(EntryGridViewColumnHeader));
+
+    public EntryGridViewColumn Column {
+        get => (EntryGridViewColumn)GetValue(ColumnProperty);
+        set => SetValue(ColumnProperty, value);
+    }
 
     public string Key {
         get => GetValue(KeyProperty) as string;
@@ -62,12 +70,14 @@ internal sealed class EntryGridViewColumnHeader : ContentControl {
     }
 
     public IExportResourceKey Resolver { get; }
+    public ITranslation Translation { get; }
 
-    public EntryGridViewColumnHeader(IExportResourceKey resolver) {
+    public EntryGridViewColumnHeader(IExportResourceKey resolver, ITranslation translation) {
         Resolver = resolver;
+        Translation = translation;
     }
 
-    public EntryGridViewColumnHeader() : this(null) {
+    public EntryGridViewColumnHeader() : this(null, null) {
     }
 
     public void Sorting(EntrySortDirection? direction) {

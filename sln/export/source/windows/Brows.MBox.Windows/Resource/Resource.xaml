@@ -2,11 +2,15 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
                     xmlns:local="clr-namespace:Brows">
-    <DataTemplate x:Key="MBoxEntry_Subject">
-        <brows:EntryNameGrid Text="{Binding Item[Subject]}"/>
-    </DataTemplate>
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Brows.MBox.Windows;component/Resources/Styles/Brows.Style.MBoxEntryPreview.xaml"/>
+    <ResourceDictionary Source="/Brows.MBox.Windows;component/Resources/Styles/Brows.Style.MBoxProvider.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+  <DataTemplate x:Key="MBoxEntry_Subject">
+    <brows:EntryNameGrid Text="{Binding Item[Subject]}"/>
+  </DataTemplate>
 
-    <DataTemplate x:Key="PanelProvider_MBoxProvider">
-        <local:MBoxProviderControl/>
-    </DataTemplate>
+  <DataTemplate x:Key="PanelProvider_MBoxProvider">
+    <local:MBoxProviderControl ViewModel="{Binding}"/>
+  </DataTemplate>
 </ResourceDictionary>

@@ -4,15 +4,13 @@ using System;
 using System.Threading;
 using System.Windows;
 using TASK = System.Threading.Tasks.Task;
-using TRANSLATION = Brows.Localization.Translation;
 
 namespace Brows.Windows;
 
 internal sealed class AppExports {
-    private TaskCache<AppExports> Task => field ??= new(token => TASK.Run(cancellationToken: token, function: async () => {
+    private TaskCache<AppExports> Task => field ??= new(token => TASK.Run(cancellationToken: token, function: () => {
         Import = Imports.Current;
         Components = AppComponentCollection.From(Import);
-        TRANSLATION.Global = Translation = await AppComponentTranslation.Ready(Components, token);
         return this;
     }));
 
@@ -26,7 +24,6 @@ internal sealed class AppExports {
 
     public IImport Import { get; private set; }
     public AppComponentCollection Components { get; private set; }
-    public AppComponentTranslation Translation { get; private set; }
     public SynchronizationContext SynchronizationContext { get; private set; }
     public WindowsApplication App { get; }
 

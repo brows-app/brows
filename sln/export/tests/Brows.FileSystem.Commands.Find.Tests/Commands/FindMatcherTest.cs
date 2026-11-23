@@ -80,16 +80,9 @@ internal sealed class FindMatcherTest {
         var match = new FindMatcher("two", ignoreCase: false)
             .FindInText(text, maxPreviewLength: 512, CancellationToken.None)
             .Single();
-        var row = new FoundInFileText(file, fixture.Root, match);
-        var previousTranslation = Translation.Global;
-        Translation.Global = new TestTranslation();
-        try {
-            Assert.That(row.Match.Line, Is.EqualTo(1));
-            Assert.That(row.LineLabel, Is.EqualTo("Line 2"));
-        }
-        finally {
-            Translation.Global = previousTranslation;
-        }
+        var row = new FoundInFileText(file, fixture.Root, match, new TestTranslation());
+        Assert.That(row.Match.Line, Is.EqualTo(1));
+        Assert.That(row.LineLabel, Is.EqualTo("Line 2"));
     }
 
     [Test]

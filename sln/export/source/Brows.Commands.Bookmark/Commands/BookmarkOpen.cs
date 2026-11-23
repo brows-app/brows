@@ -8,7 +8,7 @@ namespace Brows.Commands;
 
 using Conf;
 
-internal class BookmarkOpen : Command {
+internal sealed class BookmarkOpen : Command {
     private IConfiguration<Bookmarks> Data => field ??=
         ConfigData.Data<Bookmarks>(Bookmarks.DataName);
 

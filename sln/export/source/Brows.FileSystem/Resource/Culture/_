@@ -30,13 +30,16 @@ Command_Group_FileSystemEntryData               = File System
 Command_Group_FileSystemInfoData                = File System
 Command_Group_FileSystemMetaData                = Property System
 
-Command_Description_FileSystem_TerminalOpen     = Open or focus the PowerShell terminal for this directory
-Command_Description_FileSystem_TerminalRelease  = Return focus to the entries while keeping the terminal running
-Command_Description_FileSystem_TerminalClose    = Stop the terminal session and its owned processes
-FileSystemTerminal_Status_Starting = Starting PowerShell
-FileSystemTerminal_Status_Running  = Running
-FileSystemTerminal_Status_Exited   = Process exited with code {0}
-FileSystemTerminal_Status_ExitedWithoutCode = Process exited
-FileSystemTerminal_Status_Stopping = Stopping PowerShell
-FileSystemTerminal_Status_Stopped  = Stopped
-FileSystemTerminal_Status_Failed   = PowerShell terminal error: {0}
+Command_Description_FileSystem_Terminal         = Open, focus, or release focus from the PowerShell terminal, or close it
+
+FileSystemTerminal_Status_Starting = Terminal starting
+FileSystemTerminal_Status_Running  = Terminal running
+FileSystemTerminal_Status_Exited   = Terminal process exited with code {0}
+FileSystemTerminal_Status_ExitedWithoutCode = Terminal process exited
+FileSystemTerminal_Status_Stopping = Terminal stopping
+FileSystemTerminal_Status_Stopped  = Terminal stopped
+FileSystemTerminal_Status_Failed   = Terminal error: {0}
+
+FileSystemTerminal_Trigger_Focus   = Focus:
+FileSystemTerminal_Trigger_Release = Release focus:
+

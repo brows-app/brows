@@ -1,6 +1,8 @@
-﻿namespace Brows.Commands;
+﻿using Domore.Conf.Cli;
 
-internal sealed class Logs : Command<LogsParameter> {
+namespace Brows.Commands;
+
+internal sealed class Logs : Command<Logs.Parameter> {
     protected sealed override bool Work(Context context) {
         if (context is null) {
             return false;
@@ -12,5 +14,10 @@ internal sealed class Logs : Command<LogsParameter> {
         return context.Operate(async (progress, token) => {
             return await context.Provide(LogsProviderFactory.ProviderID, where, token);
         });
+    }
+
+    public sealed class Parameter {
+        [CliArgument]
+        public CommandContextProvide? Where { get; set; }
     }
 }

@@ -9,8 +9,6 @@
   <Color x:Key="Brows.Theme.Color.Surface">#202020</Color>
   <Color x:Key="Brows.Theme.Color.Input">#2B2B2B</Color>
   <Color x:Key="Brows.Theme.Color.Foreground">#F3F3F3</Color>
-  <SolidColorBrush x:Key="Brows.Theme.FileSystemTerminal.Foreground"
-                   Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
   <Color x:Key="Brows.Theme.Color.Muted">#A6A6A6</Color>
   <Color x:Key="Brows.Theme.Color.Border">#454545</Color>
   <Color x:Key="Brows.Theme.Color.Accent">#D0D0D0</Color>
@@ -39,18 +37,30 @@
   <SolidColorBrush x:Key="Brows.Theme.Success" Color="{StaticResource Brows.Theme.Color.Success}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.Warning" Color="{StaticResource Brows.Theme.Color.Warning}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.Info" Color="{StaticResource Brows.Theme.Color.Info}" po:Freeze="True"/>
+
+  <Color x:Key="Brows.Theme.Color.LogsProvider.Background">#000000</Color>
+  <Color x:Key="Brows.Theme.Color.LogsProvider.Debug">#8C8C8C</Color>
+  <Color x:Key="Brows.Theme.Color.LogsProvider.Info">#9DC1E3</Color>
+  <Color x:Key="Brows.Theme.Color.LogsProvider.Warn">#E9C46A</Color>
+  <Color x:Key="Brows.Theme.Color.LogsProvider.Error">#FF99A4</Color>
+  <Color x:Key="Brows.Theme.Color.LogsProvider.Critical">#FF5F6D</Color>
+  <SolidColorBrush x:Key="Brows.Theme.LogsProvider.Background"
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Background}" Opacity="0.25" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.LogsProvider.Foreground"
-                   Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Info}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.LogsProvider.DebugForeground"
-                   Color="{StaticResource Brows.Theme.Color.Muted}" po:Freeze="True"/>
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Debug}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.LogsProvider.InfoForeground"
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Info}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.LogsProvider.WarnForeground"
-                   Color="{StaticResource Brows.Theme.Color.Warning}" po:Freeze="True"/>
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Warn}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.LogsProvider.ErrorForeground"
-                   Color="{StaticResource Brows.Theme.Color.Danger}" po:Freeze="True"/>
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Error}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.LogsProvider.CriticalForeground"
-                   Color="{StaticResource Brows.Theme.Color.Danger}" po:Freeze="True"/>
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Critical}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.LogsProvider.SelectionBackground"
-                   Color="{StaticResource Brows.Theme.Color.Selection}" po:Freeze="True"/>
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Info}" Opacity="0.2" po:Freeze="True"/>
+
   <SolidColorBrush x:Key="Brows.Theme.ProcessProxy.Foreground"
                    Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.ProcessProxy.StandardOutput.Foreground"
@@ -71,6 +81,62 @@
                    Color="{StaticResource Brows.Theme.Color.Success}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.ProcessProxy.State.Failure.Foreground"
                    Color="{StaticResource Brows.Theme.Color.Danger}" po:Freeze="True"/>
+
+  <SolidColorBrush x:Key="Brows.Theme.FileSystemTerminal.StatusBar.Background"
+                   Color="{StaticResource Brows.Theme.Color.Accent}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.FileSystemTerminal.StatusBar.Foreground"
+                   Color="{StaticResource Brows.Theme.Color.Background}" po:Freeze="True"/>
+
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Attachment.ContentType.Foreground"
+                   Color="{StaticResource Brows.Theme.Color.Muted}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Attachment.Foreground"
+                   Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Attachments.Background"
+                   Color="{StaticResource Brows.Theme.Color.Surface}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Attachments.BorderBrush"
+                   Color="{StaticResource Brows.Theme.Color.Border}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Attachments.Label.Foreground"
+                   Color="{StaticResource Brows.Theme.Color.Muted}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Background"
+                   Color="Transparent" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.BorderBrush"
+                   Color="Transparent" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.BorderBrush.Focus"
+                   Color="{StaticResource Brows.Theme.Color.RowFocus}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Body.Background"
+                   Color="Transparent" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Body.CaretBrush"
+                   Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Body.Foreground"
+                   Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Body.SelectionBrush"
+                   Color="{StaticResource Brows.Theme.Color.TextSelection}" po:Freeze="True"/>
+  <s:Double x:Key="Brows.Theme.MBoxEntryPreview.Body.SelectionOpacity">0.4</s:Double>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Body.SelectionTextBrush"
+                   Color="{StaticResource Brows.Theme.Color.TextSelectionForeground}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Status.Background"
+                   Color="{StaticResource Brows.Theme.Color.Surface}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Status.BorderBrush"
+                   Color="{StaticResource Brows.Theme.Color.Border}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxEntryPreview.Status.Foreground"
+                   Color="{StaticResource Brows.Theme.Color.Muted}" po:Freeze="True"/>
+
+  <SolidColorBrush x:Key="Brows.Theme.MBoxProvider.StatusForeground"
+                   Color="{StaticResource Brows.Theme.Color.Warning}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxProvider.StatusReadingForeground"
+                   Color="{StaticResource Brows.Theme.Color.Info}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxProvider.StatusErrorForeground"
+                   Color="{StaticResource Brows.Theme.Color.Danger}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxProvider.ErrorForeground"
+                   Color="{StaticResource Brows.Theme.Color.Danger}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxProvider.ReadingForeground"
+                   Color="{StaticResource Brows.Theme.Color.LogsProvider.Info}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxProvider.Icon.Fill"
+                   Color="{StaticResource Brows.Theme.Color.Background}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxProvider.Icon.Stroke"
+                   Color="{StaticResource Brows.Theme.Color.Accent}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.MBoxProvider.Icon.StackStroke"
+                   Color="{StaticResource Brows.Theme.Color.Muted}" po:Freeze="True"/>
 
   <SolidColorBrush x:Key="Brows.Theme.ScrollBar.Static.Background"
                    Color="{StaticResource Brows.Theme.Color.Foreground}" Opacity="0.1" po:Freeze="True"/>
@@ -306,7 +372,7 @@
                    Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.PanelSplitter.Background"
                    Color="{StaticResource Brows.Theme.Color.Border}" po:Freeze="True"/>
-  
+
   <SolidColorBrush x:Key="Brows.Theme.ProgressBar.Background.Surface"
                    Color="{StaticResource Brows.Theme.Color.Surface}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.ProgressBar.BorderBrush"
@@ -360,9 +426,9 @@
 
   <GridLength x:Key="Brows.Theme.ProviderGrid.ScrollBar.VerticalScrollBarGridLength">5</GridLength>
 
-  <s:Double           x:Key="Brows.Theme.ScrollBar.HorizontalScrollBarButtonWidth"> 0</s:Double>
-  <GridLength         x:Key="Brows.Theme.ScrollBar.HorizontalScrollBarGridLength">  5</GridLength>
-  <s:Double           x:Key="Brows.Theme.ScrollBar.HorizontalScrollBarHeight">      5</s:Double>
-  <s:Double           x:Key="Brows.Theme.ScrollBar.VerticalScrollBarButtonHeight">  0</s:Double>
+  <s:Double           x:Key="Brows.Theme.ScrollBar.HorizontalScrollBarButtonWidth">0</s:Double>
+  <GridLength         x:Key="Brows.Theme.ScrollBar.HorizontalScrollBarGridLength">5</GridLength>
+  <s:Double           x:Key="Brows.Theme.ScrollBar.HorizontalScrollBarHeight">5</s:Double>
+  <s:Double           x:Key="Brows.Theme.ScrollBar.VerticalScrollBarButtonHeight">0</s:Double>
   <s:Double           x:Key="Brows.Theme.ScrollBar.VerticalScrollBarWidth">5</s:Double>
 </ResourceDictionary>

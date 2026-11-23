@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Brows.Localization;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Brows.Entries;
@@ -6,19 +7,24 @@ namespace Brows.Entries;
 internal sealed class EntryDataDefinitionSet : IEntryDataDefinitionSet {
     private readonly IReadOnlyDictionary<string, IEntryDataDefinition> Set;
 
-    private EntryDataKeySet KeySet => field ??= new(new HashSet<string>(Set.Keys));
+    private readonly ITranslation Translation;
 
-    private EntryDataDefinitionSet(IReadOnlyDictionary<string, IEntryDataDefinition> set) {
+    private EntryDataKeySet KeySet => field ??= new(new HashSet<string>(Set.Keys), Translation);
+
+    private EntryDataDefinitionSet(IReadOnlyDictionary<string, IEntryDataDefinition> set, ITranslation translation) {
         Set = set ?? throw new ArgumentNullException(nameof(set));
+        Translation = translation;
     }
 
-    public static EntryDataDefinitionSet From(IEnumerable<IEntryDataDefinition> collection) {
+    public static EntryDataDefinitionSet From(IEnumerable<IEntryDataDefinition> collection, ITranslation translation) {
         collection = collection ?? Array.Empty<IEntryDataDefinition>();
-        return new EntryDataDefinitionSet(collection
-            .Where(item => item != null)
-            .ToDictionary(
-                item => item.Key,
-                item => item));
+        return new EntryDataDefinitionSet(
+            collection
+                .Where(item => item != null)
+                .ToDictionary(
+                    item => item.Key,
+                    item => item),
+            translation);
     }
 
     public IEntryDataKeySet Key => KeySet;

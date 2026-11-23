@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Brows.Commands; 
-internal sealed class NativeBrowse : FileSystemCommand<NativeBrowseParameter> {
+internal sealed class NativeBrowse : FileSystemCommand<NativeBrowse.Parameter> {
     protected sealed override IEnumerable<Type> Source { get; } = new[] {
         typeof(IEntry),
         typeof(IEntryObservation)
@@ -26,5 +26,8 @@ internal sealed class NativeBrowse : FileSystemCommand<NativeBrowseParameter> {
                 }
             });
         });
+    }
+
+    public sealed class Parameter {
     }
 }

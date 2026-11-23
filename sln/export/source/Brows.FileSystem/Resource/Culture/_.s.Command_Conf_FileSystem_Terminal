@@ -1,0 +1,17 @@
+# example:
+# {input}
+# {input} close
+
+# Perform this action on the terminal of the active file-system provider.
+# Options:
+#   default: Open a PowerShell terminal when the provider has none, focus
+#            the terminal when it does not have keyboard focus, or return
+#            keyboard focus to the provider's entries when it does.
+#            Returning focus keeps the terminal session running.
+#   close:   Stop the terminal session and its owned processes, and remove
+#            the terminal from the lower view. Nothing happens when no
+#            terminal is open.
+# The shell starts in the provider directory, regardless of the selected entry.
+# Run again after exit or failure to start a new session.
+# Escape remains terminal input, including when an editor or TUI is running.
+action = default

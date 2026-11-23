@@ -1,12 +1,13 @@
 using Brows.Entries;
 using Brows.Exports;
+using Domore.Conf.Cli;
 using Domore.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Brows.Commands; 
-internal sealed class CreateDirectory : FileSystemCommand<CreateDirectoryParameter> {
+internal sealed class CreateDirectory : FileSystemCommand<CreateDirectory.Parameter> {
     protected sealed override IEnumerable<Type> Source { get; } = new[] {
         typeof(IEntry),
         typeof(IEntryObservation)
@@ -51,4 +52,15 @@ internal sealed class CreateDirectory : FileSystemCommand<CreateDirectoryParamet
     }
 
     public ICreateDirectoryInfoDirectory CreateDirectoryInfoDirectory { get; set; }
+
+    public sealed class Parameter {
+        [CliArgument]
+        [CliRequired]
+        public string Name {
+            get => field ??= "";
+            set;
+        }
+
+        public CommandContextProvide? Open { get; set; }
+    }
 }

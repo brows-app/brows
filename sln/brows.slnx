@@ -81,6 +81,7 @@
     <Project Path="export/tests/Brows.FileSystem.Commands.Tar.Tests/Brows.FileSystem.Commands.Tar.Tests.csproj" />
     <Project Path="export/tests/Brows.FileSystem.Commands.Zip.Tests/Brows.FileSystem.Commands.Zip.Tests.csproj" />
     <Project Path="export/tests/Brows.FileSystem.Tests/Brows.FileSystem.Tests.csproj" />
+    <Project Path="export/tests/Brows.FileSystem.Win32.Tests/Brows.FileSystem.Win32.Tests.csproj" />
     <Project Path="export/tests/Brows.FileSystem.Windows.Tests/Brows.FileSystem.Windows.Tests.csproj" />
   </Folder>
   <Folder Name="/export/FTP/">
@@ -117,12 +118,10 @@
     <Project Path="export/tests/Brows.Logs.Windows.Tests/Brows.Logs.Windows.Tests.csproj" />
   </Folder>
   <Folder Name="/export/MBox/">
-    <Project Path="export/source/Brows.MBox.Format/Brows.MBox.Format.csproj" />
     <Project Path="export/source/Brows.MBox/Brows.MBox.csproj" />
     <Project Path="export/source/windows/Brows.MBox.Windows/Brows.MBox.Windows.csproj" />
   </Folder>
   <Folder Name="/export/MBox/tests/">
-    <Project Path="export/tests/Brows.MBox.Format.Tests/Brows.MBox.Format.Tests.csproj" />
     <Project Path="export/tests/Brows.MBox.Tests/Brows.MBox.Tests.csproj" />
     <Project Path="export/tests/Brows.MBox.Windows.Tests/Brows.MBox.Windows.Tests.csproj" />
   </Folder>

@@ -1,4 +1,5 @@
 ﻿using Brows.Gui;
+using Brows.Localization;
 using Brows.Windows.Controls;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,6 +25,8 @@ public sealed class EntryObservationControl : ModelView<IEntryObservation> {
     }
 
     internal EntryListView ListView => _ListView;
+
+    internal ITranslationExport Translation { get; set; }
 
     internal void UpdateController(bool refresh = false) {
         if (ViewModel is not IControlled<IEntryObservationController> controlled) {

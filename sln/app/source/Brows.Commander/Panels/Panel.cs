@@ -113,6 +113,7 @@ internal sealed class Panel : Notifier, IPanel, IControlled<IPanelController> {
                         : "PanelSecret_Prompt_EntropyEnter"
                 };
             }
+            Commander?.Import?.Populate(choice);
             var submitted = await Prompt(choice, token);
             if (submitted is null) {
                 return false;
@@ -666,11 +667,13 @@ internal sealed class Panel : Notifier, IPanel, IControlled<IPanelController> {
         var saved = await SecretSaved(storeKey, token);
         if (saved is not null) {
             var restored = PanelSecret.Create<TSecret>(request);
+            Commander?.Import?.Populate(restored);
             if (await SecretRestore(restored, saved, token)) {
                 return (TSecret)(object)restored;
             }
         }
         var secret = PanelSecret.Create<TSecret>(request);
+        Commander?.Import?.Populate(secret);
         secret.PromptArgs = promptArgs;
         secret.PromptFormat = promptFormat;
         var submitted = await Prompt(secret, token);

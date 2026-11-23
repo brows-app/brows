@@ -13,9 +13,9 @@
     <PackageVersion Include="Brows.Composition" Version="1.1.0" />
     <PackageVersion Include="Brows.Composition.Testing" Version="1.1.0" />
     <PackageVersion Include="Brows.IPC.Host" Version="1.1.0" />
-    <PackageVersion Include="Brows.Operations" Version="1.6.0" />
-    <PackageVersion Include="Brows.Operations.Composition" Version="1.6.0" />
-    <PackageVersion Include="Brows.Operations.Windows" Version="1.6.0" />
+    <PackageVersion Include="Brows.Operations" Version="1.7.0" />
+    <PackageVersion Include="Brows.Operations.Composition" Version="1.7.0" />
+    <PackageVersion Include="Brows.Operations.Windows" Version="1.7.0" />
     <PackageVersion Include="Brows.ProcessAgent" Version="1.1.0" />
     <PackageVersion Include="Brows.ProcessAgent.Windows" Version="1.1.0" />
     <PackageVersion Include="Brows.Sys" Version="1.1.0" />
@@ -24,13 +24,13 @@
     <PackageVersion Include="Brows.TTY.Windows" Version="0.1.0" />
     <PackageVersion Include="Brows.Win32.PreviewHandler.Windows" Version="1.1.0" />
     <PackageVersion Include="Brows.Win32.PropertySystem" Version="1.0.0" />
-    <PackageVersion Include="Brows.Win32.Interop" Version="1.5.0" />
-    <PackageVersion Include="Brows.Win32.Interop.Composition" Version="1.5.0" />
-    <PackageVersion Include="Brows.Win32.Interop.Operations" Version="1.5.0" />
+    <PackageVersion Include="Brows.Win32.Interop" Version="1.6.0" />
+    <PackageVersion Include="Brows.Win32.Interop.Composition" Version="1.6.0" />
+    <PackageVersion Include="Brows.Win32.Interop.Operations" Version="1.6.0" />
     <PackageVersion Include="Brows.Win32.STAThreadPool" Version="1.5.1" />
     <PackageVersion Include="Brows.Win32.STAThreadPool.Composition.Exports" Version="1.5.1" />
-    <PackageVersion Include="Brows.Win32.Windows" Version="1.2.0" />
-    <PackageVersion Include="Brows.Win32.Windows.Composition" Version="1.2.0" />
+    <PackageVersion Include="Brows.Win32.Windows" Version="1.3.0" />
+    <PackageVersion Include="Brows.Win32.Windows.Composition" Version="1.3.0" />
     <PackageVersion Include="Domore.Async.FileSystemWatching" Version="11.0.0" />
     <PackageVersion Include="Domore.Async.TaskCaching" Version="10.6.4" />
     <PackageVersion Include="Domore.Async.TextReading" Version="11.0.0" />

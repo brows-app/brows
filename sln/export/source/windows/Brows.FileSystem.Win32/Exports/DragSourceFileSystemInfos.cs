@@ -3,7 +3,8 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Windows;
 
-namespace Brows.Exports; 
+namespace Brows.Exports;
+
 internal sealed class DragSourceFileSystemInfos : IDragSourceFileSystemInfos {
     public void Drag(object source, IEnumerable<FileSystemInfo> fileSystemInfos) {
         if (fileSystemInfos == null) {

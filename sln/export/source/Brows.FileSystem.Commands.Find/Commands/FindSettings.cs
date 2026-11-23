@@ -36,10 +36,10 @@ internal sealed record FindSettings {
     internal int MaximumResults { get; }
     internal int MaximumPreviewLength { get; }
 
-    internal FindSettings(FindParameter parameter) : this(parameter, null) {
+    internal FindSettings(Find.Parameter parameter) : this(parameter, null) {
     }
 
-    internal FindSettings(FindParameter parameter, FindMatcher matcher) {
+    internal FindSettings(Find.Parameter parameter, FindMatcher matcher) {
         ArgumentNullException.ThrowIfNull(parameter);
         ArgumentOutOfRangeException.ThrowIfLessThan(parameter.Workers, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(parameter.Workers, 32);

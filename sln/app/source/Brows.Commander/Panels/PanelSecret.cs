@@ -17,6 +17,8 @@ internal abstract class PanelSecret : Notifier, IPanelSecret {
 
     private readonly TaskCompletionSource<PanelSecret> TaskCompletionSource = new();
 
+    internal ITranslationExport Translation { get; set; }
+
     internal static PanelSecret Create<TSecret>(IRequestFactory request)
     where TSecret : IPanelSecret {
         var implementation = Implementations.FirstOrDefault(type => typeof(TSecret).IsAssignableFrom(type));
@@ -60,7 +62,7 @@ internal abstract class PanelSecret : Notifier, IPanelSecret {
 
     public string Prompt =>
         string.Format(
-            format: Translation.Global.Value(PromptFormat),
+            format: Translation?.Value(PromptFormat) ?? PromptFormat,
             args: PromptArgs?.ToArray() ?? []);
 
     public string PromptFormat {

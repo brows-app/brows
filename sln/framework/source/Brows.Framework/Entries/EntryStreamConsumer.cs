@@ -5,7 +5,28 @@ using System.Threading.Tasks;
 
 namespace Brows.Entries;
 
+/// <summary>
+/// Reads entry stream sets and manages their preparation and stream lifetimes.
+/// </summary>
 public static class EntryStreamConsumer {
+    /// <summary>
+    /// Processes each source in order and disposes its stream and preparation resources afterward.
+    /// </summary>
+    /// <param name="entryStreamSet">
+    /// The stream sources to consume.
+    /// </param>
+    /// <param name="consuming">
+    /// Processes each prepared stream. The stream is valid only until the returned task completes.
+    /// </param>
+    /// <param name="progress">
+    /// Receives progress updates, or null when no progress reporting is needed.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task that completes after all sources have been processed.
+    /// </returns>
     public static async Task Consume(this IEntryStreamSet entryStreamSet,
                                      EntryStreamConsumingDelegate consuming,
                                      IOperationProgress progress,
@@ -40,6 +61,25 @@ public static class EntryStreamConsumer {
         }
     }
 
+    /// <summary>
+    /// Copies each readable source into memory before processing it, disposing streams and preparation resources
+    /// afterward.
+    /// </summary>
+    /// <param name="entryStreamSet">
+    /// The stream sources to consume.
+    /// </param>
+    /// <param name="consuming">
+    /// Processes each prepared stream. The stream is valid only until the returned task completes.
+    /// </param>
+    /// <param name="progress">
+    /// Receives progress updates, or null when no progress reporting is needed.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task that completes after all sources have been processed.
+    /// </returns>
     public static async Task ConsumeFromMemory(this IEntryStreamSet entryStreamSet,
                                                EntryStreamConsumingDelegate consuming,
                                                IOperationProgress progress,

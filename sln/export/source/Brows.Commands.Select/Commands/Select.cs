@@ -1,9 +1,10 @@
 using Brows.Entries;
+using Domore.Conf.Cli;
 using System;
 using System.Collections.Generic;
 
 namespace Brows.Commands; 
-internal sealed class Select : Command<SelectParameter> {
+internal sealed class Select : Command<Select.Parameter> {
     protected sealed override IEnumerable<Type> Source { get; } = new[] {
         typeof(IEntry)
     };
@@ -30,5 +31,13 @@ internal sealed class Select : Command<SelectParameter> {
             }
             return true;
         });
+    }
+
+    public sealed class Parameter {
+        [CliArgument]
+        public string Pattern { get; set; }
+        public bool Add { get; set; }
+        public bool All { get; set; }
+        public bool CaseSensitive { get; set; }
     }
 }

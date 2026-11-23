@@ -4,6 +4,12 @@ using System.Security;
 
 namespace Brows.Native;
 
+/// <summary>
+/// Owns a string in unmanaged memory that must be released through <see cref="IDisposable.Dispose"/>.
+/// </summary>
+/// <remarks>
+/// Copies refer to the same allocation. Dispose only once, after all native uses have finished.
+/// </remarks>
 public readonly struct NativeGlobalAlloc : IDisposable {
     private NativeGlobalAlloc(IntPtr hGlobal) {
         HGlobal = hGlobal;
@@ -15,8 +21,17 @@ public readonly struct NativeGlobalAlloc : IDisposable {
         }
     }
 
+    /// <summary>
+    /// Gets the address of the string, or zero for a null string.
+    /// </summary>
     public readonly IntPtr HGlobal { get; }
 
+    /// <summary>
+    /// Owns an unmanaged copy of a secure string that is cleared and released when disposed.
+    /// </summary>
+    /// <remarks>
+    /// Copies refer to the same allocation. Dispose only once, after all native uses have finished.
+    /// </remarks>
     public readonly struct OfSecureString : IDisposable {
         private bool Unicode { get; }
 
@@ -40,6 +55,9 @@ public readonly struct NativeGlobalAlloc : IDisposable {
             }
         }
 
+        /// <summary>
+        /// Gets the address of the string, or zero for a null string.
+        /// </summary>
         public readonly IntPtr HGlobal { get; }
 
         void IDisposable.Dispose() {
@@ -54,6 +72,18 @@ public readonly struct NativeGlobalAlloc : IDisposable {
         }
     }
 
+    /// <summary>
+    /// Copies a string to unmanaged memory owned by the returned value.
+    /// </summary>
+    /// <param name="s">
+    /// The string to copy, or null for a zero address.
+    /// </param>
+    /// <param name="charSet">
+    /// Ansi or Unicode, matching the native function that will read the string.
+    /// </param>
+    /// <returns>
+    /// The allocated string. Dispose it through IDisposable when native code no longer needs it.
+    /// </returns>
     public static NativeGlobalAlloc String(string s, CharSet charSet) {
         switch (charSet) {
             case CharSet.Ansi:
@@ -65,6 +95,18 @@ public readonly struct NativeGlobalAlloc : IDisposable {
         }
     }
 
+    /// <summary>
+    /// Copies a string to unmanaged memory owned by the returned value.
+    /// </summary>
+    /// <param name="s">
+    /// The string to copy, or null for a zero address.
+    /// </param>
+    /// <param name="charSet">
+    /// Ansi or Unicode, matching the native function that will read the string.
+    /// </param>
+    /// <returns>
+    /// The allocated string. Dispose it through IDisposable when native code no longer needs it.
+    /// </returns>
     public static OfSecureString SecureString(SecureString s, CharSet charSet) {
         return OfSecureString.Create(s, charSet);
     }

@@ -8,7 +8,7 @@ namespace Brows;
 [TestFixture]
 public sealed class FileSystemFindDataTest {
     private static FileSystemFindResult Result(DirectoryInfo root, bool complete) {
-        return new FileSystemFindResult(root, new FindParameter { Pattern = "*" }, "find", null) {
+        return new FileSystemFindResult(root, new Find.Parameter { Pattern = "*" }, "find", null) {
             Complete = complete
         };
     }

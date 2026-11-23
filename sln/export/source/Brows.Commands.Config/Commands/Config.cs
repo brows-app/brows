@@ -21,7 +21,7 @@ internal sealed class Config : Command<Config.Parameter> {
         });
     }
 
-    public class Parameter {
+    public sealed class Parameter {
         public CommandContextProvide? Open { get; set; }
     }
 }

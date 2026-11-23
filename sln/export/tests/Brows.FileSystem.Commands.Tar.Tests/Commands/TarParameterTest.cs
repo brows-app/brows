@@ -7,7 +7,7 @@ namespace Brows.Commands;
 internal sealed class TarParameterTest {
     [Test]
     public void Configure_PreservesConfigurationAndCommandLineBinding() {
-        var parameter = new TarParameter().ConfFrom(
+        var parameter = new Tar.Parameter().ConfFrom(
             "force=Extract\noverwrite=true",
             key: "");
         var cli = new CliProvider(new CliSetup());

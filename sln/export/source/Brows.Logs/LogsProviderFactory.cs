@@ -9,6 +9,8 @@ internal sealed class LogsProviderFactory : ProviderFactory<LogsProvider> {
         if (id != ProviderID) {
             return Task.FromResult<LogsProvider>(null);
         }
-        return Task.FromResult(new LogsProvider(id));
+        return Task.FromResult(new LogsProvider(id, Translation));
     }
+
+    public ITranslationExport Translation { get; set; }
 }

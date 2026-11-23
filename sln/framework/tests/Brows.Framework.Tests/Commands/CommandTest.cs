@@ -1,6 +1,9 @@
-﻿using Brows.Panels;
+﻿using Brows.Composition;
+using Brows.Localization;
+using Brows.Panels;
 using Brows.Providers;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
@@ -247,6 +250,17 @@ internal sealed class CommandTest {
         Assert.That(command.Triggered, Is.True);
     }
 
+    [Test]
+    public Task Command_Translate_WhenSubclassDeclaresTranslation_IsPopulated() {
+        var translation = Mock.Of<ITranslationExport>();
+        var command = new TranslationCommand();
+        return ImportSandbox.Enter([command, new CommandCliProvider(), translation], () => {
+            Assert.That(((Command)command).Translate, Is.SameAs(translation));
+            Assert.That(command.Translation, Is.SameAs(translation));
+            return Task.CompletedTask;
+        });
+    }
+
     private static ICommandContext PanelContext(bool providesEntries) {
         var provider = providesEntries
             ? Mock.Of<IEntryProvider>()
@@ -302,6 +316,13 @@ internal sealed class CommandTest {
     }
 
     private sealed class DefaultCommand : Command {
+    }
+
+    /*
+     * A command in a plugin declares its own translation property when it needs one.
+     */
+    private sealed class TranslationCommand : Command {
+        public ITranslationExport Translation { get; set; }
     }
 
     private sealed class EntriesCommand : Command {

@@ -1,7 +1,0 @@
-# Return keyboard focus to the provider's entries without stopping or hiding the terminal.
-# The default Ctrl+Shift+F12 shortcut is reserved while terminal input is active.
-# Escape remains terminal input, including when an editor or TUI is running.
-# To remap the shortcut, add both lines to trigger.conf and change F11 as desired:
-# cmd[FileSystem_TerminalRelease].press[CTRL+SHIFT+F12] = disabled
-# cmd[FileSystem_TerminalRelease].press[CTRL+SHIFT+F11] = *
-# Adding a new key alone leaves the default shortcut active; an empty value does not remove it.

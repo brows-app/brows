@@ -14,7 +14,7 @@ internal sealed class EntryDataKeySet : IEntryDataKeySet {
                 var keys = Keys;
                 foreach (var key in keys) {
                     var set = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-                    var keyAliases = Translate.Alias(key);
+                    var keyAliases = Translate?.Alias(key) ?? [];
                     if (keyAliases.Length == 0) {
                         set.Add(key);
                     }
@@ -44,9 +44,9 @@ internal sealed class EntryDataKeySet : IEntryDataKeySet {
 
     public IReadOnlySet<string> Keys { get; }
 
-    public EntryDataKeySet(IReadOnlySet<string> keys) {
+    public EntryDataKeySet(IReadOnlySet<string> keys, ITranslation translate) {
         Keys = keys ?? throw new ArgumentNullException(nameof(keys));
-        Translate = Translation.Global;
+        Translate = translate;
     }
 
     string IEntryDataKeySet.Lookup(string alias) {

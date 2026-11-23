@@ -43,6 +43,224 @@ internal sealed class MBoxProviderTest {
         return provider.Entries.ToList();
     }
 
+    private string ThreeMessages() {
+        return MBoxTestFixture.WriteFile(
+            _Directory.Directory,
+            "three.mbox",
+            MBoxTestFixture.Mailbox(
+                new[] { "First body.\n", "Second body.\n", "Third body.\n" },
+                new[] {
+                    "Subject: Shared subject",
+                    "From: sender@example.com",
+                }));
+    }
+
+    private static Task Provided(MBoxProvider provider, int count) {
+        var provided = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var observation = (IEntryObservation)((IEntryProvider)provider).Observation;
+        observation.ObservedChanged += (_, _) => {
+            if (provider.Entries.Count >= count) {
+                provided.TrySetResult();
+            }
+        };
+        return provided.Task;
+    }
+
+    private static Action<MBoxProvider.IndexStage> BlockSecondRead(ManualResetEventSlim release) {
+        var reads = 0;
+        return stage => {
+            if (stage == MBoxProvider.IndexStage.ReadHeaders) {
+                reads++;
+                if (reads == 2) {
+                    release.Wait(TimeSpan.FromSeconds(5));
+                }
+            }
+        };
+    }
+
+    [Test]
+    public async Task Begin_ProvidesMessagesBeforeTheIndexIsComplete() {
+        var provider = await MBoxTestProvider.Create(ThreeMessages(), new MBoxConfig());
+        using var release = new ManualResetEventSlim();
+        try {
+            provider.IndexStageForTesting = BlockSecondRead(release);
+            var firstProvided = Provided(provider, 1);
+            var begin = MBoxTestProvider.Begin(provider, CancellationToken.None);
+            await firstProvided.WaitAsync(TimeSpan.FromSeconds(5));
+            var preview = await provider.Preview(provider.Entries[0], CancellationToken.None);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(provider.State, Is.EqualTo(MBoxProviderState.Loading));
+                Assert.That(provider.Entries, Has.Count.EqualTo(1));
+                Assert.That(provider.IndexedCount, Is.EqualTo(1));
+                Assert.That(provider.ActiveGenerationId, Is.Not.Empty);
+                Assert.That(preview.Text, Is.EqualTo("First body.\n"));
+            }
+            release.Set();
+            await begin.WaitAsync(TimeSpan.FromSeconds(5));
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(provider.State, Is.EqualTo(MBoxProviderState.Ready));
+                Assert.That(provider.Refreshing, Is.False);
+                Assert.That(provider.Entries, Has.Count.EqualTo(3));
+                Assert.That(provider.IndexedCount, Is.EqualTo(3));
+                Assert.That(provider.Entries.Select(entry => entry.Record.Offset), Is.Ordered);
+            }
+        }
+        finally {
+            release.Set();
+            provider.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Begin_KeepsTheProvidedMessagesWhenTheReadFails() {
+        var provider = await MBoxTestProvider.Create(ThreeMessages(), new MBoxConfig());
+        try {
+            var reads = 0;
+            provider.IndexStageForTesting = stage => {
+                if (stage == MBoxProvider.IndexStage.ReadHeaders) {
+                    reads++;
+                    if (reads == 2) {
+                        throw new IOException("Injected index failure.");
+                    }
+                }
+            };
+            await MBoxTestProvider.Begin(provider, CancellationToken.None);
+            var preview = await provider.Preview(provider.Entries[0], CancellationToken.None);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(provider.State, Is.EqualTo(MBoxProviderState.Failed));
+                Assert.That(provider.Error, Is.Not.Empty);
+                Assert.That(provider.Entries, Has.Count.EqualTo(1));
+                Assert.That(provider.IndexedCount, Is.EqualTo(1));
+                Assert.That(preview.Text, Is.EqualTo("First body.\n"));
+            }
+        }
+        finally {
+            provider.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Begin_KeepsTheProvidedMessagesWhenTheReadIsCancelled() {
+        var provider = await MBoxTestProvider.Create(ThreeMessages(), new MBoxConfig());
+        using var release = new ManualResetEventSlim();
+        using var source = new CancellationTokenSource();
+        try {
+            provider.IndexStageForTesting = BlockSecondRead(release);
+            var firstProvided = Provided(provider, 1);
+            var begin = MBoxTestProvider.Begin(provider, source.Token);
+            await firstProvided.WaitAsync(TimeSpan.FromSeconds(5));
+            source.Cancel();
+            release.Set();
+            await begin.WaitAsync(TimeSpan.FromSeconds(5));
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(provider.State, Is.EqualTo(MBoxProviderState.Cancelled));
+                Assert.That(provider.Refreshing, Is.False);
+                Assert.That(provider.Entries, Has.Count.EqualTo(1));
+            }
+        }
+        finally {
+            release.Set();
+            provider.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Begin_SetsTheStateOfTheProviderToPartialWhenALimitStopsTheIndex() {
+        var config = new MBoxConfig {
+            MaxEntries = 2,
+        };
+        var provider = await MBoxTestProvider.Create(ThreeMessages(), config);
+        try {
+            await MBoxTestProvider.Begin(provider, CancellationToken.None);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(provider.State, Is.EqualTo(MBoxProviderState.Partial));
+                Assert.That(provider.Entries, Has.Count.EqualTo(2));
+                Assert.That(provider.IndexedCount, Is.EqualTo(2));
+            }
+        }
+        finally {
+            provider.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Begin_SetsTheStateOfTheProviderToEmptyWhenTheStreamedMailboxHoldsNoMessage() {
+        var path = MBoxTestFixture.WriteFile(_Directory.Directory, "empty.mbox", "");
+        var provider = await MBoxTestProvider.Create(path, new MBoxConfig());
+        try {
+            await MBoxTestProvider.Begin(provider, CancellationToken.None);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(provider.State, Is.EqualTo(MBoxProviderState.Empty));
+                Assert.That(provider.Entries, Is.Empty);
+                Assert.That(provider.IndexedCount, Is.EqualTo(0));
+            }
+        }
+        finally {
+            provider.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Begin_SetsTheStateOfTheProviderToFailedAndReleasesTheMailboxWhenItIsNotValid() {
+        var path = MBoxTestFixture.WriteFile(_Directory.Directory, "invalid.mbox", "not a mailbox at all\n");
+        var provider = await MBoxTestProvider.Create(path, new MBoxConfig());
+        await MBoxTestProvider.Begin(provider, CancellationToken.None);
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(provider.State, Is.EqualTo(MBoxProviderState.Failed));
+            Assert.That(provider.Error, Is.Not.Empty);
+            Assert.That(provider.Entries, Is.Empty);
+        }
+        provider.Dispose();
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        Assert.That(stream.CanRead, Is.True);
+    }
+
+    [Test]
+    public async Task Refresh_AfterBeginReplacesTheStreamedGeneration() {
+        var provider = await MBoxTestProvider.Create(ThreeMessages(), new MBoxConfig());
+        try {
+            await MBoxTestProvider.Begin(provider, CancellationToken.None);
+            var streamed = provider.Entries.ToList();
+            var generation = provider.ActiveGenerationId;
+            await MBoxTestProvider.Refresh(provider, CancellationToken.None);
+            var preview = await provider.Preview(streamed[0], CancellationToken.None);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(provider.State, Is.EqualTo(MBoxProviderState.Ready));
+                Assert.That(provider.ActiveGenerationId, Is.Not.EqualTo(generation));
+                Assert.That(provider.Entries, Has.Count.EqualTo(3));
+                Assert.That(provider.Entries.Intersect(streamed), Is.Empty);
+                Assert.That(preview.Text, Is.Null);
+            }
+        }
+        finally {
+            provider.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Dispose_DuringBegin_ReleasesTheMailboxOnceTheIndexStops() {
+        var path = ThreeMessages();
+        var provider = await MBoxTestProvider.Create(path, new MBoxConfig());
+        using var release = new ManualResetEventSlim();
+        try {
+            provider.IndexStageForTesting = BlockSecondRead(release);
+            var firstProvided = Provided(provider, 1);
+            var begin = MBoxTestProvider.Begin(provider, CancellationToken.None);
+            await firstProvided.WaitAsync(TimeSpan.FromSeconds(5));
+            provider.Dispose();
+            release.Set();
+            await begin.WaitAsync(TimeSpan.FromSeconds(5));
+            Assert.That(((IEntryProvider)provider).Observation.Observed, Is.Empty);
+            Assert.That(() => {
+                using var stream = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            }, Throws.Nothing);
+        }
+        finally {
+            release.Set();
+            provider.Dispose();
+        }
+    }
+
     [Test]
     public async Task Begin_ReadsTheMessagesOfTheMailbox() {
         var provider = await Provider();
@@ -330,6 +548,60 @@ internal sealed class MBoxProviderTest {
             var preview = await provider.Preview(entries[0], CancellationToken.None);
             Assert.That(preview.Text, Is.EqualTo("First body.\n"));
             Assert.That(preview.State, Is.EqualTo(Brows.MBox.Format.MBoxBodyState.Complete));
+        }
+        finally {
+            provider.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Preview_ListsTheAttachmentsOfTheMessage() {
+        var text = MBoxTestFixture.Envelope + "\n" +
+                   "Subject: With attachments\n" +
+                   "Content-Type: multipart/mixed; boundary=\"mixed\"\n" +
+                   "\n" +
+                   "--mixed\n" +
+                   "Content-Type: text/plain; charset=utf-8\n" +
+                   "\n" +
+                   "Body text.\n" +
+                   "--mixed\n" +
+                   "Content-Type: application/pdf; name=\"report.pdf\"\n" +
+                   "Content-Disposition: attachment; filename=\"report.pdf\"\n" +
+                   "Content-Transfer-Encoding: base64\n" +
+                   "\n" +
+                   "JVBERi0xLjQK\n" +
+                   "--mixed\n" +
+                   "Content-Type: image/png\n" +
+                   "Content-Disposition: attachment\n" +
+                   "Content-Transfer-Encoding: base64\n" +
+                   "\n" +
+                   "iVBORw0KGgo=\n" +
+                   "--mixed--\n";
+        var path = MBoxTestFixture.WriteFile(_Directory.Directory, "attachments.mbox", text);
+        var provider = await MBoxTestProvider.Create(path, new MBoxConfig());
+        try {
+            await MBoxTestProvider.Refresh(provider, CancellationToken.None);
+            var preview = await provider.Preview(provider.Entries[0], CancellationToken.None);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(preview.Text, Is.EqualTo("Body text.\n"));
+                Assert.That(preview.Attachments, Is.EqualTo(new[] {
+                    new MBoxPreviewAttachment("report.pdf", "application/pdf"),
+                    new MBoxPreviewAttachment(MBoxText.Value(provider.Translation, "MBoxPreview_Attachment_Unnamed"), "image/png"),
+                }));
+            }
+        }
+        finally {
+            provider.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Preview_ListsNoAttachmentsWhenTheMessageHasNone() {
+        var provider = await Provider();
+        try {
+            var entries = await Read(provider);
+            var preview = await provider.Preview(entries[0], CancellationToken.None);
+            Assert.That(preview.Attachments, Is.Empty);
         }
         finally {
             provider.Dispose();

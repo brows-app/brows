@@ -2,15 +2,15 @@
 using Brows.Gui;
 using Brows.Providers;
 using Brows.Triggers;
-using ICommand = Brows.Commands.ICommand;
+using Brows.Windows;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Moq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using ICommand = Brows.Commands.ICommand;
 using InputEventArgs = Brows.Triggers.InputEventArgs;
 
 namespace Brows;
@@ -770,7 +770,11 @@ internal sealed class CommanderControlTest {
             var control = new CommanderControl { ViewModel = firstModel.Object };
             var first = ShowWindow(new Grid(), control);
             var second = new TestWindow {
-                Height = 160, Width = 320, Left = -10000, ShowActivated = false, ShowInTaskbar = false
+                Height = 160,
+                Width = 320,
+                Left = -10000,
+                ShowActivated = false,
+                ShowInTaskbar = false
             };
             var firstClosed = false;
             var secondClosed = false;

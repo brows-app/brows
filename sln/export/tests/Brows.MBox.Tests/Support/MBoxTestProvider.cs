@@ -33,6 +33,10 @@ internal static class MBoxTestProvider {
         return provider;
     }
 
+    public static Task Begin(MBoxProvider provider, CancellationToken token) {
+        return provider.BeginForTesting(token);
+    }
+
     public static Task Refresh(MBoxProvider provider, CancellationToken token) {
         return ((IProvider)provider).Refresh(token);
     }

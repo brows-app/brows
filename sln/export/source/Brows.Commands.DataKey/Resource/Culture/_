@@ -1,4 +1,5 @@
-﻿Command_Description_Fit             = Fit column widths to the data
+﻿Command_Description_Fit             = Fit column widths to full data; use show to restore configured sizing
 Command_Description_Hide            = Remove columns from the view
-Command_Description_Show            = Add columns to the view. End with a bang (!) to clear existing columns first.
+Command_Description_Show            = Add columns, or restore configured sizing with no arguments. End with a bang (!) to clear existing columns first.
 Command_Description_Sort            = Sort the items in this view. A bang (!) removes all sorting.
+Command_Help_Fit = Fit the requested columns, or all columns, to rendered content. Wide columns may scroll horizontally. Run show without arguments to restore configured sizing.

@@ -1,28 +1,44 @@
-﻿using Brows.Localization;
-using Domore.Threading.Tasks;
-using System;
+﻿using Brows.Composition;
+using Brows.Localization;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brows.Windows;
 
-public sealed class AppComponentTranslation : ITranslation {
+public sealed class AppComponentTranslation : ITranslationExport, IExportAndInit {
     private readonly ConcurrentDictionary<string, string> Value = new();
     private readonly ConcurrentDictionary<string, IReadOnlySet<string>> Alias = new();
 
-    private TaskCache<AppComponentTranslation> Load => field ??= new(async token => {
-        var comps = Components;
+    public object this[string key] =>
+        Value.TryGetValue(key, out var value)
+            ? value
+            : null;
+
+    string ITranslation.Value(string key) {
+        return Value.TryGetValue(key, out var value)
+            ? value
+            : null;
+    }
+
+    string[] ITranslation.Alias(string key) {
+        return Alias.TryGetValue(key, out var value)
+            ? value.ToArray()
+            : Array.Empty<string>();
+    }
+
+    async Task IExportAndInit.Init(IExportContext context, CancellationToken token) {
+        ArgumentNullException.ThrowIfNull(context);
+        var components = AppComponentCollection.From(context);
         var tasks = new List<Task>();
-        foreach (var item in comps) {
+        foreach (var item in components) {
             tasks.Add(item.Alias(token));
             tasks.Add(item.Translate(token));
         }
         await Task
             .WhenAll(tasks);
-        foreach (var item in comps) {
+        foreach (var item in components) {
             var translate = await item
                 .Translate(token);
             foreach (var t in translate) {
@@ -40,36 +56,5 @@ public sealed class AppComponentTranslation : ITranslation {
                 }
             }
         }
-        return this;
-    });
-
-    public object this[string key] =>
-        Value.TryGetValue(key, out var value)
-            ? value
-            : null;
-
-    private AppComponentCollection Components { get; }
-
-    private AppComponentTranslation(AppComponentCollection collection) {
-        Components = collection ?? throw new ArgumentNullException(nameof(collection));
-    }
-
-    public static async Task<AppComponentTranslation> Ready(AppComponentCollection components, CancellationToken token) {
-        var
-        @this = new AppComponentTranslation(components);
-        @this = await @this.Load.Ready(token);
-        return @this;
-    }
-
-    string ITranslation.Value(string key) {
-        return Value.TryGetValue(key, out var value)
-            ? value
-            : null;
-    }
-
-    string[] ITranslation.Alias(string key) {
-        return Alias.TryGetValue(key, out var value)
-            ? value.ToArray()
-            : Array.Empty<string>();
     }
 }

@@ -71,8 +71,8 @@ internal sealed class FtpRenameTest {
         });
     }
 
-    [TestCase("Brows.FTP", "FtpProviderFactory", "FtpProvider", "ftp://example.test/root/", "ftp-rename")]
-    [TestCase("Brows.FTPS", "FtpsProviderFactory", "FtpsProvider", "ftps://example.test/root/", "ftps-rename")]
+    [TestCase("Brows.FTP", "FtpProviderFactory", "FtpProvider", "ftp://example.test/root/", "rename")]
+    [TestCase("Brows.FTPS", "FtpsProviderFactory", "FtpsProvider", "ftps://example.test/root/", "rename")]
     public void Rename_F2OpensPaletteWithOnlyTheFileStemSelected(string assemblyName,
                                                                  string factoryName,
                                                                  string providerName,
@@ -92,8 +92,8 @@ internal sealed class FtpRenameTest {
         Assert.That(context.ShownPalette.Single().SelectedLength, Is.EqualTo("report.tar".Length));
     }
 
-    [TestCase("Brows.FTP", "FtpProviderFactory", "FtpProvider", "ftp://example.test/root/", "ftp-rename")]
-    [TestCase("Brows.FTPS", "FtpsProviderFactory", "FtpsProvider", "ftps://example.test/root/", "ftps-rename")]
+    [TestCase("Brows.FTP", "FtpProviderFactory", "FtpProvider", "ftp://example.test/root/", "rename")]
+    [TestCase("Brows.FTPS", "FtpsProviderFactory", "FtpsProvider", "ftps://example.test/root/", "rename")]
     public void Rename_NoNameInvocationRoundTripsCliQuotesAndBackslashes(string assemblyName,
                                                                           string factoryName,
                                                                           string providerName,
@@ -118,8 +118,8 @@ internal sealed class FtpRenameTest {
         });
     }
 
-    [TestCase("Brows.FTP", "FtpProviderFactory", "FtpProvider", "ftp://example.test/root/", "ftp-rename")]
-    [TestCase("Brows.FTPS", "FtpsProviderFactory", "FtpsProvider", "ftps://example.test/root/", "ftps-rename")]
+    [TestCase("Brows.FTP", "FtpProviderFactory", "FtpProvider", "ftp://example.test/root/", "rename")]
+    [TestCase("Brows.FTPS", "FtpsProviderFactory", "FtpsProvider", "ftps://example.test/root/", "rename")]
     public void Rename_NoNameInvocationPreservesBoundaryAndOnlySpaces(string assemblyName,
                                                                        string factoryName,
                                                                        string providerName,

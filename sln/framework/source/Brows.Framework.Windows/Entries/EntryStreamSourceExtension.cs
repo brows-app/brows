@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading;
+﻿using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -8,7 +6,9 @@ namespace Brows.Entries;
 
 internal static class EntryStreamSourceExtension {
     public static async Task<BitmapImage> Image(this IEntryStreamSource entryStreamSource, CancellationToken token) {
-        if (entryStreamSource is null) throw new ArgumentNullException(nameof(entryStreamSource));
+        if (entryStreamSource is null) {
+            throw new ArgumentNullException(nameof(entryStreamSource));
+        }
         var entryStreamMemory = await Task.Run(cancellationToken: token, function: async () => {
             using (await entryStreamSource.StreamReady(token)) {
                 await using (var stream = entryStreamSource.Stream) {
@@ -21,10 +21,16 @@ internal static class EntryStreamSourceExtension {
                 }
             }
         });
-        if (entryStreamMemory == null) {
+        if (entryStreamMemory is null) {
             return null;
         }
-        var image = new BitmapImage();
+        /*
+         * Copying leaves the position at the end of the stream. The JPEG
+         * decoder reads from the current position, so rewind before decoding.
+         */
+        entryStreamMemory.Position = 0;
+        var
+        image = new BitmapImage();
         image.BeginInit();
         image.CacheOption = BitmapCacheOption.OnLoad;
         image.StreamSource = entryStreamMemory;

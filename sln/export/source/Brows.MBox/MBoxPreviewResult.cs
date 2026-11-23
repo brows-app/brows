@@ -40,11 +40,24 @@ internal sealed record MBoxPreviewResult {
         init;
     }
 
+    public IReadOnlyList<MBoxPreviewAttachment> Attachments {
+        get;
+        init;
+    } = Array.Empty<MBoxPreviewAttachment>();
+
     /// <summary>
-    /// Gets the number of bytes of the preview text, which is used to bound the cache.
+    /// Gets the number of bytes of the preview text and the attachment names, which is used to
+    /// bound the cache.
     /// </summary>
-    public long Size =>
-        ((long)(Text?.Length ?? 0) + (Html?.Length ?? 0)) * sizeof(char);
+    public long Size {
+        get {
+            var length = (long)(Text?.Length ?? 0) + (Html?.Length ?? 0);
+            foreach (var attachment in Attachments) {
+                length += (attachment.Name?.Length ?? 0) + (attachment.ContentType?.Length ?? 0);
+            }
+            return length * sizeof(char);
+        }
+    }
 
     /// <summary>
     /// Gets the preview that holds nothing.

@@ -1,12 +1,17 @@
 # example:
-# {input} C:\Mail
+# {input} n eml
 #
-# Export the selected messages of the mailbox.
-#   The destination may be an existing directory, or an existing file when a single message is
-#   selected. A directory export writes one file per message, named after the offset of the
-#   message in the mailbox.
-#   The mailbox itself is never a destination, because the source is read only.
-#   An existing destination is kept, unless overwrite is set.
+# Export the selected messages of the mailbox to another panel.
+#   The panel is chosen by where: (a)uto, (h)ere, (n)ext, or (p)revious. Auto, the default,
+#   chooses the other panel when there are exactly two panels.
+#   One file is exported per message, named after the offset of the message in the mailbox.
+#   The mode chooses the file:
+#     archive  a ZIP archive (.zip) of the message and its attachments. This is the default.
+#     eml      the message, as a file of an Internet message (.eml).
+#   The mode follows where, so where is given whenever the mode is, or the mode is named:
+#   {input} mode=eml.
+#   The panel receives the files the way that it receives copied files, so a directory, an
+#   archive, or a remote host can receive them. The mailbox itself never receives them.
 #
-destination =
-#overwrite = true
+#where = auto
+#mode = archive

@@ -25,4 +25,5 @@ internal sealed class DriveProviderFactory : ProviderFactory<DriveProvider>, IFi
     public IDriveIcon DriveIcon { get; set; }
     public IDrivesIcon DrivesIcon { get; set; }
     public IFileSystemIcon FileSystemIcon { get; set; }
+    public ITranslationExport Translation { get; set; }
 }

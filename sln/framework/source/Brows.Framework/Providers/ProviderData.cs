@@ -1,5 +1,6 @@
 ﻿using Brows.Composition;
 using Brows.Entries;
+using Brows.Localization;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,7 +25,9 @@ internal sealed class ProviderData {
         EntryData = entryData;
     }
 
-    public EntryDataDefinitionSet Definition => field ??= EntryDataDefinitionSet.From(Definitions);
+    public EntryDataDefinitionSet Definition => field ??= EntryDataDefinitionSet.From(
+        Definitions,
+        Import.Find<ITranslationExport>());
 
     public static ProviderData Get(IImportAgent import,
                                    Type entryType,

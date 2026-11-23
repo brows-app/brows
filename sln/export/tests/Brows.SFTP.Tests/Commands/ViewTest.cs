@@ -22,7 +22,7 @@ internal sealed class ViewTest {
     private Func<IOperationProgress, CancellationToken, Task<bool>> CaptureOperation() {
         IPanel panel = new TestPanel { Column = 0, Provider = Provider };
         ICommandLine line = new TestCommandLine {
-            Input = "sftp-view",
+            Input = "view",
             Command = "Sftp_View"
         };
         Func<IOperationProgress, CancellationToken, Task<bool>> operation = null;
@@ -59,9 +59,9 @@ internal sealed class ViewTest {
 
     [Test]
     public void View_TriggeredWork_TogglesPreviewWithoutPaletteParameters() {
-        Assert.That(Work(parameter: null, input: "sftp-view"), Is.True);
+        Assert.That(Work(parameter: null, input: "view"), Is.True);
         Assert.That(HasPreview(), Is.True);
-        Assert.That(Work(parameter: null, input: "sftp-view"), Is.True);
+        Assert.That(Work(parameter: null, input: "view"), Is.True);
         Assert.That(HasPreview(), Is.False);
     }
 

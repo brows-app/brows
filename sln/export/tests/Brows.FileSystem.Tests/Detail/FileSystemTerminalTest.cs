@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using TERMINAL = Brows.Commands.Terminal;
 
 namespace Brows.Detail;
 
@@ -58,13 +59,11 @@ internal sealed class FileSystemTerminalTest {
     }
 
     [Test]
-    public void FileSystemTerminal_AllowsOnlyReleaseCommand() {
+    public void FileSystemTerminal_AllowsOnlyTerminalCommand() {
         var owner = (IControllingCommandGesture)Terminal;
 
         using (Assert.EnterMultipleScope()) {
-            Assert.That(owner.Allows(new TerminalRelease()), Is.True);
-            Assert.That(owner.Allows(new TerminalOpen()), Is.False);
-            Assert.That(owner.Allows(new TerminalClose()), Is.False);
+            Assert.That(owner.Allows(new TERMINAL()), Is.True);
             Assert.That(owner.Allows(new View()), Is.False);
         }
     }
@@ -278,80 +277,66 @@ internal sealed class FileSystemTerminalTest {
         }
     }
 
-    [Test]
-    public void TerminalRelease_TriggeredWork_AllowsPaletteIntentAndFocusesEntries() {
-        var controller = new TestTerminalController();
-        ((IControlled<IFileSystemTerminalController>)Terminal).Controller = controller;
-        Provider.Detail.ShowAsync(FileSystemTerminal.Key, Terminal, CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
-        var context = new TestCommandContext {
-            Panels = Panels,
-            Line = new TestCommandLine {
-                Input = "terminal-release"
-            }
-        };
-
-        Assert.That(TriggeredWork(new TerminalRelease(), context), Is.True);
-        Assert.That(controller.FocusEntriesCalls, Is.EqualTo(1));
-    }
-
-    [Test]
-    public void TerminalRelease_TriggeredWork_RejectsShortcutWhenTerminalDoesNotOwnFocus() {
-        var controller = new TestTerminalController();
-        ((IControlled<IFileSystemTerminalController>)Terminal).Controller = controller;
-        Provider.Detail.ShowAsync(FileSystemTerminal.Key, Terminal, CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
+    [TestCase(null)]
+    [TestCase("default")]
+    public void Terminal_TriggeredWork_FocusesTerminalThatDoesNotOwnFocus(string action) {
+        var controller = ShowTerminal(new TestTerminalController());
         var context = new TestCommandContext {
             Panels = Panels,
             Gesture = Mock.Of<IGesture>(),
             Line = new TestCommandLine {
-                Input = "terminal-release"
+                Input = action is null ? "terminal" : "terminal " + action,
+                Parameter = action
             }
         };
 
-        Assert.That(TriggeredWork(new TerminalRelease(), context), Is.False);
-        Assert.That(controller.FocusEntriesCalls, Is.EqualTo(0));
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(TriggeredWork(new TERMINAL(), context), Is.True);
+            Assert.That(controller.OpenCalls, Is.EqualTo(1));
+            Assert.That(controller.FocusLaterCalls, Is.EqualTo(1));
+            Assert.That(controller.FocusEntriesCalls, Is.Zero);
+            Assert.That(controller.CloseCalls, Is.Zero);
+            Assert.That(Provider.Detail.Active, Is.SameAs(Terminal));
+        }
     }
 
-    [Test]
-    public void TerminalRelease_TriggeredWork_AllowsShortcutWhenTerminalOwnsFocus() {
-        var controller = new TestTerminalController {
+    [TestCase(null)]
+    [TestCase("default")]
+    public void Terminal_TriggeredWork_ReleasesFocusFromTerminalThatOwnsFocus(string action) {
+        var controller = ShowTerminal(new TestTerminalController {
             HasKeyboardFocusValue = true
-        };
-        ((IControlled<IFileSystemTerminalController>)Terminal).Controller = controller;
-        Provider.Detail.ShowAsync(FileSystemTerminal.Key, Terminal, CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
+        });
         var context = new TestCommandContext {
             Panels = Panels,
             Gesture = Mock.Of<IGesture>(),
             Line = new TestCommandLine {
-                Input = "terminal-release"
+                Input = action is null ? "terminal" : "terminal " + action,
+                Parameter = action
             }
         };
 
-        Assert.That(TriggeredWork(new TerminalRelease(), context), Is.True);
-        Assert.That(controller.FocusEntriesCalls, Is.EqualTo(1));
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(TriggeredWork(new TERMINAL(), context), Is.True);
+            Assert.That(controller.FocusEntriesCalls, Is.EqualTo(1));
+            Assert.That(controller.OpenCalls, Is.Zero);
+            Assert.That(controller.CloseCalls, Is.Zero);
+            Assert.That(Provider.Detail.Active, Is.SameAs(Terminal));
+        }
     }
 
     [Test]
-    public void TerminalRelease_TriggeredWork_ReturnsFocusAfterFailedCloseRetainsInvalidatedTerminal() {
-        var controller = new TestTerminalController {
-            CloseFailureCalls = new HashSet<int> { 1 }
-        };
-        ((IControlled<IFileSystemTerminalController>)Terminal).Controller = controller;
-        Provider.Detail.ShowAsync(FileSystemTerminal.Key, Terminal, CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
+    public void Terminal_TriggeredWork_ReturnsFocusAfterFailedCloseRetainsInvalidatedTerminal() {
+        var controller = ShowTerminal(new TestTerminalController {
+            CloseFailureCalls = new HashSet<int> { 1 },
+            HasKeyboardFocusValue = true
+        });
         var closed = Provider.Detail.CloseAsync(Terminal, CancellationToken.None)
             .GetAwaiter()
             .GetResult();
         var context = new TestCommandContext {
             Panels = Panels,
             Line = new TestCommandLine {
-                Input = "terminal-release"
+                Input = "terminal"
             }
         };
 
@@ -360,23 +345,23 @@ internal sealed class FileSystemTerminalTest {
             Assert.That(Provider.Detail.Active, Is.SameAs(Terminal));
             Assert.That(Provider.Detail.Error, Is.Not.Null);
             Assert.That(Terminal.IsInvalidated, Is.True);
-            Assert.That(TriggeredWork(new TerminalRelease(), context), Is.True);
+            Assert.That(TriggeredWork(new TERMINAL(), context), Is.True);
             Assert.That(controller.FocusEntriesCalls, Is.EqualTo(1));
         }
     }
 
     [Test]
-    public void TerminalOpen_TriggeredWork_OpensEmptyProviderAndReusesCurrentTerminal() {
+    public void Terminal_TriggeredWork_OpensEmptyProviderAndReusesCurrentTerminal() {
         var controller = new TestTerminalController();
         ((IControlled<IProviderDetailSetController>)Provider.Detail).Controller =
             new TestProviderDetailSetController(Provider, controller);
         var context = new TestCommandContext {
             Panels = Panels,
             Line = new TestCommandLine {
-                Input = "terminal-open"
+                Input = "terminal"
             }
         };
-        var command = new TerminalOpen {
+        var command = new TERMINAL {
             CommandCliProvider = new CommandCliProvider()
         };
 
@@ -393,20 +378,40 @@ internal sealed class FileSystemTerminalTest {
         }
     }
 
-    [Test]
-    public void TerminalClose_TriggeredWork_IsIdempotentAfterClosingExpectedDetail() {
-        var controller = new TestTerminalController();
-        ((IControlled<IFileSystemTerminalController>)Terminal).Controller = controller;
-        Provider.Detail.ShowAsync(FileSystemTerminal.Key, Terminal, CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
+    [TestCase(false)]
+    [TestCase(true)]
+    public void Terminal_TriggeredWork_CloseClosesTerminalWithOrWithoutFocus(bool terminalOwnsFocus) {
+        var controller = ShowTerminal(new TestTerminalController {
+            HasKeyboardFocusValue = terminalOwnsFocus
+        });
         var context = new TestCommandContext {
             Panels = Panels,
             Line = new TestCommandLine {
-                Input = "terminal-close"
+                Input = "terminal close",
+                Parameter = "close"
             }
         };
-        var command = new TerminalClose {
+
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(TriggeredWork(new TERMINAL(), context), Is.True);
+            Assert.That(controller.CloseCalls, Is.EqualTo(1));
+            Assert.That(controller.FocusEntriesCalls, Is.Zero);
+            Assert.That(controller.OpenCalls, Is.Zero);
+            Assert.That(Provider.Detail.Active, Is.Null);
+        }
+    }
+
+    [Test]
+    public void Terminal_TriggeredWork_CloseIsIdempotentAfterClosingExpectedDetail() {
+        var controller = ShowTerminal(new TestTerminalController());
+        var context = new TestCommandContext {
+            Panels = Panels,
+            Line = new TestCommandLine {
+                Input = "terminal close",
+                Parameter = "close"
+            }
+        };
+        var command = new TERMINAL {
             CommandCliProvider = new CommandCliProvider()
         };
 
@@ -416,6 +421,55 @@ internal sealed class FileSystemTerminalTest {
             Assert.That(Provider.Detail.Active, Is.Null);
             Assert.That(controller.CloseCalls, Is.EqualTo(1));
         }
+    }
+
+    [Test]
+    public void Terminal_TriggeredWork_CloseDoesNothingWithoutTerminal() {
+        var controller = new TestTerminalController();
+        ((IControlled<IProviderDetailSetController>)Provider.Detail).Controller =
+            new TestProviderDetailSetController(Provider, controller);
+        var context = new TestCommandContext {
+            Panels = Panels,
+            Line = new TestCommandLine {
+                Input = "terminal close",
+                Parameter = "close"
+            }
+        };
+
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(TriggeredWork(new TERMINAL(), context), Is.True);
+            Assert.That(Provider.Detail.Active, Is.Null);
+            Assert.That(controller.OpenCalls, Is.Zero);
+            Assert.That(controller.CloseCalls, Is.Zero);
+        }
+    }
+
+    [Test]
+    public void Terminal_TriggeredWork_InvalidActionDoesNothing() {
+        var controller = ShowTerminal(new TestTerminalController());
+        var context = new TestCommandContext {
+            Panels = Panels,
+            Line = new TestCommandLine {
+                Input = "terminal unknown",
+                Parameter = "unknown"
+            }
+        };
+
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(TriggeredWork(new TERMINAL(), context), Is.False);
+            Assert.That(controller.OpenCalls, Is.Zero);
+            Assert.That(controller.FocusEntriesCalls, Is.Zero);
+            Assert.That(controller.CloseCalls, Is.Zero);
+            Assert.That(Provider.Detail.Active, Is.SameAs(Terminal));
+        }
+    }
+
+    private TestTerminalController ShowTerminal(TestTerminalController controller) {
+        ((IControlled<IFileSystemTerminalController>)Terminal).Controller = controller;
+        Provider.Detail.ShowAsync(FileSystemTerminal.Key, Terminal, CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+        return controller;
     }
 
     private static bool TriggeredWork(ICommand command, TestCommandContext context) {

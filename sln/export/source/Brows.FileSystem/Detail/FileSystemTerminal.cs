@@ -351,6 +351,6 @@ internal sealed class FileSystemTerminal : ProviderDetail,
         ScopeProvider;
 
     bool IControllingCommandGesture.Allows(ICommand command) {
-        return command is TerminalRelease;
+        return command is Terminal;
     }
 }

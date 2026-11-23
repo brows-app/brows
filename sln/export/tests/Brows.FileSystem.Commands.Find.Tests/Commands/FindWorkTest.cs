@@ -17,7 +17,7 @@ namespace Brows.Commands;
 internal sealed class FindWorkTest {
     private static readonly TimeSpan Deadline = TimeSpan.FromSeconds(10);
 
-    private static FileSystemFindResult Result(DirectoryInfo root, FindParameter parameter) {
+    private static FileSystemFindResult Result(DirectoryInfo root, Find.Parameter parameter) {
         return new FileSystemFindResult(root, parameter, parameter.Pattern, null);
     }
 
@@ -29,7 +29,7 @@ internal sealed class FindWorkTest {
     public async Task Done_CountsAFileOnceAcrossNameAndMultipleTextMatches() {
         using var fixture = new TempDirectory();
         fixture.CreateFile("needle.txt", "needle\r\nneedle");
-        var result = Result(fixture.Root, new FindParameter {
+        var result = Result(fixture.Root, new Find.Parameter {
             Pattern = "needle", In = FindIn.FileName | FindIn.FileText
         });
         var progress = new Progress();
@@ -52,7 +52,7 @@ internal sealed class FindWorkTest {
         fixture.CreateFile("b.log");
         fixture.CreateFile("c.log");
         fixture.CreateFile("d.log");
-        var result = Result(fixture.Root, new FindParameter { Pattern = "*", Include = ["*.txt"] });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "*", Include = ["*.txt"] });
         var progress = new Progress();
 
         await new FindWork(result).Done(progress, default).WaitAsync(Deadline);
@@ -68,7 +68,7 @@ internal sealed class FindWorkTest {
         using var fixture = new TempDirectory();
         var file = fixture.CreateFile("locked.txt", "needle");
         using var locked = file.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-        var result = Result(fixture.Root, new FindParameter { Pattern = "absent", In = FindIn.FileText });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "absent", In = FindIn.FileText });
 
         await new FindWork(result).Done(null, default).WaitAsync(Deadline);
 
@@ -84,7 +84,7 @@ internal sealed class FindWorkTest {
         using var fixture = new TempDirectory();
         fixture.CreateFile("timeout.txt");
         fixture.CreateFile("other.txt");
-        var result = Result(fixture.Root, new FindParameter { Pattern = "*", Workers = 1 });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "*", Workers = 1 });
         var processed = 0;
         async Task<FindEntryResult> Process(FileSystemInfo entry, CancellationToken token) {
             await Task.CompletedTask;
@@ -108,7 +108,7 @@ internal sealed class FindWorkTest {
     public async Task Done_ReportsMissingRootAsFatalFailure() {
         using var fixture = new TempDirectory();
         var missing = new DirectoryInfo(Path.Combine(fixture.Root.FullName, "missing"));
-        var result = Result(missing, new FindParameter { Pattern = "*" });
+        var result = Result(missing, new Find.Parameter { Pattern = "*" });
 
         await Assert.ThrowsAsync<DirectoryNotFoundException>(
             () => new FindWork(result).Done(null, default).WaitAsync(Deadline));
@@ -122,7 +122,7 @@ internal sealed class FindWorkTest {
     public async Task Done_SkipsOversizedContentButStillFindsFileName() {
         using var fixture = new TempDirectory();
         fixture.CreateFile("needle.txt", "needle content exceeds the limit");
-        var result = Result(fixture.Root, new FindParameter {
+        var result = Result(fixture.Root, new Find.Parameter {
             Pattern = "needle", In = FindIn.FileName | FindIn.FileText, MaximumContentBytes = 4
         });
 
@@ -138,7 +138,7 @@ internal sealed class FindWorkTest {
     public async Task Done_BoundsPerFileRowsAndPreviews() {
         using var fixture = new TempDirectory();
         fixture.CreateFile("many.txt", string.Join('\n', Enumerable.Repeat("needle", 100)));
-        var result = Result(fixture.Root, new FindParameter {
+        var result = Result(fixture.Root, new Find.Parameter {
             Pattern = "needle", In = FindIn.FileText, MaximumMatchesPerFile = 3, MaximumPreviewLength = 2
         });
 
@@ -157,7 +157,7 @@ internal sealed class FindWorkTest {
         for (var i = 0; i < 20; i++) {
             fixture.CreateFile($"needle{i}.txt");
         }
-        var result = Result(fixture.Root, new FindParameter { Pattern = "needle", MaximumResults = 2 });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "needle", MaximumResults = 2 });
 
         await new FindWork(result).Done(null, default).WaitAsync(Deadline);
 
@@ -174,7 +174,7 @@ internal sealed class FindWorkTest {
         var file = fixture.CreateFile("bom.txt");
         Encoding encoding = utf16 ? Encoding.Unicode : new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
         File.WriteAllText(file.FullName, "first\r\nneedle\r\n", encoding);
-        var result = Result(fixture.Root, new FindParameter { Pattern = "*needle", In = FindIn.FileText });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "*needle", In = FindIn.FileText });
 
         await new FindWork(result).Done(null, default).WaitAsync(Deadline);
 
@@ -189,7 +189,7 @@ internal sealed class FindWorkTest {
         for (var i = 0; i < 100; i++) {
             fixture.CreateFile($"{i}.txt", "needle");
         }
-        var parameter = new FindParameter { Pattern = "needle", In = FindIn.FileText, Workers = 2 };
+        var parameter = new Find.Parameter { Pattern = "needle", In = FindIn.FileText, Workers = 2 };
         var result = Result(fixture.Root, parameter);
         var real = new FindInInfo(fixture.Root, parameter);
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -240,7 +240,7 @@ internal sealed class FindWorkTest {
         using var cancellation = new CancellationTokenSource();
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var result = Result(fixture.Root, new FindParameter { Pattern = "needle", Workers = 1 });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "needle", Workers = 1 });
         var exited = false;
         async Task<FindEntryResult> Process(FileSystemInfo entry, CancellationToken token) {
             started.TrySetResult();
@@ -276,7 +276,7 @@ internal sealed class FindWorkTest {
         fixture.CreateFile("one.txt");
         using var cancellation = new CancellationTokenSource();
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var result = Result(fixture.Root, new FindParameter { Pattern = "*", Workers = 1 });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "*", Workers = 1 });
         async Task<FindEntryResult> Process(FileSystemInfo entry, CancellationToken token) {
             started.TrySetResult();
             try {
@@ -306,7 +306,7 @@ internal sealed class FindWorkTest {
         var siblingStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var siblingCanceled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var result = Result(fixture.Root, new FindParameter { Pattern = "*", Workers = 2 });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "*", Workers = 2 });
         var sequence = 0;
         var active = 0;
         var expected = new IOException("Injected worker failure");
@@ -349,7 +349,7 @@ internal sealed class FindWorkTest {
         for (var i = 0; i < 200; i++) {
             fixture.CreateFile($"{i}.txt");
         }
-        var result = Result(fixture.Root, new FindParameter { Pattern = "*", Workers = 2 });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "*", Workers = 2 });
         var expected = new InvalidOperationException("Injected collection subscriber failure");
         NotifyCollectionChangedEventHandler fail = (sender, args) => throw expected;
         ((INotifyCollectionChanged)result.Source).CollectionChanged += fail;
@@ -370,7 +370,7 @@ internal sealed class FindWorkTest {
         using var fixture = new TempDirectory();
         fixture.CreateFile("one.txt", "needle");
         fixture.CreateFile("two.txt", "needle");
-        var parameter = new FindParameter { Pattern = "needle", In = FindIn.FileText, Workers = 2 };
+        var parameter = new Find.Parameter { Pattern = "needle", In = FindIn.FileText, Workers = 2 };
         var result = Result(fixture.Root, parameter);
         var real = new FindInInfo(fixture.Root, parameter);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -402,7 +402,7 @@ internal sealed class FindWorkTest {
         var target = fixture.CreateDirectory("target");
         fixture.CreateFile(Path.Combine("target", "needle.txt"));
         var junction = fixture.CreateJunction("root-link", target);
-        var result = Result(junction, new FindParameter { Pattern = "needle" });
+        var result = Result(junction, new Find.Parameter { Pattern = "needle" });
 
         await new FindWork(result).Done(null, default).WaitAsync(Deadline);
 
@@ -415,7 +415,7 @@ internal sealed class FindWorkTest {
         using var fixture = new TempDirectory();
         fixture.CreateFile("needle.txt");
         fixture.CreateFile(Path.Combine("needle-directory", "needle-nested.txt"));
-        var result = Result(fixture.Root, new FindParameter {
+        var result = Result(fixture.Root, new Find.Parameter {
             Pattern = "needle", In = FindIn.FileName | FindIn.DirectoryName | FindIn.TopDirectoryOnly
         });
         var progress = new Progress();
@@ -441,7 +441,7 @@ internal sealed class FindWorkTest {
         int workers, long bytes, int matches, int rows, int preview) {
         using var fixture = new TempDirectory();
         fixture.CreateFile("one.txt", "needle");
-        var result = Result(fixture.Root, new FindParameter {
+        var result = Result(fixture.Root, new Find.Parameter {
             Pattern = "needle", Workers = workers, MaximumContentBytes = bytes,
             MaximumMatchesPerFile = matches, MaximumResults = rows, MaximumPreviewLength = preview
         });
@@ -460,7 +460,7 @@ internal sealed class FindWorkTest {
         fixture.CreateFile("one.txt");
         using var cancellation = new CancellationTokenSource();
         cancellation.Cancel();
-        var result = Result(fixture.Root, new FindParameter { Pattern = "*" });
+        var result = Result(fixture.Root, new Find.Parameter { Pattern = "*" });
 
         await Assert.ThrowsAsync<OperationCanceledException>(
             () => new FindWork(result).Done(null, cancellation.Token).WaitAsync(Deadline));

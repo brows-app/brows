@@ -7,7 +7,7 @@ namespace Brows.Commands;
 internal sealed class SevenZipParameterTest {
     [Test]
     public void Configure_PreservesConfigurationAndCommandLineBinding() {
-        var parameter = new SevenZipParameter().ConfFrom(
+        var parameter = new SevenZip.Parameter().ConfFrom(
             "force=Extract\ncompression=2\noverwrite=true",
             key: "");
         var cli = new CliProvider(new CliSetup());

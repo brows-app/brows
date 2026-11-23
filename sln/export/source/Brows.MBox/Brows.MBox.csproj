@@ -9,7 +9,4 @@
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_MBox_PreviewFocus" />
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_MBox_View" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Brows.MBox.Format\Brows.MBox.Format.csproj" />
-  </ItemGroup>
 </Project>

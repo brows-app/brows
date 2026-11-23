@@ -1,16 +1,14 @@
 ﻿using Brows.Detail;
-using Brows.Panels;
+using Domore.Conf.Cli;
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
 /// <summary>
 /// Moves the keyboard focus between the list of the messages of a mailbox and their preview.
 /// </summary>
-internal sealed class PreviewFocus : MBoxCommand<PreviewFocusParameter> {
+internal sealed class PreviewFocus : MBoxCommand<PreviewFocus.Parameter> {
     private static readonly TimeSpan AttachTimeout = TimeSpan.FromSeconds(2);
 
     protected sealed override bool Work(Context context) {
@@ -29,7 +27,7 @@ internal sealed class PreviewFocus : MBoxCommand<PreviewFocusParameter> {
         if (active.HasProvider(out MBoxProvider provider) == false) {
             return false;
         }
-        if (parameter.Target == PreviewFocusTarget.Entries) {
+        if (parameter.Target == Target.Entries) {
             return FocusEntries(provider);
         }
         return FocusPreview(context, active, panels, provider);
@@ -111,5 +109,32 @@ internal sealed class PreviewFocus : MBoxCommand<PreviewFocusParameter> {
             controller.RequestFocusLater(panel, panels, token);
             return true;
         });
+    }
+
+    /// <summary>
+    /// Holds the parts of a panel that the preview focus command can move the focus to.
+    /// </summary>
+    public enum Target {
+        /// <summary>
+        /// The preview of the current message.
+        /// </summary>
+        Preview = 0,
+
+        /// <summary>
+        /// The list of the messages.
+        /// </summary>
+        Entries = 1,
+    }
+
+
+    /// <summary>
+    /// Holds the parameters of the preview focus command.
+    /// </summary>
+    public sealed record Parameter {
+        /// <summary>
+        /// Gets or sets the part of the panel that receives the focus.
+        /// </summary>
+        [CliArgument]
+        public Target Target { get; set; } = Target.Preview;
     }
 }

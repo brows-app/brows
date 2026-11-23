@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Brows.Commands;
 
-internal sealed class Edit : FileSystemCommand<EditParameter> {
+internal sealed class Edit : FileSystemCommand<Edit.Parameter> {
     protected sealed override IEnumerable<Type> Source { get; } = new[] {
         typeof(IEntry)
     };
@@ -68,4 +68,7 @@ internal sealed class Edit : FileSystemCommand<EditParameter> {
     public IConfigurationFile ConfigFile { get; set; }
     public ILocateProgram LocateProgram { get; set; }
     public IOpenFileWith OpenFileWith { get; set; }
+
+    public sealed class Parameter {
+    }
 }

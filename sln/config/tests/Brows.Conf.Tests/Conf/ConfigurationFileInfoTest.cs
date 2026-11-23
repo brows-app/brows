@@ -143,23 +143,18 @@ internal sealed class ConfigurationFileInfoTest {
             var userFile = Path.Combine(directory, "trigger.conf");
             await File.WriteAllTextAsync(
                 userFile,
-                "cmd[FileSystem_TerminalRelease].input = terminal-return\r\n" +
-                "cmd[FileSystem_TerminalRelease].press[CTRL+SHIFT+F12] =\r\n" +
-                "cmd[FileSystem_TerminalRelease].press[CTRL+SHIFT+F11] = *\r\n");
+                "cmd[FileSystem_Terminal].input = terminal-toggle\r\n" +
+                "cmd[FileSystem_Terminal].press[CTRL+SHIFT+F12] =\r\n" +
+                "cmd[FileSystem_Terminal].press[CTRL+SHIFT+F11] = *\r\n");
 
             var info = new TypedConfigurationFileInfo<TriggerConfig>(userFile, DefaultTriggerFile(), "brows");
 
             var config = await info.Configure(CancellationToken.None);
 
-            Assert.That(config.Cmd["FileSystem_TerminalOpen"].Input, Is.EqualTo("terminal|term"));
-            Assert.That(config.Cmd["FileSystem_TerminalRelease"].Input, Is.EqualTo("terminal-return"));
-            Assert.That(config.Cmd["FileSystem_TerminalOpen"].Press["CTRL+ALT+T"], Is.EqualTo("*"));
-            Assert.That(
-                config.Cmd["FileSystem_TerminalRelease"].Press["CTRL+SHIFT+F11"],
-                Is.EqualTo("*"));
-            Assert.That(
-                config.Cmd["FileSystem_TerminalRelease"].Press["CTRL+SHIFT+F12"],
-                Is.EqualTo("*"));
+            Assert.That(config.Cmd["FileSystem_Terminal"].Input, Is.EqualTo("terminal-toggle"));
+            Assert.That(config.Cmd["FileSystem_Terminal"].Press.ContainsKey("CTRL+ALT+T"), Is.False);
+            Assert.That(config.Cmd["FileSystem_Terminal"].Press["CTRL+SHIFT+F11"], Is.EqualTo("*"));
+            Assert.That(config.Cmd["FileSystem_Terminal"].Press["CTRL+SHIFT+F12"], Is.EqualTo("*"));
         }
         finally {
             if (directoryIsInTemp) {

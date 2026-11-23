@@ -35,5 +35,5 @@ internal sealed class Delete : SevenZipCommand<Delete.Parameter> {
         });
     }
 
-    internal sealed record Parameter;
+    public sealed record Parameter;
 }

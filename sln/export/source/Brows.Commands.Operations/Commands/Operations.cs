@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Brows.Commands;
 
-internal sealed class Operations : Command<OperationsParameter> {
+internal sealed class Operations : Command<Operations.Parameter> {
     protected sealed override async IAsyncEnumerable<ICommandSuggestion> Suggest(Context context, [EnumeratorCancellation] CancellationToken cancellationToken) {
         if (context == null) yield break;
         if (context.DidTrigger(this)) {
@@ -38,5 +38,9 @@ internal sealed class Operations : Command<OperationsParameter> {
             return true;
         }
         return false;
+    }
+
+    public sealed class Parameter {
+        public bool? ClearErrors { get; set; }
     }
 }

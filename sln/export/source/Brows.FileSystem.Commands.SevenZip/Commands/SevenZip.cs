@@ -1,4 +1,6 @@
-﻿using Domore.Logs;
+﻿using Domore.Conf;
+using Domore.Conf.Cli;
+using Domore.Logs;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
-internal sealed class SevenZip : FileSystemCommand<SevenZipParameter> {
+internal sealed class SevenZip : FileSystemCommand<SevenZip.Parameter> {
     private static readonly ILog Log = Logging.For(typeof(SevenZip));
 
     private bool Compress(Context context) {
@@ -182,5 +184,18 @@ internal sealed class SevenZip : FileSystemCommand<SevenZipParameter> {
             default:
                 return false;
         }
+    }
+
+    public sealed record Parameter {
+        [CliArgument]
+        public string Output { get; init; }
+
+        [Conf("force")]
+        public SevenZipDirection? Direction { get; init; }
+
+        [Conf("compression")]
+        public int? CompressionLevel { get; init; }
+
+        public bool? Overwrite { get; init; }
     }
 }

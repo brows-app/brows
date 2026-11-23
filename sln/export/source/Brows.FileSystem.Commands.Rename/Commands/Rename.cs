@@ -1,12 +1,13 @@
 using Brows.Entries;
 using Brows.Exports;
+using Domore.Conf.Cli;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Brows.Commands; 
-internal sealed class Rename : FileSystemCommand<RenameParameter> {
+internal sealed class Rename : FileSystemCommand<Rename.Parameter> {
     private bool Prompt(Context context) {
         if (context == null) return false;
         if (context.HasCommander(out var commander) == false) return false;
@@ -71,4 +72,9 @@ internal sealed class Rename : FileSystemCommand<RenameParameter> {
     }
 
     public IRenameDirectoryEntries Service { get; set; }
+
+    public sealed class Parameter {
+        [CliArgument]
+        public string Pattern { get; set; }
+    }
 }

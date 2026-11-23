@@ -1,7 +1,6 @@
 ﻿using Brows.Detail;
 using Brows.Entries;
 using Brows.Gui;
-using Brows.Localization;
 using Brows.Panels;
 using Brows.Providers;
 using System;
@@ -17,8 +16,6 @@ namespace Brows.Commands;
 [TestFixture]
 [NonParallelizable]
 internal sealed class PreviewFocusTest {
-    private static ITranslation _PreviousTranslation;
-
     private MBoxTestDirectory _Directory;
     private MBoxProvider _Provider;
     private TestPanel _Panel;
@@ -27,8 +24,6 @@ internal sealed class PreviewFocusTest {
 
     [SetUp]
     public async Task SetUp() {
-        _PreviousTranslation = Translation.Global;
-        Translation.Global = new EmptyTranslation();
         _Directory = new MBoxTestDirectory();
         _Provider = await MBoxTestProvider.Create(Mailbox("inbox.mbox"), new MBoxConfig());
         await MBoxTestProvider.Refresh(_Provider, CancellationToken.None);
@@ -47,7 +42,6 @@ internal sealed class PreviewFocusTest {
         ((IProvider)_Provider).End();
         _Provider.Dispose();
         _Directory.Dispose();
-        Translation.Global = _PreviousTranslation;
     }
 
     private string Mailbox(string name) {
@@ -159,6 +153,8 @@ internal sealed class PreviewFocusTest {
     }
 
     private sealed class ObservationController : IEntryObservationController {
+        public bool AutoFit { private get; set; }
+
         public int FocusCount { get; private set; }
 
         public object DraggingSource =>

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
-internal class Bookmark : Command<BookmarkParameter> {
+internal sealed class Bookmark : Command<Bookmark.Parameter> {
     private IConfiguration<Bookmarks> Data => field ??=
         ConfigData.Data<Bookmarks>(Bookmarks.DataName);
 
@@ -105,5 +105,10 @@ internal class Bookmark : Command<BookmarkParameter> {
             return true;
         });
         return session != "" || add == true;
+    }
+
+    public sealed class Parameter {
+        public bool Add { get; set; }
+        public string Session { get; set; }
     }
 }

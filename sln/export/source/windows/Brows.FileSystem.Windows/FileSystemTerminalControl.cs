@@ -1,26 +1,30 @@
 ﻿using Brows.Detail;
-using Brows.Gui;
-using Brows.Providers;
 using Brows.Terminal;
 using Brows.Windows;
 using Brows.Windows.Controls;
 using Domore.Logs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using PATH = System.IO.Path;
+using TERMINAL = Brows.Commands.Terminal;
 
 namespace Brows;
 
-[TemplatePart(Name = TerminalPartName, Type = typeof(TerminalEmulator))]
-[TemplatePart(Name = StatusPartName, Type = typeof(TextBlock))]
+[TemplatePart(Name = PartTerminalName, Type = typeof(TerminalEmulator))]
+[TemplatePart(Name = PartStatusName, Type = typeof(TextBlock))]
+[TemplatePart(Name = PartTriggerDisplayName, Type = typeof(TextBlock))]
+[TemplatePart(Name = PartTriggerDescriptionName, Type = typeof(TextBlock))]
 internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>, IFileSystemTerminalController {
-    private const string TerminalPartName = "PART_Terminal";
-    private const string StatusPartName = "PART_Status";
+    private const string PartTerminalName = "PART_Terminal";
+    private const string PartStatusName = "PART_Status";
+    private const string PartTriggerDisplayName = "PART_TriggerDisplay";
+    private const string PartTriggerDescriptionName = "PART_TriggerDescription";
 
     private static readonly ILog Log = Logging.For(typeof(FileSystemTerminalControl));
 
@@ -28,9 +32,12 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
     private readonly Dictionary<TerminalEmulator, TerminalSessionLifecycle> Lifecycles = [];
     private readonly Func<TerminalEmulator, ITerminalSessionAdapter> SessionAdapterFactory;
     private readonly Dictionary<TerminalSessionLifecycle, long> LoggedFailureNotification = [];
+
     private TerminalSessionLifecycle SessionLifecycle;
     private TerminalEmulator Terminal;
     private TextBlock StatusText;
+    private TextBlock TriggerDisplayText;
+    private TextBlock TriggerDescriptionText;
     private FileSystemTerminal Detail;
     /*
      * A template may rebind this host to a new model. Its next session must wait
@@ -237,6 +244,67 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
         }
     }
 
+    private static bool RunsWithoutArguments(IGestureTrigger gesture) {
+        /*
+         * A gesture's definition is the command input followed by any arguments,
+         * such as "terminal" or "terminal close".
+         */
+        var defined = gesture?.Defined?.Trim();
+        if (string.IsNullOrEmpty(defined)) {
+            return false;
+        }
+        return defined.Any(char.IsWhiteSpace) == false;
+    }
+
+    private void UpdateTrigger() {
+        /*
+         * Without arguments, the terminal command releases focus while the
+         * terminal owns keyboard focus. Otherwise, it focuses the terminal.
+         * Gestures with arguments, such as the one that closes the terminal,
+         * do neither, so they are not shown.
+         */
+        var terminalHasFocus = Terminal?.IsKeyboardFocusWithin == true;
+        var display = TerminalCommand?.Trigger?.PressGestures()?.FirstOrDefault(RunsWithoutArguments)?.Display;
+        var descriptionKey = terminalHasFocus
+            ? "FileSystemTerminal_Trigger_Release"
+            : "FileSystemTerminal_Trigger_Focus";
+        var description = string.IsNullOrEmpty(display)
+            ? string.Empty
+            : FileSystemText.Value(Translation, descriptionKey);
+        if (TriggerDisplayText is not null) {
+            TriggerDisplayText.Text = display;
+        }
+        if (TriggerDescriptionText is not null) {
+            TriggerDescriptionText.Text = description;
+        }
+    }
+
+    private void AttachCommands() {
+        DetachCommands();
+        if (TerminalCommand is not null) {
+            TerminalCommand.TriggerChanged += Command_TriggerChanged;
+        }
+        UpdateTrigger();
+    }
+
+    private void DetachCommands() {
+        if (TerminalCommand is not null) {
+            TerminalCommand.TriggerChanged -= Command_TriggerChanged;
+        }
+    }
+
+    private void Command_TriggerChanged(object sender, EventArgs e) {
+        if (Dispatcher.CheckAccess() == false) {
+            Dispatcher.BeginInvoke(new Action(UpdateTrigger));
+            return;
+        }
+        UpdateTrigger();
+    }
+
+    private void Terminal_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e) {
+        UpdateTrigger();
+    }
+
     private async Task ObserveCleanup(Task cleanup) {
         try {
             await cleanup;
@@ -278,7 +346,7 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
             var currentState = lifecycle.State;
             var sessionIsLive = terminal.IsRunning && currentState == TerminalSessionState.Running;
             if (sessionIsLive) {
-                SetStatus(FileSystemText.Value("FileSystemTerminal_Status_Running"));
+                SetStatus(FileSystemText.Value(Translation, "FileSystemTerminal_Status_Running"));
                 return true;
             }
             var layoutReady = await WaitForLayout(terminal, token);
@@ -291,7 +359,7 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
             terminal.AutoStart = false;
             terminal.WorkingDirectory = detail.ProviderDirectorySnapshot;
             terminal.CommandLine = PowerShellCommandLine();
-            SetStatus(FileSystemText.Value("FileSystemTerminal_Status_Starting"));
+            SetStatus(FileSystemText.Value(Translation, "FileSystemTerminal_Status_Starting"));
             try {
                 await lifecycle.OpenAsync(token);
             }
@@ -311,11 +379,13 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
     }
 
     private void This_Loaded(object sender, RoutedEventArgs e) {
+        AttachCommands();
         AttachViewModel();
         ControllerLoaded?.Invoke(this, EventArgs.Empty);
     }
 
     private void This_Unloaded(object sender, RoutedEventArgs e) {
+        DetachCommands();
         var detail = Detail;
         if (detail is not null) {
             StartCleanup(detail);
@@ -379,39 +449,45 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
             return;
         }
         if (args.State == TerminalSessionState.Starting) {
-            SetStatus(FileSystemText.Value("FileSystemTerminal_Status_Starting"));
+            SetStatus(FileSystemText.Value(Translation, "FileSystemTerminal_Status_Starting"));
             return;
         }
         if (args.State == TerminalSessionState.Stopping) {
-            SetStatus(FileSystemText.Value("FileSystemTerminal_Status_Stopping"));
+            SetStatus(FileSystemText.Value(Translation, "FileSystemTerminal_Status_Stopping"));
             return;
         }
         if (args.State == TerminalSessionState.Running) {
-            SetStatus(FileSystemText.Value("FileSystemTerminal_Status_Running"));
+            SetStatus(FileSystemText.Value(Translation, "FileSystemTerminal_Status_Running"));
             return;
         }
         if (args.State == TerminalSessionState.Exited) {
             if (args.ExitCode.HasValue) {
-                var format = FileSystemText.Value("FileSystemTerminal_Status_Exited");
+                var format = FileSystemText.Value(Translation, "FileSystemTerminal_Status_Exited");
                 SetStatus(string.Format(format, args.ExitCode.Value));
             }
             else {
-                SetStatus(FileSystemText.Value("FileSystemTerminal_Status_ExitedWithoutCode"));
+                SetStatus(FileSystemText.Value(Translation, "FileSystemTerminal_Status_ExitedWithoutCode"));
             }
             return;
         }
         if (args.State == TerminalSessionState.Stopped) {
-            SetStatus(FileSystemText.Value("FileSystemTerminal_Status_Stopped"));
+            SetStatus(FileSystemText.Value(Translation, "FileSystemTerminal_Status_Stopped"));
             return;
         }
         if (failureIsReported) {
-            var format = FileSystemText.Value("FileSystemTerminal_Status_Failed");
+            var format = FileSystemText.Value(Translation, "FileSystemTerminal_Status_Failed");
             SetStatus(string.Format(format, args.Exception.Message));
         }
     }
 
+
+    [ImportOptional] internal TERMINAL TerminalCommand { get; set; }
+
     internal TerminalEmulator TerminalView => Terminal;
     internal TextBlock Status => StatusText;
+    internal TextBlock Trigger => TriggerDisplayText;
+    internal TextBlock TriggerDescription => TriggerDescriptionText;
+    internal ITranslationExport Translation { get; set; }
 
     internal FileSystemTerminalControl(Func<TerminalEmulator, ITerminalSessionAdapter> sessionAdapterFactory) {
         SessionAdapterFactory = sessionAdapterFactory ?? throw new ArgumentNullException(nameof(sessionAdapterFactory));
@@ -444,10 +520,19 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
     public override void OnApplyTemplate() {
         var oldTerminal = Terminal;
         base.OnApplyTemplate();
-        var newTerminal = GetTemplateChild(TerminalPartName) as TerminalEmulator;
-        StatusText = GetTemplateChild(StatusPartName) as TextBlock;
+        var newTerminal = GetTemplateChild(PartTerminalName) as TerminalEmulator;
+        StatusText = GetTemplateChild(PartStatusName) as TextBlock;
+        TriggerDisplayText = GetTemplateChild(PartTriggerDisplayName) as TextBlock;
+        TriggerDescriptionText = GetTemplateChild(PartTriggerDescriptionName) as TextBlock;
         if (ReferenceEquals(oldTerminal, newTerminal)) {
+            UpdateTrigger();
             return;
+        }
+        if (oldTerminal is not null) {
+            oldTerminal.IsKeyboardFocusWithinChanged -= Terminal_IsKeyboardFocusWithinChanged;
+        }
+        if (newTerminal is not null) {
+            newTerminal.IsKeyboardFocusWithinChanged += Terminal_IsKeyboardFocusWithinChanged;
         }
         var detail = Detail;
         Terminal = newTerminal;
@@ -468,6 +553,7 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
             newTerminal.TerminalFailed += Terminal_Failed;
         }
         AttachViewModel();
+        UpdateTrigger();
     }
 
     public bool RequestFocus() {
@@ -570,7 +656,7 @@ internal sealed class FileSystemTerminalControl : ModelView<FileSystemTerminal>,
             if (errors.Count > 1) {
                 throw new AggregateException(errors);
             }
-            SetStatus(FileSystemText.Value("FileSystemTerminal_Status_Stopped"));
+            SetStatus(FileSystemText.Value(Translation, "FileSystemTerminal_Status_Stopped"));
         });
     }
     event EventHandler IController.Loaded {

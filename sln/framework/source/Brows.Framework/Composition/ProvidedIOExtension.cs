@@ -8,7 +8,19 @@ using System.Threading.Tasks;
 
 namespace Brows.Composition;
 
+/// <summary>
+/// Provides helpers for collecting transfer sources and their file paths.
+/// </summary>
 public static class ProvidedIOExtension {
+    /// <summary>
+    /// Collects distinct, nonblank file-system paths from transfer sources.
+    /// </summary>
+    /// <param name="providedIO">
+    /// The transfer sources to inspect.
+    /// </param>
+    /// <returns>
+    /// The source paths.
+    /// </returns>
     public static IReadOnlyList<string> FileSources(this IEnumerable<IProvidedIO> providedIO) {
         if (null == providedIO) throw new ArgumentNullException(nameof(providedIO));
         return providedIO
@@ -19,6 +31,15 @@ public static class ProvidedIOExtension {
             .ToList();
     }
 
+    /// <summary>
+    /// Collects the non-null stream sets from transfer sources.
+    /// </summary>
+    /// <param name="providedIO">
+    /// The transfer sources to inspect.
+    /// </param>
+    /// <returns>
+    /// The stream sets, in source order.
+    /// </returns>
     public static IReadOnlyList<IEntryStreamSet> StreamSets(this IEnumerable<IProvidedIO> providedIO) {
         if (null == providedIO) throw new ArgumentNullException(nameof(providedIO));
         return providedIO
@@ -27,6 +48,21 @@ public static class ProvidedIOExtension {
             .ToList();
     }
 
+    /// <summary>
+    /// Expands source files and directories into files with relative destination paths.
+    /// </summary>
+    /// <param name="providedIO">
+    /// The transfer sources to expand.
+    /// </param>
+    /// <param name="progress">
+    /// Receives progress updates for the operation.
+    /// </param>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The existing files, with common parent paths removed and forward slashes in relative paths.
+    /// </returns>
     public static async Task<IReadOnlyList<ProvidedFile>>
     FlattenFiles(this IEnumerable<IProvidedIO> providedIO, IOperationProgress progress, CancellationToken token) {
         var files = providedIO.FileSources();

@@ -58,7 +58,6 @@
   <DataTemplate x:Key="Brows.Style.OperatorControl.NameContentTemplate">
     <TextBlock Text="{Binding}"
                Margin="12,14"
-               Width="226"
                VerticalAlignment="Center"
                FontSize="{DynamicResource Brows.Font.OperatorControl.Name.FontSize}"
                FontWeight="{DynamicResource Brows.Font.OperatorControl.FontWeight.SemiBold}"
@@ -69,7 +68,6 @@
   <DataTemplate x:Key="Brows.Style.OperatorControl.DataContentTemplate">
     <TextBlock Text="{Binding}"
                Margin="12,14"
-               Width="226"
                VerticalAlignment="Center"
                FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
                Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}"
@@ -81,7 +79,6 @@
             CornerRadius="{DynamicResource Brows.Theme.Border.CornerRadius}"
             Margin="12,9"
             Padding="8,5"
-            Width="76"
             VerticalAlignment="Center">
       <TextBlock Text="{Binding}"
                  FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
@@ -95,7 +92,6 @@
   <DataTemplate x:Key="Brows.Style.OperatorControl.ProgressRateContentTemplate">
     <TextBlock Text="{Binding}"
                Margin="12,14"
-               Width="76"
                VerticalAlignment="Center"
                FontSize="{DynamicResource Brows.Font.OperatorControl.ProgressRate.FontSize}"
                Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Accent}"
@@ -106,7 +102,6 @@
   <DataTemplate x:Key="Brows.Style.OperatorControl.TargetContentTemplate">
     <TextBlock Text="{Binding}"
                Margin="12,14"
-               Width="76"
                VerticalAlignment="Center"
                FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
                Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}"
@@ -114,12 +109,48 @@
                TextTrimming="CharacterEllipsis"
                ToolTip="{Binding}" />
   </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.InlineHeaderTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="12,1,12,4"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.InlineHeader.FontSize}"
+               FontWeight="{DynamicResource Brows.Font.OperatorControl.FontWeight.SemiBold}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.InlineDataContentTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="0,0,12,4"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}"
+               TextWrapping="Wrap" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.InlineProgressContentTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="0,0,12,4"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+               FontWeight="{DynamicResource Brows.Font.OperatorControl.FontWeight.SemiBold}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Accent}"
+               TextWrapping="Wrap" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.InlineProgressRateContentTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="0,0,12,4"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Accent}"
+               TextWrapping="Wrap" />
+  </DataTemplate>
+  <DataTemplate x:Key="Brows.Style.OperatorControl.InlineTargetContentTemplate">
+    <TextBlock Text="{Binding}"
+               Margin="0,0,12,4"
+               FontSize="{DynamicResource Brows.Font.OperatorControl.FontSize}"
+               Foreground="{DynamicResource Brows.Theme.OperatorControl.Foreground.Muted}"
+               TextWrapping="Wrap" />
+  </DataTemplate>
   <DataTemplate x:Key="Brows.Style.OperatorControl.ErrorTemplate">
     <Border Background="{DynamicResource Brows.Theme.OperatorControl.Danger.Background}"
             CornerRadius="{DynamicResource Brows.Theme.Border.CornerRadius}"
             Padding="8,6"
-            Margin="8,4"
-            MaxWidth="360"
+            Margin="4,2,12,10"
+            MaxWidth="560"
             HorizontalAlignment="Left"
             VerticalAlignment="Center">
       <Grid>
@@ -351,5 +382,18 @@
             Value="{StaticResource Brows.Style.OperatorControl.ProgressRateContentTemplate}" />
     <Setter Property="OperationTargetContentTemplate"
             Value="{StaticResource Brows.Style.OperatorControl.TargetContentTemplate}" />
+    <Setter Property="OperationDisplay" Value="Responsive" />
+    <Setter Property="OperationInlineHeaderTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.InlineHeaderTemplate}" />
+    <Setter Property="OperationInlineDataContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.InlineDataContentTemplate}" />
+    <Setter Property="OperationInlineProgressContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.InlineProgressContentTemplate}" />
+    <Setter Property="OperationInlineProgressRateContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.InlineProgressRateContentTemplate}" />
+    <Setter Property="OperationInlineProgressRateAverageContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.InlineProgressRateContentTemplate}" />
+    <Setter Property="OperationInlineTargetContentTemplate"
+            Value="{StaticResource Brows.Style.OperatorControl.InlineTargetContentTemplate}" />
   </Style>
 </ResourceDictionary>

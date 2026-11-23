@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Brows.Localization;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,11 +18,11 @@ internal sealed class GestureTriggerCollection : IGestureTriggerCollection {
     public int Count =>
         Set.Count;
 
-    public static GestureTriggerCollection From(IReadOnlyDictionary<IGesture, string> set) {
+    public static GestureTriggerCollection From(IReadOnlyDictionary<IGesture, string> set, ITranslation translation) {
         if (null == set) throw new ArgumentNullException(nameof(set));
         return new GestureTriggerCollection(set.ToDictionary(
             g => g.Key,
-            g => (IGestureTrigger)new GestureTrigger(g.Value, g.Key)));
+            g => (IGestureTrigger)new GestureTrigger(g.Value, g.Key, translation)));
     }
 
     public static GestureTriggerCollection Combine(params GestureTriggerCollection[] collections) {

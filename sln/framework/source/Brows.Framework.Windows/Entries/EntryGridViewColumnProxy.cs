@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Brows.Localization;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,12 +39,11 @@ internal class EntryGridViewColumnProxy {
         if (dataTemplate == null) {
             dataTemplate = EntryGridViewColumnCellTemplate.Get(Agent);
         }
-        var column = new EntryGridViewColumn(Key) {
-            CellTemplate = dataTemplate,
-            Width = Agent.Width
-        };
+        var column = new EntryGridViewColumn(Key, Agent.Width);
+        column.CellTemplate = EntryGridViewColumnCellTemplate.Wrap(column, dataTemplate);
         if (column.Header == null) {
-            column.Header = new EntryGridViewColumnHeader(Agent.ResourceKey) {
+            column.Header = new EntryGridViewColumnHeader(Agent.ResourceKey, Translation) {
+                Column = column,
                 Display = Agent.Name,
                 Key = Agent.Key
             };
@@ -55,9 +55,11 @@ internal class EntryGridViewColumnProxy {
         Agent.Key;
 
     public IEntryDataDefinition Agent { get; }
+    public ITranslation Translation { get; }
 
-    public EntryGridViewColumnProxy(IEntryDataDefinition agent) {
+    public EntryGridViewColumnProxy(IEntryDataDefinition agent, ITranslation translation) {
         Agent = agent ?? throw new ArgumentNullException(nameof(agent));
+        Translation = translation;
     }
 
     public void Sorting(EntrySortDirection? direction) {

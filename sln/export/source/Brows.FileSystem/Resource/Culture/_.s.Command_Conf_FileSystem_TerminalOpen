@@ -1,4 +1,0 @@
-# Open and focus a PowerShell terminal for the active file-system provider.
-# The shell starts in the provider directory, regardless of the selected entry.
-# Running terminals keep their session and shell working directory when focused again.
-# Run again after exit or failure to start a new session.

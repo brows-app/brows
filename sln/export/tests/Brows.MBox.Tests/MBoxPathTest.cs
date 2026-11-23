@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace Brows;
 
@@ -54,6 +53,14 @@ internal sealed class MBoxPathTest {
         }
         finally {
             CultureInfo.CurrentCulture = culture;
+        }
+    }
+
+    [Test]
+    public void ArchiveName_NamesTheArchiveAfterTheOffsetOfTheMessage() {
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(MBoxPath.ArchiveName(0), Is.EqualTo("message-0.zip"));
+            Assert.That(MBoxPath.ArchiveName(1024), Is.EqualTo("message-1024.zip"));
         }
     }
 

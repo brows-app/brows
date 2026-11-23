@@ -37,8 +37,8 @@
                         MaxHeight="180"
                         Operator="{Binding ViewModel.Operator}"
                         Style="{StaticResource Brows.Style.OperatorControl}"
-                        Visibility="{Binding ViewModel.Operator.Operations.Count,
-                                     Converter={x:Static brows:ValueConverter.FallbackToCollapsedWithZeroUnset}}" />
+                        Visibility="{Binding ViewModel.Operator.Operations.Relevant,
+                                     Converter={x:Static brows:ValueConverter.FallbackToCollapsed}}" />
               </Grid>
             </Border>
             <Grid>

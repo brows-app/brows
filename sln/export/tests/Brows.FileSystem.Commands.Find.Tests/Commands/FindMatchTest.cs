@@ -26,7 +26,7 @@ internal sealed class FindMatchTest {
         var matcher = new FindMatcher("*needle", ignoreCase: false);
         matcher.Matches(text, out var matched);
         var match = FindMatch.In(text, matched, maxPreviewLength: 32).Single();
-        return (reference, new FoundInFileText(file, root, match));
+        return (reference, new FoundInFileText(file, root, match, translation: null));
     }
 
     [Test]

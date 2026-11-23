@@ -14,7 +14,7 @@ internal sealed class FindWork {
 
     private async Task Work(IOperationProgress progress, CancellationToken token) {
         var settings = new FindSettings(Parameter);
-        var findIn = new FindInInfo(Root, settings);
+        var findIn = new FindInInfo(Root, settings) { Translation = Result.Translation };
         var process = ProcessEntry ?? findIn.Process;
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         var pipelineToken = cancellation.Token;
@@ -195,7 +195,7 @@ internal sealed class FindWork {
     }
 
     internal DirectoryInfo Root { get; }
-    internal FindParameter Parameter { get; }
+    internal Find.Parameter Parameter { get; }
     internal FileSystemFindResult Result { get; }
 
     internal FindWork(FileSystemFindResult result,

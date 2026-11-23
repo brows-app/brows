@@ -1,6 +1,7 @@
 ﻿using Brows.Commands;
 using Brows.Composition;
 using Brows.Gui;
+using Brows.Localization;
 using Brows.Operations;
 using Brows.Panels;
 using Brows.Providers;
@@ -268,6 +269,9 @@ internal sealed class Commander : Notifier, ICommander, IControlled<ICommanderCo
 
     public IImport Import =>
         Domain?.Import;
+
+    public ITranslationExport Translation =>
+        Domain?.Translation;
 
     public IPanelCollection Panels =>
         PanelCollection;

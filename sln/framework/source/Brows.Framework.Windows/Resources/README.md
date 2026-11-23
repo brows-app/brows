@@ -55,3 +55,35 @@ including the operator headers, palette input, suggestions, and headings.
 
 Localized footer and Find-result styles remain in culture dictionaries. Template
 discovery keys such as `PanelProvider_*` and `CommandContextData_*` are unchanged.
+
+## Entry column sizing
+
+Entry grids automatically measure realized cells as data arrives and allocate their
+widths within the panel. The first column receives spare space. Compact secondary
+columns keep their natural widths where possible; long secondary values have a
+soft target ceiling of 200 DIP or 25% of the available width, whichever is larger.
+When readable minimum widths do not fit, trailing automatic columns temporarily
+hide. They return when the panel grows; configured keys and sorting do not change.
+Text uses ellipsis when constrained. Custom cell templates retain their formatting,
+wrapping and image dimensions and are measured through the same shared wrapper.
+
+Natural widths are sampled at most once every 100 ms during content updates, using
+the latest realized state. EntryData also combines intermediate Value/Display
+notifications at 100 ms intervals while keeping its raw Value current. First and
+terminal publications are immediate; Ready completes after terminal publication.
+Sizing does not fetch unseen rows. Intermediate states between samples can be
+skipped, and observed maximum widths remain stable until a source/typography reset.
+
+Use fit with optional column keys for full measured content widths, including
+horizontal scrolling when needed. Explicit header widths are preserved. Run show
+with no arguments to rebuild the columns and restore their configured sizing mode;
+Reset retains its existing broader reset behavior. Widths and temporary hiding
+are local to each view and are not saved.
+
+The inherited EntryConfig.AutoFit setting controls automatic column sizing for each
+provider. It defaults to true. For example, put AutoFit = false in filesystem.conf
+to disable it for filesystem panels, while leaving zip.conf or other provider
+configurations enabled. Reopen the provider after editing its configuration file.
+When disabled, columns retain their widths and Fit remains available as a one-shot
+content fit. Running show reapplies the configured mode. This switch does not
+change EntryData notification coalescing, trimming, alignment or other cell styling.

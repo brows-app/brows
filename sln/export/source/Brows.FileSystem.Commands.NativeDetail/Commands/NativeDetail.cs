@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Brows.Commands; 
-internal sealed class NativeDetail : FileSystemCommand<NativeDetailParameter> {
+internal sealed class NativeDetail : FileSystemCommand<NativeDetail.Parameter> {
     protected sealed override IEnumerable<Type> Source { get; } = new[] {
         typeof(IEntry)
     };
@@ -23,4 +23,7 @@ internal sealed class NativeDetail : FileSystemCommand<NativeDetailParameter> {
     }
 
     public IDetailFileSystemInfos DetailFileSystemInfos { get; set; }
+
+    public sealed class Parameter {
+    }
 }

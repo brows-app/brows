@@ -3,7 +3,19 @@ using System.Collections.Generic;
 
 namespace Brows.Commands;
 
+/// <summary>
+/// Provides a command that places source items on the clipboard for copying or moving.
+/// </summary>
 public abstract class ClipboardCopyIO : Command<ClipboardCopyIO.Parameter> {
+    /// <summary>
+    /// Schedules placement of the current source items on the clipboard.
+    /// </summary>
+    /// <param name="context">
+    /// The context supplying the source and paste settings.
+    /// </param>
+    /// <returns>
+    /// True if the operation was scheduled; otherwise, false.
+    /// </returns>
     protected sealed override bool Work(Context context) {
         if (null == context) return false;
         if (false == context.HasSource(out var source)) return false;
@@ -29,9 +41,18 @@ public abstract class ClipboardCopyIO : Command<ClipboardCopyIO.Parameter> {
         });
     }
 
+    /// <summary>
+    /// Gets or sets the service that places sources on the clipboard.
+    /// </summary>
     public IClipboardSetIO Clipboard { get; set; }
 
-    public class Parameter {
+    /// <summary>
+    /// Specifies how clipboard items should be pasted.
+    /// </summary>
+    public sealed class Parameter {
+        /// <summary>
+        /// Gets or sets whether pasting should move the source items instead of copying them.
+        /// </summary>
         public bool MoveOnPaste { get; set; }
     }
 }

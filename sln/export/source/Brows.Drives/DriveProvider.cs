@@ -67,7 +67,7 @@ internal sealed class DriveProvider : Provider<DriveEntry, DrivesConfig>, IFileS
     }
 
     public string Name =>
-        Translation.Global.Value(ID);
+        Factory.Translation?.Value(ID);
 
     public object Icon { get; }
     public DriveProviderFactory Factory { get; }

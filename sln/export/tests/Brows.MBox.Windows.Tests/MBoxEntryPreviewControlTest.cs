@@ -1,18 +1,20 @@
 ﻿using Brows.Composition;
 using Brows.Detail;
 using Brows.Entries;
-using Brows.Localization;
 using Brows.MBox.Format;
 using Brows.Panels;
 using Brows.Providers;
 using Brows.Support;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace Brows;
@@ -21,8 +23,6 @@ namespace Brows;
 [Apartment(ApartmentState.STA)]
 [NonParallelizable]
 internal sealed class MBoxEntryPreviewControlTest {
-    private static ITranslation _PreviousTranslation;
-
     private MBoxTestDirectory _Directory;
     private MBoxProviderFactory _Factory;
     private MBoxProvider _Provider;
@@ -34,21 +34,6 @@ internal sealed class MBoxEntryPreviewControlTest {
     private MBoxEntryPreview _Detail;
     private EntryObservationControl _ObservationControl;
     private EntryObservationControl _OtherObservationControl;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() {
-        /*
-         * The user interface of the list shows the texts of the columns through the translation
-         * of the application, so the fixture needs one to show the texts that the user sees.
-         */
-        _PreviousTranslation = Translation.Global;
-        Translation.Global = new MBoxTranslation();
-    }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() {
-        Translation.Global = _PreviousTranslation;
-    }
 
     [SetUp]
     public void SetUp() {
@@ -88,6 +73,11 @@ internal sealed class MBoxEntryPreviewControlTest {
     private static IExport[] Exports(MBoxProviderFactory factory) {
         return [
             factory,
+            /*
+             * The user interface of the list shows the texts of the columns through the translation
+             * of the application, so the fixture needs one to show the texts that the user sees.
+             */
+            new MBoxTranslation(),
             new Brows.Data.MBoxEntryData.Subject(),
             new Brows.Data.MBoxEntryData.From(),
             new Brows.Data.MBoxEntryData.Date(),
@@ -152,10 +142,43 @@ internal sealed class MBoxEntryPreviewControlTest {
         return provider;
     }
 
-    private void Attach() {
+    private static ResourceDictionary Load(string source) {
+        return new ResourceDictionary {
+            Source = new Uri(source, UriKind.Relative)
+        };
+    }
+
+    /*
+     * Shows the preview in a window that holds the resources of a theme of the application, so
+     * that the resources of the theme are found before those of the fixture.
+     */
+    private void Attach(string theme) {
+        Attach(window => {
+            window.Resources.MergedDictionaries.Add(Load(
+                $"/Brows.Framework.Windows;component/Resources/Themes/{theme}.FileExplorer.xaml"));
+            window.Resources.MergedDictionaries.Add(Load(
+                "/Brows.Framework.Windows;component/Resources/Resources.xaml"));
+            window.Resources.MergedDictionaries.Add(Load(
+                "/Brows.MBox.Windows;component/Resource/Resource.xaml"));
+        });
+    }
+
+    private object Theme(string key) {
+        return _Window.FindResource($"Brows.Theme.MBoxEntryPreview.{key}");
+    }
+
+    private object Font(string key) {
+        return _Window.FindResource($"Brows.Font.MBoxEntryPreview.{key}");
+    }
+
+    private Border FindRoot() {
+        return (Border)_Control.Template.FindName("Root", _Control);
+    }
+
+    private void Attach(Action<Window> prepare = null) {
         MBoxTestResources.Add();
         _Control = new MBoxEntryPreviewControl {
-            DataContext = _Detail
+            ViewModel = _Detail
         };
         _ObservationControl = new EntryObservationControl {
             ViewModel = ((IEntryProvider)_Provider).Observation
@@ -174,6 +197,7 @@ internal sealed class MBoxEntryPreviewControlTest {
                 }
             }
         };
+        prepare?.Invoke(_Window);
         _Window.Show();
         ProcessDispatcher();
     }
@@ -202,9 +226,9 @@ internal sealed class MBoxEntryPreviewControlTest {
         await Run(Mailbox(("First subject", "First body.")), async () => {
             Attach();
             SelectCurrent(0);
-            await WaitFor(() => _Control.Controller.Text.Length > 0);
-            Assert.That(_Control.Controller.Text, Does.Contain("First body."));
-            Assert.That(_Control.Controller.Status, Is.Empty);
+            await WaitFor(() => _Control.Text.Length > 0);
+            Assert.That(_Control.Text, Does.Contain("First body."));
+            Assert.That(_Control.Status, Is.Empty);
         });
     }
 
@@ -212,9 +236,9 @@ internal sealed class MBoxEntryPreviewControlTest {
     public async Task Preview_ShowsNoSelectionWhenTheListHasNoCurrentMessage() {
         await Run(Mailbox(), async () => {
             Attach();
-            await WaitFor(() => _Control.Controller.Status.Length > 0);
-            Assert.That(_Control.Controller.Text, Is.Empty);
-            Assert.That(_Control.Controller.Status, Is.EqualTo("No message is selected."));
+            await WaitFor(() => _Control.Status.Length > 0);
+            Assert.That(_Control.Text, Is.Empty);
+            Assert.That(_Control.Status, Is.EqualTo("No message is selected."));
         });
     }
 
@@ -224,9 +248,226 @@ internal sealed class MBoxEntryPreviewControlTest {
                           ("Second subject", "Second body.")), async () => {
             Attach();
             SelectCurrent(1);
-            await WaitFor(() => _Control.Controller.Text.Contains("Second body."));
-            Assert.That(_Control.Controller.Text, Does.Contain("Second body."));
-            Assert.That(_Control.Controller.Text, Does.Not.Contain("First body."));
+            await WaitFor(() => _Control.Text.Contains("Second body."));
+            Assert.That(_Control.Text, Does.Contain("Second body."));
+            Assert.That(_Control.Text, Does.Not.Contain("First body."));
+        });
+    }
+
+    [Test]
+    public async Task Preview_ShowsTheStatusInItsTemplate() {
+        await Run(Mailbox(), async () => {
+            Attach();
+            await WaitFor(() => _Control.Status.Length > 0);
+            Assert.That(_Control.StatusTextBlock.Text, Is.EqualTo("No message is selected."));
+        });
+    }
+
+    [Test]
+    public async Task Preview_ShowsTheTextInItsTemplate() {
+        await Run(Mailbox(("First subject", "First body.")), async () => {
+            Attach();
+            SelectCurrent(0);
+            await WaitFor(() => _Control.Text.Contains("First body."));
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Control.BodyTextBox.Text, Does.Contain("First body."));
+                Assert.That(_Control.StatusTextBlock.Text, Is.Empty);
+            }
+        });
+    }
+
+    [TestCase("Dark")]
+    [TestCase("Light")]
+    public async Task Preview_StylesTheBodyWithTheTheme(string theme) {
+        await Run(Mailbox(("First subject", "First body.")), async () => {
+            Attach(theme);
+            SelectCurrent(0);
+            await WaitFor(() => _Control.Text.Contains("First body."));
+            var body = _Control.BodyTextBox;
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(body.Background, Is.SameAs(Theme("Body.Background")));
+                Assert.That(body.Foreground, Is.SameAs(Theme("Body.Foreground")));
+                Assert.That(body.CaretBrush, Is.SameAs(Theme("Body.CaretBrush")));
+                Assert.That(body.SelectionBrush, Is.SameAs(Theme("Body.SelectionBrush")));
+                Assert.That(body.SelectionTextBrush, Is.SameAs(Theme("Body.SelectionTextBrush")));
+                Assert.That(body.SelectionOpacity, Is.EqualTo(Theme("Body.SelectionOpacity")));
+                Assert.That(body.BorderThickness, Is.EqualTo(new Thickness(0)));
+                Assert.That(body.FontFamily, Is.SameAs(Font("FontFamily")));
+                Assert.That(body.FontSize, Is.EqualTo(Font("FontSize")));
+                Assert.That(body.FontWeight, Is.EqualTo(Font("FontWeight")));
+            }
+        });
+    }
+
+    [TestCase("Dark")]
+    [TestCase("Light")]
+    public async Task Preview_StylesTheStatusWithTheTheme(string theme) {
+        await Run(Mailbox(), async () => {
+            Attach(theme);
+            await WaitFor(() => _Control.Status.Length > 0);
+            var status = _Control.StatusTextBlock;
+            var statusBar = (Border)_Control.Template.FindName("StatusBar", _Control);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(status.Foreground, Is.SameAs(Theme("Status.Foreground")));
+                Assert.That(status.FontFamily, Is.SameAs(Font("Status.FontFamily")));
+                Assert.That(status.FontSize, Is.EqualTo(Font("Status.FontSize")));
+                Assert.That(statusBar.Background, Is.SameAs(Theme("Status.Background")));
+                Assert.That(statusBar.BorderBrush, Is.SameAs(Theme("Status.BorderBrush")));
+                Assert.That(FindRoot().Background, Is.SameAs(Theme("Background")));
+            }
+        });
+    }
+
+    private static string AttachmentRecord(string subject) {
+        return "From sender@example.com Thu Sep 17 17:54:37 +0000 2015\n" +
+               $"Subject: {subject}\n" +
+               "Content-Type: multipart/mixed; boundary=\"mixed\"\n" +
+               "\n" +
+               "--mixed\n" +
+               "Content-Type: text/plain; charset=utf-8\n" +
+               "\n" +
+               "Body with attachments.\n" +
+               "--mixed\n" +
+               "Content-Type: application/pdf\n" +
+               "Content-Disposition: attachment; filename=\"report.pdf\"\n" +
+               "Content-Transfer-Encoding: base64\n" +
+               "\n" +
+               "JVBERi0xLjQK\n" +
+               "--mixed\n" +
+               "Content-Type: image/png\n" +
+               "Content-Disposition: attachment; filename=\"photo.png\"\n" +
+               "Content-Transfer-Encoding: base64\n" +
+               "\n" +
+               "iVBORw0KGgo=\n" +
+               "--mixed--\n";
+    }
+
+    private static List<T> FindVisuals<T>(DependencyObject root) where T : DependencyObject {
+        var visuals = new List<T>();
+        if (root is T visual) {
+            visuals.Add(visual);
+        }
+        var count = VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < count; i++) {
+            visuals.AddRange(FindVisuals<T>(VisualTreeHelper.GetChild(root, i)));
+        }
+        return visuals;
+    }
+
+    private T Part<T>(string name) where T : class {
+        return _Control.Template.FindName(name, _Control) as T;
+    }
+
+    [TestCase("Dark")]
+    [TestCase("Light")]
+    public async Task Preview_ListsTheAttachmentsOfTheCurrentMessage(string theme) {
+        await Run(AttachmentRecord("With attachments"), async () => {
+            Attach(theme);
+            SelectCurrent(0);
+            await WaitFor(() => _Control.Attachments.Count == 2);
+            ProcessDispatcher();
+            var list = Part<ItemsControl>("PART_Attachments");
+            var bar = Part<Border>("AttachmentBar");
+            var label = Part<TextBlock>("PART_AttachmentsLabel");
+            var texts = FindVisuals<TextBlock>(list);
+            var names = texts.Where(text => text.Text is "report.pdf" or "photo.png").ToList();
+            var types = texts.Where(text => text.Text is "application/pdf" or "image/png").ToList();
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Control.Text, Does.Contain("Body with attachments."));
+                Assert.That(list.Items, Has.Count.EqualTo(2));
+                Assert.That(bar.IsVisible, Is.True);
+                Assert.That(label.Text, Is.EqualTo("Attachments"));
+                Assert.That(names, Has.Count.EqualTo(2));
+                Assert.That(types, Has.Count.EqualTo(2));
+                Assert.That(names.Select(text => text.Foreground), Is.All.SameAs(Theme("Attachment.Foreground")));
+                Assert.That(types.Select(text => text.Foreground),
+                            Is.All.SameAs(Theme("Attachment.ContentType.Foreground")));
+                Assert.That(label.Foreground, Is.SameAs(Theme("Attachments.Label.Foreground")));
+                Assert.That(bar.Background, Is.SameAs(Theme("Attachments.Background")));
+                Assert.That(bar.BorderBrush, Is.SameAs(Theme("Attachments.BorderBrush")));
+                Assert.That(names[0].FontFamily, Is.SameAs(Font("Attachment.FontFamily")));
+            }
+        });
+    }
+
+    [Test]
+    public async Task Preview_HidesTheAttachmentsWhenTheMessageHasNone() {
+        await Run(Mailbox(("First subject", "First body.")), async () => {
+            Attach("Dark");
+            SelectCurrent(0);
+            await WaitFor(() => _Control.Text.Contains("First body."));
+            ProcessDispatcher();
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Control.Attachments, Is.Empty);
+                Assert.That(Part<Border>("AttachmentBar").IsVisible, Is.False);
+            }
+        });
+    }
+
+    [Test]
+    public async Task Preview_ReplacesTheAttachmentsWhenTheCurrentMessageChanges() {
+        var mailbox = AttachmentRecord("With attachments") + "\n" + Mailbox(("Plain subject", "Plain body."));
+        await Run(mailbox, async () => {
+            Attach("Dark");
+            SelectCurrent(0);
+            await WaitFor(() => _Control.Attachments.Count == 2);
+            SelectCurrent(1);
+            await WaitFor(() => _Control.Text.Contains("Plain body."));
+            ProcessDispatcher();
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Control.Attachments, Is.Empty);
+                Assert.That(Part<ItemsControl>("PART_Attachments").Items, Is.Empty);
+                Assert.That(Part<Border>("AttachmentBar").IsVisible, Is.False);
+            }
+        });
+    }
+
+    [Test]
+    public async Task Preview_ShowsTheStatusWhenThereIsOne() {
+        await Run(Mailbox(), async () => {
+            Attach("Dark");
+            await WaitFor(() => _Control.Status.Length > 0);
+            var statusBar = (Border)_Control.Template.FindName("StatusBar", _Control);
+            Assert.That(statusBar.IsVisible, Is.True);
+        });
+    }
+
+    [Test]
+    public async Task Preview_HidesTheStatusWhenThereIsNone() {
+        await Run(Mailbox(("First subject", "First body.")), async () => {
+            Attach("Dark");
+            SelectCurrent(0);
+            await WaitFor(() => _Control.Text.Contains("First body."));
+            ProcessDispatcher();
+            var statusBar = (Border)_Control.Template.FindName("StatusBar", _Control);
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(_Control.Status, Is.Empty);
+                Assert.That(statusBar.IsVisible, Is.False);
+            }
+        });
+    }
+
+    [TestCase("Dark")]
+    [TestCase("Light")]
+    public async Task Preview_MarksTheKeyboardFocus(string theme) {
+        await Run(Mailbox(("First subject", "First body.")), async () => {
+            Attach(theme);
+            var unfocused = FindRoot().BorderBrush;
+            Assert.That(_Control.RequestFocus(), Is.True);
+            ProcessDispatcher();
+            using (Assert.EnterMultipleScope()) {
+                Assert.That(unfocused, Is.SameAs(Theme("BorderBrush")));
+                Assert.That(FindRoot().BorderBrush, Is.SameAs(Theme("BorderBrush.Focus")));
+                Assert.That(_Control.BodyTextBox.FocusVisualStyle, Is.Null);
+            }
+        });
+    }
+
+    [Test]
+    public async Task Preview_IsTheControllerOfItsViewModel() {
+        await Run(Mailbox(("First subject", "First body.")), async () => {
+            Attach();
+            Assert.That(_Detail.Controller, Is.SameAs(_Control));
         });
     }
 
@@ -234,10 +475,10 @@ internal sealed class MBoxEntryPreviewControlTest {
     public async Task RequestFocus_MovesTheFocusToThePreview() {
         await Run(Mailbox(("First subject", "First body.")), async () => {
             Attach();
-            var focused = _Control.Controller.RequestFocus();
+            var focused = _Control.RequestFocus();
             ProcessDispatcher();
             Assert.That(focused, Is.True);
-            Assert.That(_Control.Controller.HasKeyboardFocus, Is.True);
+            Assert.That(_Control.HasKeyboardFocus, Is.True);
         });
     }
 
@@ -246,11 +487,11 @@ internal sealed class MBoxEntryPreviewControlTest {
         await Run(Mailbox(("First subject", "First body.")), async () => {
             Attach();
             var focused = false;
-            _Control.TextBox.GotKeyboardFocus += (_, _) => focused = true;
-            _Control.Controller.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
+            _Control.BodyTextBox.GotKeyboardFocus += (_, _) => focused = true;
+            _Control.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
             ProcessDispatcher();
             Assert.That(focused, Is.True);
-            Assert.That(_Control.Controller.HasKeyboardFocus, Is.True);
+            Assert.That(_Control.HasKeyboardFocus, Is.True);
         });
     }
 
@@ -259,9 +500,9 @@ internal sealed class MBoxEntryPreviewControlTest {
         await Run(Mailbox(("First subject", "First body.")), async () => {
             Attach();
             SelectCurrent(0);
-            await WaitFor(() => _Control.Controller.Text.Length > 0);
+            await WaitFor(() => _Control.Text.Length > 0);
             ((IProvider)_Provider).End();
-            Assert.That(_Control.Controller.Text, Does.Contain("First body."));
+            Assert.That(_Control.Text, Does.Contain("First body."));
         });
     }
 
@@ -276,9 +517,9 @@ internal sealed class MBoxEntryPreviewControlTest {
             Attach();
             SelectCurrent(0);
             var guidance = "The message holds no plain text. Use MBox_Open or MBox_Export to read it.";
-            await WaitFor(() => _Control.Controller.Status == guidance);
-            Assert.That(_Control.Controller.Text, Is.Empty);
-            Assert.That(_Control.Controller.Status, Is.EqualTo(guidance));
+            await WaitFor(() => _Control.Status == guidance);
+            Assert.That(_Control.Text, Is.Empty);
+            Assert.That(_Control.Status, Is.EqualTo(guidance));
         });
     }
 
@@ -297,8 +538,8 @@ internal sealed class MBoxEntryPreviewControlTest {
             Attach();
             SelectCurrent(0);
             var guidance = "The message holds no plain text. Use MBox_Open or MBox_Export to read it.";
-            await WaitFor(() => _Control.Controller.Status == guidance);
-            Assert.That(_Control.Controller.Text, Is.Empty);
+            await WaitFor(() => _Control.Status == guidance);
+            Assert.That(_Control.Text, Is.Empty);
         });
     }
 
@@ -314,17 +555,17 @@ internal sealed class MBoxEntryPreviewControlTest {
             var entry = _Provider.Entries[0];
             Assert.That(observation.Current(entry), Is.True);
             var result = await _Provider.Preview(entry, CancellationToken.None);
-            await WaitFor(() => _Control.Controller.Status != "The message is being read.");
+            await WaitFor(() => _Control.Status != "The message is being read.");
             ProcessDispatcher();
             Assert.That(result.State, Is.EqualTo(MBoxBodyState.Complete));
             Assert.That(result.Html, Is.Null);
-            Assert.That(_Control.Controller.Text, Is.Empty);
-            Assert.That(_Control.Controller.Status, Is.Empty);
+            Assert.That(_Control.Text, Is.Empty);
+            Assert.That(_Control.Status, Is.Empty);
         });
     }
 
     [Test]
-    public async Task Preview_RebindsToTheProviderOfTheCurrentDataContext() {
+    public async Task Preview_RebindsToTheProviderOfTheCurrentViewModel() {
         await Run(Mailbox(("First subject", "First provider body."),
                           ("Other subject", "Other first-provider body.")), async () => {
             Attach();
@@ -338,13 +579,13 @@ internal sealed class MBoxEntryPreviewControlTest {
             ((Grid)_Window.Content).Children.Add(_OtherObservationControl);
             ProcessDispatcher();
             var otherDetail = new MBoxEntryPreview(_OtherProvider);
-            _Control.DataContext = otherDetail;
+            _Control.ViewModel = otherDetail;
             Assert.That(((IEntryObservation)_OtherProvider.Observation).Current(_OtherProvider.Entries[0]), Is.True);
-            await WaitFor(() => _Control.Controller.Text.Contains("Second provider body."));
+            await WaitFor(() => _Control.Text.Contains("Second provider body."));
             ((IEntryObservation)_Provider.Observation).Current(_Provider.Entries[1]);
             ProcessDispatcher();
-            Assert.That(_Control.Controller.Text, Does.Contain("Second provider body."));
-            Assert.That(_Control.Controller.Text, Does.Not.Contain("First provider body."));
+            Assert.That(_Control.Text, Does.Contain("Second provider body."));
+            Assert.That(_Control.Text, Does.Not.Contain("First provider body."));
         });
     }
 
@@ -356,9 +597,9 @@ internal sealed class MBoxEntryPreviewControlTest {
             ((Grid)_Window.Content).Children.Add(focusTarget);
             Assert.That(focusTarget.Focus(), Is.True);
             var focused = false;
-            _Control.TextBox.GotKeyboardFocus += (_, _) => focused = true;
-            _Control.Controller.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
-            _Control.DataContext = null;
+            _Control.BodyTextBox.GotKeyboardFocus += (_, _) => focused = true;
+            _Control.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
+            _Control.ViewModel = null;
             ProcessDispatcher();
             Assert.That(focused, Is.False);
         });
@@ -375,11 +616,11 @@ internal sealed class MBoxEntryPreviewControlTest {
             ((Grid)_Window.Content).Children.Add(focusTarget);
             Assert.That(focusTarget.Focus(), Is.True);
             var focused = false;
-            _Control.TextBox.GotKeyboardFocus += (_, _) => focused = true;
-            _Control.Controller.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
-            _Control.DataContext = new MBoxEntryPreview(_OtherProvider);
+            _Control.BodyTextBox.GotKeyboardFocus += (_, _) => focused = true;
+            _Control.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
+            _Control.ViewModel = new MBoxEntryPreview(_OtherProvider);
             ProcessDispatcher();
-            Assert.That(_Control.Controller.HasKeyboardFocus, Is.False);
+            Assert.That(_Control.HasKeyboardFocus, Is.False);
             Assert.That(focused, Is.False);
         });
     }
@@ -392,8 +633,8 @@ internal sealed class MBoxEntryPreviewControlTest {
             ((Grid)_Window.Content).Children.Add(focusTarget);
             Assert.That(focusTarget.Focus(), Is.True);
             var focused = false;
-            _Control.TextBox.GotKeyboardFocus += (_, _) => focused = true;
-            _Control.Controller.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
+            _Control.BodyTextBox.GotKeyboardFocus += (_, _) => focused = true;
+            _Control.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
             _Panels.Active = new TestPanel();
             ProcessDispatcher();
             Assert.That(focused, Is.False);
@@ -408,8 +649,8 @@ internal sealed class MBoxEntryPreviewControlTest {
             ((Grid)_Window.Content).Children.Add(focusTarget);
             Assert.That(focusTarget.Focus(), Is.True);
             var focused = false;
-            _Control.TextBox.GotKeyboardFocus += (_, _) => focused = true;
-            _Control.Controller.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
+            _Control.BodyTextBox.GotKeyboardFocus += (_, _) => focused = true;
+            _Control.RequestFocusLater(_Panel, _Panels, CancellationToken.None);
             var replacement = new MBoxEntryPreview(_Provider);
             var shown = await _Provider.Detail.ShowAsync(MBoxViews.Preview, replacement, CancellationToken.None);
             Assert.That(shown, Is.True);
@@ -426,9 +667,9 @@ internal sealed class MBoxEntryPreviewControlTest {
             ((Grid)_Window.Content).Children.Add(focusTarget);
             Assert.That(focusTarget.Focus(), Is.True);
             var focused = false;
-            _Control.TextBox.GotKeyboardFocus += (_, _) => focused = true;
+            _Control.BodyTextBox.GotKeyboardFocus += (_, _) => focused = true;
             using var source = new CancellationTokenSource();
-            _Control.Controller.RequestFocusLater(_Panel, _Panels, source.Token);
+            _Control.RequestFocusLater(_Panel, _Panels, source.Token);
             source.Cancel();
             ProcessDispatcher();
             Assert.That(focused, Is.False);
@@ -440,16 +681,16 @@ internal sealed class MBoxEntryPreviewControlTest {
         await Run(Mailbox(("First subject", "First body.")), async () => {
             Attach();
             SelectCurrent(0);
-            await WaitFor(() => _Control.Controller.Text.Contains("First body."));
+            await WaitFor(() => _Control.Text.Contains("First body."));
             var container = (Grid)_Window.Content;
             container.Children.Remove(_Control);
             ProcessDispatcher();
             Assert.That(_Detail.Controller, Is.Null);
             container.Children.Add(_Control);
             ProcessDispatcher();
-            Assert.That(_Detail.Controller, Is.SameAs(_Control.Controller));
+            Assert.That(_Detail.Controller, Is.SameAs(_Control));
             SelectCurrent(0);
-            await WaitFor(() => _Control.Controller.Text.Contains("First body."));
+            await WaitFor(() => _Control.Text.Contains("First body."));
         });
     }
 }

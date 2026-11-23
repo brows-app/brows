@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Brows.Entries;
 
+/// <summary>
+/// Creates entry sorting settings from keys and directions.
+/// </summary>
 public static class EntrySorting {
     private sealed class Implementation : IEntrySorting {
         public IReadOnlyDictionary<string, EntrySortDirection?> Agent { get; }
@@ -36,9 +39,25 @@ public static class EntrySorting {
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Agent).GetEnumerator();
     }
 
+    /// <summary>
+    /// Represents no sorting settings as a null value.
+    /// </summary>
     public static readonly IEntrySorting None = null;
+
+    /// <summary>
+    /// Represents sorting settings with no keys.
+    /// </summary>
     public static readonly IEntrySorting Empty = new Implementation(new Dictionary<string, EntrySortDirection?>());
 
+    /// <summary>
+    /// Creates sorting settings from data keys and sort directions.
+    /// </summary>
+    /// <param name="sorting">
+    /// The sort keys and directions in priority order.
+    /// </param>
+    /// <returns>
+    /// The sorting settings, or None when the supplied dictionary is null.
+    /// </returns>
     public static IEntrySorting From(IReadOnlyDictionary<string, EntrySortDirection?> sorting) {
         return
             sorting == null ? None :
@@ -46,10 +65,28 @@ public static class EntrySorting {
             new Implementation(sorting);
     }
 
+    /// <summary>
+    /// Creates sorting settings from data keys and sort directions.
+    /// </summary>
+    /// <param name="sorting">
+    /// The sort keys and directions in priority order.
+    /// </param>
+    /// <returns>
+    /// The sorting settings, or None when the supplied dictionary is null.
+    /// </returns>
     public static IEntrySorting From(IReadOnlyDictionary<string, EntrySortDirection> sorting) {
         return From(sorting?.ToDictionary(s => s.Key, s => (EntrySortDirection?)s.Value));
     }
 
+    /// <summary>
+    /// Creates sorting settings from data keys and sort directions.
+    /// </summary>
+    /// <param name="sorting">
+    /// The sort keys and directions in priority order.
+    /// </param>
+    /// <returns>
+    /// The sorting settings, with the last direction used for repeated keys.
+    /// </returns>
     public static IEntrySorting From(IEnumerable<KeyValuePair<string, EntrySortDirection>> sorting) {
         var dictionary = new Dictionary<string, EntrySortDirection?>();
         foreach (var pair in sorting) {

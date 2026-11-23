@@ -444,7 +444,7 @@ internal sealed class TarArchivePath {
                 if (progress is not null) {
                     progress.Change(data: item.Path);
                 }
-                await writer.WriteEntryAsync(directoryEntry);
+                await writer.WriteEntryAsync(directoryEntry, token);
                 continue;
             }
             await using (var data = ArchiveStream(item.SourcePath)) {
@@ -456,7 +456,7 @@ internal sealed class TarArchivePath {
                 if (progress is not null) {
                     progress.Change(addTarget: item.Size, data: item.Path);
                 }
-                await writer.WriteEntryAsync(fileEntry);
+                await writer.WriteEntryAsync(fileEntry, token);
                 if (progress is not null) {
                     progress.Change(addProgress: item.Size);
                 }
@@ -513,7 +513,7 @@ internal sealed class TarArchivePath {
                                             if (progress is not null) {
                                                 progress.Change(addTarget: replacement.Length, data: entry.Name);
                                             }
-                                            await writer.WriteEntryAsync(entry);
+                                            await writer.WriteEntryAsync(entry, token);
                                             if (progress is not null) {
                                                 progress.Change(addProgress: replacement.Length);
                                             }
@@ -528,7 +528,7 @@ internal sealed class TarArchivePath {
                                     if (progress is not null) {
                                         progress.Change(addTarget: entry.Length, data: entry.Name);
                                     }
-                                    await writer.WriteEntryAsync(entry);
+                                    await writer.WriteEntryAsync(entry, token);
                                     if (progress is not null) {
                                         progress.Change(addProgress: entry.Length);
                                     }

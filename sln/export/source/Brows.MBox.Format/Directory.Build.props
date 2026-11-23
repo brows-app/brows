@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project>
-  <Import Project="$(SolutionDir)/props/root.build.props" />
-  <PropertyGroup>
-    <OutputPath>$(SolutionDir)/out/$(Configuration)/brows.export/</OutputPath>
-    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
-  </PropertyGroup>
-</Project>

@@ -1,5 +1,4 @@
 ﻿using Brows.Windows.Controls;
-using System;
 using System.Threading.Tasks;
 
 namespace Brows.Terminal;

@@ -60,7 +60,8 @@
     <Style.Resources>
       <ResourceDictionary />
     </Style.Resources>
-    <Setter Property="Command" Value="{Binding ViewModel.SortCommand}" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Command" Value="{Binding SortCommand}" />
     <Setter Property="CommandParameter">
       <Setter.Value>
         <Binding Path="Content.Key" RelativeSource="{RelativeSource Self}" />
@@ -241,14 +242,23 @@
     </Setter>
     </Style>
   <Style x:Key="Brows.Style.EntryGridViewColumnHeaderControl" TargetType="local:EntryGridViewColumnHeader">
+    <Setter Property="ContentTemplate">
+      <Setter.Value>
+        <DataTemplate>
+          <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+      </Setter.Value>
+    </Setter>
     <Setter Property="Focusable" Value="False" />
     <Setter Property="IsTabStop" Value="False" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type local:EntryGridViewColumnHeader}">
-          <ContentPresenter Content="{TemplateBinding Content}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                            ContentStringFormat="{TemplateBinding ContentStringFormat}" />
+          <local:EntryColumnMeasure Column="{TemplateBinding Column}" IsHeader="True">
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              ContentStringFormat="{TemplateBinding ContentStringFormat}" />
+          </local:EntryColumnMeasure>
         </ControlTemplate>
       </Setter.Value>
     </Setter>

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace Brows.Entries;
@@ -69,8 +67,11 @@ internal sealed class EntryStreamImageControlTest {
                 sourceA.Ready.TrySetResult(new FakeReady());
                 WaitForTask(loadA, dispatcher);
                 var sharedLoadIsPending = shareState && !completeNewerFirst;
-                Assert.That(((FakeView)stateA.Image).Loading, Is.EqualTo(sharedLoadIsPending));
-                Assert.That(((FakeView)stateB.Image).Loading, Is.EqualTo(!completeNewerFirst));
+
+                using (Assert.EnterMultipleScope()) {
+                    Assert.That(((FakeView)stateA.Image).Loading, Is.EqualTo(sharedLoadIsPending));
+                    Assert.That(((FakeView)stateB.Image).Loading, Is.EqualTo(!completeNewerFirst));
+                }
 
                 if (!completeNewerFirst) {
                     var image = (Image)control.Template.FindName("PART_Image", control);
@@ -80,10 +81,13 @@ internal sealed class EntryStreamImageControlTest {
                     sourceB.Ready.TrySetResult(new FakeReady());
                     WaitForTask(loadB, dispatcher);
                 }
-                Assert.That(((FakeView)stateA.Image).Loading, Is.False);
-                Assert.That(((FakeView)stateB.Image).Loading, Is.False);
-                Assert.That(((FakeView)stateA.Image).CompletionCount, Is.EqualTo(1));
-                Assert.That(((FakeView)stateB.Image).CompletionCount, Is.EqualTo(1));
+
+                using (Assert.EnterMultipleScope()) {
+                    Assert.That(((FakeView)stateA.Image).Loading, Is.False);
+                    Assert.That(((FakeView)stateB.Image).Loading, Is.False);
+                    Assert.That(((FakeView)stateA.Image).CompletionCount, Is.EqualTo(1));
+                    Assert.That(((FakeView)stateB.Image).CompletionCount, Is.EqualTo(1));
+                }
             }
             finally {
                 sourceA.Ready.TrySetResult(new FakeReady());
@@ -114,7 +118,9 @@ internal sealed class EntryStreamImageControlTest {
     }
 
     private sealed class FakeState : INotifyPropertyChanged, IEntryStreamGuiState {
+#pragma warning disable CS0067 // The interface requires the event, but this fake's properties never change.
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
         public IEntryStreamGuiView Text => null;
 
@@ -163,6 +169,8 @@ internal sealed class EntryStreamImageControlTest {
         public IEntryStreamGuiState State { get; }
         public IEntryStreamGuiOptions Options => null;
 
+#pragma warning disable CS0067 // The interface requires the event, but this fake's properties never change.
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
     }
 }

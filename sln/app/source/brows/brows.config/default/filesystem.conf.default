@@ -35,3 +35,10 @@ Stream.Media.AutoplayAudio  = false
 Stream.Media.AutoplayVideo  = true
 Stream.Media.LoopAudio      = true
 Stream.Media.LoopVideo      = true  
+
+#
+# Automatically size entry-grid columns to data and available panel space.
+# Set AutoFit = false in filesystem.conf to use explicit column widths and Fit.
+# Reopen the provider after changing this setting.
+#
+AutoFit = true

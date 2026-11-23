@@ -56,9 +56,9 @@ internal sealed class DrawImageFile {
 
     public string Output { get; }
     public FileInfo File { get; }
-    public DrawImageParameter Parameter { get; }
+    public DrawImage.Parameter Parameter { get; }
 
-    public DrawImageFile(FileInfo file, DrawImageParameter parameter, string output) {
+    public DrawImageFile(FileInfo file, DrawImage.Parameter parameter, string output) {
         Output = output;
         File = file ?? throw new ArgumentNullException(nameof(file));
         Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));

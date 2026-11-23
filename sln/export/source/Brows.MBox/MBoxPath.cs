@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace Brows;
 
@@ -52,6 +51,10 @@ internal static class MBoxPath {
     /// </returns>
     public static string MessageName(long offset) {
         return $"message-{offset.ToString(System.Globalization.CultureInfo.InvariantCulture)}.eml";
+    }
+
+    public static string ArchiveName(long offset) {
+        return $"message-{offset.ToString(System.Globalization.CultureInfo.InvariantCulture)}.zip";
     }
 
     /// <summary>

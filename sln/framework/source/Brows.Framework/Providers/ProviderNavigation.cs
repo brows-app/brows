@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace Brows.Providers;
 
+/// <summary>
+/// Keeps a navigation tree in step with the provider shown by a panel.
+/// </summary>
 public abstract class ProviderNavigation : IProviderNavigation,
                                            IProviderFocus,
                                            IControlled<IProviderNavigationController> {
@@ -44,15 +47,39 @@ public abstract class ProviderNavigation : IProviderNavigation,
         return task ?? Task.FromResult(false);
     }
 
+    /// <summary>
+    /// Initializes navigation with a root node.
+    /// </summary>
+    /// <param name="root">
+    /// The root of the navigation tree.
+    /// </param>
     protected ProviderNavigation(ProviderNavigationNode root) {
         Root = root ?? throw new ArgumentNullException(nameof(root));
         Root.Navigation = this;
     }
 
+    /// <summary>
+    /// Gets navigation suitable for another provider.
+    /// </summary>
+    /// <param name="provider">
+    /// The provider that needs navigation.
+    /// </param>
+    /// <returns>
+    /// The navigation model to use for the supplied provider.
+    /// </returns>
     protected internal abstract ProviderNavigation For(Provider provider);
 
+    /// <summary>
+    /// Gets the root node of the navigation tree.
+    /// </summary>
     public ProviderNavigationNode Root { get; }
 
+    /// <summary>
+    /// Updates the navigation selection to reflect the provider shown in the panel.
+    /// </summary>
+    /// <param name="provider">
+    /// The current provider, or null when the provider has ended.
+    /// </param>
     public void Provided(Provider provider) {
         Provider = provider;
         Current(Provider?.ID);

@@ -8,21 +8,28 @@ Windows ConPTY.
 
 | Command | Input | Default shortcut | Effect |
 | --- | --- | --- | --- |
-| `FileSystem_TerminalOpen` | `terminal`, `term` | Ctrl+Alt+T | Show and focus the provider's terminal. |
-| `FileSystem_TerminalRelease` | `terminal-release` | Ctrl+Shift+F12 | Return focus; the terminal keeps running. |
-| `FileSystem_TerminalClose` | `terminal-close` | None | Stop the session and remove the terminal view. |
+| `FileSystem_Terminal` | `terminal`, `term` | Ctrl+Shift+F12 | Open the provider's terminal, focus it, or return focus from it to the entries. |
+| `FileSystem_Terminal close` | `terminal close` | Ctrl+Shift+Alt+F12 | Stop the session and remove the terminal view. |
 
-Commands are available from the command palette. The inputs and shortcuts are
+With no action, or the `default` action, the command opens a terminal when the
+provider has none, focuses the terminal when it does not have keyboard focus,
+and returns focus to the entries when it does. Returning focus keeps the
+terminal running. The `close` action closes the terminal whether or not it has
+focus, and does nothing when no terminal is open.
+
+The command is available from the command palette. The inputs and shortcuts are
 defaults from `trigger.conf.default`; a user's `trigger.conf` can override them.
-While the terminal has keyboard focus, the release shortcut is reserved for
-returning focus to the entries; Escape and other keys continue to the terminal.
+While the terminal has keyboard focus, the command's shortcuts are reserved for
+the command, so Ctrl+Shift+F12 returns focus to the entries and
+Ctrl+Shift+Alt+F12 closes the terminal; Escape and other keys continue to the
+terminal.
 
-To move the release shortcut, add both lines below to `trigger.conf`, changing
-F11 to the key you want:
+To move a shortcut, add both lines below to `trigger.conf`, changing F11 to the
+key you want:
 
 ```conf
-cmd[FileSystem_TerminalRelease].press[CTRL+SHIFT+F12] = disabled
-cmd[FileSystem_TerminalRelease].press[CTRL+SHIFT+F11] = *
+cmd[FileSystem_Terminal].press[CTRL+SHIFT+F12] = disabled
+cmd[FileSystem_Terminal].press[CTRL+SHIFT+F11] = *
 ```
 
 The `disabled` value removes that inherited gesture from the command. Adding a
@@ -35,8 +42,9 @@ binding can be disabled one key at a time.
 
 Opening the terminal acts on the active file-system provider, including an
 empty directory. The starting directory is the provider's directory, never the
-selected entry's path. Repeating Open focuses the same running session and
-preserves its output and shell's current directory. It does not restart the
+selected entry's path. Running the command again while the terminal does not
+have keyboard focus focuses the same running session and preserves its output
+and shell's current directory. It does not restart the
 shell or send it a `cd` command.
 
 The terminal and file preview share one lower-view area. Opening the terminal
@@ -66,13 +74,14 @@ components.
 ## Exit, failure and retry
 
 When PowerShell exits, the terminal stays visible with its final output and exit
-status. Brows does not restart it automatically. Run
-`FileSystem_TerminalOpen` again to start a fresh session in the provider's
-original directory.
+status. Brows does not restart it automatically. Run `FileSystem_Terminal`
+again to start a fresh session in the provider's original directory. If the
+exited terminal still has keyboard focus, the first run returns focus to the
+entries, and the next run starts the session.
 
 If startup fails, the file entries remain available and the terminal reports
 the failure. Check that Windows PowerShell is present and that the provider
-directory still exists and is accessible. Then run Open to retry, or run Close
-to remove the failed terminal view. Startup never falls back to the application
+directory still exists and is accessible. Then run `FileSystem_Terminal` to
+retry, or run `FileSystem_Terminal close` to remove the failed terminal view. Startup never falls back to the application
 directory. Closing the terminal stops the processes owned by that terminal
 session.

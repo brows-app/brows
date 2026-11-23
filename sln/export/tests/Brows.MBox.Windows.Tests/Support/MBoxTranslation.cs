@@ -16,7 +16,7 @@ namespace Brows.Support;
 /// that shows the user interface of the feature needs a translation of its own to see the texts
 /// that the user sees.
 /// </remarks>
-internal sealed class MBoxTranslation : ITranslation {
+internal sealed class MBoxTranslation : ITranslationExport {
     private static readonly Regex HelpPattern = new(@"(?<=.+\.Resource\.Culture\._\.s\.)(.+)");
 
     private readonly Dictionary<string, string> Values = new(StringComparer.Ordinal);

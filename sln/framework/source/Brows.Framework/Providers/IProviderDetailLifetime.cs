@@ -15,5 +15,11 @@ public interface IProviderDetailLifetime {
     /// <summary>
     /// Stops resources owned by the detail. Implementations must allow repeated calls.
     /// </summary>
+    /// <param name="token">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task that completes when the detail resources have been closed.
+    /// </returns>
     Task CloseAsync(CancellationToken token);
 }

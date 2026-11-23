@@ -12,7 +12,7 @@ namespace Brows;
 [TestFixture]
 public sealed class FileSystemFindResultTest {
     private static FileSystemFindResult Result(DirectoryInfo root) {
-        return new FileSystemFindResult(root, new FindParameter { Pattern = "*" }, "find", null);
+        return new FileSystemFindResult(root, new Find.Parameter { Pattern = "*" }, "find", null);
     }
 
     [Test]

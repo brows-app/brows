@@ -12,5 +12,8 @@ public interface IProviderDetailFocus {
     /// <summary>
     /// Requests keyboard focus for the detail.
     /// </summary>
+    /// <returns>
+    /// True if the focus request succeeded; otherwise, false.
+    /// </returns>
     bool RequestFocus();
 }

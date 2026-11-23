@@ -5,8 +5,9 @@
   <FontFamily x:Key="Brows.Font.FileSystemTerminal.FontFamily">Cascadia Mono, Consolas</FontFamily>
   <s:Double x:Key="Brows.Font.FileSystemTerminal.FontSize">14</s:Double>
 
-  <FontFamily x:Key="Brows.Font.LogsProvider.FontFamily">Consolas</FontFamily>
+  <FontFamily x:Key="Brows.Font.LogsProvider.FontFamily">Cascadia Mono, Consolas</FontFamily>
   <s:Double x:Key="Brows.Font.LogsProvider.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.LogsProvider.FontWeight">Light</FontWeight>
 
   <FontFamily x:Key="Brows.Font.ProcessProxy.FontFamily">Consolas</FontFamily>
   <s:Double x:Key="Brows.Font.ProcessProxy.FontSize">12</s:Double>
@@ -17,6 +18,7 @@
   <FontWeight x:Key="Brows.Font.Monospace.Weight">Normal</FontWeight>
   <FontWeight x:Key="Brows.Font.Weight.Bold">Bold</FontWeight>
   <s:Double x:Key="Brows.Font.OperatorControl.Header.FontSize">11</s:Double>
+  <s:Double x:Key="Brows.Font.OperatorControl.InlineHeader.FontSize">11</s:Double>
   <s:Double x:Key="Brows.Font.OperatorControl.DepthHeader.FontSize">10</s:Double>
   <s:Double x:Key="Brows.Font.OperatorControl.Button.FontSize">11</s:Double>
   <s:Double x:Key="Brows.Font.OperatorControl.Name.FontSize">13</s:Double>
@@ -41,6 +43,13 @@
   <FontFamily x:Key="Brows.Font.EntryListViewItem.FontFamily">Consolas</FontFamily>
   <s:Double x:Key="Brows.Font.EntryListViewItem.FontSize">12</s:Double>
   <FontWeight x:Key="Brows.Font.EntryListViewItem.FontWeight">Normal</FontWeight>
+  <FontFamily x:Key="Brows.Font.MBoxEntryPreview.Attachment.FontFamily">Segoe UI</FontFamily>
+  <s:Double x:Key="Brows.Font.MBoxEntryPreview.Attachment.FontSize">12</s:Double>
+  <FontFamily x:Key="Brows.Font.MBoxEntryPreview.FontFamily">Consolas</FontFamily>
+  <s:Double x:Key="Brows.Font.MBoxEntryPreview.FontSize">12</s:Double>
+  <FontWeight x:Key="Brows.Font.MBoxEntryPreview.FontWeight">Normal</FontWeight>
+  <FontFamily x:Key="Brows.Font.MBoxEntryPreview.Status.FontFamily">Segoe UI</FontFamily>
+  <s:Double x:Key="Brows.Font.MBoxEntryPreview.Status.FontSize">12</s:Double>
   <FontFamily x:Key="Brows.Font.EntryStreamViewLoadingControl.FontFamily">Consolas</FontFamily>
   <s:Double x:Key="Brows.Font.EntryStreamViewLoadingControl.FontSize">12</s:Double>
   <FontWeight x:Key="Brows.Font.EntryStreamViewLoadingControl.FontWeight">Normal</FontWeight>

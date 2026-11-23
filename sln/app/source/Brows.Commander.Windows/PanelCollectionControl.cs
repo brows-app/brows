@@ -16,6 +16,7 @@ internal sealed class PanelCollectionControl : ModelView<IPanelCollection, IPane
     private static void ClearPanelGrid(Grid grid) {
         foreach (var control in grid.Children.OfType<PanelControl>()) {
             BindingOperations.ClearBinding(control, Grid.ColumnProperty);
+            BindingOperations.ClearBinding(control, Control.PaddingProperty);
             control.ViewModel = null;
             control.DataContext = null;
         }
@@ -55,6 +56,9 @@ internal sealed class PanelCollectionControl : ModelView<IPanelCollection, IPane
         control.ViewModel = panel;
         control.DataContext = control;
         control.SetBinding(Grid.ColumnProperty, "ViewModel.Column");
+        control.SetBinding(Control.PaddingProperty, new Binding("ViewModel.Column") {
+            Converter = new ColumnPadding(splitterWidth())
+        });
 
         grid.ColumnDefinitions.Add(new ColumnDefinition());
         grid.Children.Add(control);
@@ -62,7 +66,6 @@ internal sealed class PanelCollectionControl : ModelView<IPanelCollection, IPane
         var splitter = grid.ColumnDefinitions.Count > 1 ? new PanelSplitter() : null;
         if (splitter != null) {
             splitter.SetValue(Grid.ColumnProperty, panel.Column);
-            control.Padding = new Thickness(splitterWidth(), 0, 0, 0);
             grid.Children.Add(splitter);
         }
         foreach (var columnDefinition in grid.ColumnDefinitions) {
@@ -95,6 +98,7 @@ internal sealed class PanelCollectionControl : ModelView<IPanelCollection, IPane
                 var orphaned = control.ViewModel == panel;
                 if (orphaned) {
                     BindingOperations.ClearBinding(child, Grid.ColumnProperty);
+                    BindingOperations.ClearBinding(child, Control.PaddingProperty);
                     control.ViewModel = null;
                     children.RemoveAt(i--);
                     child.DataContext = null;
@@ -103,10 +107,6 @@ internal sealed class PanelCollectionControl : ModelView<IPanelCollection, IPane
             }
         }
         if (removed) {
-            var firstPanel = children.OfType<PanelControl>().FirstOrDefault(control => control.ViewModel?.Column == 0);
-            if (firstPanel != null) {
-                firstPanel.Padding = new Thickness(0);
-            }
             var orphanedSplitter = children.OfType<PanelSplitter>().OrderBy(splitter => Convert.ToInt32(splitter.GetValue(Grid.ColumnProperty))).LastOrDefault();
             if (orphanedSplitter != null) {
                 children.Remove(orphanedSplitter);
@@ -126,6 +126,26 @@ internal sealed class PanelCollectionControl : ModelView<IPanelCollection, IPane
         if (null == panels) throw new ArgumentNullException(nameof(panels));
         foreach (var panel in panels) {
             ((IPanelCollectionController)this).RemovePanel(panel);
+        }
+    }
+
+    private sealed class ColumnPadding : IValueConverter {
+        private readonly double SplitterWidth;
+
+        public ColumnPadding(double splitterWidth) {
+            SplitterWidth = splitterWidth;
+        }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+            var followsSplitter = value is int column && column > 0;
+            if (followsSplitter) {
+                return new Thickness(SplitterWidth, 0, 0, 0);
+            }
+            return new Thickness(0);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
+            throw new NotSupportedException();
         }
     }
 }

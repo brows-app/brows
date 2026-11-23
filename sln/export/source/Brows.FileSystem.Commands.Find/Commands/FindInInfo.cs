@@ -54,7 +54,7 @@ internal sealed class FindInInfo {
                         matched = true;
                         count++;
                         truncated |= match.MatchLength > Settings.MaximumPreviewLength;
-                        rows.Add(new FoundInFileText(file, Root, match));
+                        rows.Add(new FoundInFileText(file, Root, match, Translation));
                     }
                 }
             }
@@ -98,7 +98,9 @@ internal sealed class FindInInfo {
         return new FindEntryResult(info, []);
     }
 
-    internal FindInInfo(DirectoryInfo root, FindParameter parameter) : this(root, new FindSettings(parameter)) {
+    internal ITranslation Translation { get; init; }
+
+    internal FindInInfo(DirectoryInfo root, Find.Parameter parameter) : this(root, new FindSettings(parameter)) {
     }
 
     internal FindInInfo(DirectoryInfo root, FindSettings settings, Func<DecodedTextOptions> createDecoder = null) {

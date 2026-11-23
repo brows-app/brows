@@ -2,8 +2,11 @@
 
 internal sealed class LogsProvider : Provider {
     public string Name =>
-        Translation.Global.Value(ID);
+        Translation?.Value(ID);
 
-    public LogsProvider(string id) : base(id) {
+    public ITranslation Translation { get; }
+
+    public LogsProvider(string id, ITranslation translation) : base(id) {
+        Translation = translation;
     }
 }

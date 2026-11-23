@@ -248,11 +248,17 @@ internal sealed class CommandContext : Notifier, ICommandContext {
         if (@operator == null) {
             return false;
         }
-        var name = HasInput(out var input)
-            ? input
-            : HasGesture(out var gesture)
-                ? gesture.Display()
-                : nameof(Operate);
+        var name = nameof(Operate);
+        if (HasInput(out var input)) {
+            name = input;
+        }
+        else {
+            var translation = Commander.Translation;
+            var gestureHasDisplay = HasGesture(out var gesture) && translation is not null;
+            if (gestureHasDisplay) {
+                name = gesture.Display(translation);
+            }
+        }
         @operator.Operate(name, async (progress, token) => {
             var w = false;
             var t = task?.Invoke(progress, token);

@@ -1,15 +1,31 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:tty="http://schemas.brows.app/winfx/2026/xaml/presentation"
-                    xmlns:local="clr-namespace:Brows"
-                    xmlns:gui="clr-namespace:Brows.Gui;assembly=Brows.Framework.Windows"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:b="http://schemas.brows.app/winfx/2026/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows">
+  <Style x:Key="Brows.Style.FileSystemTerminal.StatusBar" TargetType="{x:Type Border}">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.FileSystemTerminal.StatusBar.Background}"/>
+  </Style>
   <Style x:Key="Brows.Style.FileSystemTerminal.Status" TargetType="{x:Type TextBlock}">
     <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.FileSystemTerminal.FontFamily}"/>
     <Setter Property="FontSize" Value="{DynamicResource Brows.Font.FileSystemTerminal.FontSize}"/>
-    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.FileSystemTerminal.Foreground}"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.FileSystemTerminal.StatusBar.Foreground}"/>
     <Setter Property="Margin" Value="4,2"/>
   </Style>
-  <Style x:Key="Brows.Style.FileSystemTerminal.Terminal" TargetType="{x:Type tty:TerminalEmulator}">
+  <Style x:Key="Brows.Style.FileSystemTerminal.TriggerDescription" TargetType="{x:Type TextBlock}"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.FileSystemTerminal.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.FileSystemTerminal.FontSize}"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.FileSystemTerminal.StatusBar.Foreground}"/>
+    <Setter Property="Margin" Value="4,2,0,2"/>
+  </Style>
+  <Style x:Key="Brows.Style.FileSystemTerminal.TriggerDisplay" TargetType="{x:Type TextBlock}"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.FileSystemTerminal.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.FileSystemTerminal.FontSize}"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.FileSystemTerminal.StatusBar.Foreground}"/>
+    <Setter Property="Margin" Value="4,2"/>
+  </Style>
+  <Style x:Key="Brows.Style.FileSystemTerminal.Terminal" TargetType="{x:Type b:TerminalEmulator}">
     <Setter Property="Focusable" Value="True"/>
     <Setter Property="IsTabStop" Value="True"/>
     <Setter Property="AutoStart" Value="False"/>
@@ -25,11 +41,24 @@
               <RowDefinition Height="Auto"/>
               <RowDefinition/>
             </Grid.RowDefinitions>
-            <TextBlock x:Name="PART_Status" Grid.Row="0"
-                       Style="{StaticResource Brows.Style.FileSystemTerminal.Status}"/>
-            <tty:TerminalEmulator x:Name="PART_Terminal" Grid.Row="1" AutoStart="False"
-                                  gui:InputOwner.Owner="{Binding ViewModel, RelativeSource={RelativeSource TemplatedParent}}"
-                                  Style="{StaticResource Brows.Style.FileSystemTerminal.Terminal}"/>
+            <Border Grid.Row="0" Style="{StaticResource Brows.Style.FileSystemTerminal.StatusBar}">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition/>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="PART_Status" Grid.Column="0"
+                           Style="{StaticResource Brows.Style.FileSystemTerminal.Status}"/>
+                <TextBlock x:Name="PART_TriggerDescription" Grid.Column="1"
+                           Style="{StaticResource Brows.Style.FileSystemTerminal.TriggerDescription}"/>
+                <TextBlock x:Name="PART_TriggerDisplay" Grid.Column="2"
+                           Style="{StaticResource Brows.Style.FileSystemTerminal.TriggerDisplay}"/>
+              </Grid>
+            </Border>
+            <b:TerminalEmulator x:Name="PART_Terminal" Grid.Row="1" AutoStart="False"
+                                b:InputOwner.Owner="{Binding ViewModel, RelativeSource={RelativeSource TemplatedParent}}"
+                                Style="{StaticResource Brows.Style.FileSystemTerminal.Terminal}"/>
           </Grid>
         </ControlTemplate>
       </Setter.Value>

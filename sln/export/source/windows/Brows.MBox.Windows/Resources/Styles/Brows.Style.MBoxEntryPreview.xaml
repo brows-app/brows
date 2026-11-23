@@ -1,0 +1,145 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows">
+  <Style x:Key="Brows.Style.MBoxEntryPreview.Status"
+         TargetType="{x:Type TextBlock}"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.MBoxEntryPreview.Status.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.MBoxEntryPreview.Status.FontSize}"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Status.Foreground}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+  </Style>
+  <Style x:Key="Brows.Style.MBoxEntryPreview.AttachmentsLabel"
+         TargetType="{x:Type TextBlock}"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.MBoxEntryPreview.Attachment.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.MBoxEntryPreview.Attachment.FontSize}"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Attachments.Label.Foreground}"/>
+    <Setter Property="Margin" Value="0 0 12 0"/>
+  </Style>
+  <Style x:Key="Brows.Style.MBoxEntryPreview.Attachment.Name"
+         TargetType="{x:Type TextBlock}"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.MBoxEntryPreview.Attachment.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.MBoxEntryPreview.Attachment.FontSize}"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Attachment.Foreground}"/>
+  </Style>
+  <Style x:Key="Brows.Style.MBoxEntryPreview.Attachment.ContentType"
+         TargetType="{x:Type TextBlock}"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.MBoxEntryPreview.Attachment.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.MBoxEntryPreview.Attachment.FontSize}"/>
+    <Setter Property="Foreground"
+            Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Attachment.ContentType.Foreground}"/>
+    <Setter Property="Margin" Value="6 0 0 0"/>
+  </Style>
+  <Style x:Key="Brows.Style.MBoxEntryPreview.Attachments" TargetType="{x:Type ItemsControl}">
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="ItemsPanel">
+      <Setter.Value>
+        <ItemsPanelTemplate>
+          <WrapPanel Orientation="Horizontal"/>
+        </ItemsPanelTemplate>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="ItemTemplate">
+      <Setter.Value>
+        <DataTemplate>
+          <StackPanel Margin="0 0 16 0" Orientation="Horizontal">
+            <TextBlock Text="{Binding Name, Mode=OneTime}"
+                       Style="{DynamicResource Brows.Style.MBoxEntryPreview.Attachment.Name}"/>
+            <TextBlock Text="{Binding ContentType, Mode=OneTime}"
+                       Style="{DynamicResource Brows.Style.MBoxEntryPreview.Attachment.ContentType}"/>
+          </StackPanel>
+        </DataTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Brows.Style.MBoxEntryPreview.Body"
+         TargetType="{x:Type TextBox}"
+         BasedOn="{StaticResource {x:Type TextBox}}">
+    <Setter Property="Background" Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Body.Background}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CaretBrush" Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Body.CaretBrush}"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource Brows.Font.MBoxEntryPreview.FontFamily}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Brows.Font.MBoxEntryPreview.FontSize}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource Brows.Font.MBoxEntryPreview.FontWeight}"/>
+    <Setter Property="Foreground" Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Body.Foreground}"/>
+    <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="IsReadOnly" Value="True"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="Padding" Value="8 6"/>
+    <Setter Property="SelectionBrush" Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Body.SelectionBrush}"/>
+    <Setter Property="SelectionOpacity" Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Body.SelectionOpacity}"/>
+    <Setter Property="SelectionTextBrush"
+            Value="{DynamicResource Brows.Theme.MBoxEntryPreview.Body.SelectionTextBrush}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+    <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+  </Style>
+  <Style x:Key="Brows.Style.MBoxEntryPreview" TargetType="{x:Type local:MBoxEntryPreviewControl}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:MBoxEntryPreviewControl}">
+          <!--
+            The border at the left marks the preview while it has the keyboard focus, so that the
+            user can tell whether keys go to the preview or to the list.
+          -->
+          <Border x:Name="Root"
+                  Background="{DynamicResource Brows.Theme.MBoxEntryPreview.Background}"
+                  BorderBrush="{DynamicResource Brows.Theme.MBoxEntryPreview.BorderBrush}"
+                  BorderThickness="2 0 0 0">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+              </Grid.RowDefinitions>
+              <Border x:Name="StatusBar"
+                      Grid.Row="0"
+                      Background="{DynamicResource Brows.Theme.MBoxEntryPreview.Status.Background}"
+                      BorderBrush="{DynamicResource Brows.Theme.MBoxEntryPreview.Status.BorderBrush}"
+                      BorderThickness="0 0 0 1"
+                      Padding="8 4">
+                <TextBlock x:Name="PART_Status" Style="{DynamicResource Brows.Style.MBoxEntryPreview.Status}"/>
+              </Border>
+              <Border x:Name="AttachmentBar"
+                      Grid.Row="1"
+                      Background="{DynamicResource Brows.Theme.MBoxEntryPreview.Attachments.Background}"
+                      BorderBrush="{DynamicResource Brows.Theme.MBoxEntryPreview.Attachments.BorderBrush}"
+                      BorderThickness="0 0 0 1"
+                      Padding="8 4">
+                <DockPanel>
+                  <TextBlock x:Name="PART_AttachmentsLabel"
+                             DockPanel.Dock="Left"
+                             Style="{DynamicResource Brows.Style.MBoxEntryPreview.AttachmentsLabel}"/>
+                  <ItemsControl x:Name="PART_Attachments"
+                                Style="{DynamicResource Brows.Style.MBoxEntryPreview.Attachments}"/>
+                </DockPanel>
+              </Border>
+              <TextBox x:Name="PART_Body"
+                       Grid.Row="2"
+                       Style="{DynamicResource Brows.Style.MBoxEntryPreview.Body}"/>
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger SourceName="PART_Status" Property="Text" Value="">
+              <Setter TargetName="StatusBar" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+            <Trigger SourceName="PART_Attachments" Property="HasItems" Value="False">
+              <Setter TargetName="AttachmentBar" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+              <Setter TargetName="Root"
+                      Property="BorderBrush"
+                      Value="{DynamicResource Brows.Theme.MBoxEntryPreview.BorderBrush.Focus}"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="{x:Type local:MBoxEntryPreviewControl}" BasedOn="{StaticResource Brows.Style.MBoxEntryPreview}"/>
+</ResourceDictionary>

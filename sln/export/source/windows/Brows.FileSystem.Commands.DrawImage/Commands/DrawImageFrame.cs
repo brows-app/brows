@@ -98,9 +98,9 @@ internal sealed class DrawImageFrame {
 
     public BitmapFrame Source { get; }
     public BitmapEncoder Encoder { get; }
-    public DrawImageParameter Parameter { get; }
+    public DrawImage.Parameter Parameter { get; }
 
-    public DrawImageFrame(BitmapFrame source, BitmapEncoder encoder, DrawImageParameter parameter) {
+    public DrawImageFrame(BitmapFrame source, BitmapEncoder encoder, DrawImage.Parameter parameter) {
         Source = source ?? throw new ArgumentNullException(nameof(source));
         Encoder = encoder ?? throw new ArgumentNullException(nameof(encoder));
         Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));

@@ -1,9 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <RootNamespace>Brows.MBox</RootNamespace>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\source\Brows.MBox.Format\Brows.MBox.Format.csproj" />
-  </ItemGroup>
-
-</Project>
