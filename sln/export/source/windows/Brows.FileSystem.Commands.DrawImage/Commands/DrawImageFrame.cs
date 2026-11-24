@@ -3,7 +3,8 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace Brows.Commands; 
+namespace Brows.Commands;
+
 internal sealed class DrawImageFrame {
     private Size Scale {
         get {
@@ -15,56 +16,81 @@ internal sealed class DrawImageFrame {
                     return _Scale = new Size(1, 1);
                 }
                 if (height.HasValue && width.HasValue) {
-                    return _Scale = new Size(width.Value / (double)SourceWidth, height.Value / (double)SourceHeight);
+                    return _Scale = new Size(width.Value / (double)OrientedWidth, height.Value / (double)OrientedHeight);
                 }
                 var w = default(double);
                 var h = default(double);
                 if (height.HasValue == false && width.HasValue) {
                     w = (double)width.Value;
-                    h = SourceHeight / (double)SourceWidth * w;
+                    h = OrientedHeight / (double)OrientedWidth * w;
                 }
                 if (width.HasValue == false && height.HasValue) {
                     h = (double)height.Value;
-                    w = SourceWidth / (double)SourceHeight * h;
+                    w = OrientedWidth / (double)OrientedHeight * h;
                 }
-                _Scale = new Size(w / SourceWidth, h / SourceHeight);
+                _Scale = new Size(w / OrientedWidth, h / OrientedHeight);
             }
             return _Scale;
         }
     }
     private Size _Scale;
 
+    /*
+     * The orientation and rotation are applied before the scale, so the
+     * requested width and height apply to the axes of the output image.
+     */
     private TransformGroup Transform {
         get {
-            if (_Transform == null) {
-                var transform = _Transform = new TransformGroup();
-                var rotate = OutputRotation;
-                if (rotate != 0) {
-                    transform.Children.Add(new RotateTransform(rotate));
-                }
+            if (field is null) {
+                var transform = field = DrawImageOrientation.Transform(Orientation, Rotate);
                 transform.Children.Add(new ScaleTransform(Scale.Width, Scale.Height));
             }
-            return _Transform;
+            return field;
         }
     }
-    private TransformGroup _Transform;
 
-    private bool DecoderIsEncoder =>
-        _DecoderIsEncoder ?? (
-        _DecoderIsEncoder = Encoder.CodecInfo.ContainerFormat == Source.Decoder.CodecInfo.ContainerFormat).Value;
-    private bool? _DecoderIsEncoder;
+    /*
+     * Reduced to one turn, so adding the orientation's angle cannot overflow.
+     */
+    private int Rotate =>
+        (Parameter.Rotate ?? 0) % 360;
 
-    private double SourceRotation =>
-        _SourceRotation ?? (
-        _SourceRotation = DecoderIsEncoder
-            ? 0
-            : DrawImageRotation.Angle(Source)).Value;
-    private double? _SourceRotation;
+    private int Orientation =>
+        field == 0
+            ? field = DrawImageOrientation.Read(Source)
+            : field;
 
-    private double OutputRotation =>
-        _OutputRotation ?? (
-        _OutputRotation = SourceRotation + (Parameter.Rotate ?? 0)).Value;
-    private double? _OutputRotation;
+    private bool SwapsAxes {
+        get {
+            var quarterTurns = (DrawImageOrientation.Angle(Orientation) + Rotate) / 90;
+            return quarterTurns % 2 != 0;
+        }
+    }
+
+    private int OrientedWidth =>
+        SwapsAxes ? SourceHeight : SourceWidth;
+
+    private int OrientedHeight =>
+        SwapsAxes ? SourceWidth : SourceHeight;
+
+    private BitmapSource Thumbnail {
+        get {
+            var thumbnail = Source.Thumbnail;
+            if (thumbnail is null) {
+                return null;
+            }
+            var transform = DrawImageOrientation.Transform(Orientation, Rotate);
+            if (transform.Children.Count == 0) {
+                return thumbnail;
+            }
+            return new TransformedBitmap(thumbnail, transform);
+        }
+    }
+
+    private BitmapMetadata Metadata =>
+        Parameter.CopyMetadata == true
+            ? DrawImageOrientation.Normalize(Source.Metadata as BitmapMetadata)
+            : null;
 
     private TransformedBitmap TransformedBitmap =>
         _TransformedBitmap ?? (
@@ -91,18 +117,16 @@ internal sealed class DrawImageFrame {
         _Output ?? (
         _Output = BitmapFrame.Create(
             source: TransformedBitmap,
-            thumbnail: Source.Thumbnail,
-            metadata: Parameter.CopyMetadata == true ? (Source.Metadata as BitmapMetadata) : null,
+            thumbnail: Thumbnail,
+            metadata: Metadata,
             colorContexts: Source.ColorContexts));
     private BitmapFrame _Output;
 
     public BitmapFrame Source { get; }
-    public BitmapEncoder Encoder { get; }
     public DrawImage.Parameter Parameter { get; }
 
-    public DrawImageFrame(BitmapFrame source, BitmapEncoder encoder, DrawImage.Parameter parameter) {
+    public DrawImageFrame(BitmapFrame source, DrawImage.Parameter parameter) {
         Source = source ?? throw new ArgumentNullException(nameof(source));
-        Encoder = encoder ?? throw new ArgumentNullException(nameof(encoder));
         Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
     }
 }

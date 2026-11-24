@@ -6,6 +6,7 @@
     <Resource Include="splash.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Brows.App.Windows.Agent\Brows.App.Windows.Agent.csproj" />
     <ProjectReference Include="..\Brows.Commander.Windows\Brows.Commander.Windows.csproj" />
   </ItemGroup>
 </Project>

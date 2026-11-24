@@ -21,7 +21,7 @@
     <PackageVersion Include="Brows.Sys" Version="1.1.0" />
     <PackageVersion Include="Brows.Sys.Composition" Version="1.1.0" />
     <PackageVersion Include="Brows.Sys.Win32.Windows" Version="1.1.0" />
-    <PackageVersion Include="Brows.TTY.Windows" Version="0.1.0" />
+    <PackageVersion Include="Brows.TTY.Windows" Version="0.2.0" />
     <PackageVersion Include="Brows.Win32.PreviewHandler.Windows" Version="1.1.0" />
     <PackageVersion Include="Brows.Win32.PropertySystem" Version="1.0.0" />
     <PackageVersion Include="Brows.Win32.Interop" Version="1.6.0" />

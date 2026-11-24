@@ -1,5 +1,6 @@
 ﻿[assembly: ComVisible(false)]
 [assembly: InternalsVisibleTo("Brows.FileSystem.Tests")]
+[assembly: InternalsVisibleTo("Brows.FileSystem.Commands.DrawImage")]
 [assembly: InternalsVisibleTo("Brows.FileSystem.Commands.Zip")]
 [assembly: InternalsVisibleTo("Brows.FileSystem.Windows")]
 [assembly: InternalsVisibleTo("Brows.FileSystem.Windows.Tests")]

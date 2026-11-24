@@ -1,50 +1,53 @@
 ﻿using Brows.Threading;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Brows.Commands;
 
 internal sealed class DrawImageWork {
-    private IReadOnlyDictionary<FileSystemInfo, string> Name =>
-        _Name ?? (
-        _Name = Rename.Selection(Parameter.Output));
-    private IReadOnlyDictionary<FileSystemInfo, string> _Name;
-
-    private IReadOnlyList<FileSystemInfo> Info =>
-        _Info ?? (
-        _Info = new List<FileSystemInfo>(Name.Keys));
-    private IReadOnlyList<FileSystemInfo> _Info;
+    private Task<DrawImageTargets> Targets(CancellationToken token) {
+        var requests = Outputs
+            .Where(output => output.Key is FileInfo)
+            .Select(output => {
+                var file = (FileInfo)output.Key;
+                return new KeyValuePair<FileInfo, string>(file, Path.Combine(file.DirectoryName, output.Value));
+            });
+        return DrawImageTargets.Plan(requests, Parameter.Overwrite == true, PathsAreEquivalent, token);
+    }
 
     public ISTAThreadPool ThreadPool { get; }
-    public FileSystemRename Rename { get; }
     public DrawImage.Parameter Parameter { get; }
+    public IReadOnlyList<KeyValuePair<FileSystemInfo, string>> Outputs { get; }
+    public Func<string, string, CancellationToken, Task<bool>> PathsAreEquivalent { get; }
 
-    public DrawImageWork(DrawImage.Parameter parameter, FileSystemRename rename, ISTAThreadPool threadPool) {
-        Rename = rename ?? throw new ArgumentNullException(nameof(rename));
+    public DrawImageWork(DrawImage.Parameter parameter, IReadOnlyList<KeyValuePair<FileSystemInfo, string>> outputs,
+                         Func<string, string, CancellationToken, Task<bool>> pathsAreEquivalent,
+                         ISTAThreadPool threadPool) {
+        Outputs = outputs ?? throw new ArgumentNullException(nameof(outputs));
         Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
         ThreadPool = threadPool ?? throw new ArgumentNullException(nameof(threadPool));
+        PathsAreEquivalent = pathsAreEquivalent;
     }
 
     public async Task<bool> Run(IOperationProgress progress, CancellationToken token) {
         ArgumentNullException.ThrowIfNull(progress);
-        var result = await progress.Children(Info, info => new(info.Name, async (progress, childToken) => {
+        Parameter.Validate();
+        var targets = await Targets(token);
+        var result = await progress.Children(Outputs, output => new(output.Key.Name, async (progress, childToken) => {
             async Task work(FileSystemInfo info, IOperationProgress progress, CancellationToken token) {
                 ArgumentNullException.ThrowIfNull(progress);
                 token.ThrowIfCancellationRequested();
-                progress.Change(addTarget: 2);
+                progress.Change(addTarget: 1);
                 if (info is FileInfo file) {
-                    var name = Path.Combine(file.DirectoryName, Name[file]);
-                    var outp = Parameter.Overwrite == true
-                        ? name
-                        : await FileSystemTask.Nonexistent(name, FileSystemCollisionPrevention.Default, token);
                     await ThreadPool.Work(file.Name, cancellationToken: token, work: () => {
-                        var
-                        draw = new DrawImageFile(file, Parameter, outp);
-                        progress.Change(data: $"{draw.DecoderCodec.FriendlyName} > {draw.EncoderCodec.FriendlyName}");
-                        draw.Save();
-                        progress.Change(1);
-                        draw.Transfer();
+                        using (var draw = new DrawImageFile(file, Parameter, targets)) {
+                            var codecs = $"{draw.DecoderCodec.FriendlyName} > {draw.EncoderCodec.FriendlyName}";
+                            progress.Change(data: codecs);
+                            draw.Save();
+                        }
                         progress.Change(1);
                     });
                 }
@@ -52,7 +55,7 @@ internal sealed class DrawImageWork {
                     throw new DrawImageInfoIsNotFileException(info);
                 }
             }
-            await work(info, progress, childToken);
+            await work(output.Key, progress, childToken);
         }
         ), OperationFailureBehavior.Record, token);
         return result.Results.Count > 0;

@@ -6,19 +6,23 @@
 #   <*> will be replaced by the original file's name, minus it's extension.
 #   <.> will be replaced by the original file's extension, including the leading period (.).
 #   <%> will be replaced by the original file's index in the selection.
+# TIFF output keeps every page. Other formats keep only the first frame.
 #
 Output =
 
 # If true, files that match the output pattern will be overwritten.
+# A file that is also being converted is never replaced by another file's output.
 Overwrite =
 
-# Set the width of the new image
+# Set the width of the new image, in pixels greater than zero.
 Width =
 
-# Set the height of the new image
-Height = 
+# Set the height of the new image, in pixels greater than zero.
+Height =
 
-# Rotate the image this many degress.
+# Rotate the image clockwise this many degrees, in multiples of 90.
+# The image is first turned upright according to its EXIF orientation,
+# and the width and height apply to the rotated image.
 Rotate =
 
 # Set the quality of the jpeg encoder as an integer.
@@ -26,8 +30,10 @@ JpegQuality =
 
 # Copy metadata to the output.
 # Valid when input and output formats are the same.
+# The orientation is set to normal, because the output is already upright.
 CopyMetadata = true
 
 # Transfer metadata to the output
 # Valid when input and output formats are different.
+# System.Photo.Orientation is never transferred, because the output is already upright.
 TransferMetadata = System.Photo.*;System.GPS.*;System.ApplicationName;System.Author;System.Comment;System.Company;System.Copyright;System.ItemAuthors;System.Keywords;System.Rating;System.RatingText;System.SimpleRating;System.Title

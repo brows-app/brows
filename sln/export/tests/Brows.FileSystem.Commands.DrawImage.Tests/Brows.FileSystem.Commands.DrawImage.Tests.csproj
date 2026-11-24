@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference
+      Include="..\..\source\windows\Brows.FileSystem.Commands.DrawImage\Brows.FileSystem.Commands.DrawImage.csproj" />
+    <Compile
+      Include="..\Brows.FileSystem.Commands.Find.Tests\Support\TempDirectory.cs"
+      Link="Support\TempDirectory.cs" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)/props/windows.build.props" />
+</Project>

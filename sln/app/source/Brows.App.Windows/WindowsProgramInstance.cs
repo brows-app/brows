@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Brows.Agent;
+using Brows.Localization;
+using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -35,6 +38,10 @@ internal sealed class WindowsProgramInstance {
                 }
             };
             token.ThrowIfCancellationRequested();
+            AgentBridge?.Open(
+                dispatcher: app.Dispatcher,
+                windows: () => app.Windows.OfType<CommanderWindow>().ToList<Window>(),
+                translation: () => app.Exports.Import?.Find<ITranslationExport>());
             task.SetResult(app.Run());
         }
         catch (Exception ex) {
@@ -52,9 +59,11 @@ internal sealed class WindowsProgramInstance {
 
     public CancellationToken Token { get; }
     public WindowsProgramConfig Config { get; }
+    public AgentBridge AgentBridge { get; }
 
-    public WindowsProgramInstance(WindowsProgramConfig config, CancellationToken token) {
+    public WindowsProgramInstance(WindowsProgramConfig config, AgentBridge agentBridge, CancellationToken token) {
         Config = config ?? throw new ArgumentNullException(nameof(config));
+        AgentBridge = agentBridge;
         Token = token;
         Thread = new Thread(ThreadStart);
         Thread.IsBackground = true;

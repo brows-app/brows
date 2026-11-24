@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Culture\_" />
+    <EmbeddedResource Include="Resource\Culture\_.s.CommandConf_Config" />
+  </ItemGroup>
+</Project>

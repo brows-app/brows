@@ -8,6 +8,14 @@ namespace Brows.Conf;
 /// Provides the directories that hold configuration files and configuration data.
 /// </summary>
 public static class ConfigurationPath {
+    private static string DataRootDefault =>
+        Path.Combine(
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData,
+                Environment.SpecialFolderOption.DoNotVerify),
+            "Brows",
+            "data");
+
     private static Task<string> Ready(string directory, CancellationToken cancellationToken) {
         return Task.Run(cancellationToken: cancellationToken, function: async () => {
             if (Directory.Exists(directory) == false) {
@@ -21,6 +29,17 @@ public static class ConfigurationPath {
             }
             return directory;
         });
+    }
+
+    internal const string DataRootVariable = "BROWS_DATA_ROOT";
+
+    internal static string DataRootFrom(string value) {
+        var path = value?.Trim();
+        var pathIsQualified = path is not null && Path.IsPathFullyQualified(path);
+        if (pathIsQualified) {
+            return Path.GetFullPath(path);
+        }
+        return DataRootDefault;
     }
 
     /// <summary>
@@ -51,15 +70,11 @@ public static class ConfigurationPath {
 
     /// <summary>
     /// Gets the path of the directory that holds configuration data saved by the application,
-    /// <c>Brows\data</c> in the local application data folder.
+    /// <c>Brows\data</c> in the local application data folder. When the <c>BROWS_DATA_ROOT</c>
+    /// environment variable holds a fully qualified path, that path is used instead.
     /// </summary>
     public static string DataRoot =>
-        field ??= Path.Combine(
-            Environment.GetFolderPath(
-                Environment.SpecialFolder.LocalApplicationData,
-                Environment.SpecialFolderOption.DoNotVerify),
-            "Brows",
-            "data");
+        field ??= DataRootFrom(Environment.GetEnvironmentVariable(DataRootVariable));
 
     /// <summary>
     /// Gets the path of the directory that holds configuration files, <c>brows.config</c> in the

@@ -1,4 +1,6 @@
-﻿using Brows.Programs;
+﻿using Brows.Agent;
+using Brows.Programs;
+using Domore.Logs;
 using System;
 using System.Security.Principal;
 using System.Threading;
@@ -7,6 +9,7 @@ using System.Threading.Tasks;
 namespace Brows;
 
 public sealed class WindowsProgram : Program<WindowsProgramConfig> {
+    private static readonly ILog Log = Logging.For(typeof(WindowsProgram));
     private static readonly string LockName = LockNameFactory();
 
     private static string LockNameFactory() {
@@ -60,10 +63,23 @@ public sealed class WindowsProgram : Program<WindowsProgramConfig> {
     protected sealed override Task<int> Run(WindowsProgramConfig config,
                                             IProgramContext context,
                                             CancellationToken token) {
+#if !DEBUG
+        /*
+         * Refuse an agent session before the single-instance check, so the launch is neither shown nor
+         * forwarded to a running instance.
+         */
+        if (AgentBridge.Requested(config?.Agent?.Pipe)) {
+            if (Log.Warn()) {
+                Log.Warn("agent.pipe is refused: agent sessions require a Debug build");
+            }
+            return Task.FromResult(1);
+        }
+#endif
         return Lock(async owned => {
             if (owned) {
+                using var agentBridge = AgentBridge.Create(config.Agent?.Pipe);
                 using (await Imports(token)) {
-                    var instance = new WindowsProgramInstance(config, token);
+                    var instance = new WindowsProgramInstance(config, agentBridge, token);
                     var instanceExitCode = await instance.Task;
                     return instanceExitCode;
                 }

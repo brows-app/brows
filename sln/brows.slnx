@@ -10,12 +10,14 @@
     <File Path="../.github/workflows/slot_brows-api_production(deploy).yml" />
   </Folder>
   <Folder Name="/app/">
+    <Project Path="app/source/Brows.App.Windows.Agent/Brows.App.Windows.Agent.csproj" Id="642ffc94-dbf6-4b11-870e-cc2a88dd97a7" />
     <Project Path="app/source/Brows.App.Windows/Brows.App.Windows.csproj" />
     <Project Path="app/source/Brows.Commander.Windows/Brows.Commander.Windows.csproj" />
     <Project Path="app/source/Brows.Commander/Brows.Commander.csproj" />
     <Project Path="app/source/brows/brows.csproj" />
   </Folder>
   <Folder Name="/app/tests/">
+    <Project Path="app/tests/Brows.App.Windows.Agent.Tests/Brows.App.Windows.Agent.Tests.csproj" />
     <Project Path="app/tests/Brows.App.Windows.Tests/Brows.App.Windows.Tests.csproj" />
   </Folder>
   <Folder Name="/conf/">
@@ -29,7 +31,8 @@
   <Folder Name="/export/" />
   <Folder Name="/export/Commands/">
     <Project Path="export/source/Brows.Commands.Bookmark/Brows.Commands.Bookmark.csproj" />
-    <Project Path="export/source/Brows.Commands.Config/Brows.Commands.Config.csproj" />
+    <Project Path="export/source/Brows.Commands.BrowsConfig/Brows.Commands.BrowsConfig.csproj" />
+    <Project Path="export/source/Brows.Commands.BrowsData/Brows.Commands.BrowsData.csproj" />
     <Project Path="export/source/Brows.Commands.DataKey/Brows.Commands.DataKey.csproj" />
     <Project Path="export/source/Brows.Commands.Manual/Brows.Commands.Manual.csproj" />
     <Project Path="export/source/Brows.Commands.Operations/Brows.Commands.Operations.csproj" />
@@ -75,6 +78,7 @@
     <Project Path="export/source/windows/Brows.FileSystem.Windows/Brows.FileSystem.Windows.csproj" />
   </Folder>
   <Folder Name="/export/FileSystem/tests/">
+    <Project Path="export/tests/Brows.FileSystem.Commands.DrawImage.Tests/Brows.FileSystem.Commands.DrawImage.Tests.csproj" />
     <Project Path="export/tests/Brows.FileSystem.Commands.Find.Tests/Brows.FileSystem.Commands.Find.Tests.csproj" />
     <Project Path="export/tests/Brows.FileSystem.Commands.Find.Windows.Tests/Brows.FileSystem.Commands.Find.Windows.Tests.csproj" />
     <Project Path="export/tests/Brows.FileSystem.Commands.SevenZip.Tests/Brows.FileSystem.Commands.SevenZip.Tests.csproj" />
@@ -256,7 +260,7 @@
     <File Path="props/windows.build.props" />
   </Folder>
   <Folder Name="/_/scripts/">
-    <File Path="scripts/ef-browsdb.ps1" />
+    <File Path="scripts/brows-agent.ps1" />
     <File Path="scripts/publish-brows.ps1" />
   </Folder>
   <Folder Name="/_/windows/" />
