@@ -10,24 +10,6 @@ where TEntry : FileProtocolEntry {
     private readonly Func<TEntry, CancellationToken, Task<Stream>> Open;
     private readonly long? ReadLimit;
 
-    public sealed override long StreamLength { get; }
-    public sealed override string RelativePath { get; }
-
-    public FileProtocolPreviewStreamSource(TEntry entry,
-                                           string relativePath,
-                                           long streamLength,
-                                           long? readLimit,
-                                           Func<TEntry, CancellationToken, Task<Stream>> open)
-    : base(entry) {
-        RelativePath = relativePath ?? throw new ArgumentNullException(nameof(relativePath));
-        StreamLength = streamLength;
-        if (readLimit is < 0) {
-            throw new ArgumentOutOfRangeException(nameof(readLimit));
-        }
-        ReadLimit = readLimit;
-        Open = open ?? throw new ArgumentNullException(nameof(open));
-    }
-
     protected sealed override async Task<IEntryStreamReady> StreamReady(CancellationToken token) {
         var lifetime = CancellationTokenSource.CreateLinkedTokenSource(token);
         try {
@@ -42,6 +24,21 @@ where TEntry : FileProtocolEntry {
         finally {
             lifetime?.Dispose();
         }
+    }
+
+    public sealed override long StreamLength { get; }
+    public sealed override string RelativePath { get; }
+
+    public FileProtocolPreviewStreamSource(TEntry entry,
+                                           string relativePath,
+                                           long streamLength,
+                                           long? readLimit,
+                                           Func<TEntry, CancellationToken, Task<Stream>> open)
+    : base(entry) {
+        Open = open ?? throw new ArgumentNullException(nameof(open));
+        RelativePath = relativePath ?? throw new ArgumentNullException(nameof(relativePath));
+        ReadLimit = readLimit is < 0 ? throw new ArgumentOutOfRangeException(nameof(readLimit)) : readLimit;
+        StreamLength = streamLength;
     }
 
     private sealed class PreviewReadStream : Stream {

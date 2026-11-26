@@ -12,6 +12,11 @@ public interface IEntryStreamGuiState : INotifyPropertyChanged {
     IEntryStreamGuiView Text { get; }
 
     /// <summary>
+    /// Gets the loading state to update for the Markdown view.
+    /// </summary>
+    IEntryStreamGuiView Markdown { get; }
+
+    /// <summary>
     /// Gets the loading state to update for the image view.
     /// </summary>
     IEntryStreamGuiView Image { get; }

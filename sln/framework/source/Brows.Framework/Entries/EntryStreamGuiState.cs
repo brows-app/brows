@@ -7,16 +7,30 @@ internal sealed class EntryStreamGuiState : Notifier, IEntryStreamGuiState {
     private static readonly object Unavailable = new();
 
     public EntryStreamGuiView Text => field ??= new(this);
+    public EntryStreamGuiView Markdown => field ??= new(this);
     public EntryStreamGuiView Image => field ??= new(this);
     public EntryStreamGuiView Preview => field ??= new(this);
     public EntryStreamGuiView Media => field ??= new(this);
 
-    public bool Force => ForceText || ForceImage || ForceMedia || ForcePreview;
+    public bool Force => ForceText ||
+                         ForceMarkdown ||
+                         ForceImage ||
+                         ForceMedia ||
+                         ForcePreview;
 
     public bool ForceText {
         get;
         set {
             if (Change(ref field, value, nameof(ForceText), nameof(Force))) {
+                Changed();
+            }
+        }
+    }
+
+    public bool ForceMarkdown {
+        get;
+        set {
+            if (Change(ref field, value, nameof(ForceMarkdown), nameof(Force))) {
                 Changed();
             }
         }
@@ -56,6 +70,10 @@ internal sealed class EntryStreamGuiState : Notifier, IEntryStreamGuiState {
     }
 
     public void Changed() {
+        if (Markdown.Success) {
+            Gui.View = nameof(Markdown);
+            return;
+        }
         if (Text.Success) {
             Gui.View = nameof(Text);
             return;
@@ -70,6 +88,10 @@ internal sealed class EntryStreamGuiState : Notifier, IEntryStreamGuiState {
         }
         if (Image.Success) {
             Gui.View = nameof(Image);
+            return;
+        }
+        if (ForceMarkdown && Markdown.Changed && !Markdown.Loading && !Text.Loading) {
+            Gui.View = nameof(Unavailable);
             return;
         }
         if (ForceText && Text.Changed && Text.Loading == false) {
@@ -88,11 +110,11 @@ internal sealed class EntryStreamGuiState : Notifier, IEntryStreamGuiState {
             Gui.View = nameof(Unavailable);
             return;
         }
-        if (Text.Loading || Image.Loading || Media.Loading || Preview.Loading) {
+        if (Text.Loading || Markdown.Loading || Image.Loading || Media.Loading || Preview.Loading) {
             Gui.View = nameof(Loading);
             return;
         }
-        if (Text.Changed || Image.Changed || Media.Changed || Preview.Changed) {
+        if (Text.Changed || Markdown.Changed || Image.Changed || Media.Changed || Preview.Changed) {
             Gui.View = nameof(Unavailable);
             return;
         }
@@ -100,6 +122,7 @@ internal sealed class EntryStreamGuiState : Notifier, IEntryStreamGuiState {
     }
 
     IEntryStreamGuiView IEntryStreamGuiState.Text => Text;
+    IEntryStreamGuiView IEntryStreamGuiState.Markdown => Markdown;
     IEntryStreamGuiView IEntryStreamGuiState.Image => Image;
     IEntryStreamGuiView IEntryStreamGuiState.Media => Media;
     IEntryStreamGuiView IEntryStreamGuiState.Preview => Preview;

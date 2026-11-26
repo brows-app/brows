@@ -23,6 +23,16 @@ public interface IEntryStreamGuiOptions {
     DecodedTextOptions TextDecoderOptions { get; }
 
     /// <summary>
+    /// Gets the maximum source length in bytes for the Markdown view, or null for no size limit.
+    /// </summary>
+    long? MarkdownSourceLengthMax { get; }
+
+    /// <summary>
+    /// Gets the settings used to decode Markdown from the source stream.
+    /// </summary>
+    DecodedTextOptions MarkdownDecoderOptions { get; }
+
+    /// <summary>
     /// Gets preview handler class identifiers indexed by file extension.
     /// </summary>
     IReadOnlyDictionary<string, Guid> PreviewCLSID { get; }

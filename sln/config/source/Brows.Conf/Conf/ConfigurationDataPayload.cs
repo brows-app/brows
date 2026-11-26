@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using CONF = Domore.Conf.Conf;
 using FILE = System.IO.File;
 using PATH = System.IO.Path;
 
@@ -38,19 +39,23 @@ internal abstract class ConfigurationDataPayload {
         public sealed override async Task<TData> Save(CancellationToken cancellationToken) {
             var data = Data;
             var text = data?.ConfText(key: "", multiline: true);
-            if (text != null) {
-                string comment(string s) => $"# {s}";
+            if (text is not null) {
+                static string comment(string s) =>
+                    $"# {s}";
                 var file = await File(cancellationToken);
                 var fileText = string.Join(Environment.NewLine,
-                    comment(file.Head),
-                    comment(Type), "", text);
+                    comment(""),
+                    comment(Type),
+                    comment(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")),
+                    comment(""),
+                    "",
+                    text);
                 if (Log.Info()) {
                     Log.Info(
                         nameof(Save) + " > " + Type,
                         nameof(file) + " > " + file.Path);
                 }
-                await FILE
-                    .WriteAllTextAsync(file.Path, fileText, FileEncoding, cancellationToken);
+                await FILE.WriteAllTextAsync(file.Path, fileText, FileEncoding, cancellationToken);
             }
             return data;
         }
@@ -65,15 +70,17 @@ internal abstract class ConfigurationDataPayload {
             }
             var text = default(string);
             try {
-                text = await FILE
-                    .ReadAllTextAsync(file.Path, cancellationToken);
+                text = await FILE.ReadAllTextAsync(file.Path, cancellationToken);
             }
             catch (FileNotFoundException) {
                 return data;
             }
-            return data == null
-                ? data
-                : data.ConfFrom(text, key: "");
+            if (data is null) {
+                return data;
+            }
+            var conf = CONF.Contain(text, special: null, comment: "#");
+            var configured = conf.Configure(data, key: "");
+            return configured;
         }
     }
 }

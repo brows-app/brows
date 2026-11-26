@@ -10,13 +10,21 @@
     <File Path="../.github/workflows/slot_brows-api_production(deploy).yml" />
   </Folder>
   <Folder Name="/app/">
-    <Project Path="app/source/Brows.App.Windows.Agent/Brows.App.Windows.Agent.csproj" Id="642ffc94-dbf6-4b11-870e-cc2a88dd97a7" />
+    <Project Path="app/source/brows-update/brows-update.csproj" />
+    <Project Path="app/source/Brows.App.Composition/Brows.App.Composition.csproj" />
+    <Project Path="app/source/Brows.App.Core/Brows.App.Core.csproj" />
+    <Project Path="app/source/Brows.App.Updates.CLI/Brows.App.Updates.CLI.csproj" />
+    <Project Path="app/source/Brows.App.Updates/Brows.App.Updates.csproj" />
+    <Project Path="app/source/Brows.App.Windows.Agent/Brows.App.Windows.Agent.csproj" />
     <Project Path="app/source/Brows.App.Windows/Brows.App.Windows.csproj" />
     <Project Path="app/source/Brows.Commander.Windows/Brows.Commander.Windows.csproj" />
     <Project Path="app/source/Brows.Commander/Brows.Commander.csproj" />
     <Project Path="app/source/brows/brows.csproj" />
   </Folder>
   <Folder Name="/app/tests/">
+    <Project Path="app/tests/Brows.App.Core.Tests/Brows.App.Core.Tests.csproj" />
+    <Project Path="app/tests/Brows.App.Updates.CLI.Tests/Brows.App.Updates.CLI.Tests.csproj" />
+    <Project Path="app/tests/Brows.App.Updates.Tests/Brows.App.Updates.Tests.csproj" />
     <Project Path="app/tests/Brows.App.Windows.Agent.Tests/Brows.App.Windows.Agent.Tests.csproj" />
     <Project Path="app/tests/Brows.App.Windows.Tests/Brows.App.Windows.Tests.csproj" />
   </Folder>
@@ -53,7 +61,7 @@
     <Project Path="export/source/Brows.FileProtocol/Brows.FileProtocol.csproj" />
   </Folder>
   <Folder Name="/export/FileProtocol/tests/">
-    <Project Path="export/tests/Brows.FileProtocol.Tests/Brows.FileProtocol.Tests.csproj" Id="3637ab33-33f3-49ce-90f1-79e1ea42e48b" />
+    <Project Path="export/tests/Brows.FileProtocol.Tests/Brows.FileProtocol.Tests.csproj" />
   </Folder>
   <Folder Name="/export/FileSystem/">
     <Project Path="export/source/Brows.FileSystem.Commands.CreateDirectory/Brows.FileSystem.Commands.CreateDirectory.csproj" />
@@ -114,7 +122,7 @@
     <Project Path="export/tests/Brows.Git.Tests/Brows.Git.Tests.csproj" />
   </Folder>
   <Folder Name="/export/Logs/">
-    <Project Path="export/source/Brows.Logs/Brows.Logs.csproj" Id="54187bb0-154c-45b0-b920-40d66339fac7" />
+    <Project Path="export/source/Brows.Logs/Brows.Logs.csproj" />
     <Project Path="export/source/windows/Brows.Logs.Windows/Brows.Logs.Windows.csproj" />
   </Folder>
   <Folder Name="/export/Logs/tests/">

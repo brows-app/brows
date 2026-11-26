@@ -74,7 +74,7 @@ internal sealed class ConfigurationFileInfoTest {
                 "Editor[.txt] = code.exe\r\n",
                 Encoding.UTF8);
 
-            var info = new TypedConfigurationFileInfo<OverrideConfig>(userFile, defaultFile, "brows");
+            var info = new TypedConfigurationFileInfo<OverrideConfig>(userFile, defaultFile);
 
             var config = await info.Configure(CancellationToken.None);
 
@@ -100,7 +100,7 @@ internal sealed class ConfigurationFileInfoTest {
                 Encoding.UTF8);
             var userFile = Path.Combine(directory, "named.conf");
             await File.WriteAllTextAsync(userFile, "Color = blue\r\n", Encoding.UTF8);
-            var info = new NamedConfigurationFileInfo(userFile, defaultFile, "brows");
+            var info = new NamedConfigurationFileInfo(userFile, defaultFile);
             var config = new OverrideConfig();
             var applied = new List<string>();
 
@@ -120,7 +120,7 @@ internal sealed class ConfigurationFileInfoTest {
         await InTemporaryDirectory(async directory => {
             var defaultFile = Path.Combine(directory, "named.conf.default");
             await File.WriteAllTextAsync(defaultFile, "Name = shipped\r\n", Encoding.UTF8);
-            var info = new NamedConfigurationFileInfo(Path.Combine(directory, "named.conf"), defaultFile, "brows");
+            var info = new NamedConfigurationFileInfo(Path.Combine(directory, "named.conf"), defaultFile);
             var config = new OverrideConfig();
 
             await info.Configure(conf => conf.Configure(config, key: ""), CancellationToken.None);
@@ -147,7 +147,7 @@ internal sealed class ConfigurationFileInfoTest {
                 "cmd[FileSystem_Terminal].press[CTRL+SHIFT+F12] =\r\n" +
                 "cmd[FileSystem_Terminal].press[CTRL+SHIFT+F11] = *\r\n");
 
-            var info = new TypedConfigurationFileInfo<TriggerConfig>(userFile, DefaultTriggerFile(), "brows");
+            var info = new TypedConfigurationFileInfo<TriggerConfig>(userFile, DefaultTriggerFile());
 
             var config = await info.Configure(CancellationToken.None);
 

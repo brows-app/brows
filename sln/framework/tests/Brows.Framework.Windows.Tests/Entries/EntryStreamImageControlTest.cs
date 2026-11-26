@@ -123,13 +123,12 @@ internal sealed class EntryStreamImageControlTest {
 #pragma warning restore CS0067
 
         public IEntryStreamGuiView Text => null;
-
-        public IEntryStreamGuiView Image =>
-            _Image ??= new FakeView();
-        private FakeView _Image;
-
+        public IEntryStreamGuiView Markdown => null;
         public IEntryStreamGuiView Media => null;
         public IEntryStreamGuiView Preview => null;
+
+        public IEntryStreamGuiView Image =>
+            field ??= new FakeView();
     }
 
     private sealed class FakeSource : IEntryStreamSource {

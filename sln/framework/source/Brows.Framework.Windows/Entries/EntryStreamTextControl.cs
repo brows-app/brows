@@ -1,6 +1,4 @@
-﻿using Domore.IO;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
 using TEXTREADER = Domore.Windows.Controls.TextReader;
 
@@ -8,6 +6,7 @@ namespace Brows.Entries;
 
 public sealed class EntryStreamTextControl : EntryStreamGuiControl {
     private TEXTREADER TextReader;
+    private bool MarkdownFallback;
 
     private void TextReader_Loaded(object sender, RoutedEventArgs e) {
         ChangeEntryStreamGui();
@@ -30,31 +29,22 @@ public sealed class EntryStreamTextControl : EntryStreamGuiControl {
         if (reader is null) {
             return;
         }
-        reader.TextReaderOptions = ViewModel?.Options?.TextDecoderOptions;
-        reader.TextReaderSourceLengthMax = ViewModel?.Options?.TextSourceLengthMax;
-        reader.TextReaderSource = ViewModel is null
+        var gui = ViewModel;
+        var options = gui?.Options;
+        var limit = options?.TextSourceLengthMax;
+        if (MarkdownFallback && options?.MarkdownSourceLengthMax is long markdownLimit) {
+            limit = limit is long textLimit ? Math.Min(textLimit, markdownLimit) : markdownLimit;
+        }
+        reader.TextReaderOptions = options?.TextDecoderOptions;
+        reader.TextReaderSourceLengthMax = limit;
+        reader.TextReaderSource = gui is null
             ? null
-            : new StreamText(ViewModel.Source);
+            : new EntryStreamTextSource(gui.Source, MarkdownFallback ? limit : null);
     }
 
-    private sealed class StreamText : IStreamText {
-        public IEntryStreamSource Source { get; }
-
-        public StreamText(IEntryStreamSource source) {
-            Source = source ?? throw new ArgumentNullException(nameof(source));
-        }
-
-        public async Task<IDisposable> StreamReady(CancellationToken token) {
-            return await Source.StreamReady(token);
-        }
-
-        public Task<long> StreamLength(CancellationToken token) {
-            return Task.FromResult(Source.StreamLength);
-        }
-
-        Stream IStreamText.StreamText() {
-            return Source.Stream;
-        }
+    internal void ShowMarkdownFallback(IEntryStreamGui gui) {
+        MarkdownFallback = true;
+        ViewModel = gui;
     }
 
     protected sealed override void OnViewModelChanged(IEntryStreamGui oldValue, IEntryStreamGui newValue) {
@@ -62,9 +52,9 @@ public sealed class EntryStreamTextControl : EntryStreamGuiControl {
         base.OnViewModelChanged(oldValue, newValue);
     }
 
-    protected override string EntryStreamViewName => "Text";
+    protected sealed override string EntryStreamViewName => "Text";
 
-    public override void OnApplyTemplate() {
+    public sealed override void OnApplyTemplate() {
         var oldReader = TextReader;
         if (oldReader is not null) {
             oldReader.Loaded -= TextReader_Loaded;

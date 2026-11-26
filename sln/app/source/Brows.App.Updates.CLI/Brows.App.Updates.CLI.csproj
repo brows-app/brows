@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.App.Core\Brows.App.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Domore.Conf.Cli" />
+  </ItemGroup>
+</Project>

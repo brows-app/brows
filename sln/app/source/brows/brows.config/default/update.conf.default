@@ -1,0 +1,13 @@
+#
+# WARNING: This file will be overwritten when a new version of the application is installed.
+# To customize the application's configuration, create a file named update.conf in this
+# directory's parent that contains only the settings you want to change. This file is
+# loaded first, and the settings in that file override the ones here.
+#
+
+# Check GitHub for a newer release about a minute after Brows starts, and once a day
+# while it runs. Only a copy installed by the Brows installer checks automatically.
+Check = true
+
+# Also offer pre-release versions, for automatic checks and for brows-update.
+Prerelease = false

@@ -1,15 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <OutputPath>$(SolutionDir)\out\$(Configuration)\</OutputPath>
+    <_Brows_Property_BrowsUpdateCsproj>..\brows-update\brows-update.csproj</_Brows_Property_BrowsUpdateCsproj>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Brows.App.Updates\Brows.App.Updates.csproj" />
     <ProjectReference Include="..\Brows.App.Windows\Brows.App.Windows.csproj" />
     <ProjectReference Include="..\Brows.Commander.Windows\Brows.Commander.Windows.csproj" />
     <ProjectReference Include="..\Brows.Commander\Brows.Commander.csproj" />
+    <ProjectReference Include="$(_Brows_Property_BrowsUpdateCsproj)"
+                      BuildReference="false"
+                      ReferenceOutputAssembly="false"
+                      Private="false" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="brows.config\**\*.*">
@@ -29,6 +35,24 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
+  <Target Name="IncludeUpdateHelper" BeforeTargets="AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_Brows_Property_BrowsUpdatePublishDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'brows-update', '$(Configuration)', '$(RuntimeIdentifier)'))</_Brows_Property_BrowsUpdatePublishDir>
+    </PropertyGroup>
+    <MSBuild Projects="$(_Brows_Property_BrowsUpdateCsproj)"
+             Targets="_Brows_Target_PublishBrowsUpdate"
+             Properties="PublishDir=$(_Brows_Property_BrowsUpdatePublishDir);SelfContained=false;PublishSingleFile=true"
+             RemoveProperties="OutputPath;TargetFramework">
+      <Output TaskParameter="TargetOutputs" ItemName="_Brows_Output_BrowsUpdatePublishPath" />
+    </MSBuild>
+    <ItemGroup>
+      <Content Include="@(_Brows_Output_BrowsUpdatePublishPath)"
+               Link="brows-update.exe"
+               CopyToOutputDirectory="PreserveNewest"
+               CopyToPublishDirectory="PreserveNewest" />
+      <FileWrites Include="@(_Brows_Output_BrowsUpdatePublishPath)" />
+    </ItemGroup>
+  </Target>
   <Target Name="GetTargetPath" Returns="@(Brows_SetupOutputPath)">
     <ItemGroup Condition="'$(OutputType)' == 'Library'">
       <Brows_SetupOutputPath Include="$(MSBuildProjectDirectory)\$(OutputPath)\$(Brows_SetupTargetFramework)\$(AssemblyName).dll" />

@@ -85,6 +85,7 @@ cmd[Status]                         .input                      = status|st
 cmd[Theme]                          .input                      = theme
 cmd[Up]                             .input                      = up
 cmd[Up]                             .press[ALT+UP]              = *
+cmd[Update]                         .input                      = brows-update
 
 cmd[FileSystem_Delete]              .press[SHIFT+DEL]           = * unrecoverable=true
 cmd[FileSystem_DrawImage]           .input                      = draw-image|draw

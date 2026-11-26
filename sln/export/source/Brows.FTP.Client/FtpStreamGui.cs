@@ -8,6 +8,16 @@ internal sealed class FtpStreamGui : EntryStreamGui {
     private long? PreviewReadLimit {
         get {
             var options = PreviewOptions;
+            if (ForceMarkdown) {
+                var markdownLimit = options.Markdown.SourceLengthMax;
+                if (markdownLimit == long.MaxValue) {
+                    return null;
+                }
+                /*
+                 * Let the Markdown decoder read one extra byte to detect overflow.
+                 */
+                return markdownLimit is >= 0 ? markdownLimit + 1 : markdownLimit;
+            }
             if (ForceText && !ForceImage) {
                 return options.Text.SourceLengthMax;
             }
@@ -39,6 +49,10 @@ internal sealed class FtpStreamGui : EntryStreamGui {
             token));
 
     public sealed override IEntryStreamGuiOptions Options => Entry.Provider.StreamOptions;
+
+    public sealed override bool ForceMarkdown =>
+        Entry.Kind == FileProtocolEntryKind.File &&
+        PreviewOptions.Markdown.Extensions.Contains(Entry.Extension);
 
     public sealed override bool ForceText =>
         Entry.Kind == FileProtocolEntryKind.File &&

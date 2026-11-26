@@ -1,0 +1,27 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:brows="http://schemas.brows.app/winfx/2026/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows.Entries">
+  <Style x:Key="Brows.Style.EntryStreamMarkdownControl" TargetType="local:EntryStreamMarkdownControl">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:EntryStreamMarkdownControl}">
+          <Grid>
+            <brows:MarkdownControl x:Name="PART_MarkdownControl"
+                                   Foreground="{DynamicResource Brows.Theme.EntryStreamMarkdownControl.Foreground}"/>
+            <local:EntryStreamTextControl x:Name="PART_TextFallback"/>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="local:EntryStreamMarkdownControl"
+         BasedOn="{StaticResource Brows.Style.EntryStreamMarkdownControl}"/>
+  <ControlTemplate x:Key="Brows.Style.EntryStreamMarkdownControl.Preview" TargetType="{x:Type Control}">
+    <Grid>
+      <local:EntryStreamMarkdownControl ViewModel="{Binding}"/>
+      <local:EntryStreamViewLoadingControl ViewModel="{Binding}"/>
+      <local:EntryStreamViewUnavailableControl ViewModel="{Binding}"/>
+    </Grid>
+  </ControlTemplate>
+</ResourceDictionary>

@@ -10,8 +10,8 @@ namespace Brows.Conf.ConfigurationFileInfos;
 /// </summary>
 public sealed class NamedConfigurationFileInfo
 : ConfigurationFileInfo {
-    internal NamedConfigurationFileInfo(string file, string @default, string special)
-    : base(file, @default, special) {
+    internal NamedConfigurationFileInfo(string file, string @default)
+    : base(file, @default) {
     }
 
     /// <summary>

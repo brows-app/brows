@@ -262,6 +262,9 @@
                    Color="{StaticResource Brows.Theme.Color.RowFocus}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.EntryListViewItem.Foreground"
                    Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
+  <SolidColorBrush x:Key="Brows.Theme.EntryStreamMarkdownControl.Foreground"
+                   Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
+
   <SolidColorBrush x:Key="Brows.Theme.EntryStreamViewLoadingControl.Foreground"
                    Color="{StaticResource Brows.Theme.Color.Foreground}" po:Freeze="True"/>
   <SolidColorBrush x:Key="Brows.Theme.EntryStreamViewUnavailableControl.Foreground"

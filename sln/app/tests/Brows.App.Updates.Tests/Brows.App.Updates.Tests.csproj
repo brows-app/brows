@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Brows.App.Updates\Brows.App.Updates.csproj" />
+    <ProjectReference Include="..\..\source\Brows.App.Updates.CLI\Brows.App.Updates.CLI.csproj" />
+  </ItemGroup>
+</Project>

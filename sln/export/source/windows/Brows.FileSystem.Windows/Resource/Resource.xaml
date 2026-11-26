@@ -5,6 +5,14 @@
   <ResourceDictionary.MergedDictionaries>
     <ResourceDictionary
       Source="/Brows.FileSystem.Windows;component/Resources/Styles/Brows.Style.FileSystemTerminal.xaml"/>
+    <ResourceDictionary
+      Source="/Brows.FileSystem.Windows;component/Resources/Styles/Brows.Style.FileSystemStreamGuiControl.xaml"/>
+    <ResourceDictionary
+      Source="/Brows.FileSystem.Windows;component/Resources/Styles/Brows.Style.FileSystemStreamGuiImage.xaml"/>
+    <ResourceDictionary
+      Source="/Brows.FileSystem.Windows;component/Resources/Styles/Brows.Style.FileSystemEntryPreviewControl.xaml"/>
+    <ResourceDictionary
+      Source="/Brows.FileSystem.Windows;component/Resources/Styles/Brows.Style.FileSystemProviderControl.xaml"/>
   </ResourceDictionary.MergedDictionaries>
   <DataTemplate x:Key="FileSystemEntry_Name">
     <brows:EntryNameGrid Text="{Binding Item[Name]}" Icon="{Binding}">

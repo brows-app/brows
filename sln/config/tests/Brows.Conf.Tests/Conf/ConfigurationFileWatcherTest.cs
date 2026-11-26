@@ -9,7 +9,7 @@ namespace Brows.Conf;
 [TestFixture]
 internal sealed class ConfigurationFileWatcherTest {
     private static ConfigurationFileInfo Info(string name = "watcher.conf") {
-        return new TypedConfigurationFileInfo<object>(name, "default.conf", "brows");
+        return new TypedConfigurationFileInfo<object>(name, "default.conf");
     }
 
     [Test]

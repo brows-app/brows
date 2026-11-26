@@ -13,6 +13,7 @@
     <PackageVersion Include="Brows.Composition" Version="1.1.0" />
     <PackageVersion Include="Brows.Composition.Testing" Version="1.1.0" />
     <PackageVersion Include="Brows.IPC.Host" Version="1.1.0" />
+    <PackageVersion Include="Brows.MD.Windows" Version="0.1.0" />
     <PackageVersion Include="Brows.Operations" Version="1.7.0" />
     <PackageVersion Include="Brows.Operations.Composition" Version="1.7.0" />
     <PackageVersion Include="Brows.Operations.Windows" Version="1.7.0" />
@@ -35,8 +36,8 @@
     <PackageVersion Include="Domore.Async.TaskCaching" Version="10.6.4" />
     <PackageVersion Include="Domore.Async.TextReading" Version="11.0.0" />
     <PackageVersion Include="Domore.Async.TextReading.Windows" Version="11.0.0" />
-    <PackageVersion Include="Domore.Conf" Version="11.0.0" />
-    <PackageVersion Include="Domore.Conf.Cli" Version="11.0.0" />
+    <PackageVersion Include="Domore.Conf" Version="11.2.0" />
+    <PackageVersion Include="Domore.Conf.Cli" Version="11.2.0" />
     <PackageVersion Include="Domore.Logs" Version="11.1.0" />
     <PackageVersion Include="Domore.Logs.Conf" Version="11.1.0" />
     <PackageVersion Include="Domore.Logs.Windows" Version="11.1.0" />

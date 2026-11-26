@@ -14,12 +14,26 @@ Command_Description_Refresh         = Refresh the active panel
 Command_Description_RefreshAll      = Refresh all panels
 Command_Description_Theme           = Set the visual theme of the app
 Command_Description_Up              = Navigate up one level
+Command_Description_Update          = Check for and install a newer version of Brows
 
 Command_Group_Command               = Commands
 Command_Group_CommandHistory        = Command History
 Command_Group_PanelHistory          = Panel History
+Command_Group_Update                = Brows update
 
 PanelSecret_Prompt_EntropyChoose          = Choose a password to protect your saved secrets:
 PanelSecret_Prompt_EntropyChooseMismatch  = The passwords did not match. Choose a password to protect your saved secrets:
 PanelSecret_Prompt_EntropyEnter           = Enter the password that protects your saved secrets:
 PanelSecret_Prompt_EntropyEnterFailed     = That password did not work. Enter the password that protects your saved secrets:
+
+Update_Available                    = Install Brows {0} and restart
+Update_Checking                     = Checking for updates
+Update_Current                      = Brows {0} is up to date
+Update_Downloading                  = Downloading Brows {0} ({1})
+Update_Failed                       = Brows {0} was not installed (Windows Installer error {1}). See {2}
+Update_InProgress                   = An update of Brows is already being installed
+Update_NoInstaller                  = Brows {0} has no {2} installer that can be verified. Download it from {1}
+Update_NotFound                     = No release {0} newer than Brows {1} was found
+Update_NotInstallable               = Brows {0} is available. This copy cannot install the update. Download it from {1}
+Update_NotStarted                   = Brows {0} was not installed because Brows did not close in time
+Update_RestartRequired              = Restart Windows to finish installing Brows {0} (Windows Installer code {1}). See {2}

@@ -69,6 +69,30 @@ internal sealed class ConfigurationDataManagerTest {
         }
     }
 
+    [TestCase("@brws")]
+    [TestCase("@conf")]
+    public async Task Load_IgnoresIncludeDirectives(string special) {
+        var path = Path.Combine(ConfigurationPath.DataRoot, "brows_framework_test_directive.brws");
+        var included = Path.Combine(ConfigurationPath.DataRoot, "brows_framework_test_directive_included.brws");
+        try {
+            await File.WriteAllTextAsync(included, "Value = included\r\n");
+            await File.WriteAllTextAsync(path, $"{special}.include = {included}\r\n");
+
+            var loaded = ConfigurationDataPayload.For(new TestData(), "brows_framework_test_directive");
+            var data = await loaded.Load(CancellationToken.None);
+
+            /*
+             * Data files do not support special directives, so an include
+             * line is an unmatched key rather than a reference to another file.
+             */
+            Assert.That(data.Value, Is.Null);
+        }
+        finally {
+            File.Delete(path);
+            File.Delete(included);
+        }
+    }
+
     [Test]
     public async Task Load_Twice_ReturnsSameInstance() {
         var manager = new ConfigurationDataManager<TestData>("brows_framework_test");

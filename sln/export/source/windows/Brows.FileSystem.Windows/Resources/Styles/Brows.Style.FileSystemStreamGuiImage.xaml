@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Brows">
+  <Style x:Key="Brows.Style.FileSystemStreamGuiImage" TargetType="{x:Type local:FileSystemStreamGuiImage}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:FileSystemStreamGuiImage}">
+          <Image x:Name="PreviewImage"/>
+          <ControlTemplate.Triggers>
+            <DataTrigger Binding="{Binding ViewModel.Image.Ready, RelativeSource={RelativeSource Self}}"
+                         Value="True">
+              <Setter TargetName="PreviewImage" Property="Source"
+                      Value="{Binding ViewModel.Image.Display, RelativeSource={RelativeSource TemplatedParent}}"/>
+            </DataTrigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="{x:Type local:FileSystemStreamGuiImage}"
+         BasedOn="{StaticResource Brows.Style.FileSystemStreamGuiImage}"/>
+</ResourceDictionary>

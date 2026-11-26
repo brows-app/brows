@@ -1,0 +1,18 @@
+# example:
+# {input}
+# {input} 0.105.0-beta.62
+# {input} arch=arm64
+
+# Install exactly this version instead of the newest one.
+# It must be newer than the running version. A pre-release
+# may be named here even when pre-releases are not allowed.
+version =
+
+# The installer architecture: x64 or arm64. It must be able
+# to run on this Windows. The default is the architecture of
+# the running Brows.
+arch =
+
+# Offer pre-release versions this time: true or false.
+# The default comes from Prerelease in update.conf.
+prerelease =

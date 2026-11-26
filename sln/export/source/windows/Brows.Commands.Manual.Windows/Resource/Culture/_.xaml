@@ -34,6 +34,8 @@
     <Border/>
     <notices:AroNotice/>
     <Border/>
+    <notices:BrowsMarkdownNotice/>
+    <Border/>
     <notices:CurlNotice/>
     <Border/>
     <notices:DotZlibNotice/>
@@ -55,6 +57,8 @@
     <notices:LibSsh2Notice/>
     <Border/>
     <notices:ConPtyNotice/>
+    <Border/>
+    <notices:MarkdigNotice/>
     <Border/>
     <notices:MingwW64Notice/>
     <Border/>

@@ -14,6 +14,10 @@ internal sealed class FileSystemStreamGui : EntryStreamGui {
 
     public FileSystemEntry Entry { get; }
 
+    public sealed override bool ForceMarkdown =>
+        Entry.Kind == FileSystemEntryKind.File &&
+        Entry.Provider.Config.Stream.Markdown.Extensions.Contains(Entry.Extension);
+
     public sealed override bool ForceText =>
         Entry.Kind == FileSystemEntryKind.File &&
         Entry.Provider.Config.Stream.Text.Extensions.Contains(Entry.Extension);

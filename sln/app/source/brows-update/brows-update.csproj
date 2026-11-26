@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brows.App.Updates.CLI\Brows.App.Updates.CLI.csproj" />
+  </ItemGroup>
+  <Target Name="_Brows_Target_PublishBrowsUpdate" DependsOnTargets="Publish" Returns="$(PublishedSingleFilePath)" />
+</Project>

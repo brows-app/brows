@@ -147,6 +147,28 @@ public sealed class FileProtocolPreviewStreamSourceTest {
         });
     }
 
+    [TestCase(3, 3, false, TestName = "ReadAsync_PreviewProbeBelowLimit_ReachesRemoteEof")]
+    [TestCase(4, 4, false, TestName = "ReadAsync_PreviewProbeAtLimit_ReachesRemoteEof")]
+    [TestCase(6, 5, true, TestName = "ReadAsync_PreviewProbeOverLimit_StopsAfterOneExtraByte")]
+    public async Task ReadAsync_PreviewProbe_ReservesOneByteForOverflow(int length, int expected, bool canceled) {
+        const int markdownLimit = 4;
+        var entry = new TestEntry(Provider, "ftp://host/root/unknown-size.md");
+        var content = new string('x', length);
+        CancellationToken backendToken = default;
+        IEntryStreamSource source = Source(entry, new NonSeekableStream(content), readLimit: markdownLimit + 1,
+            (_, token) => backendToken = token);
+
+        using var ready = await source.StreamReady(CancellationToken.None);
+        await using var remote = source.Stream;
+        using var preview = new MemoryStream();
+        await remote.CopyToAsync(preview);
+
+        using (Assert.EnterMultipleScope()) {
+            Assert.That(Encoding.UTF8.GetString(preview.ToArray()), Is.EqualTo(content[..expected]));
+            Assert.That(backendToken.IsCancellationRequested, Is.EqualTo(canceled));
+        }
+    }
+
     [Test]
     public async Task ReadAsync_ZeroLimitReturnsStableEofAndCancelsTheRemoteTransfer() {
         var entry = new TestEntry(Provider, "ftp://host/root/empty-limit.txt");

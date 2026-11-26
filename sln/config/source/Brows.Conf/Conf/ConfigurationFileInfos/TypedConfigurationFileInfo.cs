@@ -10,8 +10,8 @@ namespace Brows.Conf.ConfigurationFileInfos;
 /// </typeparam>
 public sealed class TypedConfigurationFileInfo<TConfig>
 : ConfigurationFileInfo where TConfig : new() {
-    internal TypedConfigurationFileInfo(string file, string @default, string special)
-    : base(file, @default, special) {
+    internal TypedConfigurationFileInfo(string file, string @default)
+    : base(file, @default) {
     }
 
     /// <summary>

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using CONF = Domore.Conf.Conf;
 
 namespace Brows.Conf;
 
@@ -17,10 +18,9 @@ public abstract class ConfigurationFileInfo {
 
     private event EventHandler Invalidated;
 
-    private protected ConfigurationFileInfo(string file, string @default, string special) {
+    private protected ConfigurationFileInfo(string file, string @default) {
         File = file;
         Default = @default;
-        Special = special;
     }
 
     private static async Task<(string File, string Default)> Paths(string name, CancellationToken token) {
@@ -47,7 +47,7 @@ public abstract class ConfigurationFileInfo {
                 TResult config(TResult target, string file) {
                     for (var i = 0; ; i++) {
                         var err = default(Exception);
-                        var conf = Domore.Conf.Conf.Contain(file, special: Special);
+                        var conf = CONF.Contain(file, special: "@conf", comment: "#");
                         try {
                             return containerAction(target, conf);
                         }
@@ -81,7 +81,6 @@ public abstract class ConfigurationFileInfo {
     internal bool Invalid { get; private set; }
     internal string File { get; }
     internal string Default { get; }
-    internal string Special { get; }
 
     internal void Invalidate() {
         if (Log.Info()) {
@@ -92,13 +91,13 @@ public abstract class ConfigurationFileInfo {
     }
 
     internal static async Task<TypedConfigurationFileInfo<TConfig>> Load<TConfig>(EventHandler invalidated,
-                                                                           CancellationToken token)
+                                                                                  CancellationToken token)
     where TConfig : new() {
         var type = typeof(TConfig).Name.ToLowerInvariant();
         var name = type.EndsWith("config") ? type.Substring(0, type.Length - "config".Length) : type;
         var paths = await Paths(name, token);
         var
-        loaded = new TypedConfigurationFileInfo<TConfig>(paths.File, paths.Default, "brows");
+        loaded = new TypedConfigurationFileInfo<TConfig>(paths.File, paths.Default);
         loaded.Invalidated += invalidated;
         await ConfigurationFileWatcher.Subscribe(loaded, token);
         return loaded;
@@ -122,11 +121,11 @@ public abstract class ConfigurationFileInfo {
     /// configured.
     /// </returns>
     public static async Task<NamedConfigurationFileInfo> Load(string name,
-                                                       EventHandler invalidated,
-                                                       CancellationToken token) {
+                                                              EventHandler invalidated,
+                                                              CancellationToken token) {
         var paths = await Paths(name, token);
         var
-        loaded = new NamedConfigurationFileInfo(paths.File, paths.Default, "brows");
+        loaded = new NamedConfigurationFileInfo(paths.File, paths.Default);
         if (invalidated is not null) {
             loaded.Invalidated += invalidated;
             await ConfigurationFileWatcher.Subscribe(loaded, token);

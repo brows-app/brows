@@ -8,6 +8,10 @@ internal sealed class ZipStreamGui : EntryStreamGui {
     public sealed override IEntryStreamGuiOptions Options =>
         Entry.Provider.Config.Stream;
 
+    public sealed override bool ForceMarkdown =>
+        Entry.Info.Kind == ZipEntryKind.File &&
+        Entry.Provider.Config.Stream.Markdown.Extensions.Contains(Entry.Info.Extension);
+
     public sealed override bool ForceText =>
         Entry.Info.Kind == ZipEntryKind.File &&
         Entry.Provider.Config.Stream.Text.Extensions.Contains(Entry.Info.Extension);

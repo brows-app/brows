@@ -3,6 +3,7 @@
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Brows.MD.Windows" />
     <PackageReference Include="Brows.ProcessAgent.Windows" />
     <PackageReference Include="Brows.TTY.Windows" GeneratePathProperty="true" />
     <PackageReference Include="Brows.Win32.Interop.Composition" />
@@ -19,13 +20,7 @@
     <ProjectReference Include="..\..\..\framework\source\Brows.Framework\Brows.Framework.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(PkgBrows_TTY_Windows)\LICENSE"
-          Link="Brows.TTY.LICENSE"
-          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"
-          Visible="false" Pack="false" />
-    <None Include="$(PkgBrows_TTY_Windows)\THIRD-PARTY-NOTICES.txt"
-          Link="Brows.TTY.THIRD-PARTY-NOTICES.txt"
-          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"
-          Visible="false" Pack="false" />
+    <None Include="$(PkgBrows_TTY_Windows)\LICENSE" Link="Brows.TTY.LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Visible="false" Pack="false" />
+    <None Include="$(PkgBrows_TTY_Windows)\THIRD-PARTY-NOTICES.txt" Link="Brows.TTY.THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Visible="false" Pack="false" />
   </ItemGroup>
 </Project>

@@ -39,6 +39,10 @@
                     <DataTrigger Binding="{Binding ForceImage}" Value="True">
                       <Setter Property="Template" Value="{StaticResource ImageControl}"/>
                     </DataTrigger>
+                    <DataTrigger Binding="{Binding ForceMarkdown}" Value="True">
+                      <Setter Property="Template"
+                              Value="{DynamicResource Brows.Style.EntryStreamMarkdownControl.Preview}"/>
+                    </DataTrigger>
                     <MultiDataTrigger>
                       <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding Force}" Value="False"/>

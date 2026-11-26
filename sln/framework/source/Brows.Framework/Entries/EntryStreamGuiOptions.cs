@@ -4,11 +4,12 @@ using System.Collections.Generic;
 namespace Brows.Entries;
 
 /// <summary>
-/// Configures how entry content is displayed as text, images, media, or a platform preview.
+/// Configures how entry content is displayed as text, Markdown, images, media, or a platform preview.
 /// </summary>
 public class EntryStreamGuiOptions : IEntryStreamGuiOptions {
-    private TextOptions TextInit() {
-        var opt = new TextOptions();
+    private static TextOptions TextInit() {
+        var
+        opt = new TextOptions();
         opt.Encoding.Clear();
         opt.Encoding.Add("utf-8");
         opt.EncodingFallback.Clear();
@@ -26,6 +27,14 @@ public class EntryStreamGuiOptions : IEntryStreamGuiOptions {
     /// </summary>
     public TextOptions Text {
         get => field ??= TextInit();
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets the Markdown display and decoding options.
+    /// </summary>
+    public MarkdownOptions Markdown {
+        get => field ??= new();
         set;
     }
 
@@ -99,6 +108,24 @@ public class EntryStreamGuiOptions : IEntryStreamGuiOptions {
         /// </summary>
         public ExtensionSet Extensions {
             get => field ??= new(".txt");
+            set;
+        }
+    }
+
+    /// <summary>
+    /// Configures Markdown decoding, size limits, and recognized extensions.
+    /// </summary>
+    public sealed class MarkdownOptions : DecodedTextOptions {
+        /// <summary>
+        /// Gets or sets the maximum source length in bytes for the Markdown view, or null for no size limit.
+        /// </summary>
+        public long? SourceLengthMax { get; set; } = 1000000;
+
+        /// <summary>
+        /// Gets or sets the file extensions recognized for the Markdown view.
+        /// </summary>
+        public ExtensionSet Extensions {
+            get => field ??= new(".md");
             set;
         }
     }
@@ -183,6 +210,12 @@ public class EntryStreamGuiOptions : IEntryStreamGuiOptions {
 
     DecodedTextOptions IEntryStreamGuiOptions.TextDecoderOptions =>
         Text;
+
+    long? IEntryStreamGuiOptions.MarkdownSourceLengthMax =>
+        Markdown.SourceLengthMax;
+
+    DecodedTextOptions IEntryStreamGuiOptions.MarkdownDecoderOptions =>
+        Markdown;
 
     bool IEntryStreamGuiOptions.LoopAudio => Media.LoopAudio;
     bool IEntryStreamGuiOptions.LoopVideo => Media.LoopVideo;

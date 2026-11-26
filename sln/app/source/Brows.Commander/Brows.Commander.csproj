@@ -4,10 +4,12 @@
   <ItemGroup>
     <None Remove="Resource\Culture\_" />
     <None Remove="Resource\Culture\_.s.Command_Conf_Theme" />
+    <None Remove="Resource\Culture\_.s.Command_Conf_Update" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resource\Culture\_" />
     <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Theme" />
+    <EmbeddedResource Include="Resource\Culture\_.s.Command_Conf_Update" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Brows.Instantiation" />
@@ -17,5 +19,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\framework\source\Brows.Framework\Brows.Framework.csproj" />
+    <ProjectReference Include="..\Brows.App.Composition\Brows.App.Composition.csproj" />
   </ItemGroup>
 </Project>

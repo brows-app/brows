@@ -267,6 +267,9 @@ internal sealed class FileSystemTerminalControlTest {
             Source = new Uri("/Brows.Framework.Windows;component/Resources/Resources.xaml", UriKind.Relative)
         });
         var control = new FileSystemProviderControl();
+        control.Resources.MergedDictionaries.Add(new ResourceDictionary {
+            Source = new Uri("/Brows.FileSystem.Windows;component/Resource/Resource.xaml", UriKind.Relative)
+        });
         control.ApplyTemplate();
         var grid = (ProviderGrid)VisualTreeHelper.GetChild(control, 0);
         var terminal = (DataTemplate)grid.Resources[typeof(FileSystemTerminal)];

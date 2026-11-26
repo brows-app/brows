@@ -12,6 +12,11 @@ public abstract class EntryStreamGui : Notifier, IEntryStreamGui {
     public virtual bool ForceText => false;
 
     /// <summary>
+    /// Gets whether the Markdown view is explicitly requested. The default is false.
+    /// </summary>
+    public virtual bool ForceMarkdown => false;
+
+    /// <summary>
     /// Gets whether the image view is explicitly requested. The default is false.
     /// </summary>
     public virtual bool ForceImage => false;
@@ -27,7 +32,8 @@ public abstract class EntryStreamGui : Notifier, IEntryStreamGui {
     public virtual bool ForcePreview => false;
 
     /// <summary>
-    /// Gets the active view name: Text, Image, Media, Preview, Loading, Unavailable, or null before a view is chosen.
+    /// Gets the active view name, such as Text, Markdown, Image, Media, Preview, Loading, or Unavailable.
+    /// The value is null before a view is chosen.
     /// </summary>
     public string View {
         get;
@@ -38,7 +44,7 @@ public abstract class EntryStreamGui : Notifier, IEntryStreamGui {
     /// Gets whether any particular content view has been explicitly requested.
     /// </summary>
     public bool Force =>
-        ForceText || ForceImage || ForceMedia || ForcePreview;
+        ForceText || ForceMarkdown || ForceImage || ForceMedia || ForcePreview;
 
     /// <summary>
     /// Gets the entry content source to display.
@@ -55,8 +61,9 @@ public abstract class EntryStreamGui : Notifier, IEntryStreamGui {
     /// </summary>
     public IEntryStreamGuiState State => field ??= new EntryStreamGuiState(this) {
         ForceImage = ForceImage,
+        ForceMarkdown = ForceMarkdown,
         ForceMedia = ForceMedia,
         ForcePreview = ForcePreview,
-        ForceText = ForceText
+        ForceText = ForceText,
     };
 }
